@@ -42,4 +42,14 @@ export class SkillManager {
         });
         return totals;
     }
+
+    checkStringForMatchingSkill(skillString: string): SkillType | null {
+        const formattedString = skillString.trim().toLowerCase();
+        for (const skill of Object.values(SkillType)) {
+            if (skill.toLowerCase() === formattedString) {
+                return skill;
+            }
+        }
+        return null;
+    }
 }

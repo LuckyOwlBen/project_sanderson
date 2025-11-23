@@ -3,6 +3,7 @@ import { SkillManager } from './skills/skillManager';
 import { DerivedAttributesManager } from './attributes/derivedAttributes/derivedAttributesManager';
 import { DefenseManager } from './defenses/defenseManager';
 import { ResourceManager } from './resources/resourceManager';
+import { BonusManager } from './bonuses/bonusManager';
 
 
 export class Character {
@@ -17,6 +18,7 @@ export class Character {
   private derivedAttributesManager = new DerivedAttributesManager();
   private defenseManager = new DefenseManager();
   private resourceManager: ResourceManager;
+  private bonusManager = new BonusManager();
   
 
   constructor() {
@@ -38,6 +40,10 @@ export class Character {
 
   get resources(): ResourceManager {
     return this.resourceManager;
-  }  
+  }
+
+  get bonuses(): BonusManager {
+    return this.bonusManager;
+  }
 
 }
