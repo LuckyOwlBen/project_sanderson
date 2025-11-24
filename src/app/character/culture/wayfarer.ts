@@ -1,0 +1,8 @@
+import { CulturalInterface } from './culturalInterface';
+
+export const WAYFARER_CULTURE: CulturalInterface = {
+    name: "Wayfarer",
+    description: "Occupation, exile, or tourism may lead a person to live a life of traveling from one place to the next. You could be a traveling surgeon reluctant to return home to Jah Keved, a mercenary from Steen, or an Iriali tidereader sent to gain insights from the shores of faraway lands. Whatever the reason, the lifestyle of a perpetual traveler involves learning land and sea routes between major cities, remaining aware of bandit and pirate risks, and maintaining familiarity with mobile storm shelters, map-reading, and modes of long-distance transportation.",
+    suggestedNames: [], // Wayfarer names would come from their original culture
+    expertise: "As a character with the Wayfarer expertise, you know how to read international map keys. You can find trustworthy currency exchange hubs in major cities, which can be used to switch out dun spheres for infused ones. From your travels, you've learned basic greetings and a few cultural touchstones from various nations."
+};
