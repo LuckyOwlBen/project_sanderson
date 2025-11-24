@@ -83,5 +83,30 @@ export const SPY_TALENT_TREE: TalentTree = {
             bonuses: [],
             otherEffects: ["When you hit with a weapon or unarmed attack, for each action point spent deal extra damage equal to 1 + your tier."],
         },
+        {
+            id: "highSocietyContacts",
+            name: "High Society Contacts",
+            description: "Gain High Society expertise. Spend 2 focus to add a opportunity to a test to interact in high society.",
+            actionCost: -2, // Special
+            specialActivation: "Spend 2 focus to add a opportunity to a test to interact in high society.",
+            prerequisites: [
+                {type: 'talent', target: 'coverStory'}
+
+            ],
+            tier: 4,
+            bonuses: [],
+        },
+        {
+            id: "mercurialFacade",
+            name: "Mercurial Facade",
+            description: "Disguise yourself using Deception without needing physical supplies. The first character to see through your disguise is surprised.",
+            actionCost: -2, //special
+            specialActivation: "Disguise yourself using Deception without needing physical supplies.",
+            prerequisites: [
+                {type: 'talent', target:'subtleTakedown'},
+            ],
+            tier: 4,
+            bonuses: [],
+        }
     ],
 }

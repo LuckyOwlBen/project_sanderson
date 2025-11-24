@@ -1,16 +1,14 @@
 import { TalentPath } from "../../talentInterface";
 import { INVESTIGATOR_TALENT_TREE } from "./Investigator";
 import { SPY_TALENT_TREE } from "./spy";
+import { THIEF_TALENT_TREE } from "./thief";
 
 export const AGENT_HEROIC_PATH: TalentPath = { 
     name: 'Agent',
     paths: [
         INVESTIGATOR_TALENT_TREE,
         SPY_TALENT_TREE,
-        {
-            pathName: "Thief",
-            nodes: [],
-        }
+        THIEF_TALENT_TREE,
     ],
     talentNodes: [
         {
