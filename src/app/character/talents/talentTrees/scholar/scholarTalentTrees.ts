@@ -1,4 +1,7 @@
 import { ActionCostCode, TalentPath } from "../../talentInterface";
+import { ARTIFABRIAN_TALENT_TREE } from "./artifabrian";
+import { STRATEGIST_TALENT_TREE } from "./strategist";
+import { SURGEON_TALENT_TREE } from "./surgeon";
 
 export const SCHOLAR_TALENT_TREE: TalentPath = {
     name: "Scholar",

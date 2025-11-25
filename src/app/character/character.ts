@@ -4,6 +4,7 @@ import { DerivedAttributesManager } from './attributes/derivedAttributes/derived
 import { DefenseManager } from './defenses/defenseManager';
 import { ResourceManager } from './resources/resourceManager';
 import { BonusManager } from './bonuses/bonusManager';
+import { Ancestry } from './ancestry/ancestry';
 
 
 export class Character {
@@ -11,15 +12,15 @@ export class Character {
   name: string = '';
   level: number = 1;
   paths: string[] = [];
-  ancestry: string = '';
+  ancestry: Ancestry | null = null;
   attributes: Attributes;
+  cultures: string[] = [];
 
   private skillManager = new SkillManager();
   private derivedAttributesManager = new DerivedAttributesManager();
   private defenseManager = new DefenseManager();
   private resourceManager: ResourceManager;
   private bonusManager = new BonusManager();
-  
 
   constructor() {
     this.attributes = new Attributes();

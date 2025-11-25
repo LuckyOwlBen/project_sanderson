@@ -1,0 +1,29 @@
+<div class="ancestry-selector">
+  <h2>Choose Your Ancestry</h2>
+  
+  <div class="ancestry-options">
+    <mat-card 
+      class="ancestry-card"
+      [class.selected]="selectedAncestry === Ancestry.HUMAN"
+      (click)="selectAncestry(Ancestry.HUMAN)">
+      <mat-card-header>
+        <mat-card-title>Human</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>The most common people of Roshar...</p>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card 
+      class="ancestry-card"
+      [class.selected]="selectedAncestry === Ancestry.SINGER"
+      (click)="selectAncestry(Ancestry.SINGER)">
+      <mat-card-header>
+        <mat-card-title>Singer</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Humanoid beings with carapace and the ability to change forms...</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
