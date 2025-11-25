@@ -1,0 +1,37 @@
+.character-creator-container {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.creator-main {
+  min-height: 600px;
+}
+
+.stepper-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.character-preview {
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+@media (max-width: 968px) {
+  .character-creator-container {
+    grid-template-columns: 1fr;
+  }
+
+  .character-preview {
+    position: relative;
+    top: 0;
+  }
+}

@@ -1,12 +1,20 @@
 import { Component } from '@angular/core';
-import { AncestrySelector } from "../../components/ancestry-selector/ancestry-selector";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-landing-view',
-  imports: [AncestrySelector],
+  imports: [],
   templateUrl: './landing-view.html',
   styleUrl: './landing-view.scss',
 })
 export class LandingView {
 
+  constructor(private router: Router) {}
+  newCharacter() {
+    this.router.navigateByUrl('/character-creator-view')
+  }
+
+  loadCharacter() {
+    this.router.navigateByUrl('/load-character')
+  }
 }
