@@ -2,22 +2,19 @@
     <mat-toolbar-row class="app-header">
         <button mat-icon-button class="menu-button" (click)="drawer.toggle()">
             <mat-icon>menu</mat-icon>
-        </button>"
+        </button>
         <span>Project Sanderson</span>
     </mat-toolbar-row>
 </mat-toolbar>
-<mat-sidenav-container [hasBackdrop]="false" class="app-sidenav-conatiner">
+<mat-sidenav-container [hasBackdrop]="false" class="app-sidenav-container">
     <mat-sidenav
         #drawer
         class="app-sidenav"
-        [opened] ="!isMobile"
-        [mode]="isMobile ? 'over' : 'side' ">
+        [opened]="!isMobile"
+        [mode]="isMobile ? 'over' : 'side'">
         <app-sidenav-view></app-sidenav-view>
     </mat-sidenav>
     <mat-sidenav-content class="app-sidenav-content">
         <router-outlet />
     </mat-sidenav-content>
-    <mat-sidenav class="app-sidenav" opened [mode]="'side'">
-       <app-sidenav-view></app-sidenav-view>
-    </mat-sidenav>
 </mat-sidenav-container>
