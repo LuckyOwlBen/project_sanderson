@@ -4,7 +4,6 @@ import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
-import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
@@ -18,7 +17,6 @@ import { Observable, Subject } from 'rxjs';
     MatCardContent,
     CommonModule,
     RouterOutlet,
-    MatStepperModule,
     MatButtonModule,
   ],
   templateUrl: './character-creator-view.html',
