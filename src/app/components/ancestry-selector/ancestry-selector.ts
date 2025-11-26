@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
 import { MatCardModule } from '@angular/material/card';
@@ -15,7 +16,7 @@ export class AncestrySelector implements OnInit {
   selectedAncestry: Ancestry | null = null;
   Ancestry = Ancestry; // Expose enum to template
 
-  constructor(private characterState: CharacterStateService) {}
+  constructor(private characterState: CharacterStateService, private router: Router) {}
 
   ngOnInit(): void {
     this.characterState.character$.subscribe(char => {
@@ -26,6 +27,10 @@ export class AncestrySelector implements OnInit {
   selectAncestry(ancestry: Ancestry): void {
     this.selectedAncestry = ancestry;
     this.characterState.setAncestry(ancestry);
+  }
+
+  navigateNext(): void {
+    this.router.navigate(['/character-creator-view/culture']);
   }
 
 }

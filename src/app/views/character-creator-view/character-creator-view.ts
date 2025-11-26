@@ -1,9 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatButtonModule } from '@angular/material/button';
+import { filter, takeUntil } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-character-creator-view',
@@ -14,57 +18,87 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatCardContent,
     CommonModule,
     RouterOutlet,
-    MatStepperModule
+    MatStepperModule,
+    MatButtonModule,
   ],
   templateUrl: './character-creator-view.html',
   styleUrl: './character-creator-view.scss',
 })
-export class CharacterCreatorView implements OnInit {
-  currentStep = 0;
+export class CharacterCreatorView implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   
-  steps = [
-    { label: 'Ancestry', route: 'ancestry' },
-    { label: 'Culture', route: 'culture' },
-    { label: 'Attributes', route: 'attributes' },
-    { label: 'Skills', route: 'skills' },
-    { label: 'Talents', route: 'talents' },
-    { label: 'Review', route: 'review' }
-  ];
+  steps: CreationStep[];
+  currentStep: number = 0;
 
   constructor(
     private router: Router,
-    public characterState: CharacterStateService
-  ) {}
-
-  ngOnInit(): void {
-    // Automatically navigate to first step if at parent route
-    if (this.router.url === '/character-creator') {
-      this.router.navigate(['/character-creator/ancestry']);
-    }
+    private activatedRoute: ActivatedRoute,
+    public characterState: CharacterStateService,
+    public flowService: CharacterCreationFlowService
+  ) {
+    this.steps = this.flowService.getSteps();
   }
 
-  goToStep(index: number): void {
-    this.currentStep = index;
-    this.router.navigate(['/character-creator', this.steps[index].route]);
+    ngOnInit(): void {
+    // Subscribe to flow service changes and update local property
+    this.flowService.currentStep$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(step => {
+      this.currentStep = step;
+    });
+
+    // Sync flow service with current route on init
+    this.flowService.setCurrentStepByRoute(this.router.url);
+
+    // Check if we're at parent route with no child - redirect to first step
+    const hasChildRoute = this.activatedRoute.firstChild !== null;
+    if (!hasChildRoute) {
+      const firstStepRoute = this.flowService.getStepRoute(0);
+      if (firstStepRoute) {
+        this.router.navigate([firstStepRoute], { relativeTo: this.activatedRoute });
+      }
+    }
+
+    // Listen to route changes and update flow service
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.flowService.setCurrentStepByRoute(this.router.url);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   nextStep(): void {
-    if (this.currentStep < this.steps.length - 1) {
-      this.currentStep++;
-      this.router.navigate(['/character-creator', this.steps[this.currentStep].route]);
+    if (this.flowService.canGoNext()) {
+      const nextIndex = this.flowService.getCurrentStep() + 1;
+      const nextRoute = this.flowService.getStepRoute(nextIndex);
+      if (nextRoute) {
+        console.log('Navigating to next step route:', nextRoute);
+        this.router.navigate([nextRoute], { relativeTo: this.activatedRoute });
+      }
     }
   }
 
   previousStep(): void {
-    if (this.currentStep > 0) {
-      this.currentStep--;
-      this.router.navigate(['/character-creator', this.steps[this.currentStep].route]);
+    if (this.flowService.canGoPrevious()) {
+      const prevIndex = this.flowService.getCurrentStep() - 1;
+      const prevRoute = this.flowService.getStepRoute(prevIndex);
+      if (prevRoute) {
+        this.router.navigate([prevRoute], { relativeTo: this.activatedRoute });
+      }
     }
   }
 
   canGoNext(): boolean {
-    // Add validation logic here based on current step
-    // For now, always allow
-    return true;
+    return this.flowService.canGoNext();
+  }
+
+  canGoPrevious(): boolean {
+    return this.flowService.canGoPrevious();
   }
 }

@@ -1,41 +1,39 @@
 <div class="character-creator-container">
-  <div class="creator-main">
-    <h1>Create Your Character</h1>
-    
-    <mat-horizontal-stepper [linear]="true" [selectedIndex]="currentStep">
-      <mat-step *ngFor="let step of steps; let i = index" [label]="step.label">
-        <!-- The router-outlet will render the child component here -->
-        <router-outlet></router-outlet>
-        
-        <div class="stepper-buttons">
-          <button mat-button (click)="previousStep()" [disabled]="currentStep === 0">
-            Back
-          </button>
-          <button 
-            mat-raised-button 
-            color="primary" 
-            (click)="nextStep()" 
-            [disabled]="!canGoNext() || currentStep === steps.length - 1">
-            Next
-          </button>
-        </div>
-      </mat-step>
-    </mat-horizontal-stepper>
-  </div>
+    <div class="creator-main">
+        <h1>Create Your Character</h1>
 
-  <!-- Floating character preview -->
-  <div class="character-preview">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Character Preview</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div *ngIf="characterState.character$ | async as character">
-          <p><strong>Ancestry:</strong> {{ character.ancestry || 'Not selected' }}</p>
-          <p><strong>Level:</strong> {{ character.level }}</p>
-          <!-- Add more preview info as needed -->
+        <mat-horizontal-stepper [linear]="true" [selectedIndex]="currentStep">
+            <mat-step *ngFor="let step of steps; let i = index" [label]="step.label">
+                <!-- The router-outlet will render the child component here -->
+                <router-outlet></router-outlet>
+            </mat-step>
+        </mat-horizontal-stepper>
+
+        <div class="stepper-buttons">
+            <button mat-button (click)="previousStep()" [disabled]="!canGoPrevious()">
+                Back
+            </button>
+            <button mat-raised-button color="primary" (click)="nextStep()" [disabled]="!canGoNext()">
+                Next
+            </button>
         </div>
-      </mat-card-content>
+    </div>
+
+
+</div>
+
+<!-- Floating character preview -->
+<div class="character-preview">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>Character Preview</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div *ngIf="characterState.character$ | async as character">
+                <p><strong>Ancestry:</strong> {{ character.ancestry || 'Not selected' }}</p>
+                <p><strong>Level:</strong> {{ character.level }}</p>
+                <!-- Add more preview info as needed -->
+            </div>
+        </mat-card-content>
     </mat-card>
-  </div>
 </div>

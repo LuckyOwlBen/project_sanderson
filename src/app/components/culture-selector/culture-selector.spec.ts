@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CharacterCultureView } from './character-culture-view';
+import { CultureSelector } from './culture-selector';
 
-describe('CharacterCultureView', () => {
-  let component: CharacterCultureView;
-  let fixture: ComponentFixture<CharacterCultureView>;
+describe('CultureSelector', () => {
+  let component: CultureSelector;
+  let fixture: ComponentFixture<CultureSelector>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CharacterCultureView]
+      imports: [CultureSelector]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CharacterCultureView);
+    fixture = TestBed.createComponent(CultureSelector);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
