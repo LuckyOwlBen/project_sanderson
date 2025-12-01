@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Character } from './character';
 import { Ancestry } from './ancestry/ancestry';
+import { CulturalInterface } from './culture/culturalInterface';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,7 @@ export class CharacterStateService {
     this.characterSubject.next(this.character);
   }
 
-  addCulture(culture: string): void {
+  addCulture(culture: CulturalInterface): void {
     if (this.character.cultures.length < 2) {
       this.character.cultures.push(culture);
       this.characterSubject.next(this.character);

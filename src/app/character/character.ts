@@ -5,6 +5,7 @@ import { DefenseManager } from './defenses/defenseManager';
 import { ResourceManager } from './resources/resourceManager';
 import { BonusManager } from './bonuses/bonusManager';
 import { Ancestry } from './ancestry/ancestry';
+import { CulturalInterface } from './culture/culturalInterface';
 
 
 export class Character {
@@ -14,7 +15,7 @@ export class Character {
   paths: string[] = [];
   ancestry: Ancestry | null = null;
   attributes: Attributes;
-  cultures: string[] = [];
+  cultures: CulturalInterface[] = [];
 
   private skillManager = new SkillManager();
   private derivedAttributesManager = new DerivedAttributesManager();

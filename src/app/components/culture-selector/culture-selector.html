@@ -1,1 +1,37 @@
-<p>culture-selector works!</p>
+<div class="culture-selector">
+  <!-- Stage 1: Culture Grid -->
+  <div class="culture-grid" *ngIf="!selectedCulture">
+    <div 
+      class="culture-card"
+      *ngFor="let culture of cultures"
+      (click)="selectCulture(culture)">
+      <h3>{{ culture.name }}</h3>
+      <p class="expertise">{{ culture.expertise }}</p>
+    </div>
+    <div *ngIf="cultures.length === 0">
+      No cultures available.
+    </div>
+    
+  </div>
+
+  <!-- Stage 2: Culture Details -->
+  <div class="culture-details" *ngIf="selectedCulture">
+    <button class="back-button" (click)="backToSelection()">← Back</button>
+    
+    <h2>{{ selectedCulture.name }}</h2>
+    <p class="description">{{ selectedCulture.description }}</p>
+    
+    <div class="expertise-section">
+      <strong>Expertise:</strong> {{ selectedCulture.expertise }}
+    </div>
+    
+    <div class="names-section">
+      <strong>Suggested Names:</strong>
+      <p>{{ selectedCulture.suggestedNames.join(', ') }}</p>
+    </div>
+    
+    <button class="confirm-button" (click)="confirmCulture()">
+      Choose {{ selectedCulture.name }}
+    </button>
+  </div>
+</div>

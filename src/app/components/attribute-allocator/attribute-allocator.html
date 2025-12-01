@@ -1,0 +1,25 @@
+<div class="attribute-allocator">
+  <label class="attribute-label">{{ attributeName }}</label>
+  
+  <div class="allocator-controls">
+    <button 
+      class="decrement-btn"
+      (click)="decrement()"
+      [disabled]="!canDecrement"
+      aria-label="Decrease {{ attributeName }}">
+      ←
+    </button>
+    
+    <div class="value-display">
+      {{ currentValue }}
+    </div>
+    
+    <button 
+      class="increment-btn"
+      (click)="increment()"
+      [disabled]="!canIncrement"
+      aria-label="Increase {{ attributeName }}">
+      →
+    </button>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+.culture-selector {
+  padding: 2rem;
+}
+
+.culture-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.culture-card {
+  padding: 1.5rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+  }
+
+  .expertise {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+.culture-details {
+  max-width: 600px;
+  margin: 0 auto;
+
+  .back-button {
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+  }
+
+  .description {
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .expertise-section,
+  .names-section {
+    margin-bottom: 1rem;
+  }
+
+  .confirm-button {
+    margin-top: 2rem;
+    padding: 0.75rem 2rem;
+  }
+}
