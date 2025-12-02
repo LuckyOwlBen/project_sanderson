@@ -1,0 +1,160 @@
+.skill-manager {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #333;
+    }
+
+    .points-display {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .points-remaining {
+        font-size: 1.2rem;
+        color: #555;
+
+        strong {
+          color: #2196F3;
+          font-size: 1.4rem;
+        }
+
+        &.warning strong {
+          color: #4CAF50;
+        }
+      }
+
+      .reset-btn {
+        padding: 0.5rem 1rem;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #d32f2f;
+        }
+      }
+    }
+  }
+
+  .skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    .skill-category {
+      background: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      .category-title {
+        margin: 0 0 1rem 0;
+        font-size: 1.3rem;
+        color: #555;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 0.5rem;
+      }
+
+      .skills-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .skill-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.5rem;
+          background: white;
+          border-radius: 4px;
+
+          .skill-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+            margin-left: 1rem;
+
+            .attribute-badge {
+              font-size: 0.75rem;
+              padding: 0.2rem 0.5rem;
+              background-color: #E3F2FD;
+              color: #1976D2;
+              border-radius: 3px;
+              font-weight: 600;
+            }
+
+            .total-value {
+              font-size: 0.85rem;
+              color: #666;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+
+    .proceed-btn {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      background-color: #9E9E9E;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: not-allowed;
+      transition: all 0.3s;
+
+      &:not(:disabled) {
+        cursor: pointer;
+        background-color: #2196F3;
+
+        &:hover {
+          background-color: #1976D2;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      &.complete {
+        background-color: #4CAF50;
+
+        &:hover {
+          background-color: #45a049;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .skill-manager {
+    padding: 1rem;
+
+    .skills-container {
+      grid-template-columns: 1fr;
+    }
+  }
+}

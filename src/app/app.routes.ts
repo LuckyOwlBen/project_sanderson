@@ -3,7 +3,8 @@ import { LandingView } from './views/landing-view/landing-view';
 import { CharacterCreatorView } from './views/character-creator-view/character-creator-view';
 import { AncestrySelector } from './components/ancestry-selector/ancestry-selector';
 import { CultureSelector } from './components/culture-selector/culture-selector';
-import { AttributeManager } from './components/attribute-manager/attribute-manager';
+import { AttributeAllocator } from './components/attribute-allocator/attribute-allocator';
+import { SkillManager } from './components/skill-manager/skill-manager';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
@@ -15,7 +16,8 @@ export const routes: Routes = [
         { path: '', redirectTo: 'ancestry', pathMatch: 'full' },
         { path: 'ancestry', component: AncestrySelector, pathMatch: 'full' },
         { path: 'culture', component: CultureSelector, pathMatch: 'full' },
-        { path: 'attributes', component: AttributeManager, pathMatch: 'full' },
+        { path: 'attributes', component: AttributeAllocator, pathMatch: 'full' },
+        { path: 'skills', component: SkillManager, pathMatch: 'full' },
     ]},
   /**{ 
     path: 'character-creator', 

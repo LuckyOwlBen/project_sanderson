@@ -1,22 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AttributeAllocator } from './attribute-allocator';
+import { SkillManager } from './skill-manager';
 import { CharacterStateService } from '../../character/characterStateService';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 
-describe('AttributeAllocator', () => {
-  let component: AttributeAllocator;
-  let fixture: ComponentFixture<AttributeAllocator>;
+describe('SkillManager', () => {
+  let component: SkillManager;
+  let fixture: ComponentFixture<SkillManager>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AttributeAllocator],
+      imports: [SkillManager],
       providers: [CharacterStateService, LevelUpManager]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AttributeAllocator);
+    fixture = TestBed.createComponent(SkillManager);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

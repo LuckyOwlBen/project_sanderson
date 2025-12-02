@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ValueStepper } from './value-stepper';
 
-import { AttributeManager } from './attribute-manager';
-
-describe('AttributeManager', () => {
-  let component: AttributeManager;
-  let fixture: ComponentFixture<AttributeManager>;
+describe('ValueStepper', () => {
+  let component: ValueStepper;
+  let fixture: ComponentFixture<ValueStepper>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AttributeManager]
+      imports: [ValueStepper]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AttributeManager);
+    fixture = TestBed.createComponent(ValueStepper);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

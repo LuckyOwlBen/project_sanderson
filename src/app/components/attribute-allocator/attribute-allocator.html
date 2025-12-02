@@ -1,25 +1,54 @@
 <div class="attribute-allocator">
-  <label class="attribute-label">{{ attributeName }}</label>
-  
-  <div class="allocator-controls">
-    <button 
-      class="decrement-btn"
-      (click)="decrement()"
-      [disabled]="!canDecrement"
-      aria-label="Decrease {{ attributeName }}">
-      ←
-    </button>
-    
-    <div class="value-display">
-      {{ currentValue }}
+  <div class="header">
+    <h2>Distribute Attribute Points</h2>
+    <div class="points-display">
+      <span class="points-remaining" [class.warning]="remainingPoints === 0">
+        Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
+      </span>
+      <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
     </div>
-    
+  </div>
+
+  <div class="attributes-list">
+    <app-value-stepper
+      *ngFor="let attr of items"
+      [label]="attr.name"
+      [currentValue]="attr.currentValue"
+      [minValue]="minValue"
+      [maxValue]="maxValue"
+      [pointsRemaining]="remainingPoints"
+      (valueChanged)="onValueChanged($event)">
+    </app-value-stepper>
+  </div>
+
+  <div class="info-panel" *ngIf="character">
+    <h3>Derived Attributes Preview</h3>
+    <div class="derived-stats">
+      <div class="stat">
+        <label>Health:</label>
+        <span>{{ character.resources.health.max }}</span>
+      </div>
+      <div class="stat">
+        <label>Focus:</label>
+        <span>{{ character.resources.focus.max }}</span>
+      </div>
+      <div class="stat">
+        <label>Movement Rate:</label>
+        <span>{{ movementSpeed }}</span>
+      </div>
+      <div class="stat">
+        <label>Recovery Die:</label>
+        <span>{{ recoveryDie }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
     <button 
-      class="increment-btn"
-      (click)="increment()"
-      [disabled]="!canIncrement"
-      aria-label="Increase {{ attributeName }}">
-      →
+      class="proceed-btn" 
+      [disabled]="!canProceed"
+      [class.complete]="isComplete">
+      {{ isComplete ? 'Continue' : 'Allocate All Points to Continue' }}
     </button>
   </div>
 </div>

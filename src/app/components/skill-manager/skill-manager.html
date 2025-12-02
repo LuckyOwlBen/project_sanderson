@@ -1,0 +1,85 @@
+<div class="skill-manager">
+  <div class="header">
+    <h2>Allocate Skill Ranks</h2>
+    <div class="points-display">
+      <span class="points-remaining" [class.warning]="remainingPoints === 0">
+        Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
+      </span>
+      <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
+    </div>
+  </div>
+
+  <div class="skills-container">
+    <!-- Physical Skills -->
+    <div class="skill-category">
+      <h3 class="category-title">Physical Skills</h3>
+      <div class="skills-list">
+        <div *ngFor="let skill of physicalSkills" class="skill-row">
+          <app-value-stepper
+            [label]="skill.name"
+            [currentValue]="skill.currentValue"
+            [minValue]="minValue"
+            [maxValue]="maxValue"
+            [pointsRemaining]="remainingPoints"
+            (valueChanged)="onValueChanged($event)">
+          </app-value-stepper>
+          <div class="skill-info">
+            <span class="attribute-badge">{{ skill.associatedAttribute }}</span>
+            <span class="total-value">Total: {{ skill.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mental Skills -->
+    <div class="skill-category">
+      <h3 class="category-title">Mental Skills</h3>
+      <div class="skills-list">
+        <div *ngFor="let skill of mentalSkills" class="skill-row">
+          <app-value-stepper
+            [label]="skill.name"
+            [currentValue]="skill.currentValue"
+            [minValue]="minValue"
+            [maxValue]="maxValue"
+            [pointsRemaining]="remainingPoints"
+            (valueChanged)="onValueChanged($event)">
+          </app-value-stepper>
+          <div class="skill-info">
+            <span class="attribute-badge">{{ skill.associatedAttribute }}</span>
+            <span class="total-value">Total: {{ skill.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Skills -->
+    <div class="skill-category">
+      <h3 class="category-title">Social Skills</h3>
+      <div class="skills-list">
+        <div *ngFor="let skill of socialSkills" class="skill-row">
+          <app-value-stepper
+            [label]="skill.name"
+            [currentValue]="skill.currentValue"
+            [minValue]="minValue"
+            [maxValue]="maxValue"
+            [pointsRemaining]="remainingPoints"
+            (valueChanged)="onValueChanged($event)">
+          </app-value-stepper>
+          <div class="skill-info">
+            <span class="attribute-badge">{{ skill.associatedAttribute }}</span>
+            <span class="total-value">Total: {{ skill.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button 
+      class="proceed-btn" 
+      [disabled]="!canProceed"
+      [class.complete]="isComplete">
+      {{ isComplete ? 'Continue' : 'Allocate All Points to Continue' }}
+    </button>
+  </div>
+</div>
