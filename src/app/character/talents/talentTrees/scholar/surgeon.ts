@@ -10,7 +10,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, your Erudition talent grants you an additional skill, and you can use Erudition to choose spiritual skills that aren't surges. Additionally, you gain a utility expertise in Diagnosis.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],
@@ -23,7 +23,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             actionCost: 1,
             prerequisites: [
                 { type: 'skill', target: 'medicine', value: 1 },
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],

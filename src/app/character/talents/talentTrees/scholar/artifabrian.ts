@@ -11,7 +11,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
             actionCost: ActionCostCode.Passive,
             prerequisites: [
                 { type: 'skill', target: 'crafting', value: 1 },
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],
@@ -24,7 +24,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
             actionCost: ActionCostCode.Special,
             specialActivation: "First fabrial crafting with gem ignores time requirements",
             prerequisites: [
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],

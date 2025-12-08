@@ -15,6 +15,7 @@ export class CharacterCreationFlowService {
     { label: 'Culture', route: 'culture' },
     { label: 'Attributes', route: 'attributes' },
     { label: 'Skills', route: 'skills' },
+    { label: 'Paths', route: 'paths' },
     { label: 'Talents', route: 'talents' },
     { label: 'Review', route: 'review' }
   ];

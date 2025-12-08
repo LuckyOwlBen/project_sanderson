@@ -27,7 +27,7 @@
 
     <div class="talent-grid">
       <mat-card 
-        *ngFor="let talent of selectedTree.nodes"
+        *ngFor="let talent of getVisibleTalents()"
         class="talent-node"
         [class.unlocked]="isTalentUnlocked(talent.id)"
         [class.available]="canUnlockTalent(talent)"

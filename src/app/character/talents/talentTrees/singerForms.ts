@@ -21,7 +21,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
             prerequisites: [
                 { type: 'talent', target: 'singer_ancestry' }
             ],
-            tier: 1,
+            tier: 0,
             bonuses: [],
         },
         {
@@ -33,7 +33,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'singer_ancestry' },
                 { type: 'talent', target: 'singer_change_form' },
             ],
-            tier: 2,
+            tier: 1,
             bonuses: [],
         },
         {
@@ -83,7 +83,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'singer_ancestry' },
                 { type: 'talent', target: 'singer_change_form' },
             ],
-            tier: 2,
+            tier: 1,
             bonuses: [],
         },
         {
@@ -127,7 +127,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'singer_ancestry' },
                 { type: 'talent', target: 'singer_change_form' },
             ],
-            tier: 2,
+            tier: 1,
             bonuses: [],
         },
         {

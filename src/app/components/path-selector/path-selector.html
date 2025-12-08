@@ -1,0 +1,86 @@
+<div class="path-selector-container">
+  <!-- Step 1: Choose Main Path -->
+  <div *ngIf="!selectedMainPath" class="main-path-selection">
+    <div class="path-header">
+      <h2>Choose Your Heroic Path</h2>
+      <p class="subtitle">Select the path that defines your character's approach to adventure</p>
+    </div>
+
+    <div class="path-grid">
+      <mat-card 
+        *ngFor="let path of availablePaths"
+        class="path-card"
+        (click)="selectMainPath(path.id)">
+        
+        <mat-card-header>
+          <mat-icon class="path-icon">{{ getPathIcon(path) }}</mat-icon>
+          <mat-card-title>{{ path.name }}</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p>{{ path.description }}</p>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button mat-raised-button color="primary">
+            Select {{ path.name }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Step 2: Choose Specialization -->
+  <div *ngIf="selectedMainPath && !selectedSpecialization" class="specialization-selection">
+    <div class="path-header">
+      <h2>Choose Your Specialization</h2>
+      <p class="subtitle">Select a specific focus within the {{ getPathName(selectedMainPath) }} path</p>
+      <button mat-button (click)="backToMainPath()">
+        <mat-icon>arrow_back</mat-icon> Back to Paths
+      </button>
+    </div>
+
+    <div class="path-grid">
+      <mat-card 
+        *ngFor="let spec of availableSpecializations"
+        class="path-card"
+        (click)="selectSpecialization(spec)">
+        
+        <mat-card-header>
+          <mat-card-title>{{ spec.pathName }}</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p class="tier-info">{{ spec.nodes.length }} talents available</p>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button mat-raised-button color="primary">
+            Choose {{ spec.pathName }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Step 3: Confirmation -->
+  <div *ngIf="selectedSpecialization" class="confirmation">
+    <div class="path-header">
+      <h2>Path Selected!</h2>
+      <mat-icon class="success-icon">check_circle</mat-icon>
+    </div>
+
+    <mat-card class="selection-summary">
+      <mat-card-content>
+        <h3>{{ getPathName(selectedMainPath!) }}</h3>
+        <p class="specialization">Specialization: <strong>{{ selectedSpecialization }}</strong></p>
+        <p class="info-text">You can now proceed to select talents from this path.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="backToMainPath()">
+          <mat-icon>edit</mat-icon> Change Selection
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

@@ -10,7 +10,7 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, your Erudition talent grants you an additional skill, and you can use Erudition to choose physical skills that aren't surges. Additionally, gain one weapon expertise of your choice.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],
@@ -24,7 +24,7 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             specialActivation: "After succeeding on Gain Advantage with Erudition skill",
             prerequisites: [
                 { type: 'skill', target: 'deduction', value: 1 },
-                { type: 'talent', target: 'erudition' }
+                { type: 'talent', target: 'education' }
             ],
             tier: 1,
             bonuses: [],
