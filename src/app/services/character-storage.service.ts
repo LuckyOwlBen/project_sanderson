@@ -16,24 +16,56 @@ export interface SavedCharacter {
   providedIn: 'root'
 })
 export class CharacterStorageService {
-  private apiUrl = '/api/characters';
+  private apiUrl = 'http://localhost:3000/api/characters';
+  private useServer = true; // Set to false to use localStorage
 
   constructor(private http: HttpClient) {}
 
   saveCharacter(character: Character): Observable<{ success: boolean; id: string }> {
     const characterData = this.serializeCharacter(character);
+    
+    if (this.useServer) {
+      return this.http.post<{ success: boolean; id: string }>(
+        `${this.apiUrl}/save`,
+        characterData
+      );
+    }
+    
     return this.saveToLocalStorage(character);
   }
 
   loadCharacter(characterId: string): Observable<Character | null> {
+    if (this.useServer) {
+      return new Observable(observer => {
+        this.http.get<any>(`${this.apiUrl}/load/${characterId}`).subscribe({
+          next: (data) => {
+            const character = this.deserializeCharacter(data);
+            observer.next(character);
+            observer.complete();
+          },
+          error: (error) => {
+            console.error('Error loading character from server:', error);
+            observer.next(null);
+            observer.complete();
+          }
+        });
+      });
+    }
+    
     return this.loadFromLocalStorage(characterId);
   }
 
   listCharacters(): Observable<SavedCharacter[]> {
+    if (this.useServer) {
+      return this.http.get<SavedCharacter[]>(`${this.apiUrl}/list`);
+    }
     return this.listFromLocalStorage();
   }
 
   deleteCharacter(characterId: string): Observable<{ success: boolean }> {
+    if (this.useServer) {
+      return this.http.delete<{ success: boolean }>(`${this.apiUrl}/delete/${characterId}`);
+    }
     return this.deleteFromLocalStorage(characterId);
   }
 

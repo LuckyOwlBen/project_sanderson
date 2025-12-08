@@ -1,0 +1,21 @@
+[Unit]
+Description=Sanderson RPG Character Management System
+After=network.target
+
+[Service]
+Type=forking
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/project_sanderson
+ExecStart=/path/to/project_sanderson/start.sh
+ExecStop=/path/to/project_sanderson/stop.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+
+[Install]
+WantedBy=multi-user.target
