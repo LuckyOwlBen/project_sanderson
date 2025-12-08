@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
+import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
 
 @Component({
@@ -27,13 +28,17 @@ import { Character } from '../../character/character';
 })
 export class CharacterName implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 2; // Name is step 2
   
   character: Character | null = null;
   characterName: string = '';
   nameError: string = '';
   suggestedNames: string[] = [];
 
-  constructor(private characterState: CharacterStateService) {}
+  constructor(
+    private characterState: CharacterStateService,
+    private validationService: StepValidationService
+  ) {}
 
   ngOnInit(): void {
     this.characterState.character$
@@ -91,7 +96,13 @@ export class CharacterName implements OnInit, OnDestroy {
         (this.character as any).nameInputHasError = true;
       }
       this.characterState.updateCharacter(this.character);
+      this.updateValidation();
     }
+  }
+
+  private updateValidation(): void {
+    const isValid = this.nameError === '' && this.characterName.trim().length >= 2;
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 
   private validateName(): void {

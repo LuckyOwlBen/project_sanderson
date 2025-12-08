@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
 import { ALL_CULTURES } from '../../character/culture/allCultures';
 import { CommonModule } from '@angular/common';
@@ -6,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CharacterStateService } from '../../character/characterStateService';
+import { StepValidationService } from '../../services/step-validation.service';
 
 interface CultureInfo {
   culture: CulturalInterface;
@@ -29,13 +31,19 @@ interface CultureInfo {
   templateUrl: './culture-selector.html',
   styleUrls: ['./culture-selector.scss']
 })
-export class CultureSelector implements OnInit {
+export class CultureSelector implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 1; // Culture is step 1
+  
   allCultureInfos: CultureInfo[] = [];
   selectedCulture: CultureInfo | null = null;
   confirmedCultures: CulturalInterface[] = [];
   showValidation = false;
   
-  constructor(private characterState: CharacterStateService) {
+  constructor(
+    private characterState: CharacterStateService,
+    private validationService: StepValidationService
+  ) {
     this.initializeCultureInfos();
   }
   
@@ -60,18 +68,31 @@ export class CultureSelector implements OnInit {
   }
 
   ngOnInit(): void {
-    this.characterState.character$.subscribe(char => {
-      this.confirmedCultures = char.cultures || [];
-      // Show validation if we're on this page and have no cultures
-      if (this.confirmedCultures.length === 0) {
-        // Delay to avoid ExpressionChangedAfterItHasBeenCheckedError
-        setTimeout(() => {
-          this.showValidation = true;
-        }, 0);
-      } else {
-        this.showValidation = false;
-      }
-    });
+    this.characterState.character$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(char => {
+        this.confirmedCultures = char.cultures || [];
+        this.updateValidation();
+        // Show validation if we're on this page and have no cultures
+        if (this.confirmedCultures.length === 0) {
+          // Delay to avoid ExpressionChangedAfterItHasBeenCheckedError
+          setTimeout(() => {
+            this.showValidation = true;
+          }, 0);
+        } else {
+          this.showValidation = false;
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private updateValidation(): void {
+    const isValid = this.confirmedCultures.length > 0;
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 
   private initializeCultureInfos(): void {

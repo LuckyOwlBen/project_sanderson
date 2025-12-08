@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
+import { StepValidationService } from '../../services/step-validation.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -25,7 +27,10 @@ interface AncestryInfo {
   templateUrl: './ancestry-selector.html',
   styleUrl: './ancestry-selector.scss',
 })
-export class AncestrySelector implements OnInit {
+export class AncestrySelector implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 0; // Ancestry is step 0
+  
   selectedAncestry: Ancestry | null = null;
   Ancestry = Ancestry; // Expose enum to template
 
@@ -59,17 +64,34 @@ export class AncestrySelector implements OnInit {
     }
   ];
 
-  constructor(private characterState: CharacterStateService, private router: Router) {}
+  constructor(
+    private characterState: CharacterStateService,
+    private router: Router,
+    private validationService: StepValidationService
+  ) {}
 
   ngOnInit(): void {
-    this.characterState.character$.subscribe(char => {
-      this.selectedAncestry = char.ancestry;
-    });
+    this.characterState.character$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(char => {
+        this.selectedAncestry = char.ancestry;
+        this.updateValidation();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   selectAncestry(ancestry: Ancestry): void {
     this.selectedAncestry = ancestry;
     this.characterState.setAncestry(ancestry);
+  }
+
+  private updateValidation(): void {
+    const isValid = this.selectedAncestry !== null;
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 
   navigateNext(): void {

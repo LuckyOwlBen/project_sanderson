@@ -66,6 +66,13 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).subscribe(() => {
       this.flowService.setCurrentStepByRoute(this.router.url);
     });
+
+    // Subscribe to character changes to trigger change detection for Next button
+    this.characterState.character$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      // This subscription ensures Angular change detection runs when character updates
+    });
   }
 
   ngOnDestroy(): void {
