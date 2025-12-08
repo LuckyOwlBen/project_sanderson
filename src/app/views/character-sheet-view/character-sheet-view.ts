@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
@@ -31,6 +32,7 @@ import { TalentTree } from '../../character/talents/talentInterface';
     MatInputModule,
     MatDividerModule,
     MatTabsModule,
+    MatDialogModule,
     ResourceTracker
   ],
   templateUrl: './character-sheet-view.html',
@@ -52,7 +54,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private characterStorage: CharacterStorageService,
-    private characterState: CharacterStateService
+    private characterState: CharacterStateService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -171,7 +174,32 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   }
 
   backToList(): void {
-    this.router.navigate(['/character-list']);
+    if (!this.character) {
+      this.router.navigate(['/character-list']);
+      return;
+    }
+
+    // Simple browser confirm dialog
+    const shouldSave = confirm('Do you want to save your character before leaving?');
+    
+    if (shouldSave) {
+      this.characterStorage.saveCharacter(this.character)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (result: { success: boolean; id: string }) => {
+            console.log('Character saved before navigation:', result);
+            this.router.navigate(['/character-list']);
+          },
+          error: (err: unknown) => {
+            console.error('Error saving character:', err);
+            // Navigate anyway
+            this.router.navigate(['/character-list']);
+          }
+        });
+    } else {
+      // User chose not to save, just navigate
+      this.router.navigate(['/character-list']);
+    }
   }
 
   getTrainedSkills(): Array<{name: string, rank: number, total: number}> {

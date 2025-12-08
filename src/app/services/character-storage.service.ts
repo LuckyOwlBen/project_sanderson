@@ -122,8 +122,10 @@ export class CharacterStorageService {
   }
 
   private serializeCharacter(character: Character): any {
+    // Use existing ID if available, otherwise generate new one
+    const existingId = (character as any).id;
     return {
-      id: this.generateId(character),
+      id: existingId || this.generateId(character),
       name: character.name,
       level: character.level,
       ancestry: character.ancestry,
@@ -158,6 +160,8 @@ export class CharacterStorageService {
 
   private deserializeCharacter(data: any): Character {
     const character = new Character();
+    // Store the ID on the character object for future saves
+    (character as any).id = data.id;
     character.level = data.level || 1;
     character.name = data.name || '';
     character.ancestry = data.ancestry || '';
@@ -224,8 +228,16 @@ export class CharacterStorageService {
   }
 
   private generateId(character: Character): string {
+    // Check if character already has an ID
+    const existingId = (character as any).id;
+    if (existingId) {
+      return existingId;
+    }
+    
+    // Generate new ID only if doesn't exist
     const safeName = character.name.toLowerCase().replace(/\s+/g, '_') || 'character';
-    return `${safeName}_${Date.now()}`;
+    const timestamp = Date.now();
+    return `${safeName}_${timestamp}`;
   }
 
   private saveToLocalStorage(character: Character): Observable<{ success: boolean; id: string }> {
@@ -234,8 +246,19 @@ export class CharacterStorageService {
     
     try {
       const existing = this.getAllFromLocalStorage();
+      
+      // If character already has an ID, remove old entry to prevent duplicates
+      if ((character as any).id) {
+        // Remove any existing entry with this ID
+        delete existing[(character as any).id];
+      }
+      
       existing[id] = characterData;
       localStorage.setItem('saved_characters', JSON.stringify(existing));
+      
+      // Update character object with ID for future saves
+      (character as any).id = id;
+      
       return of({ success: true, id });
     } catch (error) {
       console.error('Error saving to localStorage:', error);

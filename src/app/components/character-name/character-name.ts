@@ -26,6 +26,7 @@ export class CharacterName implements OnInit, OnDestroy {
   
   character: Character | null = null;
   characterName: string = '';
+  nameError: string = '';
 
   constructor(private characterState: CharacterStateService) {}
 
@@ -34,7 +35,10 @@ export class CharacterName implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        this.characterName = character.name || '';
+        // Only sync characterName if it's empty (initial load)
+        if (!this.characterName) {
+          this.characterName = character.name || '';
+        }
       });
   }
 
@@ -44,9 +48,65 @@ export class CharacterName implements OnInit, OnDestroy {
   }
 
   onNameChange(): void {
+    this.validateName();
+    // characterName is the proxy - user can type anything
+    // Only update character.name when validation passes
     if (this.character) {
-      this.character.name = this.characterName;
+      if (this.nameError === '') {
+        // Valid: update character name
+        this.character.name = this.characterName.trim();
+        (this.character as any).nameInputHasError = false;
+      } else {
+        // Invalid: clear character name but keep nameInputHasError flag
+        this.character.name = '';
+        (this.character as any).nameInputHasError = true;
+      }
       this.characterState.updateCharacter(this.character);
     }
+  }
+
+  private validateName(): void {
+    const trimmedName = this.characterName.trim();
+    
+    // Check if empty
+    if (!trimmedName) {
+      this.nameError = 'Character name is required';
+      return;
+    }
+    
+    // Check minimum length
+    if (trimmedName.length < 2) {
+      this.nameError = 'Name must be at least 2 characters';
+      return;
+    }
+    
+    // Check maximum length
+    if (trimmedName.length > 50) {
+      this.nameError = 'Name must be 50 characters or less';
+      return;
+    }
+    
+    // Only allow letters, spaces, hyphens, and apostrophes
+    // This prevents SQL injection and other malicious input
+    const validNamePattern = /^[a-zA-Z\s\-']+$/;
+    if (!validNamePattern.test(trimmedName)) {
+      this.nameError = 'Name can only contain letters, spaces, hyphens, and apostrophes';
+      return;
+    }
+    
+    // Prevent excessive spaces
+    if (/\s{2,}/.test(trimmedName)) {
+      this.nameError = 'Name cannot contain multiple consecutive spaces';
+      return;
+    }
+    
+    // Name is valid
+    this.nameError = '';
+  }
+
+  isNameValid(): boolean {
+    // Re-validate to ensure we have current state
+    this.validateName();
+    return this.nameError === '' && this.characterName.trim().length >= 2;
   }
 }

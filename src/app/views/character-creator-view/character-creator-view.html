@@ -15,8 +15,8 @@
         </div>
     </div>
 
-    <!-- Floating character preview -->
-    <div class="character-preview">
+    <!-- Floating character preview (hidden until skills page) -->
+    <div class="character-preview" *ngIf="currentStep >= 4">
         <mat-card>
             <mat-card-header>
                 <mat-card-title>Character Preview</mat-card-title>

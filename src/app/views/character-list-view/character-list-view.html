@@ -75,6 +75,13 @@
         </button>
         <button 
           mat-button 
+          color="accent"
+          (click)="editCharacter(character, $event)">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button 
+          mat-button 
           color="warn"
           (click)="deleteCharacter(character, $event)">
           <mat-icon>delete</mat-icon>

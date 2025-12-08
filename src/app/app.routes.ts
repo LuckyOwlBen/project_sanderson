@@ -32,4 +32,6 @@ export const routes: Routes = [
   { path: 'character-sheet/:id', component: CharacterSheetView },
   { path: 'character-sheet', component: CharacterSheetView },
   { path: 'load-character', component: CharacterListView },
+  { path: 'character-list', component: CharacterListView },
+  { path: '**', redirectTo: '' }
 ];

@@ -7,6 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStorageService, SavedCharacter } from '../../services/character-storage.service';
+import { CharacterStateService } from '../../character/characterStateService';
+import { Character } from '../../character/character';
 
 @Component({
   selector: 'app-character-list-view',
@@ -30,6 +32,7 @@ export class CharacterListView implements OnInit, OnDestroy {
 
   constructor(
     private characterStorage: CharacterStorageService,
+    private characterState: CharacterStateService,
     private router: Router
   ) {}
 
@@ -84,7 +87,30 @@ export class CharacterListView implements OnInit, OnDestroy {
   }
 
   createNewCharacter(): void {
+    // Create a fresh character and reset state
+    const newCharacter = new Character();
+    this.characterState.updateCharacter(newCharacter);
     this.router.navigate(['/character-creator-view']);
+  }
+
+  editCharacter(character: SavedCharacter, event: Event): void {
+    event.stopPropagation(); // Prevent card click
+    
+    // Load the character into state and navigate to creator
+    this.characterStorage.loadCharacter(character.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (loadedCharacter: any) => {
+          if (loadedCharacter) {
+            this.characterState.updateCharacter(loadedCharacter);
+            this.router.navigate(['/character-creator-view']);
+          }
+        },
+        error: (err) => {
+          console.error('Error loading character for edit:', err);
+          alert('Failed to load character');
+        }
+      });
   }
 
   backToHome(): void {

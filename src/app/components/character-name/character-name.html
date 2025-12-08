@@ -17,14 +17,29 @@
           [(ngModel)]="characterName"
           (ngModelChange)="onNameChange()"
           placeholder="Enter your character's name"
-          autocomplete="off">
+          autocomplete="off"
+          required
+          maxlength="50"
+          #nameInput="ngModel">
+        <mat-error *ngIf="nameError">{{ nameError }}</mat-error>
+        <mat-hint *ngIf="!nameError && characterName.length > 0">
+          {{ characterName.length }}/50 characters
+        </mat-hint>
       </mat-form-field>
+      
+      <!-- Show error message below form field if validation fails -->
+      <div class="validation-error" *ngIf="nameError">
+        <p class="error-text">{{ nameError }}</p>
+      </div>
 
       <div class="hint-text" *ngIf="!characterName">
         <p>Choose a name that reflects your character's heritage and destiny.</p>
+        <p class="requirements">
+          <small>Must be 2-50 characters. Only letters, spaces, hyphens, and apostrophes allowed.</small>
+        </p>
       </div>
 
-      <div class="greeting-text" *ngIf="characterName">
+      <div class="greeting-text" *ngIf="characterName && !nameError">
         <p>Greetings, <strong>{{ characterName }}</strong>! Let's build your legend.</p>
       </div>
     </mat-card-content>
