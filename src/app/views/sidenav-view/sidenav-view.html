@@ -1,24 +1,31 @@
-<h1 class="header">Contact Me</h1>
+<div class="sidenav-header">
+  <h2>Sanderson RPG</h2>
+</div>
+
 <mat-divider></mat-divider>
-<mat-card class="sidenav-elements">
-    <mat-card-header>
-        <mat-card-title>
-            <h4>Email Address: </h4>
-        </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-        <a href="mailto:dummy@mail.com">dummyMail&#64;mail.com</a>
-    </mat-card-content>
-</mat-card>
-<mat-divider></mat-divider>
-<mat-card class="sidenav-elements">
-    <mat-card-header>
-        <mat-card-title>
-            <h4>Phone Number: </h4>
-        </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-        <a href="tel:+12345678901">(234)567-8901</a>
-    </mat-card-content>
-</mat-card>
-<mat-divider></mat-divider>
+
+<nav class="sidenav-nav">
+  <mat-nav-list>
+    <mat-list-item (click)="navigateTo('/')">
+      <mat-icon matListItemIcon>home</mat-icon>
+      <span matListItemTitle>Home</span>
+    </mat-list-item>
+    
+    <mat-list-item (click)="navigateTo('/character-creator-view')">
+      <mat-icon matListItemIcon>person_add</mat-icon>
+      <span matListItemTitle>Create Character</span>
+    </mat-list-item>
+    
+    <mat-list-item (click)="navigateTo('/character-list')">
+      <mat-icon matListItemIcon>list</mat-icon>
+      <span matListItemTitle>Character List</span>
+    </mat-list-item>
+    
+    <mat-divider></mat-divider>
+    
+    <mat-list-item (click)="navigateTo('/character-sheet')">
+      <mat-icon matListItemIcon>assignment</mat-icon>
+      <span matListItemTitle>Character Sheet</span>
+    </mat-list-item>
+  </mat-nav-list>
+</nav>
