@@ -15,6 +15,8 @@ import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { ResourceTracker, Resource } from '../../components/resource-tracker/resource-tracker';
+import { CharacterImage } from '../../components/shared/character-image/character-image';
+import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
@@ -33,7 +35,8 @@ import { TalentTree } from '../../character/talents/talentInterface';
     MatDividerModule,
     MatTabsModule,
     MatDialogModule,
-    ResourceTracker
+    ResourceTracker,
+    CharacterImage
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -44,6 +47,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   character: Character | null = null;
   characterId: string = '';
   sessionNotes: string = '';
+  portraitUrl: string | null = null;
 
   // Resources for tracker components
   healthResource: Resource = { name: 'Health', current: 0, max: 0, icon: 'favorite', color: '#f44336' };
@@ -66,17 +70,24 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         if (params['id']) {
           this.characterId = params['id'];
           this.loadCharacter(this.characterId);
-        } else {
-          // Use current character from state service
-          this.characterState.character$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(character => {
-              if (character) {
-                this.character = character;
-                this.updateResources();
-                this.sessionNotes = (character as any).sessionNotes || '';
-              }
-            });
+        }
+      });
+
+    // Always subscribe to character state updates (for portrait changes, etc.)
+    this.characterState.character$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(character => {
+        if (character && this.character) {
+          // Update existing character reference to pick up changes like portrait
+          this.character = character;
+          this.portraitUrl = (character as any).portraitUrl || null;
+          this.updateResources();
+        } else if (character && !this.character) {
+          // Initial load if no character ID in route
+          this.character = character;
+          this.portraitUrl = (character as any).portraitUrl || null;
+          this.updateResources();
+          this.sessionNotes = (character as any).sessionNotes || '';
         }
       });
   }
@@ -92,6 +103,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .subscribe((character: Character | null) => {
         if (character) {
           this.character = character;
+          this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
@@ -262,6 +274,42 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   getTalentIds(): string[] {
     return Array.from(this.character?.unlockedTalents || []);
+  }
+
+  openPortraitUpload(): void {
+    if (!this.character) return;
+
+    const dialogRef = this.dialog.open(CharacterPortraitUpload, {
+      width: '600px',
+      data: {
+        currentImageUrl: (this.character as any).portraitUrl || null,
+        characterId: this.characterId || (this.character as any).id,
+        characterName: this.character.name || 'Character'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((imageUrl: string | null | undefined) => {
+      if (imageUrl !== undefined && this.character) {
+        // Defer update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
+        setTimeout(() => {
+          if (!this.character) return;
+          
+          if (imageUrl) {
+            // Store URL without timestamp (add timestamp during display only)
+            const urlWithoutTimestamp = imageUrl.split('?')[0];
+            (this.character as any).portraitUrl = urlWithoutTimestamp;
+          } else {
+            delete (this.character as any).portraitUrl;
+          }
+          this.characterState.updateCharacter(this.character);
+          this.autoSave();
+        }, 0);
+      }
+    });
+  }
+
+  getPortraitUrl(): string | null {
+    return (this.character as any)?.portraitUrl || null;
   }
 }
 

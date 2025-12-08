@@ -1,0 +1,44 @@
+<div class="portrait-upload-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>portrait</mat-icon>
+    {{ data.characterName }}'s Portrait
+  </h2>
+
+  <mat-dialog-content>
+    <div class="dialog-content">
+      <p class="instruction-text">
+        Upload a character portrait image. It will be automatically compressed to WebP format for optimal storage.
+      </p>
+
+      <app-image-uploader
+        [currentImageUrl]="uploadedImageUrl"
+        [characterId]="data.characterId"
+        [imageType]="'portrait'"
+        [label]="'Character Portrait'"
+        [showPreview]="true"
+        (imageUploaded)="onImageUploaded($event)"
+        (imageRemoved)="onImageRemoved()">
+      </app-image-uploader>
+
+      <div class="tips-section">
+        <h4>Tips:</h4>
+        <ul>
+          <li>Square images work best (e.g., 512x512px)</li>
+          <li>Use clear, well-lit photos or artwork</li>
+          <li>Images are resized to 800x800px max</li>
+          <li>Supported formats: JPG, PNG, WebP (max 10MB)</li>
+        </ul>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="onSave()">
+      <mat-icon>check</mat-icon>
+      Save Portrait
+    </button>
+  </mat-dialog-actions>
+</div>

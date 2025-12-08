@@ -4,9 +4,19 @@ Web-based character creator and session manager for tabletop RPG sessions. Built
 
 ## 🚀 Quick Start
 
+**First Time Installation:**
+```bash
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies (includes image processing)
+cd server
+npm install
+cd ..
+```
+
 **Production (Recommended):**
 ```bash
-npm install && cd server && npm install && cd ..
 ./start.sh
 ```
 
@@ -19,14 +29,16 @@ Access at `http://sanderson-rpg.local:3000` or `http://<mini-pc-ip>:3000`
 - **[QUICKSTART.md](QUICKSTART.md)** - Commands and common tasks
 - **[STARTUP.md](STARTUP.md)** - Detailed startup options and systemd setup
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment, Docker, network config
+- **[IMAGE_UPLOAD.md](IMAGE_UPLOAD.md)** - Image upload system and WebP compression
 
 ## ✨ Features
 
 - **Character Creation Wizard**: Ancestry → Culture → Attributes → Skills → Paths → Talents
 - **Character Sheet**: Live gameplay view with resource tracking
+- **Image Upload System**: Custom character portraits with automatic WebP compression
 - **Session Management**: Notes, resource tracking, auto-save
 - **Multi-User**: Multiple devices connect to single host
-- **Persistent Storage**: JSON file-based character database
+- **Persistent Storage**: JSON file-based character database + server-side image storage
 - **Network Discovery**: Access by hostname (mDNS/Avahi)
 
 ## 🏗️ Architecture
@@ -72,6 +84,8 @@ sudo systemctl enable avahi-daemon
 - **Angular Material** - UI components
 - **Node.js 18+** - Backend runtime
 - **Express.js** - REST API
+- **Sharp** - Image processing and WebP compression
+- **Multer** - File upload handling
 - **TypeScript** - Type safety
 - **RxJS** - Reactive programming
 

@@ -2,27 +2,174 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.selector-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: #1976d2;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    font-style: italic;
+  }
 }
 
 .ancestry-options {
   display: flex;
-  gap: 20px;
+  gap: 2rem;
   justify-content: center;
-  max-width: 800px; /* or whatever width you want */
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .ancestry-card {
   flex: 1;
+  min-width: 450px;
+  max-width: 600px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    
+    .card-image-placeholder {
+      .image-overlay {
+        opacity: 1;
+      }
+    }
   }
 
   &.selected {
-    border: 2px solid #3f51b5;
+    border: 3px solid #1976d2;
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.3);
+  }
+  
+  .card-image-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    .ancestry-icon {
+      font-size: 80px;
+      width: 80px;
+      height: 80px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  }
+  
+  mat-card-header {
+    padding: 1.5rem 1.5rem 0;
+    
+    mat-card-title {
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    mat-card-subtitle {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+  }
+  
+  mat-card-content {
+    padding: 1.5rem;
+    
+    .full-description {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 1.5rem;
+    }
+    
+    .features-section {
+      h4 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #1976d2;
+        margin-bottom: 0.75rem;
+      }
+      
+      .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+        li {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+          font-size: 0.95rem;
+          color: #555;
+          
+          .feature-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: #4caf50;
+            flex-shrink: 0;
+            margin-top: 2px;
+          }
+          
+          span {
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+  
+  .selection-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #1976d2;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
   }
 }

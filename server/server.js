@@ -2,15 +2,37 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
+const multer = require('multer');
+const sharp = require('sharp');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const CHARACTERS_DIR = path.join(__dirname, 'characters');
+const IMAGES_DIR = path.join(__dirname, 'images');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Configure multer for file uploads (in-memory storage)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept images only
+    if (!file.mimetype.match(/^image\/(jpeg|jpg|png|webp)$/)) {
+      cb(new Error('Only JPEG, PNG, and WebP images are allowed'), false);
+      return;
+    }
+    cb(null, true);
+  }
+});
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Serve images directory as static
+app.use('/images', express.static(IMAGES_DIR));
 
 // Serve static Angular files in production
 if (IS_PRODUCTION) {
@@ -19,13 +41,20 @@ if (IS_PRODUCTION) {
   console.log('Serving static files from:', distPath);
 }
 
-// Ensure characters directory exists
-async function ensureCharactersDir() {
+// Ensure directories exist
+async function ensureDirectories() {
   try {
     await fs.access(CHARACTERS_DIR);
   } catch {
     await fs.mkdir(CHARACTERS_DIR, { recursive: true });
     console.log('Created characters directory:', CHARACTERS_DIR);
+  }
+  
+  try {
+    await fs.access(IMAGES_DIR);
+  } catch {
+    await fs.mkdir(IMAGES_DIR, { recursive: true });
+    console.log('Created images directory:', IMAGES_DIR);
   }
 }
 
@@ -159,6 +188,115 @@ app.delete('/api/characters/delete/:id', async (req, res) => {
   }
 });
 
+// Upload character portrait/image
+app.post('/api/images/upload', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'No image file provided' 
+      });
+    }
+
+    const { characterId, imageType } = req.body; // imageType: 'portrait', 'background', etc.
+    
+    // Generate filename
+    const timestamp = Date.now();
+    const filename = characterId 
+      ? `${characterId}_${imageType || 'image'}_${timestamp}.webp`
+      : `${imageType || 'image'}_${timestamp}.webp`;
+    
+    const filepath = path.join(IMAGES_DIR, filename);
+
+    // Convert and compress to WebP
+    await sharp(req.file.buffer)
+      .resize(800, 800, { // Max dimensions, maintains aspect ratio
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .webp({ 
+        quality: 85, // Good balance of quality and file size
+        effort: 4    // Compression effort (0-6, higher = smaller file)
+      })
+      .toFile(filepath);
+
+    const imageUrl = `/images/${filename}`;
+    
+    console.log(`Uploaded image: ${filename} (${Math.round(req.file.size / 1024)}KB -> WebP)`);
+    
+    res.json({ 
+      success: true, 
+      imageUrl: imageUrl,
+      filename: filename
+    });
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// Delete image
+app.delete('/api/images/delete/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    // Security: prevent directory traversal
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid filename' 
+      });
+    }
+    
+    const filepath = path.join(IMAGES_DIR, filename);
+    
+    await fs.unlink(filepath);
+    
+    console.log(`Deleted image: ${filename}`);
+    
+    res.json({ success: true });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Image not found' 
+      });
+    }
+    console.error('Error deleting image:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// List all images (optional - for gallery)
+app.get('/api/images/list', async (req, res) => {
+  try {
+    const files = await fs.readdir(IMAGES_DIR);
+    const imageFiles = files.filter(f => f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png'));
+    
+    const images = imageFiles.map(filename => ({
+      filename: filename,
+      url: `/images/${filename}`
+    }));
+    
+    res.json({ 
+      success: true, 
+      images: images 
+    });
+  } catch (error) {
+    console.error('Error listing images:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
@@ -177,7 +315,7 @@ if (IS_PRODUCTION) {
 
 // Start server
 async function startServer() {
-  await ensureCharactersDir();
+  await ensureDirectories();
   
   app.listen(PORT, '0.0.0.0', () => {
     console.log('========================================');
@@ -187,6 +325,7 @@ async function startServer() {
     console.log(`  Mode: ${IS_PRODUCTION ? 'Production' : 'Development'}`);
     console.log(`  Port: ${PORT}`);
     console.log(`  Storage: ${CHARACTERS_DIR}`);
+    console.log(`  Images: ${IMAGES_DIR}`);
     console.log(`  API: http://0.0.0.0:${PORT}/api`);
     if (IS_PRODUCTION) {
       console.log(`  App: http://0.0.0.0:${PORT}`);

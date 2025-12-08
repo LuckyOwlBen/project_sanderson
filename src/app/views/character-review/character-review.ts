@@ -5,10 +5,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterImage } from '../../components/shared/character-image/character-image';
+import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
 
@@ -20,7 +23,9 @@ import { TalentTree } from '../../character/talents/talentInterface';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDialogModule,
+    CharacterImage
   ],
   templateUrl: './character-review.html',
   styleUrl: './character-review.scss',
@@ -33,7 +38,8 @@ export class CharacterReview implements OnInit, OnDestroy {
   constructor(
     private characterState: CharacterStateService,
     private characterStorage: CharacterStorageService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -106,6 +112,41 @@ export class CharacterReview implements OnInit, OnDestroy {
           alert('Failed to save character. Please try again.');
         }
       });
+  }
+
+  openPortraitUpload(): void {
+    if (!this.character) return;
+
+    const dialogRef = this.dialog.open(CharacterPortraitUpload, {
+      width: '600px',
+      data: {
+        currentImageUrl: (this.character as any).portraitUrl || null,
+        characterId: (this.character as any).id,
+        characterName: this.character.name || 'Character'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((imageUrl: string | null | undefined) => {
+      if (imageUrl !== undefined && this.character) {
+        // Defer update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
+        setTimeout(() => {
+          if (!this.character) return;
+          
+          if (imageUrl) {
+            // Store URL without timestamp (add timestamp during display only)
+            const urlWithoutTimestamp = imageUrl.split('?')[0];
+            (this.character as any).portraitUrl = urlWithoutTimestamp;
+          } else {
+            delete (this.character as any).portraitUrl;
+          }
+          this.characterState.updateCharacter(this.character);
+        }, 0);
+      }
+    });
+  }
+
+  getPortraitUrl(): string | null {
+    return (this.character as any)?.portraitUrl || null;
   }
 
   getTalentName(talentId: string): string {

@@ -5,6 +5,29 @@
   </div>
 
   <div class="review-content">
+    <!-- Portrait Section -->
+    <mat-card class="review-card portrait-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">portrait</mat-icon>
+        <mat-card-title>Character Portrait</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="portrait-section">
+          <app-character-image
+            [imageUrl]="getPortraitUrl()"
+            [characterName]="character.name || 'Character'"
+            [size]="'large'"
+            [showPlaceholder]="true">
+          </app-character-image>
+          
+          <button mat-raised-button color="primary" (click)="openPortraitUpload()">
+            <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+            {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
     <!-- Basic Information Card -->
     <mat-card class="review-card">
       <mat-card-header>

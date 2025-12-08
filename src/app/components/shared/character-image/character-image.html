@@ -1,0 +1,22 @@
+<div class="character-image" [ngClass]="getSizeClass()">
+  <!-- Placeholder (shows until image loads or if no image) -->
+  <div *ngIf="(!imageUrl || !imageLoaded) && showPlaceholder && !imageError" class="placeholder">
+    <mat-icon>person</mat-icon>
+  </div>
+
+  <!-- Image (lazy loaded) -->
+  <img 
+    *ngIf="imageUrl && !imageError" 
+    [src]="getFullImageUrl()" 
+    [alt]="characterName + ' portrait'"
+    [class.visible]="imageLoaded"
+    (load)="onImageLoad()"
+    (error)="onImageError()"
+    class="portrait-image">
+  
+  <!-- Error State -->
+  <div *ngIf="imageError" class="error-placeholder">
+    <mat-icon>broken_image</mat-icon>
+    <span>Image failed to load</span>
+  </div>
+</div>

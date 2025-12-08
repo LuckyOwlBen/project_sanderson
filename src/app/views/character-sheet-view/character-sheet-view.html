@@ -33,8 +33,89 @@
 
   <!-- Main Content -->
   <div class="sheet-content">
-    <!-- Left Column: Stats & Skills -->
+    <!-- Left Column: Portrait, Talents & Notes -->
     <div class="left-column">
+      <!-- Portrait Card -->
+      <mat-card class="portrait-card">
+        <div class="portrait-header">
+          <h3 class="character-name-overlay">{{ character.name || 'Character' }}</h3>
+        </div>
+        <div class="portrait-image-container">
+          <app-character-image
+            [imageUrl]="portraitUrl"
+            [characterName]="character.name || 'Character'"
+            [size]="'large'"
+            [showPlaceholder]="true">
+          </app-character-image>
+        </div>
+        <div class="portrait-actions">
+          <button mat-button (click)="openPortraitUpload()">
+            <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+            {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Talents Card -->
+      <mat-card class="talents-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">stars</mat-icon>
+          <mat-card-title>Talents & Abilities</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="talents-list">
+            <div class="talent-chip" *ngFor="let talentId of getTalentIds()">
+              <mat-icon>check_circle</mat-icon>
+              <span>{{ getTalentName(talentId) }}</span>
+            </div>
+            <p class="empty-text" *ngIf="getTalentIds().length === 0">
+              No talents unlocked
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Session Notes Card -->
+      <mat-card class="notes-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">notes</mat-icon>
+          <mat-card-title>Session Notes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="notes-field">
+            <mat-label>Notes, objectives, and reminders...</mat-label>
+            <textarea 
+              matInput 
+              [(ngModel)]="sessionNotes"
+              (blur)="saveCharacter()"
+              rows="10"
+              placeholder="Track your adventure here...">
+            </textarea>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Middle Column: Resources -->
+    <div class="middle-column">
+      <app-resource-tracker 
+        [resource]="healthResource"
+        (valueChanged)="onResourceChanged('Health', $event)">
+      </app-resource-tracker>
+
+      <app-resource-tracker 
+        [resource]="focusResource"
+        (valueChanged)="onResourceChanged('Focus', $event)">
+      </app-resource-tracker>
+
+      <app-resource-tracker 
+        [resource]="investitureResource"
+        (valueChanged)="onResourceChanged('Investiture', $event)">
+      </app-resource-tracker>
+    </div>
+
+    <!-- Right Column: Attributes, Defenses & Skills -->
+    <div class="right-column">
       <!-- Attributes Card -->
       <mat-card class="stats-card">
         <mat-card-header>
@@ -112,66 +193,6 @@
               No skills trained
             </p>
           </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-
-    <!-- Middle Column: Resources -->
-    <div class="middle-column">
-      <app-resource-tracker 
-        [resource]="healthResource"
-        (valueChanged)="onResourceChanged('Health', $event)">
-      </app-resource-tracker>
-
-      <app-resource-tracker 
-        [resource]="focusResource"
-        (valueChanged)="onResourceChanged('Focus', $event)">
-      </app-resource-tracker>
-
-      <app-resource-tracker 
-        [resource]="investitureResource"
-        (valueChanged)="onResourceChanged('Investiture', $event)">
-      </app-resource-tracker>
-    </div>
-
-    <!-- Right Column: Talents & Notes -->
-    <div class="right-column">
-      <!-- Talents Card -->
-      <mat-card class="talents-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">stars</mat-icon>
-          <mat-card-title>Talents & Abilities</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="talents-list">
-            <div class="talent-chip" *ngFor="let talentId of getTalentIds()">
-              <mat-icon>check_circle</mat-icon>
-              <span>{{ getTalentName(talentId) }}</span>
-            </div>
-            <p class="empty-text" *ngIf="getTalentIds().length === 0">
-              No talents unlocked
-            </p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Session Notes Card -->
-      <mat-card class="notes-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">notes</mat-icon>
-          <mat-card-title>Session Notes</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-form-field appearance="outline" class="notes-field">
-            <mat-label>Notes, objectives, and reminders...</mat-label>
-            <textarea 
-              matInput 
-              [(ngModel)]="sessionNotes"
-              (blur)="saveCharacter()"
-              rows="10"
-              placeholder="Track your adventure here...">
-            </textarea>
-          </mat-form-field>
         </mat-card-content>
       </mat-card>
     </div>
