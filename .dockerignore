@@ -1,0 +1,13 @@
+node_modules
+dist
+.angular
+npm-debug.log
+.git
+.gitignore
+README.md
+.vscode
+logs
+.pids
+*.log
+server/node_modules
+server/characters

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Character } from '../character/character';
 
 export interface SavedCharacter {
@@ -16,57 +17,97 @@ export interface SavedCharacter {
   providedIn: 'root'
 })
 export class CharacterStorageService {
-  private apiUrl = 'http://localhost:3000/api/characters';
-  private useServer = true; // Set to false to use localStorage
+  // In production, API is served from same origin (no CORS needed)
+  // In dev mode, backend runs on port 3000, frontend on 4200
+  private apiUrl = window.location.hostname === 'localhost' && window.location.port === '4200'
+    ? 'http://localhost:3000/api/characters'  // Dev mode
+    : '/api/characters';                       // Production mode
+  private useServer = false; // Will auto-detect
+  private serverAvailable: boolean | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.checkServerAvailability();
+  }
+
+  private checkServerAvailability(): void {
+    // Quick health check
+    const healthUrl = this.apiUrl.replace('/api/characters', '/api/health');
+    this.http.get(healthUrl, { observe: 'response' })
+      .pipe(
+        map(() => true),
+        catchError(() => of(false))
+      )
+      .subscribe((available: boolean) => {
+        this.serverAvailable = available;
+        this.useServer = available;
+        if (!available) {
+          console.log('Backend server not available, using localStorage');
+        } else {
+          console.log('Backend server detected, using API');
+        }
+      });
+  }
 
   saveCharacter(character: Character): Observable<{ success: boolean; id: string }> {
     const characterData = this.serializeCharacter(character);
     
-    if (this.useServer) {
-      return this.http.post<{ success: boolean; id: string }>(
-        `${this.apiUrl}/save`,
-        characterData
-      );
+    // If server check hasn't completed yet, default to localStorage
+    if (this.serverAvailable === null || !this.useServer) {
+      return this.saveToLocalStorage(character);
     }
     
-    return this.saveToLocalStorage(character);
+    // Try server first, fallback to localStorage on error
+    return this.http.post<{ success: boolean; id: string }>(
+      `${this.apiUrl}/save`,
+      characterData
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to save to server, falling back to localStorage', error);
+        this.useServer = false;
+        return this.saveToLocalStorage(character);
+      })
+    );
   }
 
   loadCharacter(characterId: string): Observable<Character | null> {
-    if (this.useServer) {
-      return new Observable(observer => {
-        this.http.get<any>(`${this.apiUrl}/load/${characterId}`).subscribe({
-          next: (data) => {
-            const character = this.deserializeCharacter(data);
-            observer.next(character);
-            observer.complete();
-          },
-          error: (error) => {
-            console.error('Error loading character from server:', error);
-            observer.next(null);
-            observer.complete();
-          }
-        });
-      });
+    // If server check hasn't completed yet or server not available, use localStorage
+    if (this.serverAvailable === null || !this.useServer) {
+      return this.loadFromLocalStorage(characterId);
     }
     
-    return this.loadFromLocalStorage(characterId);
+    return this.http.get<any>(`${this.apiUrl}/load/${characterId}`).pipe(
+      map((data) => this.deserializeCharacter(data)),
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to load from server, trying localStorage', error);
+        return this.loadFromLocalStorage(characterId);
+      })
+    );
   }
 
   listCharacters(): Observable<SavedCharacter[]> {
-    if (this.useServer) {
-      return this.http.get<SavedCharacter[]>(`${this.apiUrl}/list`);
+    if (this.serverAvailable === null || !this.useServer) {
+      return this.listFromLocalStorage();
     }
-    return this.listFromLocalStorage();
+    
+    return this.http.get<SavedCharacter[]>(`${this.apiUrl}/list`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to list from server, using localStorage', error);
+        return this.listFromLocalStorage();
+      })
+    );
   }
 
   deleteCharacter(characterId: string): Observable<{ success: boolean }> {
-    if (this.useServer) {
-      return this.http.delete<{ success: boolean }>(`${this.apiUrl}/delete/${characterId}`);
+    if (this.serverAvailable === null || !this.useServer) {
+      return this.deleteFromLocalStorage(characterId);
     }
-    return this.deleteFromLocalStorage(characterId);
+    
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/delete/${characterId}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to delete from server, using localStorage', error);
+        return this.deleteFromLocalStorage(characterId);
+      })
+    );
   }
 
   exportCharacter(character: Character): void {

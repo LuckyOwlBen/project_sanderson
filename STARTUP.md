@@ -2,26 +2,65 @@
 
 ## Quick Start
 
-### Manual Start
+### Production Mode (Recommended for Mini PC)
 
-#### Windows
+**Linux/Mac:**
+```bash
+# Build and start (single command)
+./start.sh prod
+
+# Or just (prod is default)
+./start.sh
+
+# Stop server
+./stop.sh
+```
+
+**What it does:**
+- Builds Angular app to optimized static files
+- Starts single Node.js server on port 3000
+- Serves both app and API from one process
+- Accessible network-wide at `http://<mini-pc-ip>:3000`
+
+**Windows:**
+```powershell
+# Build Angular
+npm run build
+
+# Copy build to server
+Remove-Item -Recurse -Force server\dist -ErrorAction SilentlyContinue
+Copy-Item -Recurse dist\project-sanderson\browser server\dist
+
+# Start in production mode
+cd server
+$env:NODE_ENV="production"; node server.js
+```
+
+### Development Mode
+
+**Linux/Mac:**
+```bash
+# Start dev servers (hot reload)
+./start.sh dev
+
+# Stop both
+./stop.sh
+```
+
+**Windows:**
 ```bash
 # Terminal 1 - Backend
 cd server
 npm start
 
-# Terminal 2 - Frontend
+# Terminal 2 - Frontend (hot reload)
 npm start
 ```
 
-#### Linux/Mac
-```bash
-# One command to start both
-./start.sh
-
-# Stop both servers
-./stop.sh
-```
+**What it does:**
+- Backend on port 3000
+- Frontend on port 4200 with hot reload
+- Use for active development only
 
 ### Automatic Startup (Linux/Mac)
 
@@ -106,12 +145,93 @@ Load the service:
 launchctl load ~/Library/LaunchAgents/com.sanderson-rpg.plist
 ```
 
+### Docker Deployment (Optional)
+
+**Build and run with Docker Compose:**
+```bash
+# Build and start
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+
+# Rebuild after changes
+docker-compose up -d --build
+```
+
+**Direct Docker commands:**
+```bash
+# Build image
+docker build -t sanderson-rpg .
+
+# Run container
+docker run -d \
+  --name sanderson-rpg \
+  -p 3000:3000 \
+  -v $(pwd)/server/characters:/app/characters \
+  sanderson-rpg
+
+# View logs
+docker logs -f sanderson-rpg
+
+# Stop and remove
+docker stop sanderson-rpg
+docker rm sanderson-rpg
+```
+
+## Network Discovery (mDNS/Avahi)
+
+To access the app by name instead of IP (`http://sanderson-rpg.local:3000`):
+
+**Install Avahi (Linux):**
+```bash
+# Debian/Ubuntu
+sudo apt-get install avahi-daemon avahi-utils
+
+# Fedora/RHEL
+sudo dnf install avahi avahi-tools
+
+# Arch
+sudo pacman -S avahi
+```
+
+**Set hostname:**
+```bash
+sudo hostnamectl set-hostname sanderson-rpg
+```
+
+**Enable and start:**
+```bash
+sudo systemctl enable avahi-daemon
+sudo systemctl start avahi-daemon
+```
+
+**Test discovery:**
+```bash
+# From mini PC
+avahi-browse -a -t
+
+# From other devices, access:
+# http://sanderson-rpg.local:3000
+```
+
+**Compatibility:**
+- ✅ Linux - Works out of box
+- ✅ macOS - Works natively
+- ✅ Windows 10/11 - Works (Bonjour included)
+- ⚠️ Android - May need Bonjour browser app
+- ✅ iOS - Works natively
+
 ## Architecture
 
 - **Frontend**: Angular 18 standalone components (client-side rendering)
-- **Backend**: Express.js minimal API (~150 lines)
+- **Backend**: Express.js minimal API (~200 lines)
 - **Storage**: JSON files in `server/characters/` directory
 - **Communication**: REST API with CORS enabled
+- **Deployment**: Single process serves both static files and API
 
 ## API Endpoints
 

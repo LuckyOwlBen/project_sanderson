@@ -1,0 +1,86 @@
+<div class="character-list-container">
+  <div class="list-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="backToHome()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Your Characters</h1>
+    </div>
+    <button mat-raised-button color="primary" (click)="createNewCharacter()">
+      <mat-icon>add</mat-icon>
+      New Character
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading characters...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error && !loading">
+    <mat-icon>error_outline</mat-icon>
+    <h2>{{ error }}</h2>
+    <button mat-raised-button color="primary" (click)="loadCharacters()">
+      <mat-icon>refresh</mat-icon>
+      Try Again
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && !error && characters.length === 0">
+    <mat-icon>person_add</mat-icon>
+    <h2>No Characters Yet</h2>
+    <p>Create your first character to begin your adventure!</p>
+    <button mat-raised-button color="primary" (click)="createNewCharacter()">
+      <mat-icon>add</mat-icon>
+      Create Character
+    </button>
+  </div>
+
+  <!-- Character Grid -->
+  <div class="character-grid" *ngIf="!loading && !error && characters.length > 0">
+    <mat-card 
+      *ngFor="let character of characters" 
+      class="character-card"
+      (click)="selectCharacter(character)">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="character-avatar">person</mat-icon>
+        <mat-card-title>{{ character.name }}</mat-card-title>
+        <mat-card-subtitle>
+          Level {{ character.level }} {{ character.ancestry }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="character-info">
+          <div class="info-item" *ngIf="character.data?.paths?.length > 0">
+            <mat-icon>route</mat-icon>
+            <span>{{ character.data.paths.join(', ') }}</span>
+          </div>
+          <div class="info-item" *ngIf="character.data?.cultures?.length > 0">
+            <mat-icon>public</mat-icon>
+            <span>{{ getCultureNames(character) }}</span>
+          </div>
+          <div class="info-item last-modified">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ character.lastModified | date:'short' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button color="primary">
+          <mat-icon>visibility</mat-icon>
+          View
+        </button>
+        <button 
+          mat-button 
+          color="warn"
+          (click)="deleteCharacter(character, $event)">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

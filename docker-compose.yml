@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  sanderson-rpg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sanderson-rpg
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist character data
+      - ./server/characters:/app/characters
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    networks:
+      - sanderson-network
+
+networks:
+  sanderson-network:
+    driver: bridge

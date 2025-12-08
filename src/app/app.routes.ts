@@ -10,6 +10,7 @@ import { PathSelector } from './components/path-selector/path-selector';
 import { TalentView } from './components/talent-view/talent-view';
 import { CharacterReview } from './views/character-review/character-review';
 import { CharacterSheetView } from './views/character-sheet-view/character-sheet-view';
+import { CharacterListView } from './views/character-list-view/character-list-view';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
@@ -30,21 +31,5 @@ export const routes: Routes = [
     ]},
   { path: 'character-sheet/:id', component: CharacterSheetView },
   { path: 'character-sheet', component: CharacterSheetView },
-  /**{ 
-    path: 'character-creator', 
-    component: CharacterCreatorView,
-    children: [
-      { path: '', redirectTo: 'ancestry', pathMatch: 'full' },
-      { path: 'ancestry', component: AncestrySelector },
-      { path: 'culture', component: CultureSelector },
-      { path: 'attributes', component: AttributeAllocator },
-      { path: 'skills', component: SkillSelector },
-      { path: 'talents', component: TalentTreeViewer },
-      { path: 'review', component: CharacterReview }
-    ]
-  },
-  { path: 'character-sheet/:id', component: CharacterSheetView },
-  { path: 'load-character', component: LoadCharacterView }, **/
-  { path: '**', redirectTo: '' }
+  { path: 'load-character', component: CharacterListView },
 ];
-
