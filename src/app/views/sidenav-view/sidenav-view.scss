@@ -38,3 +38,83 @@
     margin: 0.5rem 0;
   }
 }
+
+.character-progress {
+  margin-top: 1rem;
+
+  .creation-accordion {
+    box-shadow: none;
+    
+    mat-expansion-panel {
+      box-shadow: none;
+      
+      mat-expansion-panel-header {
+        padding: 0 1rem;
+        
+        mat-panel-title {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-weight: 500;
+          color: #333;
+          
+          mat-icon {
+            color: #1976d2;
+          }
+        }
+      }
+    }
+  }
+
+  .step-list {
+    padding: 0.5rem 0;
+    
+    .creation-step {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0.6;
+      padding: 0.25rem 0.5rem;
+      min-height: 40px;
+      height: auto;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        opacity: 1;
+      }
+      
+      &.completed {
+        opacity: 1;
+        
+        mat-icon[matListItemIcon] {
+          color: #4caf50;
+        }
+        
+        .check-icon {
+          color: #4caf50;
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+        
+        span {
+          font-weight: 500;
+        }
+      }
+      
+      mat-icon[matListItemIcon] {
+        color: #999;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+      }
+      
+      span {
+        font-size: 0.85rem;
+        color: #666;
+        white-space: normal;
+        line-height: 1.3;
+      }
+    }
+  }
+}
