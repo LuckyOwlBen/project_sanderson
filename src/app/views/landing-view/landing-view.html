@@ -1,2 +1,36 @@
-<button (click)="newCharacter()">New Character</button>
-<button (click)="loadCharacter()">Load Character</button>
+<div class="landing-container">
+  <div class="landing-header">
+    <h1 class="app-title">Stormlight Archive RPG</h1>
+    <p class="app-subtitle">Character Management System</p>
+  </div>
+
+  <div class="navigation-cards">
+    <mat-card class="nav-card" (click)="newCharacter()">
+      <mat-card-content>
+        <mat-icon class="card-icon">person_add</mat-icon>
+        <h2>Create Character</h2>
+        <p>Start building a new character from scratch</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="nav-card" (click)="loadCharacter()">
+      <mat-card-content>
+        <mat-icon class="card-icon">list</mat-icon>
+        <h2>Character List</h2>
+        <p>View and manage your saved characters</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="nav-card" (click)="viewSheet()">
+      <mat-card-content>
+        <mat-icon class="card-icon">description</mat-icon>
+        <h2>Character Sheet</h2>
+        <p>View your active character sheet</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="landing-footer">
+    <p>Unofficial fan-made RPG system based on Brandon Sanderson's Stormlight Archive</p>
+  </div>
+</div>
