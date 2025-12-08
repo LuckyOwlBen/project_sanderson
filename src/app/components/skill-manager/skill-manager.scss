@@ -10,21 +10,27 @@
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 1rem;
 
     h2 {
       margin: 0;
       font-size: 1.8rem;
       color: #333;
+      white-space: nowrap;
+      min-width: 0;
     }
 
     .points-display {
       display: flex;
       align-items: center;
       gap: 1rem;
+      flex-wrap: wrap;
 
       .points-remaining {
         font-size: 1.2rem;
         color: #555;
+        white-space: nowrap;
 
         strong {
           color: #2196F3;
@@ -44,6 +50,7 @@
         border-radius: 4px;
         cursor: pointer;
         transition: background-color 0.2s;
+        white-space: nowrap;
 
         &:hover {
           background-color: #d32f2f;
@@ -54,7 +61,7 @@
 
   .skills-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
     gap: 2rem;
     margin-bottom: 2rem;
 
@@ -84,13 +91,21 @@
           padding: 0.5rem;
           background: white;
           border-radius: 4px;
+          gap: 0.5rem;
+          min-width: 0;
+
+          app-value-stepper {
+            flex: 1;
+            min-width: 0;
+          }
 
           .skill-info {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
             gap: 0.25rem;
-            margin-left: 1rem;
+            flex-shrink: 0;
+            min-width: fit-content;
 
             .attribute-badge {
               font-size: 0.75rem;
@@ -99,12 +114,14 @@
               color: #1976D2;
               border-radius: 3px;
               font-weight: 600;
+              white-space: nowrap;
             }
 
             .total-value {
               font-size: 0.85rem;
               color: #666;
               font-weight: 500;
+              white-space: nowrap;
             }
           }
         }
@@ -126,6 +143,10 @@
       border-radius: 4px;
       cursor: not-allowed;
       transition: all 0.3s;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.4;
+      min-height: 3rem;
 
       &:not(:disabled) {
         cursor: pointer;
@@ -153,8 +174,45 @@
   .skill-manager {
     padding: 1rem;
 
+    .header {
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .points-display {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
     .skills-container {
       grid-template-columns: 1fr;
+    }
+
+    .actions .proceed-btn {
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .skill-manager {
+    .header {
+      h2 {
+        font-size: 1.25rem;
+        width: 100%;
+      }
+
+      .points-display {
+        .points-remaining {
+          font-size: 1rem;
+
+          strong {
+            font-size: 1.2rem;
+          }
+        }
+      }
     }
   }
 }
