@@ -15,8 +15,9 @@
     <div class="culture-grid" *ngIf="availableCultureInfos.length > 0">
       <mat-card 
         class="culture-card"
+        [class.disabled]="isMaxCulturesSelected"
         *ngFor="let cultureInfo of availableCultureInfos"
-        (click)="viewCultureDetails(cultureInfo)">
+        (click)="!isMaxCulturesSelected && viewCultureDetails(cultureInfo)">
         
         <div class="culture-image-container">
           <div class="image-placeholder" [style.background]="cultureInfo.imagePlaceholder">
@@ -69,14 +70,6 @@
         
         <div class="description-section">
           <p>{{ selectedCulture.description }}</p>
-        </div>
-        
-        <div class="names-section">
-          <mat-icon>person</mat-icon>
-          <div class="names-content">
-            <strong>Suggested Names:</strong>
-            <p class="name-list">{{ selectedCulture.suggestedNames.join(', ') }}</p>
-          </div>
         </div>
         
         <button mat-raised-button color="primary" class="confirm-button" (click)="confirmCulture()">

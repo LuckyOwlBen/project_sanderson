@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
@@ -16,7 +18,9 @@ import { Character } from '../../character/character';
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatCardModule
+    MatCardModule,
+    MatIconModule,
+    MatChipsModule
   ],
   templateUrl: './character-name.html',
   styleUrl: './character-name.scss',
@@ -27,6 +31,7 @@ export class CharacterName implements OnInit, OnDestroy {
   character: Character | null = null;
   characterName: string = '';
   nameError: string = '';
+  suggestedNames: string[] = [];
 
   constructor(private characterState: CharacterStateService) {}
 
@@ -39,7 +44,31 @@ export class CharacterName implements OnInit, OnDestroy {
         if (!this.characterName) {
           this.characterName = character.name || '';
         }
+        // Update suggested names from cultures
+        this.updateSuggestedNames();
       });
+  }
+
+  private updateSuggestedNames(): void {
+    if (!this.character?.cultures || this.character.cultures.length === 0) {
+      this.suggestedNames = [];
+      return;
+    }
+    
+    // Combine suggested names from all cultures
+    const allNames = new Set<string>();
+    this.character.cultures.forEach(culture => {
+      if (culture.suggestedNames) {
+        culture.suggestedNames.forEach(name => allNames.add(name));
+      }
+    });
+    
+    this.suggestedNames = Array.from(allNames);
+  }
+
+  selectSuggestedName(name: string): void {
+    this.characterName = name;
+    this.onNameChange();
   }
 
   ngOnDestroy(): void {

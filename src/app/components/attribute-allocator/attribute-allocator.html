@@ -1,54 +1,73 @@
-<div class="attribute-allocator">
-  <div class="header">
-    <h2>Distribute Attribute Points</h2>
-    <div class="points-display">
-      <span class="points-remaining" [class.warning]="remainingPoints === 0">
-        Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
-      </span>
-      <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
+<div class="attribute-allocator-container">
+  <div class="main-content">
+    <div class="header">
+      <h2>Distribute Attribute Points</h2>
+      <div class="points-display">
+        <span class="points-remaining" [class.warning]="remainingPoints === 0">
+          Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
+        </span>
+        <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
+      </div>
+    </div>
+
+    <div class="attributes-list">
+      <app-value-stepper
+        *ngFor="let attr of items"
+        [label]="attr.name"
+        [currentValue]="attr.currentValue"
+        [minValue]="minValue"
+        [maxValue]="maxValue"
+        [pointsRemaining]="remainingPoints"
+        (valueChanged)="onValueChanged($event)">
+      </app-value-stepper>
     </div>
   </div>
 
-  <div class="attributes-list">
-    <app-value-stepper
-      *ngFor="let attr of items"
-      [label]="attr.name"
-      [currentValue]="attr.currentValue"
-      [minValue]="minValue"
-      [maxValue]="maxValue"
-      [pointsRemaining]="remainingPoints"
-      (valueChanged)="onValueChanged($event)">
-    </app-value-stepper>
-  </div>
-
-  <div class="info-panel" *ngIf="character">
-    <h3>Derived Attributes Preview</h3>
+  <div class="sidebar" *ngIf="character">
+    <div class="sidebar-header">
+      <h3>Derived Attributes</h3>
+      <p class="sidebar-subtitle">Preview of your character's statistics</p>
+    </div>
+    
     <div class="derived-stats">
-      <div class="stat">
-        <label>Health:</label>
-        <span>{{ character.resources.health.max }}</span>
+      <div class="stat-card">
+        <div class="stat-icon">❤️</div>
+        <div class="stat-info">
+          <label>Health</label>
+          <span class="stat-value">{{ character.resources.health.max }}</span>
+        </div>
       </div>
-      <div class="stat">
-        <label>Focus:</label>
-        <span>{{ character.resources.focus.max }}</span>
+      
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-info">
+          <label>Focus</label>
+          <span class="stat-value">{{ character.resources.focus.max }}</span>
+        </div>
       </div>
-      <div class="stat">
-        <label>Movement Rate:</label>
-        <span>{{ movementSpeed }}</span>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🏃</div>
+        <div class="stat-info">
+          <label>Movement Rate</label>
+          <span class="stat-value">{{ movementSpeed }}</span>
+        </div>
       </div>
-      <div class="stat">
-        <label>Recovery Die:</label>
-        <span>{{ recoveryDie }}</span>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🎲</div>
+        <div class="stat-info">
+          <label>Recovery Die</label>
+          <span class="stat-value">{{ recoveryDie }}</span>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="actions">
-    <button 
-      class="proceed-btn" 
-      [disabled]="!canProceed"
-      [class.complete]="isComplete">
-      {{ isComplete ? 'Continue' : 'Allocate All Points to Continue' }}
-    </button>
+    
+    <div class="allocation-status" [class.complete]="isComplete">
+      <div class="status-message">
+        <span *ngIf="!isComplete">⚠️ Allocate all points to continue</span>
+        <span *ngIf="isComplete">✓ All points allocated!</span>
+      </div>
+    </div>
   </div>
 </div>

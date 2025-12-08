@@ -76,22 +76,22 @@ export class SidenavView implements OnInit, OnDestroy {
 
     this.creationSteps = [
       {
-        label: 'Name',
-        icon: 'badge',
-        stepNumber: 0,
-        completed: !!this.character.name && this.character.name.length > 0
-      },
-      {
         label: 'Ancestry',
         icon: 'groups',
-        stepNumber: 1,
+        stepNumber: 0,
         completed: !!this.character.ancestry
       },
       {
         label: 'Culture',
         icon: 'public',
-        stepNumber: 2,
+        stepNumber: 1,
         completed: this.character.cultures && this.character.cultures.length > 0
+      },
+      {
+        label: 'Name',
+        icon: 'badge',
+        stepNumber: 2,
+        completed: !!this.character.name && this.character.name.length > 0
       },
       {
         label: 'Attributes',

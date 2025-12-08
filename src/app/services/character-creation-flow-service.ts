@@ -12,9 +12,9 @@ export interface CreationStep {
 })
 export class CharacterCreationFlowService {
   private readonly steps: CreationStep[] = [
-    { label: 'Name', route: 'name' },
     { label: 'Ancestry', route: 'ancestry' },
     { label: 'Culture', route: 'culture' },
+    { label: 'Name', route: 'name' },
     { label: 'Attributes', route: 'attributes' },
     { label: 'Skills', route: 'skills' },
     { label: 'Paths', route: 'paths' },
@@ -71,13 +71,15 @@ export class CharacterCreationFlowService {
     }
     
     switch (currentStep) {
-      case 0: // Name step
+      case 0: // Ancestry step
+        return !!character.ancestry;
+      case 1: // Culture step
+        return character.cultures && character.cultures.length > 0;
+      case 2: // Name step
         // Check both that name is valid AND that there's no input error
         return this.isNameValid(character.name) && !character.nameInputHasError;
-      case 1: // Ancestry step
-        return !!character.ancestry;
-      case 2: // Culture step
-        return character.cultures && character.cultures.length > 0;
+      case 3: // Attributes step
+        return this.areAttributesAllocated(character);
       default:
         // Other steps don't block progression
         return true;
@@ -108,6 +110,18 @@ export class CharacterCreationFlowService {
     }
     
     return true;
+  }
+
+  private areAttributesAllocated(character: any): boolean {
+    if (!character?.attributes) return false;
+    
+    const attrs = character.attributes;
+    const totalAllocated = attrs.strength + attrs.speed + attrs.intellect + 
+                          attrs.willpower + attrs.awareness + attrs.presence;
+    
+    // Check if all points are allocated (level 1 gets 18 points)
+    const expectedPoints = 18; // This could be dynamic based on level
+    return totalAllocated === expectedPoints;
   }
 
   canGoPrevious(): boolean {

@@ -26,7 +26,7 @@ export class LandingView {
     // Reset to a brand new character
     const freshCharacter = new Character();
     this.characterState.updateCharacter(freshCharacter);
-    this.router.navigateByUrl('/character-creator-view')
+    this.router.navigateByUrl('/character-creator-view/ancestry')
   }
 
   loadCharacter() {

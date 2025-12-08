@@ -54,6 +54,10 @@ export class CultureSelector implements OnInit {
       this.confirmedCultures.some(culture => culture.name === info.culture.name)
     );
   }
+  
+  get isMaxCulturesSelected(): boolean {
+    return this.confirmedCultures.length >= 2;
+  }
 
   ngOnInit(): void {
     this.characterState.character$.subscribe(char => {
