@@ -5,6 +5,7 @@ import { AncestrySelector } from './components/ancestry-selector/ancestry-select
 import { CultureSelector } from './components/culture-selector/culture-selector';
 import { AttributeAllocator } from './components/attribute-allocator/attribute-allocator';
 import { SkillManager } from './components/skill-manager/skill-manager';
+import { TalentView } from './components/talent-view/talent-view';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
@@ -18,6 +19,7 @@ export const routes: Routes = [
         { path: 'culture', component: CultureSelector, pathMatch: 'full' },
         { path: 'attributes', component: AttributeAllocator, pathMatch: 'full' },
         { path: 'skills', component: SkillManager, pathMatch: 'full' },
+        { path: 'talents', component: TalentView, pathMatch: 'full' },
     ]},
   /**{ 
     path: 'character-creator', 

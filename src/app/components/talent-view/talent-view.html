@@ -1,0 +1,78 @@
+<div class="talent-view-container">
+  <div class="talent-header">
+    <h2>Talent Selection</h2>
+    <div class="talent-points">
+      <mat-icon>stars</mat-icon>
+      <span>Available Points: {{ availableTalentPoints }}</span>
+    </div>
+  </div>
+
+  <div class="tree-selector" *ngIf="availableTrees.length > 1">
+    <mat-chip-set>
+      <mat-chip 
+        *ngFor="let tree of availableTrees"
+        [highlighted]="selectedTree?.pathName === tree.pathName"
+        (click)="selectTree(tree)">
+        {{ tree.pathName }}
+      </mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <div class="talent-tree-container" *ngIf="selectedTree">
+    <mat-card class="tree-info">
+      <mat-card-header>
+        <mat-card-title>{{ selectedTree.pathName }}</mat-card-title>
+      </mat-card-header>
+    </mat-card>
+
+    <div class="talent-grid">
+      <mat-card 
+        *ngFor="let talent of selectedTree.nodes"
+        class="talent-node"
+        [class.unlocked]="isTalentUnlocked(talent.id)"
+        [class.available]="canUnlockTalent(talent)"
+        [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)"
+        [ngStyle]="getTalentStyle(talent)">
+        
+        <mat-card-header>
+          <mat-card-title>{{ talent.name }}</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p>{{ talent.description }}</p>
+          
+          <div class="prerequisites" *ngIf="talent.prerequisites.length > 0">
+            <span class="prereq-label">Requires:</span>
+            <ul>
+              <li *ngFor="let prereq of talent.prerequisites">
+                {{ formatPrerequisite(prereq) }}
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button 
+            mat-raised-button 
+            color="primary"
+            *ngIf="!isTalentUnlocked(talent.id) && canUnlockTalent(talent)"
+            (click)="unlockTalent(talent)">
+            Unlock
+          </button>
+          <button 
+            mat-raised-button 
+            color="warn"
+            *ngIf="isTalentUnlocked(talent.id)"
+            (click)="removeTalent(talent.id)">
+            Remove
+          </button>
+          <mat-icon *ngIf="isTalentUnlocked(talent.id)">check_circle</mat-icon>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="no-trees" *ngIf="availableTrees.length === 0">
+    <p>No talent trees available. Please select a path or ancestry first.</p>
+  </div>
+</div>

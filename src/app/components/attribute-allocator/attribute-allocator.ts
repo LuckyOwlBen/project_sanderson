@@ -33,11 +33,13 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   ngOnInit(): void {
-    this.character = this.characterStateService.getCharacter();
-    
-    if (this.character) {
-      this.initializeAttributes();
-    }
+    // Subscribe to character state to get updates and persist state
+    this.characterStateService.character$.subscribe(character => {
+      this.character = character;
+      if (this.character) {
+        this.initializeAttributes();
+      }
+    });
   }
 
   private initializeAttributes(): void {

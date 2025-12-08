@@ -41,11 +41,13 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit {
   }
 
   ngOnInit(): void {
-    this.character = this.characterStateService.getCharacter();
-    
-    if (this.character) {
-      this.initializeSkills();
-    }
+    // Subscribe to character state to get updates and persist state
+    this.characterStateService.character$.subscribe(character => {
+      this.character = character;
+      if (this.character) {
+        this.initializeSkills();
+      }
+    });
   }
 
   private initializeSkills(): void {

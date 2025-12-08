@@ -16,6 +16,7 @@ export class Character {
   ancestry: Ancestry | null = null;
   attributes: Attributes;
   cultures: CulturalInterface[] = [];
+  unlockedTalents: Set<string> = new Set<string>();
 
   private skillManager = new SkillManager();
   private derivedAttributesManager = new DerivedAttributesManager();
@@ -26,6 +27,7 @@ export class Character {
   constructor() {
     this.attributes = new Attributes();
     this.resourceManager = new ResourceManager(this.attributes);
+    this.bonusManager.setCharacter(this);
   }
 
   get skills(): SkillManager {

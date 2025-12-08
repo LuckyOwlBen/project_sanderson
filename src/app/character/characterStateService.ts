@@ -47,4 +47,18 @@ export class CharacterStateService {
       this.characterSubject.next(this.character);
     }
   }
+
+  unlockTalent(talentId: string): void {
+    this.character.unlockedTalents.add(talentId);
+    this.characterSubject.next(this.character);
+  }
+
+  removeTalent(talentId: string): void {
+    this.character.unlockedTalents.delete(talentId);
+    this.characterSubject.next(this.character);
+  }
+
+  getUnlockedTalents(): Set<string> {
+    return this.character.unlockedTalents;
+  }
 }
