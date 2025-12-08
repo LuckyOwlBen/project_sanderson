@@ -76,6 +76,8 @@ export class CharacterCreationFlowService {
         return this.isNameValid(character.name) && !character.nameInputHasError;
       case 1: // Ancestry step
         return !!character.ancestry;
+      case 2: // Culture step
+        return character.cultures && character.cultures.length > 0;
       default:
         // Other steps don't block progression
         return true;

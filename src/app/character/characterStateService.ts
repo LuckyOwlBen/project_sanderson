@@ -40,6 +40,14 @@ export class CharacterStateService {
     }
   }
 
+  removeCulture(culture: CulturalInterface): void {
+    const index = this.character.cultures.findIndex(c => c.name === culture.name);
+    if (index !== -1) {
+      this.character.cultures.splice(index, 1);
+      this.characterSubject.next(this.character);
+    }
+  }
+
   assignAttributePoint(attribute: keyof Character['attributes']): void {
     const currentValue = this.character.attributes[attribute];
     if (typeof currentValue === 'number' && currentValue < 5) {
