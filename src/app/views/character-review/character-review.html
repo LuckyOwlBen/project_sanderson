@@ -14,15 +14,15 @@
       <mat-card-content>
         <div class="portrait-section">
           <app-character-image
-            [imageUrl]="getPortraitUrl()"
+            [imageUrl]="portraitUrl"
             [characterName]="character.name || 'Character'"
             [size]="'large'"
             [showPlaceholder]="true">
           </app-character-image>
           
           <button mat-raised-button color="primary" (click)="openPortraitUpload()">
-            <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
-            {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
+            <mat-icon>{{ portraitUrl ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+            {{ portraitUrl ? 'Change Portrait' : 'Add Portrait' }}
           </button>
         </div>
       </mat-card-content>

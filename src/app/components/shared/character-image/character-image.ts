@@ -47,18 +47,27 @@ export class CharacterImage implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['imageUrl'] && !changes['imageUrl'].firstChange) {
-      // Only reset on actual changes, not first initialization
-      this.imageLoaded = false;
-      this.imageError = false;
-      this.imageLoadAttempts = 0;
+    if (changes['imageUrl']) {
+      const previous = changes['imageUrl'].previousValue;
+      const current = changes['imageUrl'].currentValue;
       
-      // Defer load to avoid change detection errors
-      setTimeout(() => {
-        if (this.imageUrl) {
-          this.loadImage();
-        }
-      }, 0);
+      // Reset state when URL actually changes
+      if (previous !== current && !changes['imageUrl'].firstChange) {
+        this.imageLoaded = false;
+        this.imageError = false;
+        this.imageLoadAttempts = 0;
+        
+        // Clear cached URL to force regeneration
+        this.lastImageUrl = null;
+        this.cachedFullUrl = '';
+        
+        // Defer load to avoid change detection errors
+        setTimeout(() => {
+          if (this.imageUrl) {
+            this.loadImage();
+          }
+        }, 0);
+      }
     }
   }
 

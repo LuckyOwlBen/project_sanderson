@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -59,7 +59,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private router: Router,
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -298,10 +299,13 @@ export class CharacterSheetView implements OnInit, OnDestroy {
             // Store URL without timestamp (add timestamp during display only)
             const urlWithoutTimestamp = imageUrl.split('?')[0];
             (this.character as any).portraitUrl = urlWithoutTimestamp;
+            this.portraitUrl = urlWithoutTimestamp;
           } else {
             delete (this.character as any).portraitUrl;
+            this.portraitUrl = null;
           }
           this.characterState.updateCharacter(this.character);
+          this.cdr.detectChanges(); // Force change detection
           this.autoSave();
         }, 0);
       }

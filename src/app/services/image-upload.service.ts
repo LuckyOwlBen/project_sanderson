@@ -88,12 +88,21 @@ export class ImageUploadService {
       reader.onload = (e) => {
         try {
           const base64Image = e.target?.result as string;
-          const storageKey = `${this.LOCALSTORAGE_PREFIX}${characterId}_${imageType}`;
+          
+          // Delete old image for this character/type if it exists
+          const oldKeyPattern = `${this.LOCALSTORAGE_PREFIX}${characterId}_${imageType}`;
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith(oldKeyPattern)) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Add timestamp to make each upload unique
+          const timestamp = Date.now();
+          const storageKey = `${this.LOCALSTORAGE_PREFIX}${characterId}_${imageType}_${timestamp}`;
           
           // Store in localStorage
           localStorage.setItem(storageKey, base64Image);
-          
-          console.log(`Image stored in localStorage: ${storageKey}`);
           
           observer.next({
             success: true,

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -34,12 +34,14 @@ export class CharacterReview implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   character: Character | null = null;
+  portraitUrl: string | null = null;
 
   constructor(
     private characterState: CharacterStateService,
     private characterStorage: CharacterStorageService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -47,6 +49,7 @@ export class CharacterReview implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
+        this.portraitUrl = (character as any)?.portraitUrl || null;
       });
   }
 
@@ -136,10 +139,13 @@ export class CharacterReview implements OnInit, OnDestroy {
             // Store URL without timestamp (add timestamp during display only)
             const urlWithoutTimestamp = imageUrl.split('?')[0];
             (this.character as any).portraitUrl = urlWithoutTimestamp;
+            this.portraitUrl = urlWithoutTimestamp;
           } else {
             delete (this.character as any).portraitUrl;
+            this.portraitUrl = null;
           }
           this.characterState.updateCharacter(this.character);
+          this.cdr.detectChanges(); // Force change detection
         }, 0);
       }
     });
