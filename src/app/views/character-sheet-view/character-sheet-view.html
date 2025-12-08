@@ -1,0 +1,188 @@
+<div class="character-sheet-container" *ngIf="character">
+  <!-- Header -->
+  <div class="sheet-header">
+    <div class="header-left">
+      <h1>{{ character.name || 'Unnamed Character' }}</h1>
+      <div class="header-subtitle">
+        <span>Level {{ character.level }}</span>
+        <span class="separator">•</span>
+        <span>{{ character.ancestry || 'Unknown' }}</span>
+        <span class="separator" *ngIf="character.paths.length > 0">•</span>
+        <span *ngFor="let path of character.paths; let last = last">
+          {{ path }}<span *ngIf="!last">, </span>
+        </span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button (click)="saveCharacter()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+      <button mat-button (click)="exportCharacter()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+      <button mat-button (click)="backToList()">
+        <mat-icon>list</mat-icon>
+        Character List
+      </button>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Main Content -->
+  <div class="sheet-content">
+    <!-- Left Column: Stats & Skills -->
+    <div class="left-column">
+      <!-- Attributes Card -->
+      <mat-card class="stats-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">fitness_center</mat-icon>
+          <mat-card-title>Attributes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="attributes-grid">
+            <div class="attribute-box">
+              <span class="attr-label">Strength</span>
+              <span class="attr-value">{{ character.attributes.strength }}</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Speed</span>
+              <span class="attr-value">{{ character.attributes.speed }}</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Intellect</span>
+              <span class="attr-value">{{ character.attributes.intellect }}</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Willpower</span>
+              <span class="attr-value">{{ character.attributes.willpower }}</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Awareness</span>
+              <span class="attr-value">{{ character.attributes.awareness }}</span>
+            </div>
+            <div class="attribute-box">
+              <span class="attr-label">Presence</span>
+              <span class="attr-value">{{ character.attributes.presence }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Defenses Card -->
+      <mat-card class="stats-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">shield</mat-icon>
+          <mat-card-title>Defenses</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="defenses-list">
+            <div class="defense-item">
+              <span class="defense-label">Physical Defense</span>
+              <span class="defense-value">{{ character.defenses.getPhysicalDefense(character.attributes, 0) }}</span>
+            </div>
+            <div class="defense-item">
+              <span class="defense-label">Cognitive Defense</span>
+              <span class="defense-value">{{ character.defenses.getCognitiveDefense(character.attributes, 0) }}</span>
+            </div>
+            <div class="defense-item">
+              <span class="defense-label">Spiritual Defense</span>
+              <span class="defense-value">{{ character.defenses.getSpiritualDefense(character.attributes, 0) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Skills Card -->
+      <mat-card class="stats-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">school</mat-icon>
+          <mat-card-title>Skills</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="skills-list">
+            <div class="skill-item" *ngFor="let skill of getTrainedSkills()">
+              <span class="skill-name">{{ skill.name }}</span>
+              <span class="skill-ranks">Rank {{ skill.rank }}</span>
+              <span class="skill-total">Total: +{{ skill.total }}</span>
+            </div>
+            <p class="empty-text" *ngIf="getTrainedSkills().length === 0">
+              No skills trained
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Middle Column: Resources -->
+    <div class="middle-column">
+      <app-resource-tracker 
+        [resource]="healthResource"
+        (valueChanged)="onResourceChanged('Health', $event)">
+      </app-resource-tracker>
+
+      <app-resource-tracker 
+        [resource]="focusResource"
+        (valueChanged)="onResourceChanged('Focus', $event)">
+      </app-resource-tracker>
+
+      <app-resource-tracker 
+        [resource]="investitureResource"
+        (valueChanged)="onResourceChanged('Investiture', $event)">
+      </app-resource-tracker>
+    </div>
+
+    <!-- Right Column: Talents & Notes -->
+    <div class="right-column">
+      <!-- Talents Card -->
+      <mat-card class="talents-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">stars</mat-icon>
+          <mat-card-title>Talents & Abilities</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="talents-list">
+            <div class="talent-chip" *ngFor="let talentId of getTalentIds()">
+              <mat-icon>check_circle</mat-icon>
+              <span>{{ getTalentName(talentId) }}</span>
+            </div>
+            <p class="empty-text" *ngIf="getTalentIds().length === 0">
+              No talents unlocked
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Session Notes Card -->
+      <mat-card class="notes-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">notes</mat-icon>
+          <mat-card-title>Session Notes</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="notes-field">
+            <mat-label>Notes, objectives, and reminders...</mat-label>
+            <textarea 
+              matInput 
+              [(ngModel)]="sessionNotes"
+              (blur)="saveCharacter()"
+              rows="10"
+              placeholder="Track your adventure here...">
+            </textarea>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<div class="no-character" *ngIf="!character">
+  <mat-icon>error_outline</mat-icon>
+  <h2>No Character Loaded</h2>
+  <p>Please select a character from the character list.</p>
+  <button mat-raised-button color="primary" (click)="backToList()">
+    Go to Character List
+  </button>
+</div>

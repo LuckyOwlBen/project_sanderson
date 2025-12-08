@@ -11,6 +11,7 @@ export interface CreationStep {
 })
 export class CharacterCreationFlowService {
   private readonly steps: CreationStep[] = [
+    { label: 'Name', route: 'name' },
     { label: 'Ancestry', route: 'ancestry' },
     { label: 'Culture', route: 'culture' },
     { label: 'Attributes', route: 'attributes' },

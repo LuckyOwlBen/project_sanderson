@@ -43,6 +43,10 @@ export class SkillManager {
         return totals;
     }
 
+    getAllSkillRanks(): SkillRanks {
+        return { ...this.skillRanks };
+    }
+
     checkStringForMatchingSkill(skillString: string): SkillType | null {
         const formattedString = skillString.trim().toLowerCase();
         for (const skill of Object.values(SkillType)) {

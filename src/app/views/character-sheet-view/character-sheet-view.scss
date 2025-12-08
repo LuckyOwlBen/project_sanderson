@@ -1,0 +1,266 @@
+.character-sheet-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+
+  .header-left {
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 0.5rem 0;
+      color: #1976d2;
+    }
+
+    .header-subtitle {
+      font-size: 1rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .separator {
+        color: #ccc;
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+.sheet-content {
+  display: grid;
+  grid-template-columns: 1fr 400px 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+
+  @media (max-width: 1400px) {
+    grid-template-columns: 1fr 1fr;
+
+    .middle-column {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+
+    .middle-column {
+      grid-column: 1;
+    }
+  }
+}
+
+.stats-card,
+.talents-card,
+.notes-card {
+  margin-bottom: 1.5rem;
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .section-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #1976d2;
+    }
+
+    mat-card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+
+  mat-card-content {
+    padding: 1rem;
+  }
+}
+
+.attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+
+  .attribute-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: white;
+
+    .attr-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .attr-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+  }
+}
+
+.defenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .defense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border-left: 4px solid #1976d2;
+
+    .defense-label {
+      font-weight: 500;
+      color: #555;
+    }
+
+    .defense-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1976d2;
+    }
+  }
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+
+  .skill-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+
+    .skill-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .skill-ranks {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .skill-total {
+      font-weight: 600;
+      color: #1976d2;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+.talents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .talent-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #4caf50;
+    }
+  }
+}
+
+.notes-card {
+  .notes-field {
+    width: 100%;
+
+    textarea {
+      min-height: 200px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+  }
+}
+
+.middle-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.empty-text {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 2rem;
+}
+
+.no-character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: #666;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 2rem;
+  }
+}

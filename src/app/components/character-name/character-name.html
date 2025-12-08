@@ -1,0 +1,32 @@
+<div class="character-name-container">
+  <mat-card class="name-card">
+    <mat-card-header>
+      <mat-card-title>Welcome, Hero</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="intro-text">
+        <p>Before we begin your journey through the world of Roshar, tell us...</p>
+        <h2>What is your name?</h2>
+      </div>
+
+      <mat-form-field appearance="outline" class="name-input">
+        <mat-label>Character Name</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="characterName"
+          (ngModelChange)="onNameChange()"
+          placeholder="Enter your character's name"
+          autocomplete="off">
+      </mat-form-field>
+
+      <div class="hint-text" *ngIf="!characterName">
+        <p>Choose a name that reflects your character's heritage and destiny.</p>
+      </div>
+
+      <div class="greeting-text" *ngIf="characterName">
+        <p>Greetings, <strong>{{ characterName }}</strong>! Let's build your legend.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

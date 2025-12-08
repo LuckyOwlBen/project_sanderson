@@ -1,0 +1,92 @@
+.character-name-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.name-card {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+
+  mat-card-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+
+    mat-card-title {
+      font-size: 2rem;
+      font-weight: 300;
+      color: #1976d2;
+    }
+  }
+
+  mat-card-content {
+    padding: 2rem;
+
+    .intro-text {
+      margin-bottom: 2rem;
+
+      p {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        font-size: 2rem;
+        font-weight: 400;
+        color: #333;
+        margin: 1rem 0;
+      }
+    }
+
+    .name-input {
+      width: 100%;
+      font-size: 1.2rem;
+      margin: 2rem 0;
+
+      ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+          background-color: #f9f9f9;
+        }
+
+        input {
+          text-align: center;
+          font-size: 1.3rem;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .hint-text {
+      margin-top: 1rem;
+      
+      p {
+        font-size: 0.95rem;
+        color: #999;
+        font-style: italic;
+      }
+    }
+
+    .greeting-text {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: rgba(25, 118, 210, 0.05);
+      border-radius: 8px;
+      
+      p {
+        font-size: 1.1rem;
+        color: #1976d2;
+        margin: 0;
+
+        strong {
+          font-weight: 600;
+          color: #0d47a1;
+        }
+      }
+    }
+  }
+}

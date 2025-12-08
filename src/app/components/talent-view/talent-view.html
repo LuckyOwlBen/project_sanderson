@@ -56,17 +56,33 @@
             mat-raised-button 
             color="primary"
             *ngIf="!isTalentUnlocked(talent.id) && canUnlockTalent(talent)"
-            (click)="unlockTalent(talent)">
-            Unlock
+            (click)="unlockTalent(talent); $event.stopPropagation()">
+            <mat-icon>add_circle</mat-icon>
+            Select Talent
+          </button>
+          <button 
+            mat-button
+            *ngIf="!isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints > 0"
+            disabled>
+            <mat-icon>lock</mat-icon>
+            Prerequisites Not Met
+          </button>
+          <button 
+            mat-button
+            *ngIf="!isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints <= 0"
+            disabled>
+            <mat-icon>stars</mat-icon>
+            No Points Available
           </button>
           <button 
             mat-raised-button 
             color="warn"
             *ngIf="isTalentUnlocked(talent.id)"
-            (click)="removeTalent(talent.id)">
+            (click)="removeTalent(talent.id); $event.stopPropagation()">
+            <mat-icon>remove_circle</mat-icon>
             Remove
           </button>
-          <mat-icon *ngIf="isTalentUnlocked(talent.id)">check_circle</mat-icon>
+          <mat-icon *ngIf="isTalentUnlocked(talent.id)" class="unlocked-badge">check_circle</mat-icon>
         </mat-card-actions>
       </mat-card>
     </div>

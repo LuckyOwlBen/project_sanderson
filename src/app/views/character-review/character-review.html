@@ -1,0 +1,157 @@
+<div class="character-review-container" *ngIf="character">
+  <div class="review-header">
+    <h1>Character Complete!</h1>
+    <p class="subtitle">Review your character before finalizing</p>
+  </div>
+
+  <div class="review-content">
+    <!-- Basic Information Card -->
+    <mat-card class="review-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">person</mat-icon>
+        <mat-card-title>Basic Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Name:</span>
+            <span class="value highlight-name">{{ character.name || 'Unnamed Hero' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Level:</span>
+            <span class="value">{{ character.level }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Ancestry:</span>
+            <span class="value">{{ character.ancestry || 'None' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Cultures Card -->
+    <mat-card class="review-card" *ngIf="character.cultures.length > 0">
+      <mat-card-header>
+        <mat-icon class="section-icon">language</mat-icon>
+        <mat-card-title>Cultural Background</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chip-list">
+          <span class="culture-chip" *ngFor="let culture of character.cultures">
+            {{ culture.name }}
+          </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Paths Card -->
+    <mat-card class="review-card" *ngIf="character.paths.length > 0">
+      <mat-card-header>
+        <mat-icon class="section-icon">route</mat-icon>
+        <mat-card-title>Heroic Path</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="path-display">
+          <div class="path-item" *ngFor="let path of character.paths">
+            <mat-icon>arrow_forward</mat-icon>
+            <span>{{ path }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Attributes Card -->
+    <mat-card class="review-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">fitness_center</mat-icon>
+        <mat-card-title>Attributes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="attributes-display">
+          <div class="attribute-box">
+            <div class="attr-name">Strength</div>
+            <div class="attr-value">{{ character.attributes.strength }}</div>
+          </div>
+          <div class="attribute-box">
+            <div class="attr-name">Speed</div>
+            <div class="attr-value">{{ character.attributes.speed }}</div>
+          </div>
+          <div class="attribute-box">
+            <div class="attr-name">Intellect</div>
+            <div class="attr-value">{{ character.attributes.intellect }}</div>
+          </div>
+          <div class="attribute-box">
+            <div class="attr-name">Willpower</div>
+            <div class="attr-value">{{ character.attributes.willpower }}</div>
+          </div>
+          <div class="attribute-box">
+            <div class="attr-name">Awareness</div>
+            <div class="attr-value">{{ character.attributes.awareness }}</div>
+          </div>
+          <div class="attribute-box">
+            <div class="attr-name">Presence</div>
+            <div class="attr-value">{{ character.attributes.presence }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Skills Card -->
+    <mat-card class="review-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">school</mat-icon>
+        <mat-card-title>Trained Skills ({{ getTrainedSkills().length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="skills-display" *ngIf="getTrainedSkills().length > 0">
+          <div class="skill-item" *ngFor="let skill of getTrainedSkills()">
+            <span class="skill-name">{{ skill.name }}</span>
+            <span class="skill-rank">Rank {{ skill.rank }}</span>
+          </div>
+        </div>
+        <p class="empty-state" *ngIf="getTrainedSkills().length === 0">
+          No skills trained
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Talents Card -->
+    <mat-card class="review-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">stars</mat-icon>
+        <mat-card-title>Talents ({{ getTalentIds().length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="talents-display" *ngIf="getTalentIds().length > 0">
+          <div class="talent-item" *ngFor="let talentId of getTalentIds()">
+            <mat-icon class="talent-icon">check_circle</mat-icon>
+            <span>{{ getTalentName(talentId) }}</span>
+          </div>
+        </div>
+        <p class="empty-state" *ngIf="getTalentIds().length === 0">
+          No talents selected
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Finalize Button -->
+  <div class="finalize-section">
+    <mat-divider></mat-divider>
+    <div class="finalize-content">
+      <p class="finalize-message">
+        Ready to begin your adventure? Once finalized, you can export or save your character.
+      </p>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        class="finalize-button"
+        (click)="finalizeCharacter()">
+        <mat-icon>done_all</mat-icon>
+        Finalize Character
+      </button>
+    </div>
+  </div>
+</div>
+
+

@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
+import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
+import { TalentTree } from '../../character/talents/talentInterface';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -99,4 +101,70 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   canGoPrevious(): boolean {
     return this.flowService.canGoPrevious();
   }
+
+  getTrainedSkills(character: any): Array<{name: string, rank: number}> {
+    const trainedSkills: Array<{name: string, rank: number}> = [];
+    if (character?.skills) {
+      try {
+        // Use the public getAllSkillRanks method
+        const skillRanks = character.skills.getAllSkillRanks();
+        
+        Object.entries(skillRanks).forEach(([skillType, rank]: [string, any]) => {
+          if (rank > 0) {
+            trainedSkills.push({
+              name: this.formatSkillName(skillType),
+              rank: rank
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Error accessing skill ranks:', error);
+      }
+    }
+    return trainedSkills;
+  }
+
+  private formatSkillName(skillType: string): string {
+    return skillType
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  getTalentIds(character: any): string[] {
+    return Array.from(character.unlockedTalents || []);
+  }
+
+  getTalentName(talentId: string): string {
+    // Search through all available talent trees
+    const allTrees: TalentTree[] = [];
+    
+    // Get trees from paths
+    Object.values(ALL_TALENT_PATHS).forEach(path => {
+      if (path.talentNodes) {
+        allTrees.push({ pathName: path.name, nodes: path.talentNodes });
+      }
+      allTrees.push(...path.paths);
+    });
+    
+    // Also search ancestry trees
+    const ancestryTree = getTalentTree('singer');
+    if (ancestryTree) {
+      allTrees.push(ancestryTree);
+    }
+    
+    // Search for the talent
+    for (const tree of allTrees) {
+      const talent = tree.nodes.find(n => n.id === talentId);
+      if (talent) {
+        return talent.name;
+      }
+    }
+    
+    // Fallback to formatted ID
+    return talentId.split('_').map(w => 
+      w.charAt(0).toUpperCase() + w.slice(1)
+    ).join(' ');
+  }
 }
+

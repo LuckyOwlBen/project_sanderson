@@ -151,8 +151,18 @@ export class TalentView implements OnInit, OnDestroy {
   private calculateAvailablePoints(): void {
     // Base calculation - adjust based on your game rules
     this.availableTalentPoints = this.character?.level ?? 1;
-    // Subtract already unlocked talents
-    this.availableTalentPoints -= this.unlockedTalents.size;
+    
+    // Only subtract talents that cost points (tier 1+, not tier 0 which are free)
+    let spentPoints = 0;
+    this.availableTrees.forEach(tree => {
+      tree.nodes.forEach(talent => {
+        if (this.unlockedTalents.has(talent.id) && talent.tier > 0) {
+          spentPoints++;
+        }
+      });
+    });
+    
+    this.availableTalentPoints -= spentPoints;
   }
 
   selectTree(tree: TalentTree): void {
