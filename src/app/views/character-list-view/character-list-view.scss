@@ -18,13 +18,13 @@
     h1 {
       margin: 0;
       font-size: 2rem;
-      color: #1976d2;
+      color: #ffffff;
     }
   }
   
   .back-button {
     mat-icon {
-      color: #666;
+      color: var(--gpColor-ChalkyBlue);
     }
   }
   
@@ -49,17 +49,17 @@
     font-size: 4rem;
     width: 4rem;
     height: 4rem;
-    color: #999;
+    color: var(--gpColor-ChalkyBlue);
     margin-bottom: 1rem;
   }
   
   h2 {
     margin: 0.5rem 0;
-    color: #333;
+    color: #ffffff;
   }
   
   p {
-    color: #666;
+    color: #e8e8e8;
     margin-bottom: 2rem;
   }
   
@@ -83,29 +83,31 @@
 .character-card {
   cursor: pointer;
   transition: all 0.3s ease;
+  background: var(--gpSystemDarkerGrey) !important;
   
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px rgba(102, 192, 244, 0.3);
+    background: var(--gpSystemDarkGrey) !important;
   }
   
   mat-card-header {
     margin-bottom: 1rem;
     
     .character-avatar {
-      background-color: #1976d2;
-      color: white;
+      background-color: var(--gpColor-ChalkyBlue);
+      color: #ffffff;
     }
   }
   
   mat-card-title {
     font-size: 1.5rem;
-    color: #1976d2;
+    color: #ffffff;
   }
   
   mat-card-subtitle {
     font-size: 1rem;
-    color: #666;
+    color: #e8e8e8;
     margin-top: 0.25rem;
   }
   
@@ -119,13 +121,13 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: #555;
+        color: #e8e8e8;
         
         mat-icon {
           font-size: 1.25rem;
           width: 1.25rem;
           height: 1.25rem;
-          color: #999;
+          color: var(--gpColor-ChalkyBlue);
         }
         
         span {
@@ -133,11 +135,11 @@
         }
         
         &.last-modified {
-          color: #999;
+          color: #b0b0b0;
           font-size: 0.85rem;
           margin-top: 0.5rem;
           padding-top: 0.5rem;
-          border-top: 1px solid #eee;
+          border-top: 1px solid var(--gpSystemDarkGrey);
         }
       }
     }
@@ -147,7 +149,7 @@
     display: flex;
     justify-content: flex-end;
     padding: 0.5rem 1rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--gpSystemDarkGrey);
     
     button {
       display: flex;
