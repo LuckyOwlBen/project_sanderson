@@ -35,3 +35,17 @@ body {
   color: var(--gpSystemLightestGrey);
 }
 app-root { display: flex; flex-direction: column; height: 100vh; }
+
+// Remove scrollbars from Material dialogs
+.mat-mdc-dialog-container {
+  overflow: hidden !important;
+  
+  .mat-mdc-dialog-surface {
+    overflow: hidden !important;
+  }
+  
+  .mat-mdc-dialog-content {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+}
