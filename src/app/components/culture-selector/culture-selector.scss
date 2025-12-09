@@ -10,12 +10,12 @@
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
   }
   
   .section-subtitle {
     margin: 0;
-    color: #666;
+    color: #e8e8e8;
     font-size: 1rem;
   }
 }
@@ -60,10 +60,12 @@
   transition: all 0.3s ease;
   overflow: hidden;
   min-height: 400px;
+  background-color: var(--gpSystemDarkerGrey) !important;
 
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    background-color: var(--gpSystemDarkGrey) !important;
   }
   
   &.disabled {
@@ -117,7 +119,7 @@
       margin: 0 0 0.75rem 0;
       font-size: 1.75rem;
       font-weight: 600;
-      color: #333;
+      color: #ffffff;
     }
     
     .culture-expertise {
@@ -125,7 +127,7 @@
       align-items: center;
       gap: 0.5rem;
       margin: 0 0 1rem 0;
-      color: #1976d2;
+      color: var(--gpColor-ChalkyBlue);
       font-weight: 500;
       font-size: 1rem;
       
@@ -137,7 +139,7 @@
     }
     
     .culture-description {
-      color: #666;
+      color: #e8e8e8;
       line-height: 1.6;
       font-size: 0.95rem;
       margin: 0;
@@ -148,20 +150,6 @@
     }
   }
 
-  // Light gradient backgrounds for each culture on the card itself
-  &:nth-child(1) { background: linear-gradient(180deg, rgba(139, 69, 19, 0.08) 0%, rgba(210, 105, 30, 0.05) 100%); } // Alethi
-  &:nth-child(2) { background: linear-gradient(180deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 165, 0, 0.08) 100%); } // Azish
-  &:nth-child(3) { background: linear-gradient(180deg, rgba(34, 139, 34, 0.08) 0%, rgba(50, 205, 50, 0.05) 100%); } // Herdazian
-  &:nth-child(4) { background: linear-gradient(180deg, rgba(255, 99, 71, 0.08) 0%, rgba(255, 69, 0, 0.05) 100%); } // Iriali
-  &:nth-child(5) { background: linear-gradient(180deg, rgba(65, 105, 225, 0.08) 0%, rgba(30, 144, 255, 0.05) 100%); } // Kharbranthian
-  &:nth-child(6) { background: linear-gradient(180deg, rgba(128, 0, 128, 0.08) 0%, rgba(153, 50, 204, 0.05) 100%); } // Listener
-  &:nth-child(7) { background: linear-gradient(180deg, rgba(32, 178, 170, 0.08) 0%, rgba(72, 209, 204, 0.05) 100%); } // Natan
-  &:nth-child(8) { background: linear-gradient(180deg, rgba(0, 206, 209, 0.08) 0%, rgba(64, 224, 208, 0.05) 100%); } // Reshi
-  &:nth-child(9) { background: linear-gradient(180deg, rgba(240, 230, 140, 0.12) 0%, rgba(238, 232, 170, 0.08) 100%); } // Shin
-  &:nth-child(10) { background: linear-gradient(180deg, rgba(47, 79, 79, 0.08) 0%, rgba(112, 128, 144, 0.05) 100%); } // Thaylen
-  &:nth-child(11) { background: linear-gradient(180deg, rgba(160, 82, 45, 0.08) 0%, rgba(205, 133, 63, 0.05) 100%); } // Unkalaki
-  &:nth-child(12) { background: linear-gradient(180deg, rgba(220, 20, 60, 0.08) 0%, rgba(178, 34, 34, 0.05) 100%); } // Veden
-  &:nth-child(13) { background: linear-gradient(180deg, rgba(105, 105, 105, 0.08) 0%, rgba(128, 128, 128, 0.05) 100%); } // Wayfarer
 }
 
 .culture-details {
@@ -174,6 +162,8 @@
   }
 
   .detail-card {
+    background-color: var(--gpSystemDarkerGrey) !important;
+
     .detail-image-container {
       height: 300px;
       overflow: hidden;
@@ -214,7 +204,7 @@
         margin: 0 0 1.5rem 0;
         font-size: 2.5rem;
         font-weight: 700;
-        color: #333;
+        color: #ffffff;
       }
       
       .expertise-section {
@@ -223,18 +213,19 @@
         gap: 0.75rem;
         margin-bottom: 1.5rem;
         padding: 1rem;
-        background-color: #f5f5f5;
+        background-color: var(--gpSystemDarkGrey);
         border-radius: 8px;
+        color: #ffffff;
         
         mat-icon {
-          color: #1976d2;
+          color: var(--gpColor-ChalkyBlue);
           font-size: 24px;
           width: 24px;
           height: 24px;
         }
         
         strong {
-          color: #333;
+          color: #ffffff;
           margin-right: 0.5rem;
         }
       }
@@ -245,7 +236,7 @@
         p {
           line-height: 1.8;
           font-size: 1.1rem;
-          color: #555;
+          color: #e8e8e8;
           margin: 0;
         }
       }
@@ -255,11 +246,11 @@
         gap: 0.75rem;
         margin-bottom: 2rem;
         padding: 1rem;
-        background-color: #f5f5f5;
+        background-color: var(--gpSystemDarkGrey);
         border-radius: 8px;
         
         mat-icon {
-          color: #1976d2;
+          color: var(--gpColor-ChalkyBlue);
           font-size: 24px;
           width: 24px;
           height: 24px;
@@ -272,12 +263,12 @@
           strong {
             display: block;
             margin-bottom: 0.5rem;
-            color: #333;
+            color: #ffffff;
           }
           
           .name-list {
             margin: 0;
-            color: #666;
+            color: #e8e8e8;
             line-height: 1.6;
           }
         }
@@ -313,9 +304,11 @@
 
 .selected-culture-card {
   transition: all 0.2s ease;
+  background-color: var(--gpSystemDarkerGrey) !important;
   
   &:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background-color: var(--gpSystemDarkGrey) !important;
   }
   
   .selected-culture-content {
@@ -366,7 +359,7 @@
         margin: 0 0 0.5rem 0;
         font-size: 1.5rem;
         font-weight: 600;
-        color: #333;
+        color: #ffffff;
       }
       
       .selected-expertise {
@@ -374,7 +367,7 @@
         align-items: center;
         gap: 0.5rem;
         margin: 0;
-        color: #1976d2;
+        color: var(--gpColor-ChalkyBlue);
         font-weight: 500;
         font-size: 1rem;
         

@@ -18,11 +18,9 @@
           (ngModelChange)="onNameChange()"
           placeholder="Enter your character's name"
           autocomplete="off"
-          required
           maxlength="50"
           #nameInput="ngModel">
-        <mat-error *ngIf="nameError">{{ nameError }}</mat-error>
-        <mat-hint *ngIf="!nameError && characterName.length > 0">
+        <mat-hint *ngIf="characterName.length > 0">
           {{ characterName.length }}/50 characters
         </mat-hint>
       </mat-form-field>

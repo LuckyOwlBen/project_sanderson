@@ -11,6 +11,7 @@
   h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
+    color: #ffffff;
   }
 
   .talent-points {
@@ -20,6 +21,7 @@
     gap: 0.5rem;
     font-size: 1.1rem;
     font-weight: 500;
+    color: #ffffff;
     
     mat-icon {
       color: #ffd700;
@@ -60,10 +62,26 @@
   mat-chip {
     cursor: pointer;
     font-size: 1rem;
+    background-color: var(--gpSystemDarkGrey);
+    
+    ::ng-deep {
+      .mdc-evolution-chip__text-label {
+        color: #ffffff !important;
+      }
+    }
+    
+    &:hover {
+      background-color: var(--gpSystemGrey);
+    }
     
     &[highlighted] {
-      background-color: #1976d2;
-      color: white;
+      background-color: var(--gpColor-ChalkyBlue);
+      
+      ::ng-deep {
+        .mdc-evolution-chip__text-label {
+          color: #ffffff !important;
+        }
+      }
     }
   }
 }
@@ -72,10 +90,12 @@
   .tree-info {
     margin-bottom: 2rem;
     text-align: center;
+    background-color: var(--gpSystemDarkerGrey) !important;
 
     mat-card-title {
       font-size: 1.5rem;
       font-weight: 600;
+      color: #ffffff;
     }
   }
 }
@@ -85,7 +105,6 @@
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
-align-items: start;
 }
 
 .talent-node {
@@ -94,24 +113,23 @@ align-items: start;
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: var(--gpSystemDarkerGrey) !important;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: var(--gpSystemDarkGrey) !important;
   }
 
   &.available {
-    border-color: #1976d2;
-    background-color: rgba(25, 118, 210, 0.05);
+    border-color: var(--gpColor-ChalkyBlue);
   }
 
   &.unlocked {
-    border-color: #4caf50;
-    background-color: rgba(76, 175, 80, 0.05);
+    border-color: var(--gpColor-Green);
   }
 
   &.locked {
     opacity: 0.6;
-    background-color: rgba(0, 0, 0, 0.02);
   }
 
   mat-card-header {
@@ -120,7 +138,7 @@ align-items: start;
     mat-card-title {
       font-size: 1.2rem;
       font-weight: 600;
-      color: #333;
+      color: #ffffff;
     }
   }
 
@@ -129,19 +147,19 @@ align-items: start;
     
     p {
       line-height: 1.6;
-      color: #555;
+      color: #e8e8e8;
       margin-bottom: 1rem;
     }
 
     .prerequisites {
-      background-color: #f5f5f5;
+      background-color: var(--gpSystemDarkGrey);
       padding: 0.75rem;
       border-radius: 4px;
       margin-top: 1rem;
 
       .prereq-label {
         font-weight: 600;
-        color: #666;
+        color: #ffffff;
         display: block;
         margin-bottom: 0.5rem;
       }
@@ -151,7 +169,7 @@ align-items: start;
         padding-left: 1.5rem;
 
         li {
-          color: #777;
+          color: #e8e8e8;
           font-size: 0.9rem;
           line-height: 1.4;
         }
@@ -164,7 +182,7 @@ align-items: start;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--gpSystemDarkGrey);
     margin-top: auto;
     gap: 0.5rem;
 
@@ -174,6 +192,12 @@ align-items: start;
       align-items: center;
       justify-content: center;
       gap: 0.25rem;
+      background-color: var(--gpSystemDarkGrey);
+      color: #ffffff;
+      
+      &:hover:not([disabled]) {
+        background-color: var(--gpSystemGrey);
+      }
       
       mat-icon {
         font-size: 20px;
@@ -199,7 +223,7 @@ align-items: start;
 .no-trees {
   text-align: center;
   padding: 3rem;
-  color: #666;
+  color: #e8e8e8;
 
   p {
     font-size: 1.1rem;

@@ -165,13 +165,30 @@ export class TalentView implements OnInit, OnDestroy {
       return visibleTalents.length > 0;
     });
 
-    // Sort trees: singer/ancestry trees first, then path trees
+    // Sort trees to prioritize the character's chosen path
     if (this.character.ancestry === 'singer') {
+      // Singers: show Singer tree first
       this.availableTrees.sort((a, b) => {
         const aIsSinger = a.pathName.toLowerCase().includes('singer');
         const bIsSinger = b.pathName.toLowerCase().includes('singer');
         if (aIsSinger && !bIsSinger) return -1;
         if (!aIsSinger && bIsSinger) return 1;
+        return 0;
+      });
+    } else if (this.character.ancestry === 'human' && specializationName) {
+      // Humans: show their chosen specialization first
+      this.availableTrees.sort((a, b) => {
+        const aIsChosen = a.pathName.toLowerCase() === specializationName.toLowerCase();
+        const bIsChosen = b.pathName.toLowerCase() === specializationName.toLowerCase();
+        if (aIsChosen && !bIsChosen) return -1;
+        if (!aIsChosen && bIsChosen) return 1;
+        
+        // Then show core tree of chosen path
+        const aIsCore = mainPathName && a.pathName.toLowerCase().includes(mainPathName.toLowerCase()) && a.pathName.toLowerCase().includes('core');
+        const bIsCore = mainPathName && b.pathName.toLowerCase().includes(mainPathName.toLowerCase()) && b.pathName.toLowerCase().includes('core');
+        if (aIsCore && !bIsCore) return -1;
+        if (!aIsCore && bIsCore) return 1;
+        
         return 0;
       });
     }

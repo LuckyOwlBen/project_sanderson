@@ -5,20 +5,21 @@
   justify-content: center;
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, var(--gpStoreDarkGrey) 0%, var(--gpStoreDarkerGrey) 80%);
 }
 
 .landing-header {
   text-align: center;
   margin-bottom: 3rem;
-  color: white;
+  color: var(--gpSystemLightestGrey);
 }
 
 .app-title {
   font-size: 3rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--gpColor-ChalkyBlue);
 }
 
 .app-subtitle {
@@ -26,6 +27,7 @@
   font-weight: 300;
   margin: 0;
   opacity: 0.9;
+  color: var(--gpStoreLightestGrey);
 }
 
 .navigation-cards {
@@ -39,10 +41,12 @@
 .nav-card {
   cursor: pointer;
   transition: all 0.3s ease;
+  background-color: var(--gpSystemDarkGrey);
   
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    background-color: var(--gpSystemGrey);
   }
 
   mat-card-content {
@@ -57,7 +61,7 @@
     font-size: 64px;
     width: 64px;
     height: 64px;
-    color: #667eea;
+    color: var(--gpColor-ChalkyBlue);
     margin-bottom: 1rem;
   }
 
@@ -65,12 +69,12 @@
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
     font-weight: 600;
-    color: #333;
+    color: var(--gpSystemLightestGrey);
   }
 
   p {
     margin: 0;
-    color: #666;
+    color: var(--gpStoreLighterGrey);
     font-size: 1rem;
     line-height: 1.5;
   }
@@ -79,7 +83,7 @@
 .landing-footer {
   margin-top: 3rem;
   text-align: center;
-  color: white;
+  color: var(--gpStoreLightestGrey);
   opacity: 0.8;
   font-size: 0.9rem;
 

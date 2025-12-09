@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
+import { StepValidationService } from '../../services/step-validation.service';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
@@ -34,7 +35,8 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     public characterState: CharacterStateService,
-    public flowService: CharacterCreationFlowService
+    public flowService: CharacterCreationFlowService,
+    private validationService: StepValidationService
   ) {
     this.steps = this.flowService.getSteps();
   }
@@ -67,11 +69,12 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       this.flowService.setCurrentStepByRoute(this.router.url);
     });
 
-    // Subscribe to character changes to trigger change detection for Next button
+    // Subscribe to character changes to validate all steps and trigger change detection
     this.characterState.character$.pipe(
       takeUntil(this.destroy$)
-    ).subscribe(() => {
-      // This subscription ensures Angular change detection runs when character updates
+    ).subscribe(character => {
+      // Validate all steps whenever character changes
+      this.validationService.validateAllSteps(character);
     });
   }
 

@@ -1,11 +1,11 @@
 <div class="attribute-allocator-container">
   <div class="main-content">
     <div class="header">
-      <h2>Distribute Attribute Points</h2>
+      <div class="header-text">
+        <h2>Distribute Attribute Points</h2>
+        <div class="points-remaining">Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}</div>
+      </div>
       <div class="points-display">
-        <span class="points-remaining" [class.warning]="remainingPoints === 0">
-          Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
-        </span>
         <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
       </div>
     </div>

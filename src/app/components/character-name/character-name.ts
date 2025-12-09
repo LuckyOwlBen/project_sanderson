@@ -51,6 +51,9 @@ export class CharacterName implements OnInit, OnDestroy {
         }
         // Update suggested names from cultures
         this.updateSuggestedNames();
+        // Validate on load for existing characters
+        this.validateName();
+        this.updateValidation();
       });
   }
 

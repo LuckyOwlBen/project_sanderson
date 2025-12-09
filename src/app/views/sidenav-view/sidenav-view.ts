@@ -63,9 +63,11 @@ export class SidenavView implements OnInit, OnDestroy {
   }
 
   navigateToStep(stepNumber: number): void {
-    this.router.navigate(['/character-creator-view'], { 
-      queryParams: { step: stepNumber } 
-    });
+    const stepRoutes = ['ancestry', 'culture', 'name', 'attributes', 'skills', 'paths', 'talents', 'review'];
+    const route = stepRoutes[stepNumber];
+    if (route) {
+      this.router.navigate(['/character-creator-view', route]);
+    }
   }
 
   private updateCreationSteps(): void {
