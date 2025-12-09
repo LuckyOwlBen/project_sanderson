@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
+import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
@@ -24,7 +26,10 @@ interface SkillConfig {
   templateUrl: './skill-manager.html',
   styleUrls: ['./skill-manager.scss']
 })
-export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit {
+export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 4; // Skills is step 4
+  
   character: Character | null = null;
   private skillAssociationTable = new SkillAssociationTable();
 
@@ -35,19 +40,27 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit {
 
   constructor(
     private characterStateService: CharacterStateService,
-    private levelUpManager: LevelUpManager
+    private levelUpManager: LevelUpManager,
+    private validationService: StepValidationService
   ) {
     super();
   }
 
   ngOnInit(): void {
     // Subscribe to character state to get updates and persist state
-    this.characterStateService.character$.subscribe(character => {
-      this.character = character;
-      if (this.character) {
-        this.initializeSkills();
-      }
-    });
+    this.characterStateService.character$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(character => {
+        this.character = character;
+        if (this.character) {
+          this.initializeSkills();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initializeSkills(): void {
@@ -139,6 +152,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit {
     if (this.character) {
       this.characterStateService.updateCharacter(this.character);
       this.updateSkillTotals();
+      this.updateValidation();
     }
   }
 
@@ -146,6 +160,23 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit {
     if (this.character) {
       this.characterStateService.updateCharacter(this.character);
       this.updateSkillTotals();
+      this.updateValidation();
+    }
+  }
+
+  private updateValidation(): void {
+    // All points must be allocated (remainingPoints === 0)
+    const isValid = this.remainingPoints === 0;
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
+    
+    // Scroll to show navigation buttons when all points are allocated
+    if (isValid) {
+      setTimeout(() => {
+        const buttons = document.querySelector('.stepper-buttons') as HTMLElement;
+        if (buttons) {
+          buttons.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 150);
     }
   }
 }

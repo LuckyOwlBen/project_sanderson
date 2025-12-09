@@ -106,16 +106,16 @@ export class SidenavView implements OnInit, OnDestroy {
         completed: this.hasSkillsAssigned()
       },
       {
-        label: 'Talents',
-        icon: 'stars',
-        stepNumber: 5,
-        completed: this.character.unlockedTalents && this.character.unlockedTalents.size > 0
-      },
-      {
         label: 'Path',
         icon: 'explore',
-        stepNumber: 6,
+        stepNumber: 5,
         completed: this.character.paths && this.character.paths.length > 0
+      },
+      {
+        label: 'Talents',
+        icon: 'stars',
+        stepNumber: 6,
+        completed: this.character.unlockedTalents && this.character.unlockedTalents.size > 0
       },
       {
         label: 'Review',

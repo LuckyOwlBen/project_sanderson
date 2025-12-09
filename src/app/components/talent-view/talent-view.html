@@ -7,6 +7,11 @@
     </div>
   </div>
 
+  <div class="validation-message" *ngIf="validationMessage">
+    <mat-icon>info</mat-icon>
+    <span>{{ validationMessage }}</span>
+  </div>
+
   <div class="tree-selector" *ngIf="availableTrees.length > 1">
     <mat-chip-set>
       <mat-chip 

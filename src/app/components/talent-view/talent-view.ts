@@ -10,6 +10,7 @@ import { Character } from '../../character/character';
 import { TalentTree, TalentNode, TalentPath } from '../../character/talents/talentInterface';
 import { TalentPrerequisiteChecker } from '../../character/talents/talentPrerequesite';
 import { getTalentTree, getTalentPath } from '../../character/talents/talentTrees/talentTrees';
+import { StepValidationService } from '../../services/step-validation.service';
 
 @Component({
   selector: 'app-talent-view',
@@ -25,14 +26,19 @@ import { getTalentTree, getTalentPath } from '../../character/talents/talentTree
 })
 export class TalentView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 6;
   
   character: Character | null = null;
   availableTrees: TalentTree[] = [];
   selectedTree: TalentTree | null = null;
   unlockedTalents = new Set<string>();
   availableTalentPoints: number = 0;
+  validationMessage: string = '';
 
-  constructor(private characterState: CharacterStateService) {}
+  constructor(
+    private characterState: CharacterStateService,
+    private validationService: StepValidationService
+  ) {}
 
   ngOnInit(): void {
     this.characterState.character$
@@ -43,6 +49,7 @@ export class TalentView implements OnInit, OnDestroy {
         this.unlockedTalents = new Set(character.unlockedTalents);
         this.loadAvailableTrees();
         this.calculateAvailablePoints();
+        this.updateValidation();
       });
   }
 
@@ -61,42 +68,72 @@ export class TalentView implements OnInit, OnDestroy {
     const mainPathName = this.character.paths[0];
     const specializationName = this.character.paths[1];
     
-    // Load the main path if it exists
-    if (mainPathName) {
-      const talentPath = getTalentPath(mainPathName);
-      if (talentPath) {
-        // Add the core/shared talent nodes as a tree
-        if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
-          const coreTree = {
-            pathName: `${talentPath.name} - Core`,
-            nodes: talentPath.talentNodes
-          };
-          this.autoUnlockTier0Talents(coreTree);
-          tempTrees.push(coreTree);
-          addedTreeNames.add(coreTree.pathName.toLowerCase());
+    // For humans at level 1, load ALL heroic paths (they can pick bonus talent from any path)
+    if (this.character.ancestry === 'human' && this.character.level === 1) {
+      const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+      
+      allPaths.forEach(pathId => {
+        const talentPath = getTalentPath(pathId);
+        if (talentPath) {
+          // Add core tree
+          if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
+            const coreTree = {
+              pathName: `${talentPath.name} - Core`,
+              nodes: talentPath.talentNodes
+            };
+            this.autoUnlockTier0Talents(coreTree);
+            tempTrees.push(coreTree);
+            addedTreeNames.add(coreTree.pathName.toLowerCase());
+          }
+          
+          // Add all specializations from this path
+          talentPath.paths.forEach(specTree => {
+            if (!addedTreeNames.has(specTree.pathName.toLowerCase())) {
+              this.autoUnlockTier0Talents(specTree);
+              tempTrees.push(specTree);
+              addedTreeNames.add(specTree.pathName.toLowerCase());
+            }
+          });
         }
-        
-        // If specialization specified, only load that tree
-        if (specializationName) {
-          const specializationTree = talentPath.paths.find(
-            tree => tree.pathName.toLowerCase() === specializationName.toLowerCase()
-          );
-          if (specializationTree && !addedTreeNames.has(specializationTree.pathName.toLowerCase())) {
-            this.autoUnlockTier0Talents(specializationTree);
-            tempTrees.push(specializationTree);
-            addedTreeNames.add(specializationTree.pathName.toLowerCase());
+      });
+    } else {
+      // For non-humans or higher levels, load only the character's chosen path
+      if (mainPathName) {
+        const talentPath = getTalentPath(mainPathName);
+        if (talentPath) {
+          // Add the core/shared talent nodes as a tree
+          if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
+            const coreTree = {
+              pathName: `${talentPath.name} - Core`,
+              nodes: talentPath.talentNodes
+            };
+            this.autoUnlockTier0Talents(coreTree);
+            tempTrees.push(coreTree);
+            addedTreeNames.add(coreTree.pathName.toLowerCase());
+          }
+          
+          // If specialization specified, only load that tree
+          if (specializationName) {
+            const specializationTree = talentPath.paths.find(
+              tree => tree.pathName.toLowerCase() === specializationName.toLowerCase()
+            );
+            if (specializationTree && !addedTreeNames.has(specializationTree.pathName.toLowerCase())) {
+              this.autoUnlockTier0Talents(specializationTree);
+              tempTrees.push(specializationTree);
+              addedTreeNames.add(specializationTree.pathName.toLowerCase());
+            }
           }
         }
       }
-    }
-    
-    // Also load specialization as direct tree if not found above
-    if (specializationName && !addedTreeNames.has(specializationName.toLowerCase())) {
-      const tree = getTalentTree(specializationName);
-      if (tree) {
-        this.autoUnlockTier0Talents(tree);
-        tempTrees.push(tree);
-        addedTreeNames.add(tree.pathName.toLowerCase());
+      
+      // Also load specialization as direct tree if not found above
+      if (specializationName && !addedTreeNames.has(specializationName.toLowerCase())) {
+        const tree = getTalentTree(specializationName);
+        if (tree) {
+          this.autoUnlockTier0Talents(tree);
+          tempTrees.push(tree);
+          addedTreeNames.add(tree.pathName.toLowerCase());
+        }
       }
     }
 
@@ -128,6 +165,17 @@ export class TalentView implements OnInit, OnDestroy {
       return visibleTalents.length > 0;
     });
 
+    // Sort trees: singer/ancestry trees first, then path trees
+    if (this.character.ancestry === 'singer') {
+      this.availableTrees.sort((a, b) => {
+        const aIsSinger = a.pathName.toLowerCase().includes('singer');
+        const bIsSinger = b.pathName.toLowerCase().includes('singer');
+        if (aIsSinger && !bIsSinger) return -1;
+        if (!aIsSinger && bIsSinger) return 1;
+        return 0;
+      });
+    }
+
     // Select first tree by default
     if (this.availableTrees.length > 0 && !this.selectedTree) {
       this.selectedTree = this.availableTrees[0];
@@ -149,8 +197,23 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   private calculateAvailablePoints(): void {
-    // Base calculation - adjust based on your game rules
-    this.availableTalentPoints = this.character?.level ?? 1;
+    if (!this.character) {
+      this.availableTalentPoints = 0;
+      return;
+    }
+
+    // Base talent points equal to character level
+    let totalPoints = this.character.level ?? 1;
+    
+    // Humans get +1 bonus talent point at level 1
+    if (this.character.ancestry === 'human' && this.character.level === 1) {
+      totalPoints += 1;
+    }
+    
+    // Singers get +1 bonus talent point at level 1 (for starting form)
+    if (this.character.ancestry === 'singer' && this.character.level === 1) {
+      totalPoints += 1;
+    }
     
     // Only subtract talents that cost points (tier 1+, not tier 0 which are free)
     let spentPoints = 0;
@@ -162,7 +225,7 @@ export class TalentView implements OnInit, OnDestroy {
       });
     });
     
-    this.availableTalentPoints -= spentPoints;
+    this.availableTalentPoints = totalPoints - spentPoints;
   }
 
   selectTree(tree: TalentTree): void {
@@ -176,6 +239,25 @@ export class TalentView implements OnInit, OnDestroy {
 
     if (this.availableTalentPoints <= 0) {
       return false;
+    }
+
+    // Singers must select at least 1 singer talent (starting form) before other talents
+    if (this.character.ancestry === 'singer' && this.character.level === 1) {
+      const isSingerTalent = this.selectedTree?.pathName.toLowerCase().includes('singer');
+      
+      if (!isSingerTalent) {
+        // Check if they have already selected a singer talent
+        const hasSingerTalent = this.availableTrees.some(tree => {
+          const isSingerTree = tree.pathName.toLowerCase().includes('singer');
+          return isSingerTree && tree.nodes.some(node => 
+            this.unlockedTalents.has(node.id) && node.tier > 0
+          );
+        });
+        
+        if (!hasSingerTalent) {
+          return false; // Must pick singer talent first
+        }
+      }
     }
 
     const checker = new TalentPrerequisiteChecker(this.character, this.unlockedTalents);
@@ -193,6 +275,8 @@ export class TalentView implements OnInit, OnDestroy {
       
       // Persist to character state service
       this.characterState.unlockTalent(talent.id);
+      
+      this.updateValidation();
     }
   }
 
@@ -216,6 +300,8 @@ export class TalentView implements OnInit, OnDestroy {
       
       // Persist to character state service
       this.characterState.removeTalent(talentId);
+      
+      this.updateValidation();
     }
   }
 
@@ -283,5 +369,50 @@ export class TalentView implements OnInit, OnDestroy {
       default:
         return String(prereq);
     }
+  }
+
+  private updateValidation(): void {
+    if (!this.character) {
+      this.validationService.setStepValid(this.STEP_INDEX, false);
+      return;
+    }
+
+    // Count unlocked talents that cost points (tier 1+)
+    let unlockedPaidTalents = 0;
+    let singerTalents = 0;
+    
+    this.availableTrees.forEach(tree => {
+      const isSingerTree = tree.pathName.toLowerCase().includes('singer');
+      
+      tree.nodes.forEach(talent => {
+        if (this.unlockedTalents.has(talent.id) && talent.tier > 0) {
+          unlockedPaidTalents++;
+          if (isSingerTree) {
+            singerTalents++;
+          }
+        }
+      });
+    });
+    
+    // Calculate required talents based on level and ancestry
+    let requiredTalents = this.character.level || 1;
+    
+    if (this.character.ancestry === 'singer' || this.character.ancestry === 'human') {
+      requiredTalents += 1; // Both get +1 bonus talent at level 1
+    }
+    
+    const isValid = unlockedPaidTalents >= requiredTalents;
+    
+    // Set validation message
+    if (this.character.ancestry === 'singer' && singerTalents === 0) {
+      this.validationMessage = 'Singers must select at least one starting form from the Singer tree';
+    } else if (!isValid) {
+      const remaining = requiredTalents - unlockedPaidTalents;
+      this.validationMessage = `Select ${remaining} more talent${remaining > 1 ? 's' : ''} to continue`;
+    } else {
+      this.validationMessage = '';
+    }
+    
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 }

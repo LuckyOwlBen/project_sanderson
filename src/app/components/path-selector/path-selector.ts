@@ -9,6 +9,7 @@ import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { getTalentPath } from '../../character/talents/talentTrees/talentTrees';
 import { TalentPath, TalentTree } from '../../character/talents/talentInterface';
+import { StepValidationService } from '../../services/step-validation.service';
 
 export interface PathOption {
   id: string;
@@ -32,6 +33,7 @@ export interface PathOption {
 })
 export class PathSelector implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private readonly STEP_INDEX = 5;
   
   character: Character | null = null;
   selectedMainPath: string | null = null;
@@ -78,18 +80,31 @@ export class PathSelector implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private characterState: CharacterStateService) {}
+  constructor(
+    private characterState: CharacterStateService,
+    private validationService: StepValidationService
+  ) {}
 
   ngOnInit(): void {
     this.characterState.character$
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        // Load existing paths - expect format like "Soldier", "Duelist", etc.
-        if (character.paths.length > 0) {
-          // Try to determine the specialization from saved paths
+        // Load existing paths - expect format like ["warrior", "Soldier"]
+        if (character.paths.length >= 2) {
+          this.selectedMainPath = character.paths[0];
+          this.selectedSpecialization = character.paths[1];
+          
+          // Load specializations for the selected main path
+          const talentPath = getTalentPath(this.selectedMainPath);
+          if (talentPath) {
+            this.availableSpecializations = talentPath.paths;
+          }
+        } else if (character.paths.length === 1) {
+          // Legacy format or incomplete selection
           this.selectedSpecialization = character.paths[0];
         }
+        this.updateValidation();
       });
   }
 
@@ -128,6 +143,7 @@ export class PathSelector implements OnInit, OnDestroy {
     this.selectedMainPath = null;
     this.selectedSpecialization = null;
     this.availableSpecializations = [];
+    this.updateValidation();
   }
 
   private updateCharacterPaths(): void {
@@ -135,7 +151,13 @@ export class PathSelector implements OnInit, OnDestroy {
       // Store the main path name and specialization
       this.character.paths = [this.selectedMainPath!, this.selectedSpecialization];
       this.characterState.updateCharacter(this.character);
+      this.updateValidation();
     }
+  }
+
+  private updateValidation(): void {
+    const isValid = this.selectedSpecialization !== null;
+    this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 
   getPathIcon(path: PathOption): string {

@@ -27,6 +27,24 @@
   }
 }
 
+.validation-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-weight: 500;
+
+  mat-icon {
+    color: #ffc107;
+  }
+}
+
 .tree-selector {
   margin-bottom: 2rem;
   display: flex;
