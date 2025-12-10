@@ -155,7 +155,26 @@ export class CharacterReview implements OnInit, OnDestroy {
     return (this.character as any)?.portraitUrl || null;
   }
 
-  getTalentName(talentId: string): string {
+  getUnlockedTalents(): Array<{name: string, tier: number, description: string}> {
+    const talents: Array<{name: string, tier: number, description: string}> = [];
+    
+    if (this.character?.unlockedTalents && this.character.unlockedTalents.size > 0) {
+      this.character.unlockedTalents.forEach((talentId: string) => {
+        const talent = this.findTalentById(talentId);
+        if (talent) {
+          talents.push({
+            name: talent.name,
+            tier: talent.tier,
+            description: talent.description
+          });
+        }
+      });
+    }
+    
+    return talents.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
+  }
+
+  private findTalentById(talentId: string): any {
     // Search through all available talent trees
     const allTrees: TalentTree[] = [];
     
@@ -177,8 +196,17 @@ export class CharacterReview implements OnInit, OnDestroy {
     for (const tree of allTrees) {
       const talent = tree.nodes.find(n => n.id === talentId);
       if (talent) {
-        return talent.name;
+        return talent;
       }
+    }
+    
+    return null;
+  }
+
+  getTalentName(talentId: string): string {
+    const talent = this.findTalentById(talentId);
+    if (talent) {
+      return talent.name;
     }
     
     // Fallback to formatted ID

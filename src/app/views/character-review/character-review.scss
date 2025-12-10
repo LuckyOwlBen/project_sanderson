@@ -198,7 +198,7 @@
 
 .talents-display {
   display: grid;
-  gap: 0.5rem;
+  gap: 1rem;
 
   .talent-item {
     display: flex;
@@ -218,6 +218,51 @@
     span {
       font-size: 0.95rem;
       color: #ffffff;
+    }
+  }
+
+  .talent-item-detailed {
+    padding: 1rem;
+    background-color: var(--gpSystemDarkGrey);
+    border-radius: 8px;
+    border-left: 3px solid var(--gpColor-ChalkyBlue);
+
+    .talent-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      .talent-icon {
+        color: var(--gpColor-ChalkyBlue);
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .talent-name {
+        flex: 1;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .talent-tier {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #e8e8e8;
+        background-color: var(--gpSystemDarkerGrey);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+      }
+    }
+
+    .talent-description {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #e8e8e8;
+      padding-left: 28px; // Align with name after icon
     }
   }
 }

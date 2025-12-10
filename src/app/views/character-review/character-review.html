@@ -142,16 +142,20 @@
     <mat-card class="review-card">
       <mat-card-header>
         <mat-icon class="section-icon">stars</mat-icon>
-        <mat-card-title>Talents ({{ getTalentIds().length }})</mat-card-title>
+        <mat-card-title>Talents ({{ getUnlockedTalents().length }})</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="talents-display" *ngIf="getTalentIds().length > 0">
-          <div class="talent-item" *ngFor="let talentId of getTalentIds()">
-            <mat-icon class="talent-icon">check_circle</mat-icon>
-            <span>{{ getTalentName(talentId) }}</span>
+        <div class="talents-display" *ngIf="getUnlockedTalents().length > 0">
+          <div class="talent-item-detailed" *ngFor="let talent of getUnlockedTalents()">
+            <div class="talent-header">
+              <mat-icon class="talent-icon">stars</mat-icon>
+              <span class="talent-name">{{ talent.name }}</span>
+              <span class="talent-tier">Tier {{ talent.tier }}</span>
+            </div>
+            <p class="talent-description">{{ talent.description }}</p>
           </div>
         </div>
-        <p class="empty-state" *ngIf="getTalentIds().length === 0">
+        <p class="empty-state" *ngIf="getUnlockedTalents().length === 0">
           No talents selected
         </p>
       </mat-card-content>
