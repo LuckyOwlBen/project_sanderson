@@ -22,24 +22,19 @@
             </mat-card-header>
             <mat-card-content>
                 <div *ngIf="characterState.character$ | async as character" class="preview-content">
-                    <!-- Basic Info -->
-                    <div class="preview-section">
-                        <h3>Basic Info</h3>
-                        <p><strong>Name:</strong> {{ character.name || 'Unnamed' }}</p>
-                        <p><strong>Level:</strong> {{ character.level }}</p>
-                        <p><strong>Ancestry:</strong> {{ character.ancestry || 'Not selected' }}</p>
-                    </div>
-
-                    <!-- Cultures -->
-                    <div class="preview-section" *ngIf="character.cultures.length > 0">
-                        <h3>Cultures</h3>
-                        <p *ngFor="let culture of character.cultures">• {{ culture.name }}</p>
-                    </div>
-
-                    <!-- Paths -->
-                    <div class="preview-section" *ngIf="character.paths.length > 0">
-                        <h3>Path</h3>
-                        <p *ngFor="let path of character.paths">• {{ path }}</p>
+                    <!-- Compact Basic Info -->
+                    <div class="preview-section compact">
+                        <h3>{{ character.name || 'Unnamed' }}</h3>
+                        <div class="basic-info-grid">
+                            <span><strong>Level:</strong> {{ character.level }}</span>
+                            <span><strong>Ancestry:</strong> {{ character.ancestry || 'Not selected' }}</span>
+                        </div>
+                        <div class="basic-info-grid" *ngIf="character.cultures.length > 0">
+                            <span><strong>Culture:</strong> {{ getCultureNames(character) }}</span>
+                        </div>
+                        <div class="basic-info-grid" *ngIf="character.paths.length > 0">
+                            <span><strong>Path:</strong> {{ getPathNames(character) }}</span>
+                        </div>
                     </div>
 
                     <!-- Attributes -->
@@ -47,27 +42,27 @@
                         <h3>Attributes</h3>
                         <div class="attributes-grid">
                             <div class="attribute-item">
-                                <span class="attr-label">Strength:</span>
+                                <span class="attr-label">STR:</span>
                                 <span class="attr-value">{{ character.attributes.strength }}</span>
                             </div>
                             <div class="attribute-item">
-                                <span class="attr-label">Speed:</span>
+                                <span class="attr-label">SPD:</span>
                                 <span class="attr-value">{{ character.attributes.speed }}</span>
                             </div>
                             <div class="attribute-item">
-                                <span class="attr-label">Intellect:</span>
+                                <span class="attr-label">INT:</span>
                                 <span class="attr-value">{{ character.attributes.intellect }}</span>
                             </div>
                             <div class="attribute-item">
-                                <span class="attr-label">Willpower:</span>
+                                <span class="attr-label">WIL:</span>
                                 <span class="attr-value">{{ character.attributes.willpower }}</span>
                             </div>
                             <div class="attribute-item">
-                                <span class="attr-label">Awareness:</span>
+                                <span class="attr-label">AWR:</span>
                                 <span class="attr-value">{{ character.attributes.awareness }}</span>
                             </div>
                             <div class="attribute-item">
-                                <span class="attr-label">Presence:</span>
+                                <span class="attr-label">PRE:</span>
                                 <span class="attr-value">{{ character.attributes.presence }}</span>
                             </div>
                         </div>
@@ -75,22 +70,24 @@
 
                     <!-- Skills -->
                     <div class="preview-section">
-                        <h3>Skills (Trained)</h3>
-                        <div class="skills-list">
-                            <p *ngFor="let skill of getTrainedSkills(character)" class="skill-item">
-                                {{ skill.name }}: {{ skill.rank }}
-                            </p>
-                            <p *ngIf="getTrainedSkills(character).length === 0" class="empty-text">No skills trained yet</p>
+                        <h3>Skills</h3>
+                        <div class="skills-grid">
+                            <div *ngFor="let skill of getTrainedSkills(character)" class="skill-item">
+                                <span class="skill-name">{{ skill.name }}</span>
+                                <span class="skill-rank">{{ skill.rank }}</span>
+                            </div>
+                            <p *ngIf="getTrainedSkills(character).length === 0" class="empty-text">No skills trained</p>
                         </div>
                     </div>
 
                     <!-- Talents -->
-                    <div class="preview-section" *ngIf="character.unlockedTalents.size > 0">
+                    <div class="preview-section" *ngIf="getUnlockedTalents(character).length > 0">
                         <h3>Talents</h3>
                         <div class="talents-list">
-                            <p *ngFor="let talentId of getTalentIds(character)" class="talent-item">
-                                • {{ talentId }}
-                            </p>
+                            <div *ngFor="let talent of getUnlockedTalents(character)" class="talent-item">
+                                <strong>{{ talent.name }}</strong>
+                                <span class="talent-tier">Tier {{ talent.tier }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

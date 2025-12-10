@@ -83,6 +83,31 @@
         letter-spacing: 0.5px;
       }
 
+      &.compact {
+        h3 {
+          font-size: 1.2rem;
+          margin-bottom: 0.5rem;
+          text-transform: none;
+          letter-spacing: normal;
+        }
+        
+        .basic-info-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-bottom: 0.25rem;
+          font-size: 0.85rem;
+          
+          span {
+            color: #e8e8e8;
+            
+            strong {
+              color: #ffffff;
+            }
+          }
+        }
+      }
+
       p {
         margin: 0.25rem 0;
         font-size: 0.9rem;
@@ -97,42 +122,87 @@
       .empty-text {
         color: #999;
         font-style: italic;
+        font-size: 0.85rem;
+        margin: 0;
       }
     }
 
     .attributes-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
 
       .attribute-item {
         display: flex;
         justify-content: space-between;
-        padding: 0.25rem 0.5rem;
+        padding: 0.3rem 0.5rem;
         background-color: var(--gpSystemDarkGrey);
         border-radius: 4px;
 
         .attr-label {
-          font-weight: 500;
+          font-weight: 600;
           color: #e8e8e8;
-          font-size: 0.85rem;
+          font-size: 0.8rem;
         }
 
         .attr-value {
-          font-weight: 600;
+          font-weight: 700;
           color: var(--gpColor-ChalkyBlue);
-          font-size: 0.95rem;
+          font-size: 0.9rem;
         }
       }
     }
 
-    .skills-list,
-    .talents-list {
-      .skill-item,
-      .talent-item {
-        padding: 0.25rem 0;
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+      
+      .skill-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3rem 0.5rem;
+        background-color: var(--gpSystemDarkGrey);
+        border-radius: 4px;
         font-size: 0.85rem;
-        color: #e8e8e8;
+        
+        .skill-name {
+          font-weight: 500;
+          color: #e8e8e8;
+        }
+        
+        .skill-rank {
+          font-weight: 700;
+          color: var(--gpColor-ChalkyBlue);
+        }
+      }
+    }
+
+    .talents-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      
+      .talent-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0.5rem;
+        background-color: var(--gpSystemDarkGrey);
+        border-radius: 4px;
+        font-size: 0.85rem;
+        
+        strong {
+          flex: 1;
+          color: #e8e8e8;
+          font-weight: 600;
+        }
+        
+        .talent-tier {
+          font-size: 0.75rem;
+          color: #999;
+          font-weight: 500;
+        }
       }
     }
   }

@@ -141,11 +141,44 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       .join(' ');
   }
 
+  getCultureNames(character: any): string {
+    if (!character?.cultures || character.cultures.length === 0) {
+      return 'None';
+    }
+    return character.cultures.map((c: any) => c.name).join(', ');
+  }
+
+  getPathNames(character: any): string {
+    if (!character?.paths || character.paths.length === 0) {
+      return 'None';
+    }
+    return character.paths.join(', ');
+  }
+
   getTalentIds(character: any): string[] {
     return Array.from(character.unlockedTalents || []);
   }
 
-  getTalentName(talentId: string): string {
+  getUnlockedTalents(character: any): Array<{name: string, tier: number}> {
+    const talents: Array<{name: string, tier: number}> = [];
+    
+    if (character?.unlockedTalents && character.unlockedTalents.size > 0) {
+      character.unlockedTalents.forEach((talentId: string) => {
+        // Find the talent in the talent trees to get its display name and tier
+        const talent = this.findTalentById(talentId);
+        if (talent) {
+          talents.push({
+            name: talent.name,
+            tier: talent.tier
+          });
+        }
+      });
+    }
+    
+    return talents.sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
+  }
+
+  private findTalentById(talentId: string): any {
     // Search through all available talent trees
     const allTrees: TalentTree[] = [];
     
@@ -167,8 +200,17 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     for (const tree of allTrees) {
       const talent = tree.nodes.find(n => n.id === talentId);
       if (talent) {
-        return talent.name;
+        return talent;
       }
+    }
+    
+    return null;
+  }
+
+  getTalentName(talentId: string): string {
+    const talent = this.findTalentById(talentId);
+    if (talent) {
+      return talent.name;
     }
     
     // Fallback to formatted ID
