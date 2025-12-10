@@ -56,20 +56,60 @@
         </div>
       </mat-card>
 
-      <!-- Talents Card -->
-      <mat-card class="talents-card">
+      <!-- Powers Card -->
+      <mat-card class="powers-card">
         <mat-card-header>
-          <mat-icon class="section-icon">stars</mat-icon>
-          <mat-card-title>Talents & Abilities</mat-card-title>
+          <mat-icon class="section-icon">auto_awesome</mat-icon>
+          <mat-card-title>Powers</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="talents-list">
-            <div class="talent-chip" *ngFor="let talentId of getTalentIds()">
-              <mat-icon>check_circle</mat-icon>
-              <span>{{ getTalentName(talentId) }}</span>
-            </div>
-            <p class="empty-text" *ngIf="getTalentIds().length === 0">
-              No talents unlocked
+          <div class="powers-list">
+            <mat-accordion class="powers-accordion" *ngIf="getPowers().length > 0">
+              <mat-expansion-panel *ngFor="let power of getPowers()" class="power-panel">
+                <mat-expansion-panel-header>
+                  <mat-panel-title class="power-title">
+                    <mat-icon class="power-icon">flash_on</mat-icon>
+                    <span class="power-name">{{ power.name }}</span>
+                  </mat-panel-title>
+                  <mat-panel-description class="power-cost">
+                    {{ getActionCostDisplay(power.actionCost) }}
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                
+                <div class="power-details">
+                  <div class="power-description">
+                    <p>{{ power.description }}</p>
+                    <p *ngIf="power.specialActivation" class="special-activation">
+                      <strong>Special Activation:</strong> {{ power.specialActivation }}
+                    </p>
+                  </div>
+                  
+                  <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
+                    <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
+                    <ul>
+                      <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
+                    <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
+                    <ul>
+                      <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="power-meta">
+                    <span class="power-tier">Tier {{ power.tier }}</span>
+                    <span class="power-path" *ngIf="power.pathRequirement">
+                      <mat-icon>route</mat-icon> {{ power.pathRequirement }}
+                    </span>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+            
+            <p class="empty-text" *ngIf="getPowers().length === 0">
+              No powers unlocked yet
             </p>
           </div>
         </mat-card-content>

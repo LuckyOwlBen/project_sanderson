@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
@@ -19,7 +20,7 @@ import { CharacterImage } from '../../components/shared/character-image/characte
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
-import { TalentTree } from '../../character/talents/talentInterface';
+import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
 
 @Component({
   selector: 'app-character-sheet-view',
@@ -35,6 +36,7 @@ import { TalentTree } from '../../character/talents/talentInterface';
     MatDividerModule,
     MatTabsModule,
     MatDialogModule,
+    MatExpansionModule,
     ResourceTracker,
     CharacterImage
   ],
@@ -246,7 +248,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .join(' ');
   }
 
-  getTalentName(talentId: string): string {
+  getPowers(): TalentNode[] {
+    const powerIds = Array.from(this.character?.unlockedTalents || []);
+    const powers: TalentNode[] = [];
+    
     const allTrees: TalentTree[] = [];
     
     Object.values(ALL_TALENT_PATHS).forEach(path => {
@@ -261,20 +266,78 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       allTrees.push(ancestryTree);
     }
     
-    for (const tree of allTrees) {
-      const talent = tree.nodes.find(n => n.id === talentId);
-      if (talent) {
-        return talent.name;
+    powerIds.forEach(powerId => {
+      for (const tree of allTrees) {
+        const power = tree.nodes.find(n => n.id === powerId);
+        if (power) {
+          powers.push(power);
+          break;
+        }
       }
-    }
+    });
     
-    return talentId.split('_').map(w => 
-      w.charAt(0).toUpperCase() + w.slice(1)
-    ).join(' ');
+    return powers;
   }
 
-  getTalentIds(): string[] {
-    return Array.from(this.character?.unlockedTalents || []);
+  getActionCostDisplay(actionCost: number | ActionCostCode): string {
+    if (actionCost === ActionCostCode.Passive) {
+      return 'Passive';
+    } else if (actionCost === ActionCostCode.Reaction) {
+      return 'Reaction';
+    } else if (actionCost === ActionCostCode.Special) {
+      return 'Special';
+    } else if (actionCost === ActionCostCode.Free) {
+      return 'Free Action';
+    } else {
+      return `${actionCost} Action${actionCost > 1 ? 's' : ''}`;
+    }
+  }
+
+  getBonusDisplay(power: TalentNode): string[] {
+    if (!power.bonuses || power.bonuses.length === 0) {
+      return [];
+    }
+    
+    return power.bonuses.map(bonus => {
+      const parts: string[] = [];
+      
+      if (bonus.value !== undefined) {
+        const sign = bonus.value >= 0 ? '+' : '';
+        parts.push(`${sign}${bonus.value}`);
+      }
+      
+      if (bonus.type) {
+        parts.push(bonus.type.toString());
+      }
+      
+      if (bonus.target) {
+        parts.push(`to ${bonus.target}`);
+      }
+      
+      if (bonus.condition) {
+        parts.push(`(${bonus.condition})`);
+      }
+      
+      return parts.join(' ');
+    });
+  }
+
+  getOtherEffects(power: TalentNode): string[] {
+    const effects: string[] = [];
+    
+    if (power.grantsAdvantage && power.grantsAdvantage.length > 0) {
+      effects.push(`Grants Advantage on: ${power.grantsAdvantage.join(', ')}`);
+    }
+    
+    if (power.grantsDisadvantage && power.grantsDisadvantage.length > 0) {
+      effects.push(`Grants Disadvantage on: ${power.grantsDisadvantage.join(', ')}`);
+    }
+    
+    if (power.otherEffects && power.otherEffects.length > 0) {
+      effects.push(...power.otherEffects);
+    }
+    
+    return effects;
   }
 
   openPortraitUpload(): void {
