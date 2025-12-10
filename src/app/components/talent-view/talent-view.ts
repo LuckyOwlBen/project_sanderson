@@ -12,6 +12,13 @@ import { TalentPrerequisiteChecker } from '../../character/talents/talentPrerequ
 import { getTalentTree, getTalentPath } from '../../character/talents/talentTrees/talentTrees';
 import { StepValidationService } from '../../services/step-validation.service';
 
+interface PathOption {
+  id: string;
+  name: string;
+  keyTalent: TalentNode;
+  isSelected: boolean;
+}
+
 @Component({
   selector: 'app-talent-view',
   imports: [
@@ -34,6 +41,8 @@ export class TalentView implements OnInit, OnDestroy {
   unlockedTalents = new Set<string>();
   availableTalentPoints: number = 0;
   validationMessage: string = '';
+  availableCorePaths: PathOption[] = [];
+  showCorePathSelector: boolean = false;
 
   constructor(
     private characterState: CharacterStateService,
@@ -47,10 +56,58 @@ export class TalentView implements OnInit, OnDestroy {
         this.character = character;
         // Sync local state with persisted state
         this.unlockedTalents = new Set(character.unlockedTalents);
+        this.loadCorePathOptions();
         this.loadAvailableTrees();
         this.calculateAvailablePoints();
         this.updateValidation();
       });
+  }
+
+  private loadCorePathOptions(): void {
+    if (!this.character) return;
+
+    // Only show core path selector for humans at level 1
+    this.showCorePathSelector = this.character.ancestry === 'human' && this.character.level === 1;
+    
+    if (!this.showCorePathSelector) {
+      this.availableCorePaths = [];
+      return;
+    }
+
+    const mainPathName = this.character.paths[0];
+    const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+    
+    this.availableCorePaths = allPaths
+      .filter(pathId => pathId !== mainPathName) // Exclude main path
+      .map(pathId => {
+        const talentPath = getTalentPath(pathId);
+        if (!talentPath || !talentPath.talentNodes || talentPath.talentNodes.length === 0) {
+          return null;
+        }
+        
+        const keyTalent = talentPath.talentNodes.find(t => t.tier === 0);
+        if (!keyTalent) return null;
+        
+        return {
+          id: pathId,
+          name: talentPath.name,
+          keyTalent: keyTalent,
+          isSelected: this.unlockedTalents.has(keyTalent.id)
+        };
+      })
+      .filter(p => p !== null) as PathOption[];
+  }
+
+  selectCorePath(pathOption: PathOption): void {
+    if (pathOption.isSelected) {
+      // Deselect - remove the talent
+      this.removeTalent(pathOption.keyTalent.id);
+    } else {
+      // Select - unlock the key talent
+      this.unlockTalent(pathOption.keyTalent);
+    }
+    // Reload core path options to update selected state
+    this.loadCorePathOptions();
   }
 
   ngOnDestroy(): void {
@@ -201,39 +258,23 @@ export class TalentView implements OnInit, OnDestroy {
       });
     }
 
-    // Filter out trees that have no visible talents
+    // Filter to only show specialty trees (not core trees) that have tier 1+ talents
     this.availableTrees = tempTrees.filter(tree => {
-      // For humans at level 1, filter out the core tree of their main path (already auto-unlocked)
-      if (this.character?.ancestry === 'human' && this.character.level === 1 && mainPathName) {
-        const isMainPathCore = tree.pathName.toLowerCase().includes('core') && 
-                               tree.pathName.toLowerCase().includes(mainPathName.toLowerCase());
-        if (isMainPathCore) {
-          return false; // Don't show the main path's core tree
-        }
-        
-        // Keep other core trees if they have any talents (including tier 0)
-        const isOtherCoreTree = tree.pathName.toLowerCase().includes('core');
-        if (isOtherCoreTree) {
-          // Core trees have tier 0 talents that should be visible for selection
-          return tree.nodes.some(talent => talent.tier === 0 && !this.unlockedTalents.has(talent.id));
-        }
+      const isCoreTree = tree.pathName.toLowerCase().includes('core');
+      if (isCoreTree) {
+        return false; // Don't show core trees in the chip selector
       }
       
-      // For other trees, only keep if they have tier 1+ talents
+      // Only keep specialty trees that have tier 1+ talents
       const visibleTalents = tree.nodes.filter(talent => talent.tier > 0);
       return visibleTalents.length > 0;
     });
     
-    // Strip " - Core" from tree names for display (store original name for logic checks)
-    this.availableTrees = this.availableTrees.map(tree => {
-      const isCoreTree = tree.pathName.toLowerCase().includes('core');
-      return {
-        ...tree,
-        pathName: tree.pathName.replace(/ - Core$/i, ''),
-        // Store metadata for logic checks (not displayed)
-        _isCoreTree: isCoreTree
-      } as TalentTree & { _isCoreTree?: boolean };
-    });
+    // Strip " - Core" from any remaining tree names for display (shouldn't be needed now)
+    this.availableTrees = this.availableTrees.map(tree => ({
+      ...tree,
+      pathName: tree.pathName.replace(/ - Core$/i, '')
+    }));
 
     // Sort trees to prioritize the character's chosen path
     if (this.character.ancestry === 'singer') {
@@ -317,17 +358,21 @@ export class TalentView implements OnInit, OnDestroy {
     }
     
     // Count talents that cost points
-    // Tier 1+ talents always cost points
-    // Tier 0 talents cost points if manually selected (not the auto-unlocked main path key talent)
+    // Check core path options for tier 0 talents
     let spentPoints = 0;
+    
+    // Count tier 0 talents from bonus paths (not the auto-unlocked main path)
+    this.availableCorePaths.forEach(pathOption => {
+      if (pathOption.isSelected) {
+        spentPoints++;
+      }
+    });
+    
+    // Count tier 1+ talents from specialty trees
     this.availableTrees.forEach(tree => {
       tree.nodes.forEach(talent => {
-        if (this.unlockedTalents.has(talent.id)) {
-          if (talent.tier > 0) {
-            spentPoints++;
-          } else if (talent.tier === 0 && talent.id !== autoUnlockedKeyTalentId) {
-            spentPoints++;
-          }
+        if (this.unlockedTalents.has(talent.id) && talent.tier > 0) {
+          spentPoints++;
         }
       });
     });
@@ -433,23 +478,8 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   shouldDisplayTalent(talent: TalentNode): boolean {
-    // For tier 0 talents, show them only if they're NOT auto-unlocked
-    // (i.e., they're from another path that hasn't been selected yet)
+    // Tier 0 talents are now handled by the core path selector, not shown in trees
     if (talent.tier === 0) {
-      // If already unlocked (auto-unlocked from main path), don't show
-      if (this.isTalentUnlocked(talent.id)) {
-        return false;
-      }
-      
-      // If not unlocked, show it so they can select it as their bonus talent
-      // This allows humans to pick key talents from other paths
-      if (this.character?.ancestry === 'human' && this.character.level === 1) {
-        // Check if this is from a core tree using the stored metadata
-        const isFromCoreTree = (this.selectedTree as any)?._isCoreTree ?? false;
-        return isFromCoreTree;
-      }
-      
-      // Otherwise don't show tier 0 talents
       return false;
     }
 
@@ -581,25 +611,25 @@ export class TalentView implements OnInit, OnDestroy {
     }
 
     // Count unlocked talents that cost points
-    // For humans at level 1: tier 1+ talents always count, and tier 0 talents count if NOT the auto-unlocked one
     let unlockedPaidTalents = 0;
     let singerTalents = 0;
     
+    // Count tier 0 talents from bonus paths (selected via core path selector)
+    this.availableCorePaths.forEach(pathOption => {
+      if (pathOption.isSelected) {
+        unlockedPaidTalents++;
+      }
+    });
+    
+    // Count tier 1+ talents from specialty trees
     this.availableTrees.forEach(tree => {
       const isSingerTree = tree.pathName.toLowerCase().includes('singer');
       
       tree.nodes.forEach(talent => {
-        if (this.unlockedTalents.has(talent.id)) {
-          // Count tier 1+ talents
-          if (talent.tier > 0) {
-            unlockedPaidTalents++;
-            if (isSingerTree) {
-              singerTalents++;
-            }
-          }
-          // Count tier 0 talents if manually selected (not auto-unlocked)
-          else if (talent.tier === 0 && talent.id !== autoUnlockedKeyTalentId) {
-            unlockedPaidTalents++;
+        if (this.unlockedTalents.has(talent.id) && talent.tier > 0) {
+          unlockedPaidTalents++;
+          if (isSingerTree) {
+            singerTalents++;
           }
         }
       });

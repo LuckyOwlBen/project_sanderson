@@ -47,6 +47,89 @@
   }
 }
 
+.core-path-selector {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+
+  h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  .helper-text {
+    color: #e8e8e8;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .core-path-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .core-path-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background-color: var(--gpSystemDarkerGrey) !important;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      border-color: var(--gpColor-ChalkyBlue);
+    }
+
+    &.selected {
+      border-color: var(--gpColor-ChalkyBlue);
+      background-color: var(--gpSystemDarkGrey) !important;
+      box-shadow: 0 4px 12px rgba(100, 149, 237, 0.3);
+    }
+
+    mat-card-header {
+      background-color: var(--gpSystemDarkGrey);
+      padding: 1rem;
+      margin: -16px -16px 16px -16px;
+
+      mat-card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #ffffff;
+      }
+    }
+
+    .key-talent-info {
+      strong {
+        color: var(--gpColor-ChalkyBlue);
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #e8e8e8;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+    }
+
+    mat-card-actions {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
 .tree-selector {
   margin-bottom: 2rem;
   display: flex;
