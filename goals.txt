@@ -1,0 +1,40 @@
+Great! Here are 5 high-impact features that would significantly enhance the GM dashboard and overall gameplay experience:
+
+1. Initiative Tracker with Turn Management
+Drag-and-drop interface to reorder player turns
+"Next Turn" button that highlights the current player's character sheet
+Visual indicator on player sheets showing "Your Turn!"
+Persist initiative order across sessions
+Add NPCs/monsters to the initiative tracker
+2. GM Combat Tools
+Quick damage dealer: click a player card to apply damage/healing
+Temporary conditions/status effects (stunned, prone, inspired, etc.)
+Condition timers that count down each turn
+Broadcast messages to all players ("Roll for initiative!", "Intermission")
+Dice roller visible to all players
+3. Session History & Notes
+Campaign log with timestamped events (character joined, health reached 0, major milestones)
+GM notes panel that persists across sessions
+Export session summary at end of game
+Track XP/level progression over multiple sessions
+Character change history (level ups, equipment acquired)
+4. Visual Battlefield/Grid System
+Simple token placement on gridded map
+Upload background images for encounter locations
+Move player tokens around (GM control or player drag)
+Fog of war for exploration
+Distance/range calculator between tokens
+5. Encounter Builder & Monster Tracking
+Add NPC/enemy combatants with their own health pools
+Pre-built encounter templates
+Quick stat blocks for enemies visible only to GM
+Track multiple enemy groups simultaneously
+"Defeat All" button to clear encounter
+Bonus Quick Wins:
+
+Dark mode toggle for late-night sessions
+Audio notifications when player health is critical
+Session timer showing total play time
+Player ready/not-ready indicators before starting
+Quick reference panel for common rules/actions
+Which of these sounds most useful for your tabletop sessions? I'd recommend starting with #1 (Initiative Tracker) since it directly builds on what you have and is essential for combat-heavy games.

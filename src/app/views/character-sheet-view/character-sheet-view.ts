@@ -178,7 +178,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           }
           // Otherwise, the connected$ subscription will handle it
         } else {
-          console.warn('[Character Sheet] Character loaded but was null');
+          console.warn('[Character Sheet] Character not found, redirecting to landing page');
+          this.router.navigate(['/']);
         }
       });
   }
@@ -242,6 +243,19 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   saveCharacter(): void {
     if (!this.character) return;
+
+    // Don't save completely empty characters (prevents blank saves after server purge)
+    // But allow characters in creation (with ID but no name/ancestry yet)
+    const hasId = (this.character as any).id;
+    const hasName = this.character.name && this.character.name.trim().length > 0;
+    const hasAncestry = this.character.ancestry !== null;
+    const hasLevel = this.character.level > 1;
+    
+    // Only skip save if character has absolutely nothing (not even an ID)
+    if (!hasId && !hasName && !hasAncestry && !hasLevel) {
+      console.warn('[Character Sheet] Skipping save - character is completely empty');
+      return;
+    }
 
     // Save session notes to character
     (this.character as any).sessionNotes = this.sessionNotes;
