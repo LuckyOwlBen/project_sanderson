@@ -11,10 +11,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
+import { WebsocketService } from '../../services/websocket.service';
 import { ResourceTracker, Resource } from '../../components/resource-tracker/resource-tracker';
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
@@ -45,6 +46,8 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
 })
 export class CharacterSheetView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private resourceUpdateSubject = new Subject<void>();
+  private autoSaveInterval: any = null;
   
   character: Character | null = null;
   characterId: string = '';
@@ -61,11 +64,25 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private router: Router,
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
+    private websocketService: WebsocketService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Connect to WebSocket for session management
+    this.websocketService.connect();
+
+    // Wait for WebSocket connection before emitting player-join
+    this.websocketService.connected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        if (connected && this.character) {
+          // Emit player-join when connection is established and character is loaded
+          this.emitPlayerJoin();
+        }
+      });
+
     // Check if we have a character ID in the route
     this.route.params
       .pipe(takeUntil(this.destroy$))
@@ -93,23 +110,75 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.sessionNotes = (character as any).sessionNotes || '';
         }
       });
+
+    // Set up debounced resource updates for WebSocket (2-3 seconds)
+    this.resourceUpdateSubject
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(2500)
+      )
+      .subscribe(() => {
+        this.emitResourceUpdate();
+      });
+
+    // Set up auto-save interval (every 30 seconds)
+    this.autoSaveInterval = setInterval(() => {
+      if (this.character) {
+        this.saveCharacter();
+      }
+    }, 30000);
   }
 
   ngOnDestroy(): void {
+    // Save character state before leaving
+    if (this.character) {
+      this.saveCharacter();
+    }
+
+    // Emit player leave event
+    if (this.characterId) {
+      this.websocketService.emitPlayerLeave(this.characterId);
+    }
+
+    // Disconnect from WebSocket
+    this.websocketService.disconnect();
+
+    // Clear auto-save interval
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+    }
+
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   private loadCharacter(id: string): void {
+    console.log('[Character Sheet] Loading character with ID:', id);
     this.characterStorage.loadCharacter(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe((character: Character | null) => {
         if (character) {
+          console.log('[Character Sheet] Character loaded:', {
+            name: character.name,
+            level: character.level,
+            ancestry: character.ancestry
+          });
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
+
+          // Emit player-join event if WebSocket is already connected
+          if (this.websocketService.isConnected()) {
+            console.log('[Character Sheet] WebSocket connected, emitting player-join immediately');
+            this.emitPlayerJoin();
+          } else {
+            console.log('[Character Sheet] WebSocket not connected yet, will emit on connection');
+          }
+          // Otherwise, the connected$ subscription will handle it
+        } else {
+          console.warn('[Character Sheet] Character loaded but was null');
         }
       });
   }
@@ -145,6 +214,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   onResourceChanged(resourceName: string, newValue: number): void {
     if (!this.character) return;
 
+    const oldHealth = this.character.resources.health.current;
+
     switch (resourceName) {
       case 'Health':
         // Direct assignment since we can't call restore with negative values easily
@@ -156,6 +227,14 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       case 'Investiture':
         (this.character.resources.investiture as any).currentValue = newValue;
         break;
+    }
+
+    // Check for critical health (immediate update, bypass debounce)
+    if (resourceName === 'Health' && newValue === 0 && oldHealth !== 0) {
+      this.emitResourceUpdate(); // Immediate
+    } else {
+      // Trigger debounced update
+      this.resourceUpdateSubject.next();
     }
 
     this.autoSave();
@@ -377,6 +456,55 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   getPortraitUrl(): string | null {
     return (this.character as any)?.portraitUrl || null;
+  }
+
+  private emitPlayerJoin(): void {
+    if (!this.character) {
+      console.warn('[Character Sheet] Cannot emit player-join: character is null');
+      return;
+    }
+
+    const joinData = {
+      characterId: this.characterId || (this.character as any).id,
+      name: this.character.name || 'Unknown',
+      level: this.character.level || 1,
+      ancestry: this.character.ancestry,
+      health: {
+        current: this.character.resources.health.current,
+        max: this.character.resources.health.max
+      },
+      focus: {
+        current: this.character.resources.focus.current,
+        max: this.character.resources.focus.max
+      },
+      investiture: {
+        current: this.character.resources.investiture.current,
+        max: this.character.resources.investiture.max
+      }
+    };
+
+    console.log('[Character Sheet] Emitting player-join with data:', joinData);
+    this.websocketService.emitPlayerJoin(joinData);
+  }
+
+  private emitResourceUpdate(): void {
+    if (!this.character || !this.characterId) return;
+
+    this.websocketService.emitResourceUpdate({
+      characterId: this.characterId || (this.character as any).id,
+      health: {
+        current: this.character.resources.health.current,
+        max: this.character.resources.health.max
+      },
+      focus: {
+        current: this.character.resources.focus.current,
+        max: this.character.resources.focus.max
+      },
+      investiture: {
+        current: this.character.resources.investiture.current,
+        max: this.character.resources.investiture.max
+      }
+    });
   }
 }
 

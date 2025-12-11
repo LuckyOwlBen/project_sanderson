@@ -11,10 +11,12 @@ import { TalentView } from './components/talent-view/talent-view';
 import { CharacterReview } from './views/character-review/character-review';
 import { CharacterSheetView } from './views/character-sheet-view/character-sheet-view';
 import { CharacterListView } from './views/character-list-view/character-list-view';
+import { GmDashboardView } from './views/gm-dashboard-view/gm-dashboard-view';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
   { path: 'landing', component: LandingView },
+  { path: 'gm-control-center', component: GmDashboardView },
   { 
     path: 'character-creator-view', 
     component: CharacterCreatorView,

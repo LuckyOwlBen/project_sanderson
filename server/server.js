@@ -4,12 +4,25 @@ const fs = require('fs').promises;
 const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
+const { Server } = require('socket.io');
+const { createServer } = require('http');
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 const CHARACTERS_DIR = path.join(__dirname, 'characters');
 const IMAGES_DIR = path.join(__dirname, 'images');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Track active players
+const activePlayers = new Map(); // socketId -> {characterId, name, level, ancestry, joinedAt}
 
 // Configure multer for file uploads (in-memory storage)
 const upload = multer({
@@ -313,11 +326,115 @@ if (IS_PRODUCTION) {
   });
 }
 
+// WebSocket connection handling
+io.on('connection', (socket) => {
+  console.log(`[WebSocket] Client connected: ${socket.id}`);
+
+  // Player joins session with character
+  socket.on('player-join', (data) => {
+    const { characterId, name, level, ancestry, health, focus, investiture } = data;
+    
+    // Handle ancestry - can be string, object with name, or null
+    let ancestryName = 'Unknown';
+    if (typeof ancestry === 'string') {
+      ancestryName = ancestry;
+    } else if (ancestry && ancestry.name) {
+      ancestryName = ancestry.name;
+    }
+    
+    activePlayers.set(socket.id, {
+      characterId,
+      name,
+      level,
+      ancestry: ancestryName,
+      health: health || { current: 0, max: 0 },
+      focus: focus || { current: 0, max: 0 },
+      investiture: investiture || { current: 0, max: 0 },
+      joinedAt: new Date().toISOString(),
+      socketId: socket.id
+    });
+    
+    console.log(`[Session] Player joined: ${name} (${characterId})`);
+    
+    // Broadcast updated player list to all GM clients
+    io.emit('player-joined', activePlayers.get(socket.id));
+    io.emit('active-players', Array.from(activePlayers.values()));
+  });
+
+  // Player leaves session
+  socket.on('player-leave', (data) => {
+    const { characterId } = data;
+    const player = activePlayers.get(socket.id);
+    
+    if (player) {
+      console.log(`[Session] Player left: ${player.name} (${characterId})`);
+      activePlayers.delete(socket.id);
+      
+      // Broadcast updated player list
+      io.emit('player-left', { characterId, socketId: socket.id });
+      io.emit('active-players', Array.from(activePlayers.values()));
+    }
+  });
+
+  // Resource update from player
+  socket.on('resource-update', (data) => {
+    const { characterId, health, focus, investiture } = data;
+    const player = activePlayers.get(socket.id);
+    
+    if (player) {
+      // Update cached player resources
+      player.health = health;
+      player.focus = focus;
+      player.investiture = investiture;
+      
+      // Broadcast to all GM clients
+      io.emit('player-resource-update', {
+        characterId,
+        socketId: socket.id,
+        health,
+        focus,
+        investiture
+      });
+      
+      // Critical alert for zero health
+      if (health.current === 0) {
+        console.log(`[CRITICAL] ${player.name} has reached 0 health!`);
+        io.emit('player-critical', {
+          characterId,
+          playerName: player.name,
+          message: `${player.name} has reached 0 health!`
+        });
+      }
+    }
+  });
+
+  // Get current active players (for GM dashboard on load)
+  socket.on('get-active-players', () => {
+    socket.emit('active-players', Array.from(activePlayers.values()));
+  });
+
+  // Handle disconnect
+  socket.on('disconnect', () => {
+    const player = activePlayers.get(socket.id);
+    
+    if (player) {
+      console.log(`[WebSocket] Player disconnected: ${player.name} (${socket.id})`);
+      activePlayers.delete(socket.id);
+      
+      // Broadcast updated player list
+      io.emit('player-left', { characterId: player.characterId, socketId: socket.id });
+      io.emit('active-players', Array.from(activePlayers.values()));
+    } else {
+      console.log(`[WebSocket] Client disconnected: ${socket.id}`);
+    }
+  });
+});
+
 // Start server
 async function startServer() {
   await ensureDirectories();
   
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log('========================================');
     console.log('  Sanderson RPG Character Server');
     console.log('========================================');
@@ -327,6 +444,7 @@ async function startServer() {
     console.log(`  Storage: ${CHARACTERS_DIR}`);
     console.log(`  Images: ${IMAGES_DIR}`);
     console.log(`  API: http://0.0.0.0:${PORT}/api`);
+    console.log(`  WebSocket: Active`);
     if (IS_PRODUCTION) {
       console.log(`  App: http://0.0.0.0:${PORT}`);
     }

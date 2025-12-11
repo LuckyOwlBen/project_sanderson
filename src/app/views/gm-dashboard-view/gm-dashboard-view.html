@@ -1,0 +1,109 @@
+<div class="gm-dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="title-section">
+      <h1>
+        <mat-icon>shield</mat-icon>
+        GM Control Center
+      </h1>
+    </div>
+    
+    <div class="connection-status">
+      <mat-chip [class.connected]="isConnected" [class.disconnected]="!isConnected">
+        <mat-icon>{{ isConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
+        {{ isConnected ? 'Connected' : 'Disconnected' }}
+      </mat-chip>
+    </div>
+  </div>
+
+  <!-- Active Players Grid -->
+  <div class="players-grid" *ngIf="activePlayers.size > 0">
+    <mat-card *ngFor="let player of getActivePlayersArray()" 
+              class="player-card"
+              [class.critical]="isCritical(player.characterId)">
+      
+      <!-- Critical Alert Badge -->
+      <div class="critical-badge" *ngIf="isCritical(player.characterId)">
+        <mat-icon>warning</mat-icon>
+        <span>CRITICAL</span>
+      </div>
+
+      <mat-card-header>
+        <mat-card-title>
+          {{ player.name }}
+          <mat-icon class="level-icon" [matBadge]="player.level" matBadgeSize="small">star</mat-icon>
+        </mat-card-title>
+        <mat-card-subtitle>{{ player.ancestry }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Health -->
+        <div class="resource-section">
+          <div class="resource-header">
+            <mat-icon class="resource-icon health">favorite</mat-icon>
+            <span class="resource-label">Health</span>
+            <span class="resource-values">{{ player.health.current }} / {{ player.health.max }}</span>
+          </div>
+          <mat-progress-bar 
+            mode="determinate" 
+            [value]="getHealthPercentage(player)"
+            [color]="getHealthColor(player)"
+            class="resource-bar health-bar">
+          </mat-progress-bar>
+        </div>
+
+        <!-- Focus -->
+        <div class="resource-section">
+          <div class="resource-header">
+            <mat-icon class="resource-icon focus">psychology</mat-icon>
+            <span class="resource-label">Focus</span>
+            <span class="resource-values">{{ player.focus.current }} / {{ player.focus.max }}</span>
+          </div>
+          <mat-progress-bar 
+            mode="determinate" 
+            [value]="getFocusPercentage(player)"
+            color="accent"
+            class="resource-bar focus-bar">
+          </mat-progress-bar>
+        </div>
+
+        <!-- Investiture -->
+        <div class="resource-section">
+          <div class="resource-header">
+            <mat-icon class="resource-icon investiture">auto_awesome</mat-icon>
+            <span class="resource-label">Investiture</span>
+            <span class="resource-values">{{ player.investiture.current }} / {{ player.investiture.max }}</span>
+          </div>
+          <mat-progress-bar 
+            mode="determinate" 
+            [value]="getInvestiturePercentage(player)"
+            color="primary"
+            class="resource-bar investiture-bar">
+          </mat-progress-bar>
+        </div>
+
+        <!-- Joined timestamp -->
+        <div class="player-meta">
+          <mat-icon>schedule</mat-icon>
+          <span>Joined: {{ player.joinedAt | date:'short' }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="activePlayers.size === 0 && isConnected">
+    <mat-icon>people_outline</mat-icon>
+    <h2>No Active Players</h2>
+    <p>Waiting for players to join the session...</p>
+    <p class="hint">Players will appear here when they load their character sheets</p>
+  </div>
+
+  <!-- Disconnected State -->
+  <div class="empty-state error-state" *ngIf="!isConnected">
+    <mat-icon>cloud_off</mat-icon>
+    <h2>Connection Lost</h2>
+    <p>Unable to connect to the game server</p>
+    <p class="hint">Make sure the server is running and refresh the page</p>
+  </div>
+</div>

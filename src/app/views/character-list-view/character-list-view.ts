@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -33,7 +33,8 @@ export class CharacterListView implements OnInit, OnDestroy {
   constructor(
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -49,17 +50,24 @@ export class CharacterListView implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     
+    console.log('[Character List] Loading characters...');
     this.characterStorage.listCharacters()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (characters: SavedCharacter[]) => {
+          console.log('[Character List] Loaded characters:', characters.length);
           this.characters = characters;
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error loading characters:', err);
+          console.error('[Character List] Error loading characters:', err);
           this.error = 'Failed to load characters';
           this.loading = false;
+          this.cdr.detectChanges();
+        },
+        complete: () => {
+          console.log('[Character List] Load complete');
         }
       });
   }
