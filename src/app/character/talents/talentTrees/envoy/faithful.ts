@@ -37,7 +37,7 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             prerequisites: [
                 { type: 'talent', target: 'galvanize' }
             ],
-            tier: 1,
+            tier: 2,
             bonuses: [],
             otherEffects: ["Increase max and current focus by tier", "Increase focus by 1 when tier increases"]
         },

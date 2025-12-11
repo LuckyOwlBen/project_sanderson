@@ -50,7 +50,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             prerequisites: [
                 { type: 'talent', target: 'practical_demonstration' }
             ],
-            tier: 1,
+            tier: 2,
             bonuses: [],
             otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
         },

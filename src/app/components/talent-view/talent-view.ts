@@ -529,7 +529,12 @@ export class TalentView implements OnInit, OnDestroy {
       return true;
     }
 
-    // Show if prerequisites are met (even if can't unlock due to lack of points)
+    // Always show tier 1 talents (even if locked)
+    if (talent.tier === 1) {
+      return true;
+    }
+
+    // For tier 2+ talents, show if prerequisites are met
     if (!this.character) {
       return false;
     }

@@ -11,7 +11,7 @@ export const HUNTER_TALENT_TREES: TalentPath = {
         TRACKER_TALENT_TREE,
     ],
     talentNodes: [{ 
-        id: "seek_quary",
+        id: "seek_quarry",
         name: "Seek Quarry",
         description: "Choose a character to be your quarry, gaining an advantage on tests to find, attack and study them.",
         actionCost: ActionCostCode.Special,

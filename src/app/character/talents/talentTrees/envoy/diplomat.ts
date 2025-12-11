@@ -76,7 +76,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'steadfast_challenge' },
             ],
             specialActivation: "While wearing Presentable armor or fashionable clothing, gain an advantage on your first Deception, Leadership, or Persuasion test.",
-            tier: 1,
+            tier: 2,
             bonuses: [],
             grantsAdvantage: ["deception_first", "leadership_first", "persuasion_first"],
             otherEffects: ["Gain Fashion expertise"]
@@ -89,7 +89,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             prerequisites: [
                 { type: 'talent', target: 'well_dressed'}
             ],
-            tier: 1,
+            tier: 2,
             bonuses: [],
             otherEffects: ["Gain High Society expertise", "Spend 2 focus for additional effects in high society interactions"]
         },
