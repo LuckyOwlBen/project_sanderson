@@ -8,7 +8,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
 import { Subject, takeUntil } from 'rxjs';
 import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.service';
-import { CharacterImage } from '../../components/shared/character-image/character-image';
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -20,8 +19,7 @@ import { CharacterImage } from '../../components/shared/character-image/characte
     MatButtonModule,
     MatChipsModule,
     MatProgressBarModule,
-    MatBadgeModule,
-    CharacterImage
+    MatBadgeModule
   ],
   templateUrl: './gm-dashboard-view.html',
   styleUrl: './gm-dashboard-view.scss',

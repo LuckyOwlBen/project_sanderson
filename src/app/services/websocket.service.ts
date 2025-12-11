@@ -1,12 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { Ancestry } from '../character/ancestry/ancestry';
 
 export interface PlayerJoinedEvent {
   characterId: string;
   name: string;
   level: number;
-  ancestry: string;
+  ancestry: Ancestry | null;
   health: { current: number; max: number };
   focus: { current: number; max: number };
   investiture: { current: number; max: number };
@@ -152,7 +153,7 @@ export class WebsocketService implements OnDestroy {
     characterId: string;
     name: string;
     level: number;
-    ancestry: any;
+    ancestry: Ancestry | null;
     health: { current: number; max: number };
     focus: { current: number; max: number };
     investiture: { current: number; max: number };

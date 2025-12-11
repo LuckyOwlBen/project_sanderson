@@ -3,12 +3,13 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Character } from '../character/character';
+import { Ancestry } from '../character/ancestry/ancestry';
 
 export interface SavedCharacter {
   id: string;
   name: string;
   level: number;
-  ancestry: string;
+  ancestry: Ancestry | null;
   lastModified: string;
   data: any;
 }
@@ -164,7 +165,7 @@ export class CharacterStorageService {
     (character as any).id = data.id;
     character.level = data.level || 1;
     character.name = data.name || '';
-    character.ancestry = data.ancestry || '';
+    character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];
     character.paths = data.paths || [];
     

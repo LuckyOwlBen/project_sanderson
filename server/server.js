@@ -334,13 +334,9 @@ io.on('connection', (socket) => {
   socket.on('player-join', (data) => {
     const { characterId, name, level, ancestry, health, focus, investiture } = data;
     
-    // Handle ancestry - can be string, object with name, or null
-    let ancestryName = 'Unknown';
-    if (typeof ancestry === 'string') {
-      ancestryName = ancestry;
-    } else if (ancestry && ancestry.name) {
-      ancestryName = ancestry.name;
-    }
+    // Handle ancestry - should always be a string from Ancestry enum (e.g., 'human', 'singer')
+    // Fallback to 'Unknown' if null/undefined
+    const ancestryName = ancestry || 'Unknown';
     
     activePlayers.set(socket.id, {
       characterId,
