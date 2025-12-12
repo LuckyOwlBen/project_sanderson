@@ -6,8 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
 import { Subject, takeUntil } from 'rxjs';
 import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.service';
+import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
+import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -19,7 +23,9 @@ import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.se
     MatButtonModule,
     MatChipsModule,
     MatProgressBarModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDialogModule,
+    MatListModule
   ],
   templateUrl: './gm-dashboard-view.html',
   styleUrl: './gm-dashboard-view.scss',
@@ -33,7 +39,8 @@ export class GmDashboardView implements OnInit, OnDestroy {
 
   constructor(
     private websocketService: WebsocketService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -164,5 +171,20 @@ export class GmDashboardView implements OnInit, OnDestroy {
 
   clearCriticalAlert(characterId: string): void {
     this.criticalPlayers.delete(characterId);
+  }
+
+  openSprenGrantDialog(player: PlayerJoinedEvent): void {
+    const dialogRef = this.dialog.open(SprenGrantDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: { player }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // result contains: { order: string, orderInfo: RadiantOrderInfo }
+        this.websocketService.grantSpren(player.characterId, result.order, result.orderInfo);
+      }
+    });
   }
 }

@@ -34,6 +34,14 @@ export interface PlayerCriticalEvent {
   message: string;
 }
 
+export interface SprenGrantEvent {
+  characterId: string;
+  order: string;
+  sprenType: string;
+  surgePair: [string, string];
+  philosophy: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,6 +68,9 @@ export class WebsocketService implements OnDestroy {
 
   private activePlayersSubject = new Subject<PlayerJoinedEvent[]>();
   public activePlayers$ = this.activePlayersSubject.asObservable();
+
+  private sprenGrantSubject = new Subject<SprenGrantEvent>();
+  public sprenGrant$ = this.sprenGrantSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -138,6 +149,13 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] Active players update:', data);
       this.activePlayersSubject.next(data);
     });
+
+    this.socket.on('spren-granted', (data: SprenGrantEvent) => {
+      console.log('[WebSocket] ⭐⭐⭐ SPREN GRANTED EVENT RECEIVED ⭐⭐⭐');
+      console.log('[WebSocket] ⭐ Spren granted event received:', data);
+      console.log('[WebSocket] ⭐ Broadcasting to sprenGrantSubject');
+      this.sprenGrantSubject.next(data);
+    });
   }
 
   disconnect(): void {
@@ -206,6 +224,22 @@ export class WebsocketService implements OnDestroy {
 
     console.log('[WebSocket] Requesting active players');
     this.socket.emit('get-active-players');
+  }
+
+  grantSpren(characterId: string, order: string, orderInfo: any): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot grant spren: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] Granting spren:', { characterId, order });
+    this.socket.emit('gm-grant-spren', {
+      characterId,
+      order,
+      sprenType: orderInfo.sprenType,
+      surgePair: orderInfo.surgePair,
+      philosophy: orderInfo.philosophy
+    });
   }
 
   isConnected(): boolean {

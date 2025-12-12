@@ -11,6 +11,8 @@ import { TalentTree, TalentNode, TalentPath } from '../../character/talents/tale
 import { TalentPrerequisiteChecker } from '../../character/talents/talentPrerequesite';
 import { getTalentTree, getTalentPath } from '../../character/talents/talentTrees/talentTrees';
 import { StepValidationService } from '../../services/step-validation.service';
+import { WebsocketService, SprenGrantEvent } from '../../services/websocket.service';
+import { SkillType } from '../../character/skills/skillTypes';
 
 interface PathOption {
   id: string;
@@ -43,10 +45,12 @@ export class TalentView implements OnInit, OnDestroy {
   validationMessage: string = '';
   availableCorePaths: PathOption[] = [];
   showCorePathSelector: boolean = false;
+  pendingSprenGrant: SprenGrantEvent | null = null;
 
   constructor(
     private characterState: CharacterStateService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private websocketService: WebsocketService
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +64,26 @@ export class TalentView implements OnInit, OnDestroy {
         this.loadAvailableTrees();
         this.calculateAvailablePoints();
         this.updateValidation();
+      });
+
+    // Listen for spren grants
+    this.websocketService.sprenGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(grant => {
+        console.log('[TalentView] Spren grant received:', grant);
+        console.log('[TalentView] Current character ID:', (this.character as any)?.id);
+        if (this.character && grant.characterId === (this.character as any).id) {
+          console.log('[TalentView] Match! Showing spren notification');
+          this.pendingSprenGrant = grant;
+          // Auto-dismiss after 30 seconds
+          setTimeout(() => {
+            if (this.pendingSprenGrant === grant) {
+              this.pendingSprenGrant = null;
+            }
+          }, 30000);
+        } else {
+          console.log('[TalentView] No match - character ID mismatch');
+        }
       });
   }
 
@@ -244,6 +268,38 @@ export class TalentView implements OnInit, OnDestroy {
         tempTrees.push(ancestryTree);
         addedTreeNames.add(ancestryTree.pathName.toLowerCase());
       }
+    }
+
+    // Include Radiant Order tree if spren is bound
+    if (this.character.radiantPath.hasSpren()) {
+      const orderTreeId = this.character.radiantPath.getOrderTree();
+      if (orderTreeId) {
+        const orderPath = getTalentPath(orderTreeId);
+        if (orderPath && orderPath.talentNodes && orderPath.talentNodes.length > 0) {
+          const radiantCoreTree = {
+            pathName: `${orderPath.name} - Radiant`,
+            nodes: orderPath.talentNodes
+          };
+          this.autoUnlockTier0Talents(radiantCoreTree);
+          if (!addedTreeNames.has(radiantCoreTree.pathName.toLowerCase())) {
+            tempTrees.push(radiantCoreTree);
+            addedTreeNames.add(radiantCoreTree.pathName.toLowerCase());
+          }
+        }
+      }
+    }
+
+    // Include Surge trees if First Ideal is spoken
+    if (this.character.radiantPath.hasSpokenIdeal()) {
+      const surgeTrees = this.character.radiantPath.getSurgeTrees();
+      surgeTrees.forEach(surgeTreeId => {
+        const surgeTree = getTalentTree(surgeTreeId);
+        if (surgeTree && !addedTreeNames.has(surgeTree.pathName.toLowerCase())) {
+          this.autoUnlockTier0Talents(surgeTree);
+          tempTrees.push(surgeTree);
+          addedTreeNames.add(surgeTree.pathName.toLowerCase());
+        }
+      });
     }
 
     // If no trees loaded, try to load based on cultures
@@ -660,5 +716,53 @@ export class TalentView implements OnInit, OnDestroy {
     }
     
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
+  }
+
+  acceptSpren(): void {
+    if (!this.character || !this.pendingSprenGrant) return;
+
+    // Grant the spren to the character
+    this.character.radiantPath.grantSpren(this.pendingSprenGrant.order);
+    
+    // Unlock the tier 0 radiant talent
+    const orderPath = getTalentPath(this.pendingSprenGrant.order.toLowerCase());
+    if (orderPath?.talentNodes) {
+      const keyTalent = orderPath.talentNodes.find(t => t.tier === 0);
+      if (keyTalent) {
+        this.unlockTalent(keyTalent);
+      }
+    }
+
+    // Clear the pending grant
+    this.pendingSprenGrant = null;
+
+    // Reload trees to show radiant order
+    this.loadAvailableTrees();
+    this.updateValidation();
+  }
+
+  speakIdeal(): void {
+    if (!this.character) return;
+
+    // Speak the First Ideal - this unlocks surge skills and surge trees
+    this.character.radiantPath.speakIdeal(this.character.skills);
+
+    // Update character state
+    this.characterState.updateCharacter(this.character);
+
+    // Reload trees to show surge trees
+    this.loadAvailableTrees();
+    this.updateValidation();
+  }
+
+  getSurgeNames(): string {
+    if (!this.character) return '';
+    
+    const orderInfo = this.character.radiantPath.getOrderInfo();
+    if (!orderInfo) return '';
+
+    return orderInfo.surgePair.map(surge => 
+      this.formatSkillName(surge)
+    ).join(' and ');
   }
 }

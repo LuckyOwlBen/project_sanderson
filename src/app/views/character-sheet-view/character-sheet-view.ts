@@ -53,6 +53,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   characterId: string = '';
   sessionNotes: string = '';
   portraitUrl: string | null = null;
+  pendingSprenGrant: any = null;
 
   // Resources for tracker components
   healthResource: Resource = { name: 'Health', current: 0, max: 0, icon: 'favorite', color: '#f44336' };
@@ -129,6 +130,30 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         this.saveCharacter();
       }
     }, 30000);
+
+    // Listen for spren grants
+    console.log('[Character Sheet] 🔔 Setting up spren grant listener...');
+    this.websocketService.sprenGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(grant => {
+        console.log('[Character Sheet] ⭐⭐⭐ SPREN GRANT RECEIVED IN CHARACTER SHEET ⭐⭐⭐');
+        console.log('[Character Sheet] ⭐ Spren grant received:', grant);
+        console.log('[Character Sheet] ⭐ Current character ID:', this.characterId);
+        if (this.characterId && grant.characterId === this.characterId) {
+          console.log('[Character Sheet] ⭐ Match! Showing spren notification');
+          this.pendingSprenGrant = grant;
+          // Auto-dismiss after 30 seconds
+          setTimeout(() => {
+            if (this.pendingSprenGrant === grant) {
+              this.pendingSprenGrant = null;
+              this.cdr.detectChanges();
+            }
+          }, 30000);
+          this.cdr.detectChanges();
+        } else {
+          console.log('[Character Sheet] ⭐ No match - character ID mismatch');
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -527,6 +552,51 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         max: this.character.resources.investiture.max
       }
     });
+  }
+
+  acceptSpren(): void {
+    if (!this.character || !this.pendingSprenGrant) return;
+
+    console.log('[Character Sheet] Accepting spren:', this.pendingSprenGrant.order);
+    
+    // Grant the spren to the character
+    this.character.radiantPath.grantSpren(this.pendingSprenGrant.order);
+    
+    // Save the character
+    this.characterState.updateCharacter(this.character);
+    this.saveCharacter();
+
+    // Clear the pending grant
+    this.pendingSprenGrant = null;
+    this.cdr.detectChanges();
+  }
+
+  speakIdeal(): void {
+    if (!this.character) return;
+
+    console.log('[Character Sheet] Speaking First Ideal');
+    
+    // Speak the First Ideal - this unlocks surge skills and surge trees
+    this.character.radiantPath.speakIdeal(this.character.skills);
+
+    // Update character state
+    this.characterState.updateCharacter(this.character);
+    this.saveCharacter();
+    this.cdr.detectChanges();
+  }
+
+  getSurgeNames(): string {
+    if (!this.character) return '';
+    
+    const orderInfo = this.character.radiantPath.getOrderInfo();
+    if (!orderInfo) return '';
+
+    return orderInfo.surgePair.map(surge => 
+      surge.toLowerCase().replace('_', ' ')
+        .split(' ')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    ).join(' and ');
   }
 }
 

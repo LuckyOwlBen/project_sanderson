@@ -154,6 +154,7 @@ export class CharacterStorageService {
         current: character.resources.investiture.current,
         max: character.resources.investiture.max
       },
+      radiantPath: character.radiantPath.toJSON(),
       sessionNotes: (character as any).sessionNotes || '',
       lastModified: new Date().toISOString()
     };
@@ -221,6 +222,10 @@ export class CharacterStorageService {
           character.resources.investiture.spend(Math.abs(investDiff));
         }
       }
+    }
+    
+    if (data.radiantPath) {
+      character.radiantPath.fromJSON(data.radiantPath);
     }
     
     (character as any).sessionNotes = data.sessionNotes || '';

@@ -21,6 +21,17 @@ export class SkillAssociationTable {
         [SkillType.PERCEPTION]: 'awareness',
         [SkillType.PERSUASION]: 'presence',
         [SkillType.SURVIVAL]: 'awareness',
+        // Surge skills - associated with Willpower (spiritual/internal power)
+        [SkillType.ADHESION]: 'willpower',
+        [SkillType.GRAVITATION]: 'willpower',
+        [SkillType.DIVISION]: 'willpower',
+        [SkillType.ABRASION]: 'willpower',
+        [SkillType.PROGRESSION]: 'willpower',
+        [SkillType.ILLUMINATION]: 'willpower',
+        [SkillType.TRANSFORMATION]: 'willpower',
+        [SkillType.TRANSPORTATION]: 'willpower',
+        [SkillType.COHESION]: 'willpower',
+        [SkillType.TENSION]: 'willpower',
     };
 
     checkSkillAssociation(skill: SkillType): keyof Attributes {

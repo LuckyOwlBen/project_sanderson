@@ -6,6 +6,7 @@ import { ResourceManager } from './resources/resourceManager';
 import { BonusManager } from './bonuses/bonusManager';
 import { Ancestry } from './ancestry/ancestry';
 import { CulturalInterface } from './culture/culturalInterface';
+import { RadiantPathManager } from './radiantPath/radiantPathManager';
 
 
 export class Character {
@@ -23,6 +24,7 @@ export class Character {
   private defenseManager = new DefenseManager();
   private resourceManager: ResourceManager;
   private bonusManager = new BonusManager();
+  private radiantPathManager = new RadiantPathManager();
 
   constructor() {
     this.attributes = new Attributes();
@@ -48,6 +50,10 @@ export class Character {
 
   get bonuses(): BonusManager {
     return this.bonusManager;
+  }
+
+  get radiantPath(): RadiantPathManager {
+    return this.radiantPathManager;
   }
 
 }

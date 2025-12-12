@@ -409,6 +409,40 @@ io.on('connection', (socket) => {
     socket.emit('active-players', Array.from(activePlayers.values()));
   });
 
+  // GM grants spren to a player
+  socket.on('gm-grant-spren', (data) => {
+    const { characterId, order, sprenType, surgePair, philosophy } = data;
+    console.log(`[GM Action] ⭐⭐⭐ RECEIVED GM-GRANT-SPREN REQUEST ⭐⭐⭐`);
+    console.log(`[GM Action] Granting ${order} spren to character ${characterId}`);
+    console.log(`[GM Action] Current active players:`, Array.from(activePlayers.entries()).map(([sid, p]) => ({ socketId: sid, characterId: p.characterId, name: p.name })));
+    
+    // Find the target player's socket
+    let targetSocket = null;
+    for (const [socketId, player] of activePlayers.entries()) {
+      if (player.characterId === characterId) {
+        targetSocket = socketId;
+        break;
+      }
+    }
+    
+    if (targetSocket) {
+      // Send spren grant to specific player
+      const payload = {
+        characterId,
+        order,
+        sprenType,
+        surgePair,
+        philosophy
+      };
+      console.log(`[GM Action] ⭐ Sending spren-granted to socket ${targetSocket} with payload:`, payload);
+      io.to(targetSocket).emit('spren-granted', payload);
+      console.log(`[GM Action] ⭐ Spren grant sent to socket ${targetSocket}`);
+    } else {
+      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+      console.warn(`[GM Action] ⚠️ Available character IDs:`, Array.from(activePlayers.values()).map(p => p.characterId));
+    }
+  });
+
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);

@@ -88,6 +88,13 @@
           <span>Joined: {{ player.joinedAt | date:'short' }}</span>
         </div>
       </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="openSprenGrantDialog(player)">
+          <mat-icon>auto_awesome</mat-icon>
+          Grant Spren
+        </button>
+      </mat-card-actions>
     </mat-card>
   </div>
 
