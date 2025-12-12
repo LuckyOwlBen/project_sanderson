@@ -63,7 +63,7 @@ export class SidenavView implements OnInit, OnDestroy {
   }
 
   navigateToStep(stepNumber: number): void {
-    const stepRoutes = ['ancestry', 'culture', 'name', 'attributes', 'skills', 'paths', 'talents', 'review'];
+    const stepRoutes = ['ancestry', 'culture', 'name', 'attributes', 'skills', 'expertises', 'paths', 'talents', 'review'];
     const route = stepRoutes[stepNumber];
     if (route) {
       this.router.navigate(['/character-creator-view', route]);
@@ -108,21 +108,27 @@ export class SidenavView implements OnInit, OnDestroy {
         completed: this.hasSkillsAssigned()
       },
       {
+        label: 'Expertises',
+        icon: 'auto_stories',
+        stepNumber: 5,
+        completed: this.character.selectedExpertises && this.character.selectedExpertises.length > 0
+      },
+      {
         label: 'Path',
         icon: 'explore',
-        stepNumber: 5,
+        stepNumber: 6,
         completed: this.character.paths && this.character.paths.length > 0
       },
       {
         label: 'Talents',
         icon: 'stars',
-        stepNumber: 6,
+        stepNumber: 7,
         completed: this.character.unlockedTalents && this.character.unlockedTalents.size > 0
       },
       {
         label: 'Review',
         icon: 'check_circle',
-        stepNumber: 7,
+        stepNumber: 8,
         completed: this.isCharacterComplete()
       }
     ];

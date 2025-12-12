@@ -33,7 +33,7 @@ export interface PathOption {
 })
 export class PathSelector implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  private readonly STEP_INDEX = 5;
+  private readonly STEP_INDEX = 6;
   
   character: Character | null = null;
   selectedMainPath: string | null = null;

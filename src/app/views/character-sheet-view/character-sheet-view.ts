@@ -374,6 +374,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .join(' ');
   }
 
+  getSelectedExpertises(): string[] {
+    return this.character?.selectedExpertises || [];
+  }
+
   getPowers(): TalentNode[] {
     const powerIds = Array.from(this.character?.unlockedTalents || []);
     const powers: TalentNode[] = [];

@@ -132,6 +132,7 @@ export class CharacterStorageService {
       ancestry: character.ancestry,
       cultures: character.cultures,
       paths: character.paths,
+      selectedExpertises: character.selectedExpertises || [],
       attributes: {
         strength: character.attributes.strength,
         speed: character.attributes.speed,
@@ -169,6 +170,7 @@ export class CharacterStorageService {
     character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];
     character.paths = data.paths || [];
+    character.selectedExpertises = data.selectedExpertises || [];
     
     if (data.attributes) {
       character.attributes.strength = data.attributes.strength || 0;

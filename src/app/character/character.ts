@@ -17,6 +17,7 @@ export class Character {
   ancestry: Ancestry | null = null;
   attributes: Attributes;
   cultures: CulturalInterface[] = [];
+  selectedExpertises: string[] = [];
   unlockedTalents: Set<string> = new Set<string>();
 
   private skillManager = new SkillManager();

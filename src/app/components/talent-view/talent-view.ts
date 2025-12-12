@@ -35,7 +35,7 @@ interface PathOption {
 })
 export class TalentView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  private readonly STEP_INDEX = 6;
+  private readonly STEP_INDEX = 7;
   
   character: Character | null = null;
   availableTrees: TalentTree[] = [];

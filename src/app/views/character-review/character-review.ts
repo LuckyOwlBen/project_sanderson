@@ -86,6 +86,10 @@ export class CharacterReview implements OnInit, OnDestroy {
       .join(' ');
   }
 
+  getSelectedExpertises(): string[] {
+    return this.character?.selectedExpertises || [];
+  }
+
   getTalentIds(): string[] {
     return Array.from(this.character?.unlockedTalents || []);
   }

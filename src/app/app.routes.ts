@@ -6,6 +6,7 @@ import { AncestrySelector } from './components/ancestry-selector/ancestry-select
 import { CultureSelector } from './components/culture-selector/culture-selector';
 import { AttributeAllocator } from './components/attribute-allocator/attribute-allocator';
 import { SkillManager } from './components/skill-manager/skill-manager';
+import { ExpertiseSelector } from './components/expertise-selector/expertise-selector';
 import { PathSelector } from './components/path-selector/path-selector';
 import { TalentView } from './components/talent-view/talent-view';
 import { CharacterReview } from './views/character-review/character-review';
@@ -27,6 +28,7 @@ export const routes: Routes = [
         { path: 'name', component: CharacterName, pathMatch: 'full' },
         { path: 'attributes', component: AttributeAllocator, pathMatch: 'full' },
         { path: 'skills', component: SkillManager, pathMatch: 'full' },
+        { path: 'expertises', component: ExpertiseSelector, pathMatch: 'full' },
         { path: 'paths', component: PathSelector, pathMatch: 'full' },
         { path: 'talents', component: TalentView, pathMatch: 'full' },
         { path: 'review', component: CharacterReview, pathMatch: 'full' },

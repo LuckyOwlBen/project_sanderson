@@ -69,4 +69,23 @@ export class CharacterStateService {
   getUnlockedTalents(): Set<string> {
     return this.character.unlockedTalents;
   }
+
+  addExpertise(expertise: string): void {
+    if (!this.character.selectedExpertises.includes(expertise)) {
+      this.character.selectedExpertises.push(expertise);
+      this.characterSubject.next(this.character);
+    }
+  }
+
+  removeExpertise(expertise: string): void {
+    const index = this.character.selectedExpertises.indexOf(expertise);
+    if (index !== -1) {
+      this.character.selectedExpertises.splice(index, 1);
+      this.characterSubject.next(this.character);
+    }
+  }
+
+  getSelectedExpertises(): string[] {
+    return this.character.selectedExpertises;
+  }
 }
