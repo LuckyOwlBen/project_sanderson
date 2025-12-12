@@ -102,12 +102,14 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
           this.updateResources();
+          this.cdr.detectChanges();
         } else if (character && !this.character) {
           // Initial load if no character ID in route
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
           this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
+          this.cdr.detectChanges();
         }
       });
 
@@ -168,6 +170,9 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.characterState.updateCharacter(character);
           this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
+          
+          // Explicitly trigger change detection after loading
+          this.cdr.detectChanges();
 
           // Emit player-join event if WebSocket is already connected
           if (this.websocketService.isConnected()) {
@@ -210,6 +215,9 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       icon: 'auto_awesome',
       color: '#9c27b0'
     };
+    
+    // Trigger change detection after updating resources
+    this.cdr.markForCheck();
   }
 
   onResourceChanged(resourceName: string, newValue: number): void {
