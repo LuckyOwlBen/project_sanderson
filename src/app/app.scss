@@ -40,6 +40,17 @@
 .app-sidenav {
   width: var(--sidenav-width);
   background-color: var(--gpSystemDarkerGrey);
+  height: 100%;
+  overflow: hidden;
+  
+  ::ng-deep {
+    .mat-drawer-inner-container {
+      background-color: var(--gpSystemDarkerGrey);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 
 .app-sidenav-content {

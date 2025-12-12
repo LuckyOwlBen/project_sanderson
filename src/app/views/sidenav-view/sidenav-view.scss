@@ -42,8 +42,16 @@
   }
 }
 
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--gpSystemDarkerGrey);
+}
+
 .character-progress {
   margin-top: 1rem;
+  flex: 1;
 
   .creation-accordion {
     box-shadow: none;
