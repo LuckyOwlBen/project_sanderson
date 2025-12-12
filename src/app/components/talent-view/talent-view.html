@@ -12,35 +12,6 @@
     <span>{{ validationMessage }}</span>
   </div>
 
-  <!-- Core Path Selector for bonus talent -->
-  <div class="core-path-selector" *ngIf="showCorePathSelector && availableCorePaths.length > 0">
-    <h3>Select a Bonus Path (Optional)</h3>
-    <p class="helper-text">You can select a key talent from another heroic path as your bonus talent. This will unlock that path's specialties.</p>
-    <div class="core-path-grid">
-      <mat-card 
-        *ngFor="let pathOption of availableCorePaths"
-        class="core-path-card"
-        [class.selected]="pathOption.isSelected"
-        (click)="selectCorePath(pathOption)">
-        <mat-card-header>
-          <mat-card-title>{{ pathOption.name }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="key-talent-info">
-            <strong>{{ pathOption.keyTalent.name }}</strong>
-            <p>{{ pathOption.keyTalent.description }}</p>
-          </div>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-raised-button [color]="pathOption.isSelected ? 'warn' : 'primary'">
-            <mat-icon>{{ pathOption.isSelected ? 'remove_circle' : 'add_circle' }}</mat-icon>
-            {{ pathOption.isSelected ? 'Remove' : 'Select' }}
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </div>
-
   <div class="tree-selector" *ngIf="availableTrees.length > 1">
     <mat-chip-set>
       <mat-chip 
@@ -117,6 +88,35 @@
             Remove
           </button>
           <mat-icon *ngIf="isTalentUnlocked(talent.id)" class="unlocked-badge">check_circle</mat-icon>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Core Path Selector for bonus talent -->
+  <div class="core-path-selector" *ngIf="showCorePathSelector && availableCorePaths.length > 0">
+    <h3>Select a Bonus Path (Optional)</h3>
+    <p class="helper-text">You can select a key talent from another heroic path as your bonus talent. This will unlock that path's specialties.</p>
+    <div class="core-path-grid">
+      <mat-card 
+        *ngFor="let pathOption of availableCorePaths"
+        class="core-path-card"
+        [class.selected]="pathOption.isSelected"
+        (click)="selectCorePath(pathOption)">
+        <mat-card-header>
+          <mat-card-title>{{ pathOption.name }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="key-talent-info">
+            <strong>{{ pathOption.keyTalent.name }}</strong>
+            <p>{{ pathOption.keyTalent.description }}</p>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button [color]="pathOption.isSelected ? 'warn' : 'primary'">
+            <mat-icon>{{ pathOption.isSelected ? 'remove_circle' : 'add_circle' }}</mat-icon>
+            {{ pathOption.isSelected ? 'Remove' : 'Select' }}
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>

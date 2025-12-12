@@ -21,10 +21,10 @@ export const routes: Routes = [
     path: 'character-creator-view', 
     component: CharacterCreatorView,
     children: [
-        { path: '', redirectTo: 'name', pathMatch: 'full' },
-        { path: 'name', component: CharacterName, pathMatch: 'full' },
+        { path: '', redirectTo: 'ancestry', pathMatch: 'full' },
         { path: 'ancestry', component: AncestrySelector, pathMatch: 'full' },
         { path: 'culture', component: CultureSelector, pathMatch: 'full' },
+        { path: 'name', component: CharacterName, pathMatch: 'full' },
         { path: 'attributes', component: AttributeAllocator, pathMatch: 'full' },
         { path: 'skills', component: SkillManager, pathMatch: 'full' },
         { path: 'paths', component: PathSelector, pathMatch: 'full' },
