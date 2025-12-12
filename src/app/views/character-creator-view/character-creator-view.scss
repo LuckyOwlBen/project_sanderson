@@ -5,10 +5,25 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    gap: 1rem;
+  }
 }
 
 .creator-main {
   min-height: 600px;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 120px);
+  }
+
+  > :first-child {
+    flex: 1;
+  }
 }
 
 .stepper-buttons {
@@ -17,6 +32,18 @@
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #ddd;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--gpSystemDarkerGrey);
+    padding: 1rem;
+    margin: 1rem -1rem -1rem -1rem;
+    border-top: 2px solid var(--gpSystemDarkGrey);
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+  }
 
   button {
     font-weight: 500;
@@ -28,6 +55,19 @@
       &:hover {
         background-color: var(--gpSystemGrey);
       }
+    }
+
+    &:disabled {
+      color: #666666;
+      background-color: var(--gpSystemDarkerGrey);
+      border: 1px solid var(--gpSystemDarkGrey);
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      flex: 1;
+      max-width: 48%;
     }
   }
 }

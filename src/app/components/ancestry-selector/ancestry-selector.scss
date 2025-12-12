@@ -5,6 +5,12 @@
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  min-height: 600px;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    min-height: calc(100vh - 200px);
+  }
 }
 
 .selector-header {
@@ -16,12 +22,20 @@
     font-weight: 400;
     color: var(--gpColor-ChalkyBlue);
     margin-bottom: 0.5rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.8rem;
+    }
   }
   
   .subtitle {
     font-size: 1.1rem;
     color: var(--gpSystemLighterGrey);
     font-style: italic;
+
+    @media (max-width: 768px) {
+      font-size: 0.95rem;
+    }
   }
 }
 
@@ -42,6 +56,11 @@
   position: relative;
   overflow: hidden;
   background-color: var(--gpSystemDarkerGrey);
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+    max-width: 100%;
+  }
 
   &:hover {
     transform: translateY(-8px);

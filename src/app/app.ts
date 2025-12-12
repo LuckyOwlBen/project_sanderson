@@ -1,10 +1,11 @@
-import { Component, HostListener, signal } from '@angular/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { Component, HostListener, signal, ViewChild } from '@angular/core';
+import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { SidenavView } from "./views/sidenav-view/sidenav-view";
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { filter } from 'rxjs/operators';
 //import { clearLocalStorage } from './ngrx';     For when I finally get around to making persistent state
 @Component({
   selector: 'app-root',
@@ -23,8 +24,19 @@ export class App {
   protected readonly title = signal('project-sanderson');
   isMobile: boolean = false;
 
-  constructor() {
+  @ViewChild('drawer') drawer!: MatSidenav;
+
+  constructor(private router: Router) {
     this.checkMobile();
+    
+    // Close drawer on navigation when in mobile mode
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.isMobile && this.drawer) {
+          this.drawer.close();
+        }
+      });
   }
 
   @HostListener('window:resize')

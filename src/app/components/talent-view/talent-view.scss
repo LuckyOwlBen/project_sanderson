@@ -313,4 +313,114 @@
   }
 }
 
+@media (max-width: 768px) {
+  .talent-view-container {
+    padding: 1rem;
+  }
+
+  .talent-header {
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .talent-points {
+      font-size: 1rem;
+    }
+  }
+
+  .core-path-selector {
+    padding: 1rem;
+    margin-bottom: 2rem;
+
+    h3 {
+      font-size: 1.2rem;
+    }
+
+    .helper-text {
+      font-size: 0.85rem;
+    }
+
+    .core-path-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .core-path-card {
+      mat-card-header {
+        mat-card-title {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  .talent-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .talent-node {
+    mat-card-header {
+      mat-card-title {
+        font-size: 1.1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+    }
+
+    mat-card-content {
+      p {
+        font-size: 0.9rem;
+      }
+
+      .prerequisites {
+        padding: 0.5rem;
+
+        ul {
+          padding-left: 1rem;
+
+          li {
+            font-size: 0.85rem;
+          }
+        }
+      }
+    }
+
+    mat-card-actions {
+      flex-wrap: wrap;
+      padding: 0.5rem;
+
+      button {
+        font-size: 0.85rem;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      .unlocked-badge {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  .tree-selector {
+    mat-chip {
+      font-size: 0.9rem;
+    }
+  }
+
+  .validation-message {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+}
+
 

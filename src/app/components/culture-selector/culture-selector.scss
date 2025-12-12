@@ -1,5 +1,11 @@
 .culture-selector {
   padding: 2rem;
+  min-height: 600px;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    min-height: calc(100vh - 200px);
+  }
 }
 
 .section-header {
