@@ -1,0 +1,312 @@
+.inventory-container {
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--gpSystemDarkerGrey);
+  border-radius: 8px;
+  gap: 2rem;
+}
+
+.currency-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gpColor-ChalkyBlue);
+
+  mat-icon {
+    color: gold;
+  }
+}
+
+.weight-tracker {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.overencumbered {
+    color: var(--warn-color);
+
+    mat-icon {
+      color: var(--warn-color);
+    }
+  }
+
+  mat-progress-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+  }
+}
+
+mat-chip-set {
+  mat-chip {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.equipped-section {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.equipment-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.equipment-slot {
+  background-color: var(--gpSystemDarkerGrey) !important;
+  transition: all 0.3s ease;
+  color: #fff;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  mat-card-header {
+    mat-icon[mat-card-avatar] {
+      background-color: var(--gpColor-ChalkyBlue);
+      color: white;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    mat-card-title {
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+  }
+
+  mat-card-content {
+    min-height: 80px;
+  }
+}
+
+.equipped-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background-color: var(--gpSystemDarkGrey);
+  border-radius: 4px;
+
+  .item-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+
+    &.weapon {
+      color: var(--gpColor-ChalkyBlue);
+    }
+
+    &.armor {
+      color: var(--gpColor-LightGreen);
+    }
+
+    &.fabrial {
+      color: gold;
+    }
+  }
+
+  .item-info {
+    flex: 1;
+
+    .item-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .item-stats {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  button {
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.empty-slot {
+  text-align: center;
+  padding: 1.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.inventory-section {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.inventory-list {
+  .inventory-item {
+    margin-bottom: 0.5rem;
+    background-color: var(--gpSystemDarkerGrey) !important;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--gpSystemDarkGrey) !important;
+    }
+
+    mat-expansion-panel-header {
+      mat-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .item-icon {
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+
+          &.weapon {
+            color: var(--gpColor-ChalkyBlue);
+          }
+
+          &.armor {
+            color: var(--gpColor-LightGreen);
+          }
+
+          &.equipment {
+            color: var(--gpSystemLightGrey);
+          }
+
+          &.consumable {
+            color: var(--gpColor-ChalkyBlue);
+          }
+
+          &.fabrial {
+            color: gold;
+          }
+        }
+
+        .item-name {
+          font-weight: 600;
+          color: #fff;
+        }
+
+        .item-quantity {
+          margin-left: auto;
+          color: var(--gpColor-ChalkyBlue);
+          font-weight: 600;
+        }
+      }
+
+      mat-panel-description {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+
+        .item-weight {
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.9rem;
+        }
+
+        .item-price {
+          color: gold;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.item-details {
+  padding: 1rem 0;
+  color: #fff;
+
+  .item-description {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    button {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+.empty-inventory {
+  text-align: center;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.5);
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  p {
+    margin: 0.5rem 0;
+    color: rgba(255, 255, 255, 0.7);
+
+    &.hint {
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+  }
+}
+
+.no-character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.5);
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}

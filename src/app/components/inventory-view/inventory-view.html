@@ -1,0 +1,195 @@
+<div class="inventory-container" *ngIf="character">
+  <!-- Header with Currency and Weight -->
+  <div class="inventory-header">
+    <div class="currency-display">
+      <mat-icon>paid</mat-icon>
+      <span class="currency-amount">{{ getCurrencyDisplay() }}</span>
+    </div>
+    
+    <div class="weight-tracker" [class.overencumbered]="isOverencumbered()">
+      <mat-icon>fitness_center</mat-icon>
+      <span class="weight-text">{{ getTotalWeight() | number:'1.0-1' }} / {{ getCarryingCapacity() }} lbs</span>
+      <mat-progress-bar 
+        mode="determinate" 
+        [value]="getWeightPercentage()"
+        [color]="isOverencumbered() ? 'warn' : 'primary'">
+      </mat-progress-bar>
+    </div>
+  </div>
+
+  <!-- Tab Selector -->
+  <mat-chip-set>
+    <mat-chip 
+      [highlighted]="selectedTab === 'equipped'"
+      (click)="selectTab('equipped')">
+      <mat-icon>shield</mat-icon>
+      Equipment
+    </mat-chip>
+    <mat-chip 
+      [highlighted]="selectedTab === 'inventory'"
+      (click)="selectTab('inventory')">
+      <mat-icon>inventory_2</mat-icon>
+      Inventory
+    </mat-chip>
+  </mat-chip-set>
+
+  <!-- Equipped Tab -->
+  <div class="equipped-section" *ngIf="selectedTab === 'equipped'">
+    <div class="equipment-slots">
+      <!-- Main Hand -->
+      <mat-card class="equipment-slot">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>pan_tool</mat-icon>
+          <mat-card-title>Main Hand</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="getEquippedItem('mainHand') as item; else emptySlot">
+            <div class="equipped-item">
+              <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-stats" *ngIf="item.weaponProperties">
+                  {{ item.weaponProperties.damage }} {{ item.weaponProperties.damageType }}
+                </div>
+              </div>
+              <button mat-icon-button (click)="unequipItem(item)" matTooltip="Unequip">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+          <ng-template #emptySlot>
+            <div class="empty-slot">No item equipped</div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Off Hand -->
+      <mat-card class="equipment-slot">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>back_hand</mat-icon>
+          <mat-card-title>Off Hand</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="getEquippedItem('offHand') as item; else emptySlot">
+            <div class="equipped-item">
+              <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-stats" *ngIf="item.weaponProperties">
+                  {{ item.weaponProperties.damage }} {{ item.weaponProperties.damageType }}
+                </div>
+              </div>
+              <button mat-icon-button (click)="unequipItem(item)" matTooltip="Unequip">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Armor -->
+      <mat-card class="equipment-slot">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>shield</mat-icon>
+          <mat-card-title>Armor</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="getEquippedItem('armor') as item; else emptySlot">
+            <div class="equipped-item">
+              <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-stats" *ngIf="item.armorProperties">
+                  Deflect: {{ item.armorProperties.deflectValue }}
+                </div>
+              </div>
+              <button mat-icon-button (click)="unequipItem(item)" matTooltip="Unequip">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Accessory -->
+      <mat-card class="equipment-slot">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>auto_awesome</mat-icon>
+          <mat-card-title>Accessory</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="getEquippedItem('accessory') as item; else emptySlot">
+            <div class="equipped-item">
+              <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+              <div class="item-info">
+                <div class="item-name">{{ item.name }}</div>
+              </div>
+              <button mat-icon-button (click)="unequipItem(item)" matTooltip="Unequip">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Inventory Tab -->
+  <div class="inventory-section" *ngIf="selectedTab === 'inventory'">
+    <mat-accordion class="inventory-list">
+      <mat-expansion-panel 
+        *ngFor="let item of getUnequippedItems()"
+        [expanded]="isItemExpanded(item.id)"
+        (opened)="toggleItemExpansion(item.id)"
+        (closed)="toggleItemExpansion(item.id)"
+        class="inventory-item">
+        
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-quantity" *ngIf="item.quantity > 1">x{{ item.quantity }}</span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <span class="item-weight">{{ item.weight * item.quantity | number:'1.1-1' }} lbs</span>
+            <span class="item-price">{{ item.price }}mk</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="item-details">
+          <p class="item-description">{{ getItemDescription(item) }}</p>
+          
+          <div class="item-actions">
+            <button 
+              mat-raised-button 
+              color="primary"
+              *ngIf="item.equipable && !isEquipped(item)"
+              (click)="equipItem(item)">
+              <mat-icon>shield</mat-icon>
+              Equip
+            </button>
+            
+            <button 
+              mat-stroked-button
+              *ngIf="item.rarity === 'common'"
+              matTooltip="Sell for {{ (item.price * 0.5) | number:'1.0-0' }}mk">
+              <mat-icon>sell</mat-icon>
+              Sell
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <div class="empty-inventory" *ngIf="getUnequippedItems().length === 0">
+      <mat-icon>inventory_2</mat-icon>
+      <p>No items in inventory</p>
+      <p class="hint">Visit the store to purchase equipment</p>
+    </div>
+  </div>
+</div>
+
+<div class="no-character" *ngIf="!character">
+  <mat-icon>warning</mat-icon>
+  <p>No character loaded</p>
+</div>

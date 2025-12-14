@@ -42,6 +42,35 @@ export interface SprenGrantEvent {
   philosophy: string;
 }
 
+export interface ItemTransaction {
+  itemId: string;
+  quantity: number;
+  price: number;
+  type: 'buy' | 'sell';
+}
+
+export interface StoreTransactionEvent {
+  storeId: string;
+  characterId: string;
+  items: ItemTransaction[];
+  totalCost: number;
+  timestamp: string;
+}
+
+export interface ItemGrantEvent {
+  characterId: string;
+  itemId: string;
+  quantity: number;
+  grantedBy: string;
+  timestamp: string;
+}
+
+export interface StoreToggleEvent {
+  storeId: string;
+  enabled: boolean;
+  toggledBy: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +100,15 @@ export class WebsocketService implements OnDestroy {
 
   private sprenGrantSubject = new Subject<SprenGrantEvent>();
   public sprenGrant$ = this.sprenGrantSubject.asObservable();
+
+  private storeTransactionSubject = new Subject<StoreTransactionEvent>();
+  public storeTransaction$ = this.storeTransactionSubject.asObservable();
+
+  private itemGrantSubject = new Subject<ItemGrantEvent>();
+  public itemGrant$ = this.itemGrantSubject.asObservable();
+
+  private storeToggleSubject = new Subject<StoreToggleEvent>();
+  public storeToggle$ = this.storeToggleSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -156,6 +194,22 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] ⭐ Broadcasting to sprenGrantSubject');
       this.sprenGrantSubject.next(data);
     });
+
+    // Listen for inventory/store events
+    this.socket.on('store-transaction', (data: StoreTransactionEvent) => {
+      console.log('[WebSocket] Store transaction:', data);
+      this.storeTransactionSubject.next(data);
+    });
+
+    this.socket.on('item-granted', (data: ItemGrantEvent) => {
+      console.log('[WebSocket] 🎁 Item granted:', data);
+      this.itemGrantSubject.next(data);
+    });
+
+    this.socket.on('store-toggle', (data: StoreToggleEvent) => {
+      console.log('[WebSocket] 🏪 Store toggled:', data);
+      this.storeToggleSubject.next(data);
+    });
   }
 
   disconnect(): void {
@@ -239,6 +293,44 @@ export class WebsocketService implements OnDestroy {
       sprenType: orderInfo.sprenType,
       surgePair: orderInfo.surgePair,
       philosophy: orderInfo.philosophy
+    });
+  }
+
+  emitStoreTransaction(data: StoreTransactionEvent): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot emit store-transaction: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] Emitting store transaction:', data);
+    this.socket.emit('store-transaction', data);
+  }
+
+  grantItem(characterId: string, itemId: string, quantity: number): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot grant item: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] Granting item:', { characterId, itemId, quantity });
+    this.socket.emit('gm-grant-item', {
+      characterId,
+      itemId,
+      quantity,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  toggleStore(storeId: string, enabled: boolean): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot toggle store: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] Toggling store:', { storeId, enabled });
+    this.socket.emit('gm-toggle-store', {
+      storeId,
+      enabled
     });
   }
 

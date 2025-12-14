@@ -27,6 +27,18 @@
       <mat-icon matListItemIcon>assignment</mat-icon>
       <span matListItemTitle>Character Sheet</span>
     </mat-list-item>
+    
+    <mat-list-item (click)="navigateTo('/store')">
+      <mat-icon matListItemIcon>store</mat-icon>
+      <span matListItemTitle>Store</span>
+    </mat-list-item>
+    
+    <mat-divider></mat-divider>
+    
+    <mat-list-item (click)="navigateTo('/gm-control-center')">
+      <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+      <span matListItemTitle>GM Dashboard</span>
+    </mat-list-item>
   </mat-nav-list>
 </nav>
 

@@ -19,6 +19,7 @@ import { WebsocketService } from '../../services/websocket.service';
 import { ResourceTracker, Resource } from '../../components/resource-tracker/resource-tracker';
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
+import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -39,7 +40,8 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     MatDialogModule,
     MatExpansionModule,
     ResourceTracker,
-    CharacterImage
+    CharacterImage,
+    InventoryView
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -130,6 +132,17 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         this.saveCharacter();
       }
     }, 30000);
+
+    // Listen for item grants
+    this.websocketService.itemGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (this.character && event.characterId === this.characterId) {
+          console.log('[Character Sheet] Item granted:', event.itemId, 'x', event.quantity);
+          this.character.inventory.addItem(event.itemId, event.quantity);
+          this.saveCharacter();
+        }
+      });
 
     // Listen for spren grants
     console.log('[Character Sheet] 🔔 Setting up spren grant listener...');

@@ -156,6 +156,7 @@ export class CharacterStorageService {
         max: character.resources.investiture.max
       },
       radiantPath: character.radiantPath.toJSON(),
+      inventory: character.inventory.serialize(),
       sessionNotes: (character as any).sessionNotes || '',
       lastModified: new Date().toISOString()
     };
@@ -228,6 +229,10 @@ export class CharacterStorageService {
     
     if (data.radiantPath) {
       character.radiantPath.fromJSON(data.radiantPath);
+    }
+    
+    if (data.inventory) {
+      character.inventory.deserialize(data.inventory);
     }
     
     (character as any).sessionNotes = data.sessionNotes || '';

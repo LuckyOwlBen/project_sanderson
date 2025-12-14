@@ -94,9 +94,67 @@
           <mat-icon>auto_awesome</mat-icon>
           Grant Spren
         </button>
+        <button mat-raised-button color="accent" (click)="openItemGrantDialog(player)">
+          <mat-icon>redeem</mat-icon>
+          Grant Item
+        </button>
       </mat-card-actions>
     </mat-card>
   </div>
+
+  <!-- Store Controls Section -->
+  <mat-card class="store-controls-card" *ngIf="isConnected">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>store</mat-icon>
+      <mat-card-title>Store Controls</mat-card-title>
+      <mat-card-subtitle>Enable or disable stores for players</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="store-toggles">
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>store</mat-icon>
+            <span class="store-name">Main Store</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('main-store') ? 'primary' : 'warn'"
+            (click)="toggleStore('main-store')">
+            <mat-icon>{{ isStoreEnabled('main-store') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('main-store') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>swords</mat-icon>
+            <span class="store-name">Weapons Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('weapons-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('weapons-shop')">
+            <mat-icon>{{ isStoreEnabled('weapons-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('weapons-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>shield</mat-icon>
+            <span class="store-name">Armor Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('armor-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('armor-shop')">
+            <mat-icon>{{ isStoreEnabled('armor-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('armor-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
   <!-- Empty State -->
   <div class="empty-state" *ngIf="activePlayers.size === 0 && isConnected">

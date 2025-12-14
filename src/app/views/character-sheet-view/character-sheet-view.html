@@ -82,130 +82,139 @@
   </mat-card>
 
   <!-- Main Content -->
-  <div class="sheet-content">
-    <!-- Left Column: Portrait, Talents & Notes -->
-    <div class="left-column">
-      <!-- Portrait Card -->
-      <mat-card class="portrait-card">
-        <div class="portrait-header">
-          <h3 class="character-name-overlay">{{ character.name || 'Character' }}</h3>
-        </div>
-        <div class="portrait-image-container">
-          <app-character-image
-            [imageUrl]="portraitUrl"
-            [characterName]="character.name || 'Character'"
-            [size]="'large'"
-            [showPlaceholder]="true">
-          </app-character-image>
-        </div>
-        <div class="portrait-actions">
-          <button mat-button (click)="openPortraitUpload()">
-            <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
-            {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
-          </button>
-        </div>
-      </mat-card>
-
-      <!-- Powers Card -->
-      <mat-card class="powers-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">auto_awesome</mat-icon>
-          <mat-card-title>Powers</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="powers-list">
-            <mat-accordion class="powers-accordion" *ngIf="getPowers().length > 0">
-              <mat-expansion-panel *ngFor="let power of getPowers()" class="power-panel">
-                <mat-expansion-panel-header>
-                  <mat-panel-title class="power-title">
-                    <mat-icon class="power-icon">flash_on</mat-icon>
-                    <span class="power-name">{{ power.name }}</span>
-                  </mat-panel-title>
-                  <mat-panel-description class="power-cost">
-                    {{ getActionCostDisplay(power.actionCost) }}
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                
-                <div class="power-details">
-                  <div class="power-description">
-                    <p>{{ power.description }}</p>
-                    <p *ngIf="power.specialActivation" class="special-activation">
-                      <strong>Special Activation:</strong> {{ power.specialActivation }}
-                    </p>
-                  </div>
-                  
-                  <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
-                    <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
-                    <ul>
-                      <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
-                    <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
-                    <ul>
-                      <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
-                    </ul>
-                  </div>
-                  
-                  <div class="power-meta">
-                    <span class="power-tier">Tier {{ power.tier }}</span>
-                    <span class="power-path" *ngIf="power.pathRequirement">
-                      <mat-icon>route</mat-icon> {{ power.pathRequirement }}
-                    </span>
-                  </div>
-                </div>
-              </mat-expansion-panel>
-            </mat-accordion>
-            
-            <p class="empty-text" *ngIf="getPowers().length === 0">
-              No powers unlocked yet
-            </p>
+  <mat-tab-group class="sheet-tabs">
+    <mat-tab label="Character Stats">
+      <div class="sheet-content">
+        <!-- Portrait Card -->
+        <mat-card class="portrait-card">
+          <div class="portrait-header">
+            <h3 class="character-name-overlay">{{ character.name || 'Character' }}</h3>
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="portrait-image-container">
+            <app-character-image
+              [imageUrl]="portraitUrl"
+              [characterName]="character.name || 'Character'"
+              [size]="'large'"
+              [showPlaceholder]="true">
+            </app-character-image>
+          </div>
+          <div class="portrait-actions">
+            <button mat-button (click)="openPortraitUpload()">
+              <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+              {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
+            </button>
+          </div>
+        </mat-card>
 
-      <!-- Session Notes Card -->
-      <mat-card class="notes-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">notes</mat-icon>
-          <mat-card-title>Session Notes</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-form-field appearance="outline" class="notes-field">
-            <mat-label>Notes, objectives, and reminders...</mat-label>
-            <textarea 
-              matInput 
-              [(ngModel)]="sessionNotes"
-              (blur)="saveCharacter()"
-              rows="10"
-              placeholder="Track your adventure here...">
-            </textarea>
-          </mat-form-field>
-        </mat-card-content>
-      </mat-card>
-    </div>
+        <!-- Inventory Card -->
+        <app-inventory-view [character]="character"></app-inventory-view>
+      </div>
+    </mat-tab>
 
-    <!-- Middle Column: Resources -->
-    <div class="middle-column">
-      <app-resource-tracker 
-        [resource]="healthResource"
-        (valueChanged)="onResourceChanged('Health', $event)">
-      </app-resource-tracker>
+    <mat-tab label="Powers & Notes">
+      <div class="sheet-content powers-notes-tab">
+        <!-- Powers Card -->
+        <mat-card class="powers-card">
+          <mat-card-header>
+            <mat-icon class="section-icon">auto_awesome</mat-icon>
+            <mat-card-title>Powers</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="powers-list">
+              <mat-accordion class="powers-accordion" *ngIf="getPowers().length > 0">
+                <mat-expansion-panel *ngFor="let power of getPowers()" class="power-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title class="power-title">
+                      <mat-icon class="power-icon">flash_on</mat-icon>
+                      <span class="power-name">{{ power.name }}</span>
+                    </mat-panel-title>
+                    <mat-panel-description class="power-cost">
+                      {{ getActionCostDisplay(power.actionCost) }}
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  
+                  <div class="power-details">
+                    <div class="power-description">
+                      <p>{{ power.description }}</p>
+                      <p *ngIf="power.specialActivation" class="special-activation">
+                        <strong>Special Activation:</strong> {{ power.specialActivation }}
+                      </p>
+                    </div>
+                    
+                    <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
+                      <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
+                      <ul>
+                        <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
+                      </ul>
+                    </div>
+                    
+                    <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
+                      <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
+                      <ul>
+                        <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
+                      </ul>
+                    </div>
+                    
+                    <div class="power-meta">
+                      <span class="power-tier">Tier {{ power.tier }}</span>
+                      <span class="power-path" *ngIf="power.pathRequirement">
+                        <mat-icon>route</mat-icon> {{ power.pathRequirement }}
+                      </span>
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+              
+              <p class="empty-text" *ngIf="getPowers().length === 0">
+                No powers unlocked yet
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
 
-      <app-resource-tracker 
-        [resource]="focusResource"
-        (valueChanged)="onResourceChanged('Focus', $event)">
-      </app-resource-tracker>
+        <!-- Session Notes Card -->
+        <mat-card class="notes-card">
+          <mat-card-header>
+            <mat-icon class="section-icon">notes</mat-icon>
+            <mat-card-title>Session Notes</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="notes-field">
+              <mat-label>Notes, objectives, and reminders...</mat-label>
+              <textarea 
+                matInput 
+                [(ngModel)]="sessionNotes"
+                (blur)="saveCharacter()"
+                rows="10"
+                placeholder="Track your adventure here...">
+              </textarea>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 
-      <app-resource-tracker 
-        [resource]="investitureResource"
-        (valueChanged)="onResourceChanged('Investiture', $event)">
-      </app-resource-tracker>
-    </div>
+  <!-- Resources Column (Always Visible) -->
+  <div class="resources-sidebar">
+    <app-resource-tracker 
+      [resource]="healthResource"
+      (valueChanged)="onResourceChanged('Health', $event)">
+    </app-resource-tracker>
 
-    <!-- Right Column: Attributes, Defenses & Skills -->
-    <div class="right-column">
+    <app-resource-tracker 
+      [resource]="focusResource"
+      (valueChanged)="onResourceChanged('Focus', $event)">
+    </app-resource-tracker>
+
+    <app-resource-tracker 
+      [resource]="investitureResource"
+      (valueChanged)="onResourceChanged('Investiture', $event)">
+    </app-resource-tracker>
+  </div>
+
+  <!-- Stats Column -->
+  <div class="stats-sidebar">
       <!-- Attributes Card -->
       <mat-card class="stats-card">
         <mat-card-header>
@@ -304,7 +313,6 @@
           </div>
         </mat-card-content>
       </mat-card>
-    </div>
   </div>
 </div>
 

@@ -443,6 +443,57 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Store transaction from player
+  socket.on('store-transaction', (data) => {
+    const { storeId, characterId, items, totalCost, timestamp } = data;
+    console.log(`[Store] Transaction at ${storeId} by ${characterId}: ${totalCost}mk`);
+    
+    // Broadcast to all GM clients for tracking
+    io.emit('store-transaction', data);
+  });
+
+  // GM grants item to a player
+  socket.on('gm-grant-item', (data) => {
+    const { characterId, itemId, quantity, timestamp } = data;
+    console.log(`[GM Action] 🎁 Granting ${quantity}x ${itemId} to character ${characterId}`);
+    
+    // Find the target player's socket
+    let targetSocket = null;
+    for (const [socketId, player] of activePlayers.entries()) {
+      if (player.characterId === characterId) {
+        targetSocket = socketId;
+        break;
+      }
+    }
+    
+    if (targetSocket) {
+      const payload = {
+        characterId,
+        itemId,
+        quantity,
+        grantedBy: 'GM',
+        timestamp: timestamp || new Date().toISOString()
+      };
+      console.log(`[GM Action] 🎁 Sending item-granted to socket ${targetSocket}`);
+      io.to(targetSocket).emit('item-granted', payload);
+    } else {
+      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+    }
+  });
+
+  // GM toggles store availability
+  socket.on('gm-toggle-store', (data) => {
+    const { storeId, enabled } = data;
+    console.log(`[GM Action] 🏪 Store ${storeId} toggled: ${enabled ? 'OPEN' : 'CLOSED'}`);
+    
+    // Broadcast to all clients
+    io.emit('store-toggle', {
+      storeId,
+      enabled,
+      toggledBy: 'GM'
+    });
+  });
+
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);

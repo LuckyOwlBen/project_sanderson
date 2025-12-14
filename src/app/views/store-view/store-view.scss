@@ -1,0 +1,377 @@
+.store-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.store-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--gpSystemDarkerGrey);
+  border-radius: 12px;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .store-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+      color: var(--gpColor-ChalkyBlue);
+    }
+
+    .header-text {
+      h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        margin: 0.25rem 0 0 0;
+        color: var(--gpSystemLightGrey);
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .currency-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .currency-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gpColor-ChalkyBlue);
+      padding: 0.5rem 1rem;
+      background-color: var(--gpSystemDarkGrey);
+      border-radius: 8px;
+
+      mat-icon {
+        color: gold;
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    button {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+.currency-converter {
+  margin-bottom: 2rem;
+  background-color: var(--gpSystemDarkerGrey) !important;
+
+  mat-card-content {
+    .converter-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+.search-bar {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.category-selector {
+  margin-bottom: 2rem;
+
+  mat-chip {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.item-card {
+  background-color: var(--gpSystemDarkerGrey) !important;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &.affordable {
+    border: 2px solid transparent;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      border-color: var(--gpColor-ChalkyBlue);
+    }
+  }
+
+  &.expensive {
+    opacity: 0.7;
+
+    mat-card-header {
+      mat-card-title {
+        color: var(--gpSystemLightGrey);
+      }
+    }
+
+    .item-price {
+      color: var(--warn-color);
+    }
+  }
+
+  mat-card-header {
+    mat-icon[mat-card-avatar] {
+      width: 48px;
+      height: 48px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background-color: var(--gpSystemDarkGrey);
+
+      &.weapon {
+        color: var(--gpColor-ChalkyBlue);
+      }
+
+      &.armor {
+        color: var(--gpColor-LightGreen);
+      }
+
+      &.equipment {
+        color: var(--gpSystemLightGrey);
+      }
+
+      &.consumable {
+        color: var(--gpColor-ChalkyBlue);
+      }
+
+      &.fabrial {
+        color: gold;
+      }
+
+      &.mount {
+        color: var(--gpColor-LightGreen);
+      }
+    }
+
+    mat-card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    mat-card-subtitle {
+      text-transform: capitalize;
+    }
+  }
+
+  mat-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .item-description {
+      line-height: 1.5;
+      color: var(--gpSystemLightGrey);
+      flex: 1;
+    }
+
+    .item-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background-color: var(--gpSystemDarkGrey);
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--gpColor-ChalkyBlue);
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+
+    .item-traits {
+      mat-chip-set {
+        mat-chip {
+          font-size: 0.75rem;
+          height: 24px;
+        }
+      }
+    }
+
+    .item-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--gpSystemDarkGrey);
+
+      .item-weight,
+      .item-price {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      .item-weight {
+        color: var(--gpSystemLightGrey);
+      }
+
+      .item-price {
+        color: gold;
+        font-weight: 700;
+
+        .price-amount {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  mat-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--gpSystemDarkGrey);
+
+    button {
+      mat-icon {
+        margin-right: 0.25rem;
+      }
+
+      &:first-child {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.empty-results,
+.store-closed,
+.no-character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: var(--gpSystemLightGrey);
+
+  mat-icon {
+    font-size: 6rem;
+    width: 6rem;
+    height: 6rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin: 0 0 1rem 0;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+
+    &.hint {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--gpSystemLightGrey);
+      opacity: 0.8;
+    }
+  }
+}
+
+.store-closed {
+  mat-icon {
+    color: var(--warn-color);
+  }
+}
+
+@media (max-width: 768px) {
+  .store-container {
+    padding: 1rem;
+  }
+
+  .store-header {
+    flex-direction: column;
+    gap: 1rem;
+
+    .header-content {
+      .header-text {
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .subtitle {
+          font-size: 0.9rem;
+        }
+      }
+    }
+
+    .currency-section {
+      flex-direction: column;
+      width: 100%;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .currency-converter {
+    mat-card-content {
+      .converter-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

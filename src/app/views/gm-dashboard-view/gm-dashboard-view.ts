@@ -12,6 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.service';
 import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
 import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
+import { ItemGrantDialogComponent } from './item-grant-dialog.component';
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -36,6 +37,11 @@ export class GmDashboardView implements OnInit, OnDestroy {
   activePlayers = new Map<string, PlayerJoinedEvent>();
   isConnected = false;
   criticalPlayers = new Set<string>(); // Characters at 0 health
+  storeEnabled = new Map<string, boolean>([
+    ['main-store', true],
+    ['weapons-shop', true],
+    ['armor-shop', true]
+  ]);
 
   constructor(
     private websocketService: WebsocketService,
@@ -186,5 +192,36 @@ export class GmDashboardView implements OnInit, OnDestroy {
         this.websocketService.grantSpren(player.characterId, result.order, result.orderInfo);
       }
     });
+  }
+
+  openItemGrantDialog(player: PlayerJoinedEvent): void {
+    const dialogRef = this.dialog.open(ItemGrantDialogComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      data: { player }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('[GM Dashboard] Granting item:', result);
+        this.websocketService.grantItem(
+          player.characterId,
+          result.itemId,
+          result.quantity
+        );
+      }
+    });
+  }
+
+  toggleStore(storeId: string): void {
+    const currentState = this.storeEnabled.get(storeId) ?? true;
+    const newState = !currentState;
+    this.storeEnabled.set(storeId, newState);
+    this.websocketService.toggleStore(storeId, newState);
+    console.log(`[GM Dashboard] Store ${storeId} ${newState ? 'opened' : 'closed'}`);
+  }
+
+  isStoreEnabled(storeId: string): boolean {
+    return this.storeEnabled.get(storeId) ?? true;
   }
 }
