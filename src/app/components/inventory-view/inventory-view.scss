@@ -1,3 +1,44 @@
+// Custom tab styles for inventory view
+.inventory-tabs {
+  .tab-labels {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--gpSystemDarkGrey);
+  }
+  .tab-label {
+    background: none;
+    border: none;
+    color: #e8e8e8;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 2rem 0.5rem 2rem;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .tab-label.active {
+    color: var(--gpColor-ChalkyBlue);
+    background: var(--gpSystemDarkGrey);
+    box-shadow: 0 -2px 8px 0 rgba(74,179,232,0.08);
+    z-index: 2;
+  }
+  .tab-label:not(.active):hover {
+    background: rgba(74,179,232,0.08);
+    color: #fff;
+  }
+}
+// Force chip text to white regardless of Angular Material internals
+::ng-deep mat-chip,
+::ng-deep .mat-mdc-chip,
+::ng-deep .mat-mdc-chip .mdc-evolution-chip__text {
+  color: #fff !important;
+}
 .inventory-container {
   padding: 1rem;
   height: 100%;
@@ -54,13 +95,29 @@ mat-chip-set {
   mat-chip {
     cursor: pointer;
     transition: all 0.2s ease;
-
+    background: var(--gpSystemDarkGrey) !important;
+    color: #fff !important;
+    font-weight: 600;
+    border-radius: 20px;
+    font-size: 1.05rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border: 1.5px solid var(--gpColor-ChalkyBlue);
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
     mat-icon {
       margin-right: 0.5rem;
+      color: var(--gpColor-ChalkyBlue) !important;
     }
-
-    &:hover {
-      transform: translateY(-2px);
+    &:hover, &[highlighted], &.mat-mdc-chip-selected {
+      background: var(--gpColor-ChalkyBlue) !important;
+      color: #fff !important;
+      border-color: #fff;
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 16px rgba(74,179,232,0.18);
+      mat-icon {
+        color: #fff !important;
+      }
     }
   }
 }
@@ -217,6 +274,12 @@ mat-chip-set {
         .item-name {
           font-weight: 600;
           color: #fff;
+          max-width: 140px;
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          vertical-align: bottom;
         }
 
         .item-quantity {

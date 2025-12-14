@@ -9,6 +9,7 @@ import { SkillManager } from './components/skill-manager/skill-manager';
 import { ExpertiseSelector } from './components/expertise-selector/expertise-selector';
 import { PathSelector } from './components/path-selector/path-selector';
 import { TalentView } from './components/talent-view/talent-view';
+import { StartingEquipment } from './components/starting-equipment/starting-equipment';
 import { CharacterReview } from './views/character-review/character-review';
 import { CharacterSheetView } from './views/character-sheet-view/character-sheet-view';
 import { CharacterListView } from './views/character-list-view/character-list-view';
@@ -33,6 +34,7 @@ export const routes: Routes = [
         { path: 'expertises', component: ExpertiseSelector, pathMatch: 'full' },
         { path: 'paths', component: PathSelector, pathMatch: 'full' },
         { path: 'talents', component: TalentView, pathMatch: 'full' },
+        { path: 'equipment', component: StartingEquipment, pathMatch: 'full' },
         { path: 'review', component: CharacterReview, pathMatch: 'full' },
     ]},
   { path: 'character-sheet/:id', component: CharacterSheetView },

@@ -37,14 +37,16 @@ export class StepValidationService {
 
   // Validate all steps based on character state
   validateAllSteps(character: Character): void {
-    this.validateAncestry(character);
-    this.validateCulture(character);
-    this.validateName(character);
-    this.validateAttributes(character);
-    this.validateSkills(character);
-    this.validatePath(character);
-    this.validateTalents(character);
-    this.validateReview(character);
+    this.validateAncestry(character);      // Step 0
+    this.validateCulture(character);       // Step 1
+    this.validateName(character);          // Step 2
+    this.validateAttributes(character);    // Step 3
+    this.validateSkills(character);        // Step 4
+    this.validateExpertises(character);    // Step 5
+    this.validatePath(character);          // Step 6
+    this.validateTalents(character);       // Step 7
+    this.validateEquipment(character);     // Step 8
+    this.validateReview(character);        // Step 9
   }
 
   private validateAncestry(character: Character): void {
@@ -101,14 +103,19 @@ export class StepValidationService {
     this.setStepValid(4, isValid);
   }
 
+  private validateExpertises(character: Character): void {
+    // Expertises step is always valid (optional selections)
+    this.setStepValid(5, true);
+  }
+
   private validatePath(character: Character): void {
     const isValid = character.paths && character.paths.length > 0;
-    this.setStepValid(5, isValid);
+    this.setStepValid(6, isValid);
   }
 
   private validateTalents(character: Character): void {
     if (!character.unlockedTalents) {
-      this.setStepValid(6, false);
+      this.setStepValid(7, false);
       return;
     }
 
@@ -125,11 +132,16 @@ export class StepValidationService {
     }
     
     const isValid = paidTalentCount >= requiredTalents;
-    this.setStepValid(6, isValid);
+    this.setStepValid(7, isValid);
+  }
+
+  private validateEquipment(character: Character): void {
+    // Equipment step is always valid - user can proceed with or without items
+    this.setStepValid(8, true);
   }
 
   private validateReview(character: Character): void {
     // Review is always valid if you can get there
-    this.setStepValid(7, true);
+    this.setStepValid(9, true);
   }
 }

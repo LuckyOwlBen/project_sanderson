@@ -82,8 +82,14 @@
   </mat-card>
 
   <!-- Main Content -->
-  <mat-tab-group class="sheet-tabs">
-    <mat-tab label="Character Stats">
+  <div class="sheet-tabs custom-tabs">
+    <div class="tab-labels">
+      <button class="tab-label" [class.active]="activeTab === 0" (click)="activeTab = 0">Overview</button>
+      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">Talents &amp; Expertises</button>
+      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Equipment</button>
+      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Notes</button>
+    </div>
+    <div class="tab-content" *ngIf="activeTab === 0">
       <div class="sheet-content">
         <!-- Portrait Card -->
         <mat-card class="portrait-card">
@@ -105,13 +111,46 @@
             </button>
           </div>
         </mat-card>
-
-        <!-- Inventory Card -->
-        <app-inventory-view [character]="character"></app-inventory-view>
+        <!-- Defenses Card -->
+        <mat-card class="stats-card">
+          <mat-card-header>
+            <mat-icon class="section-icon">shield</mat-icon>
+            <mat-card-title>Defenses</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="defenses-list">
+              <div class="defense-item">
+                <span class="defense-label">Physical Defense</span>
+                <span class="defense-value">{{ character.defenses.getPhysicalDefense(character.attributes, 0) }}</span>
+              </div>
+              <div class="defense-item">
+                <span class="defense-label">Cognitive Defense</span>
+                <span class="defense-value">{{ character.defenses.getCognitiveDefense(character.attributes, 0) }}</span>
+              </div>
+              <div class="defense-item">
+                <span class="defense-label">Spiritual Defense</span>
+                <span class="defense-value">{{ character.defenses.getSpiritualDefense(character.attributes, 0) }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <div class="overview-resources-bar">
+          <app-resource-tracker 
+            [resource]="healthResource"
+            (valueChanged)="onResourceChanged('Health', $event)">
+          </app-resource-tracker>
+          <app-resource-tracker 
+            [resource]="focusResource"
+            (valueChanged)="onResourceChanged('Focus', $event)">
+          </app-resource-tracker>
+          <app-resource-tracker 
+            [resource]="investitureResource"
+            (valueChanged)="onResourceChanged('Investiture', $event)">
+          </app-resource-tracker>
+        </div>
       </div>
-    </mat-tab>
-
-    <mat-tab label="Powers & Notes">
+    </div>
+    <div class="tab-content" *ngIf="activeTab === 1">
       <div class="sheet-content powers-notes-tab">
         <!-- Powers Card -->
         <mat-card class="powers-card">
@@ -132,7 +171,6 @@
                       {{ getActionCostDisplay(power.actionCost) }}
                     </mat-panel-description>
                   </mat-expansion-panel-header>
-                  
                   <div class="power-details">
                     <div class="power-description">
                       <p>{{ power.description }}</p>
@@ -140,21 +178,18 @@
                         <strong>Special Activation:</strong> {{ power.specialActivation }}
                       </p>
                     </div>
-                    
                     <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
                       <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
                       <ul>
                         <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
                       </ul>
                     </div>
-                    
                     <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
                       <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
                       <ul>
                         <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
                       </ul>
                     </div>
-                    
                     <div class="power-meta">
                       <span class="power-tier">Tier {{ power.tier }}</span>
                       <span class="power-path" *ngIf="power.pathRequirement">
@@ -164,15 +199,40 @@
                   </div>
                 </mat-expansion-panel>
               </mat-accordion>
-              
               <p class="empty-text" *ngIf="getPowers().length === 0">
                 No powers unlocked yet
               </p>
             </div>
           </mat-card-content>
         </mat-card>
+        <!-- Expertises Card -->
+        <mat-card class="stats-card">
+          <mat-card-header>
+            <mat-icon class="section-icon">auto_stories</mat-icon>
+            <mat-card-title>Expertises</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="expertises-list">
+              <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
+                <mat-icon class="expertise-icon">check_circle</mat-icon>
+                <span class="expertise-name">{{ expertise }}</span>
+              </div>
+              <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
+                No expertises selected
+              </p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <div class="tab-content" *ngIf="activeTab === 2">
+      <div class="sheet-content">
+        <app-inventory-view [character]="character"></app-inventory-view>
+      </div>
+    </div>
 
-        <!-- Session Notes Card -->
+    <div class="tab-content" *ngIf="activeTab === 3">
+      <div class="sheet-content powers-notes-tab">
         <mat-card class="notes-card">
           <mat-card-header>
             <mat-icon class="section-icon">notes</mat-icon>
@@ -192,128 +252,9 @@
           </mat-card-content>
         </mat-card>
       </div>
-    </mat-tab>
-  </mat-tab-group>
-
-  <!-- Resources Column (Always Visible) -->
-  <div class="resources-sidebar">
-    <app-resource-tracker 
-      [resource]="healthResource"
-      (valueChanged)="onResourceChanged('Health', $event)">
-    </app-resource-tracker>
-
-    <app-resource-tracker 
-      [resource]="focusResource"
-      (valueChanged)="onResourceChanged('Focus', $event)">
-    </app-resource-tracker>
-
-    <app-resource-tracker 
-      [resource]="investitureResource"
-      (valueChanged)="onResourceChanged('Investiture', $event)">
-    </app-resource-tracker>
+    </div>
   </div>
 
-  <!-- Stats Column -->
-  <div class="stats-sidebar">
-      <!-- Attributes Card -->
-      <mat-card class="stats-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">fitness_center</mat-icon>
-          <mat-card-title>Attributes</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="attributes-grid">
-            <div class="attribute-box">
-              <span class="attr-label">Strength</span>
-              <span class="attr-value">{{ character.attributes.strength }}</span>
-            </div>
-            <div class="attribute-box">
-              <span class="attr-label">Speed</span>
-              <span class="attr-value">{{ character.attributes.speed }}</span>
-            </div>
-            <div class="attribute-box">
-              <span class="attr-label">Intellect</span>
-              <span class="attr-value">{{ character.attributes.intellect }}</span>
-            </div>
-            <div class="attribute-box">
-              <span class="attr-label">Willpower</span>
-              <span class="attr-value">{{ character.attributes.willpower }}</span>
-            </div>
-            <div class="attribute-box">
-              <span class="attr-label">Awareness</span>
-              <span class="attr-value">{{ character.attributes.awareness }}</span>
-            </div>
-            <div class="attribute-box">
-              <span class="attr-label">Presence</span>
-              <span class="attr-value">{{ character.attributes.presence }}</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Defenses Card -->
-      <mat-card class="stats-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">shield</mat-icon>
-          <mat-card-title>Defenses</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="defenses-list">
-            <div class="defense-item">
-              <span class="defense-label">Physical Defense</span>
-              <span class="defense-value">{{ character.defenses.getPhysicalDefense(character.attributes, 0) }}</span>
-            </div>
-            <div class="defense-item">
-              <span class="defense-label">Cognitive Defense</span>
-              <span class="defense-value">{{ character.defenses.getCognitiveDefense(character.attributes, 0) }}</span>
-            </div>
-            <div class="defense-item">
-              <span class="defense-label">Spiritual Defense</span>
-              <span class="defense-value">{{ character.defenses.getSpiritualDefense(character.attributes, 0) }}</span>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Skills Card -->
-      <mat-card class="stats-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">school</mat-icon>
-          <mat-card-title>Skills</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="skills-list">
-            <div class="skill-item" *ngFor="let skill of getTrainedSkills()">
-              <span class="skill-name">{{ skill.name }}</span>
-              <span class="skill-ranks">Rank {{ skill.rank }}</span>
-              <span class="skill-total">Total: +{{ skill.total }}</span>
-            </div>
-            <p class="empty-text" *ngIf="getTrainedSkills().length === 0">
-              No skills trained
-            </p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Expertises Card -->
-      <mat-card class="stats-card">
-        <mat-card-header>
-          <mat-icon class="section-icon">auto_stories</mat-icon>
-          <mat-card-title>Expertises</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="expertises-list">
-            <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
-              <mat-icon class="expertise-icon">check_circle</mat-icon>
-              <span class="expertise-name">{{ expertise }}</span>
-            </div>
-            <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
-              No expertises selected
-            </p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-  </div>
 </div>
 
 <div class="no-character" *ngIf="!character">

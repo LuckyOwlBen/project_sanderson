@@ -179,6 +179,69 @@
         </p>
       </mat-card-content>
     </mat-card>
+
+    <!-- Inventory Card -->
+    <mat-card class="review-card" *ngIf="hasInventoryItems() || hasEquippedItems()">
+      <mat-card-header>
+        <mat-icon class="section-icon">shopping_bag</mat-icon>
+        <mat-card-title>Starting Equipment</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Currency Display -->
+        <div class="currency-display" *ngIf="character">
+          <div class="currency-item">
+            <mat-icon class="currency-icon">account_balance</mat-icon>
+            <span class="currency-label">Currency:</span>
+            <span class="currency-value">
+              {{ getCurrency().broams }}b {{ getCurrency().marks }}m {{ getCurrency().chips }}c
+            </span>
+          </div>
+        </div>
+
+        <!-- Equipped Items -->
+        <div class="equipped-section" *ngIf="hasEquippedItems()">
+          <h3 class="subsection-title">
+            <mat-icon>shield</mat-icon>
+            Equipped Items
+          </h3>
+          <div class="equipped-items-list">
+            <div class="equipped-item" *ngFor="let item of getEquippedItems()">
+              <mat-icon class="item-icon">{{ getItemIcon(item.type) }}</mat-icon>
+              <div class="item-details">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-slot">{{ item.slot }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory Items -->
+        <div class="inventory-section" *ngIf="hasInventoryItems()">
+          <h3 class="subsection-title">
+            <mat-icon>inventory</mat-icon>
+            Carried Items ({{ getInventoryItems().length }})
+          </h3>
+          <div class="inventory-items-list">
+            <div class="inventory-item" *ngFor="let item of getInventoryItems()">
+              <mat-icon class="item-icon">{{ getItemIcon(item.type) }}</mat-icon>
+              <span class="item-name">{{ item.name }}</span>
+              <span class="item-quantity" *ngIf="item.quantity && item.quantity > 1">×{{ item.quantity }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weight Display -->
+        <div class="weight-display" *ngIf="character">
+          <mat-icon class="weight-icon">fitness_center</mat-icon>
+          <span class="weight-label">Total Weight:</span>
+          <span class="weight-value">{{ getTotalWeight() }} lbs</span>
+        </div>
+
+        <p class="empty-state" *ngIf="!hasInventoryItems() && !hasEquippedItems()">
+          No equipment
+        </p>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <!-- Finalize Button -->

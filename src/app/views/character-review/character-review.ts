@@ -218,6 +218,60 @@ export class CharacterReview implements OnInit, OnDestroy {
       w.charAt(0).toUpperCase() + w.slice(1)
     ).join(' ');
   }
+
+  hasInventoryItems(): boolean {
+    if (!this.character?.inventory) return false;
+    const allItems = this.character.inventory.getAllItems();
+    const equippedItems = this.character.inventory.getAllEquippedItems();
+    const equippedIds = new Set(equippedItems.map(item => item.id));
+    return allItems.some(item => !equippedIds.has(item.id));
+  }
+
+  hasEquippedItems(): boolean {
+    if (!this.character?.inventory) return false;
+    return this.character.inventory.getAllEquippedItems().length > 0;
+  }
+
+  getInventoryItems(): any[] {
+    if (!this.character?.inventory) return [];
+    const allItems = this.character.inventory.getAllItems();
+    const equippedItems = this.character.inventory.getAllEquippedItems();
+    const equippedIds = new Set(equippedItems.map(item => item.id));
+    return allItems.filter(item => !equippedIds.has(item.id));
+  }
+
+  getEquippedItems(): any[] {
+    if (!this.character?.inventory) return [];
+    return this.character.inventory.getAllEquippedItems();
+  }
+
+  getCurrency(): { broams: number; marks: number; chips: number } {
+    if (!this.character?.inventory) {
+      return { broams: 0, marks: 0, chips: 0 };
+    }
+    const totalChips = this.character.inventory.getCurrency();
+    const broams = Math.floor(totalChips / 20);
+    const marks = Math.floor((totalChips % 20) / 5);
+    const chips = totalChips % 5;
+    return { broams, marks, chips };
+  }
+
+  getTotalWeight(): number {
+    if (!this.character?.inventory) return 0;
+    return this.character.inventory.getTotalWeight();
+  }
+
+  getItemIcon(itemType: string): string {
+    const iconMap: { [key: string]: string } = {
+      'weapon': 'gavel',
+      'armor': 'shield',
+      'consumable': 'medical_services',
+      'tool': 'build',
+      'fabrial': 'blur_on',
+      'misc': 'category'
+    };
+    return iconMap[itemType] || 'inventory_2';
+  }
 }
 
 

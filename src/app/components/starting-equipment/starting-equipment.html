@@ -1,0 +1,203 @@
+<div class="starting-equipment-container">
+  <div class="step-header">
+    <h2>Starting Equipment</h2>
+    <p class="step-description">
+      Your character begins with a starting kit based on your background. 
+      You can keep these items or sell them back for currency to purchase different equipment.
+    </p>
+  </div>
+
+  <div class="equipment-layout">
+    <!-- Left Side: Available Items -->
+    <div class="available-items-section">
+      <mat-card class="items-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">store</mat-icon>
+          <mat-card-title>Available Equipment</mat-card-title>
+          <div class="currency-display">
+            <mat-icon>paid</mat-icon>
+            <span>{{ getCurrencyDisplay() }}</span>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Category Filter -->
+          <mat-chip-set class="category-chips">
+            <mat-chip
+              [highlighted]="selectedCategory === 'all'"
+              (click)="selectCategory('all')">
+              All Items
+            </mat-chip>
+            <mat-chip 
+              [highlighted]="selectedCategory === 'weapon'"
+              (click)="selectCategory('weapon')">
+              Weapons
+            </mat-chip>
+            <mat-chip 
+              [highlighted]="selectedCategory === 'armor'"
+              (click)="selectCategory('armor')">
+              Armor
+            </mat-chip>
+            <mat-chip 
+              [highlighted]="selectedCategory === 'equipment'"
+              (click)="selectCategory('equipment')">
+              Equipment
+            </mat-chip>
+            <mat-chip 
+              [highlighted]="selectedCategory === 'mount'"
+              (click)="selectCategory('mount')">
+              Mounts
+            </mat-chip>
+          </mat-chip-set>
+
+          <!-- Items Grid -->
+          <div class="items-grid">
+            <div 
+              *ngFor="let item of paginatedItems"
+              class="item-card"
+              [class.affordable]="canAfford(item)"
+              [class.owned]="getItemQuantity(item.id) > 0">
+              
+              <div class="item-header">
+                <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
+                <div class="item-info">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-type">{{ item.type }}</span>
+                </div>
+                <span class="item-price">{{ item.price }}mk</span>
+              </div>
+
+              <p class="item-description">{{ item.description }}</p>
+
+              <div class="item-footer">
+                <span class="item-weight">{{ item.weight }} lbs</span>
+                <span class="item-owned" *ngIf="getItemQuantity(item.id) > 0">
+                  Owned: {{ getItemQuantity(item.id) }}
+                </span>
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  [disabled]="!canAfford(item)"
+                  (click)="purchaseItem(item)">
+                  <mat-icon>shopping_cart</mat-icon>
+                  Buy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <mat-paginator
+            [length]="filteredItems.length"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[6, 12, 24]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Right Side: Starting Kit -->
+    <div class="starting-kit-section">
+      <mat-card class="kit-card">
+        <mat-card-header>
+          <mat-icon class="section-icon">inventory_2</mat-icon>
+          <mat-card-title>{{ startingKit?.name || 'Starting Kit' }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p class="kit-description" *ngIf="startingKit">
+            {{ startingKit.description }}
+          </p>
+
+          <mat-divider></mat-divider>
+
+          <div class="kit-items">
+            <h3>Starting Items</h3>
+            <div 
+              *ngFor="let kitItem of getStartingKitItems()"
+              class="kit-item">
+              <mat-icon [class]="'item-icon ' + kitItem.item.type">
+                {{ getItemIcon(kitItem.item) }}
+              </mat-icon>
+              <div class="kit-item-info">
+                <span class="kit-item-name">{{ kitItem.item.name }}</span>
+                <span class="kit-item-quantity">x{{ kitItem.quantity }}</span>
+              </div>
+              <button 
+                mat-icon-button
+                (click)="sellItem(kitItem.item.id)"
+                matTooltip="Sell item (50% value)">
+                <mat-icon>sell</mat-icon>
+              </button>
+            </div>
+
+            <div class="kit-currency" *ngIf="startingKit">
+              <mat-icon>paid</mat-icon>
+              <span>Starting Currency: {{ startingKit.currency }} marks</span>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="kit-actions">
+            <button 
+              mat-raised-button 
+              color="warn"
+              [disabled]="hasRefundedKit"
+              (click)="refundStartingKit()">
+              <mat-icon>currency_exchange</mat-icon>
+              Sell All Starting Items
+            </button>
+            <p class="refund-hint" *ngIf="!hasRefundedKit">
+              Sell all starting items for 50% of their value
+            </p>
+            <p class="refund-hint" *ngIf="hasRefundedKit">
+              ✓ Starting kit refunded
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Current Inventory Accordion -->
+      <mat-card class="inventory-summary">
+        <mat-card-header>
+          <mat-icon class="section-icon">inventory</mat-icon>
+          <mat-card-title>Current Inventory</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="inventory-list">
+            <div *ngFor="let inv of getAllInventoryItems()" class="inventory-list-item">
+              <mat-icon [class]="'item-icon ' + inv.item.type">{{ getItemIcon(inv.item) }}</mat-icon>
+              <span class="inv-item-name">{{ inv.item.name }}</span>
+              <span class="inv-item-qty" *ngIf="inv.quantity > 1">&times;{{ inv.quantity }}</span>
+              <span class="item-type">{{ inv.item.type }}</span>
+              <span class="item-price">{{ inv.item.price }}mk</span>
+              <span class="item-weight">{{ inv.item.weight }} lbs</span>
+              <span class="item-value">Value: {{ inv.item.price * inv.quantity }}mk</span>
+              <button mat-raised-button color="warn" (click)="sellItem(inv.item.id)">
+                <mat-icon>sell</mat-icon> Sell
+              </button>
+            </div>
+          </div>
+          <div class="inventory-stats">
+            <div class="stat">
+              <mat-icon>category</mat-icon>
+              <span>{{ getInventoryItemCount() }} items</span>
+            </div>
+            <div class="stat">
+              <mat-icon>fitness_center</mat-icon>
+              <span>{{ getInventoryWeight() }} lbs</span>
+            </div>
+            <div class="stat">
+              <mat-icon>paid</mat-icon>
+              <span>{{ getCurrencyDisplay() }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Navigation buttons removed as requested -->
+</div>

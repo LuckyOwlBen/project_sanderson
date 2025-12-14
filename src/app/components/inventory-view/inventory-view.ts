@@ -1,31 +1,31 @@
-import { Component, Input, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject } from 'rxjs';
-import { Character } from '../../character/character';
-import { InventoryItem } from '../../character/inventory/inventoryItem';
+  import { Component, Input, OnDestroy } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+  import { Subject } from 'rxjs';
+  import { MatCardModule } from '@angular/material/card';
+  import { MatButtonModule } from '@angular/material/button';
+  import { MatIconModule } from '@angular/material/icon';
+  import { MatChipsModule } from '@angular/material/chips';
+  import { MatTooltipModule } from '@angular/material/tooltip';
+  import { MatProgressBarModule } from '@angular/material/progress-bar';
+  import { MatExpansionModule } from '@angular/material/expansion';
+  import { Character } from '../../character/character';
+  import { InventoryItem } from '../../character/inventory/inventoryItem';
 
-@Component({
-  selector: 'app-inventory-view',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    MatExpansionModule
-  ],
-  templateUrl: './inventory-view.html',
-  styleUrl: './inventory-view.scss'
+  @Component({
+    selector: 'app-inventory-view',
+    standalone: true,
+    imports: [
+      CommonModule,
+      MatCardModule,
+      MatButtonModule,
+      MatIconModule,
+      MatChipsModule,
+      MatTooltipModule,
+      MatProgressBarModule,
+      MatExpansionModule
+    ],
+    templateUrl: './inventory-view.html',
+  styleUrls: ['./inventory-view.scss']
 })
 export class InventoryView implements OnDestroy {
   private destroy$ = new Subject<void>();
@@ -166,5 +166,8 @@ export class InventoryView implements OnDestroy {
       case 'talent-only': return 'accent';
       default: return 'primary';
     }
+  }
+  trackByItemId(index: number, item: InventoryItem): string {
+    return item.id;
   }
 }

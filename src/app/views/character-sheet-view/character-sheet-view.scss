@@ -1,3 +1,64 @@
+.overview-resources-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  background: var(--gpSystemDarkGrey);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1rem 2rem;
+  align-items: stretch;
+}
+
+.overview-resources-bar app-resource-tracker {
+  flex: 1 1 0;
+  min-width: 0;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+.custom-tabs {
+  .tab-labels {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--gpSystemDarkGrey);
+  }
+  .tab-label {
+    background: none;
+    border: none;
+    color: #e8e8e8;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 2rem 0.5rem 2rem;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    position: relative;
+  }
+  .tab-label.active {
+    color: var(--gpColor-ChalkyBlue);
+    background: var(--gpSystemDarkGrey);
+    box-shadow: 0 -2px 8px 0 rgba(74,179,232,0.08);
+    z-index: 2;
+  }
+  .tab-label:not(.active):hover {
+    background: rgba(74,179,232,0.08);
+    color: #fff;
+  }
+  .tab-content {
+    animation: fadeInTab 0.2s;
+  }
+}
+
+@keyframes fadeInTab {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
 .character-sheet-container {
   max-width: 1600px;
   margin: 0 auto;
@@ -70,12 +131,45 @@ mat-divider {
     background-color: var(--gpSystemDarkerGrey);
   }
 
+  /* Escalate specificity: target the span inside the tab label, which is where Angular Material sets the color */
+  ::ng-deep .mat-mdc-tab-label .mdc-tab__content,
+  ::ng-deep .mat-mdc-tab-label .mdc-tab__text-label,
+  ::ng-deep .mat-mdc-tab-label span,
   ::ng-deep .mat-mdc-tab-label {
-    color: rgba(255, 255, 255, 0.6);
-
-    &.mdc-tab--active {
-      color: var(--gpColor-ChalkyBlue);
-    }
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+  ::ng-deep .mat-mdc-tab-label.mdc-tab--active .mdc-tab__content,
+  ::ng-deep .mat-mdc-tab-label.mdc-tab--active .mdc-tab__text-label,
+  ::ng-deep .mat-mdc-tab-label.mdc-tab--active span,
+  ::ng-deep .mat-mdc-tab-label.mdc-tab--active {
+    color: var(--gpColor-ChalkyBlue) !important;
+    opacity: 1 !important;
+  }
+  /* Also target focus and keyboard states */
+  ::ng-deep .mat-mdc-tab-label:focus .mdc-tab__content,
+  ::ng-deep .mat-mdc-tab-label.cdk-keyboard-focused .mdc-tab__content,
+  ::ng-deep .mat-mdc-tab-label.cdk-program-focused .mdc-tab__content,
+  ::ng-deep .mat-mdc-tab-label:focus,
+  ::ng-deep .mat-mdc-tab-label.cdk-keyboard-focused,
+  ::ng-deep .mat-mdc-tab-label.cdk-program-focused {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+  /* Attribute selector for extra specificity */
+  ::ng-deep [mat-tab-label],
+  ::ng-deep [mat-tab-label] .mdc-tab__content,
+  ::ng-deep [mat-tab-label] .mdc-tab__text-label,
+  ::ng-deep [mat-tab-label] span {
+    color: #fff !important;
+    opacity: 1 !important;
+  }
+  ::ng-deep [mat-tab-label].mdc-tab--active,
+  ::ng-deep [mat-tab-label].mdc-tab--active .mdc-tab__content,
+  ::ng-deep [mat-tab-label].mdc-tab--active .mdc-tab__text-label,
+  ::ng-deep [mat-tab-label].mdc-tab--active span {
+    color: var(--gpColor-ChalkyBlue) !important;
+    opacity: 1 !important;
   }
 }
 
@@ -580,8 +674,8 @@ mat-divider {
         background-color: var(--gpSystemDarkGrey);
       }
       
-      label {
-        color: #e8e8e8 !important;
+      label, .mat-mdc-floating-label, .mat-mdc-form-field-label {
+        display: none !important;
       }
       
       .mat-mdc-form-field-hint,

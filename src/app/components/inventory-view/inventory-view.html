@@ -17,21 +17,19 @@
     </div>
   </div>
 
-  <!-- Tab Selector -->
-  <mat-chip-set>
-    <mat-chip 
-      [highlighted]="selectedTab === 'equipped'"
-      (click)="selectTab('equipped')">
-      <mat-icon>shield</mat-icon>
-      Equipment
-    </mat-chip>
-    <mat-chip 
-      [highlighted]="selectedTab === 'inventory'"
-      (click)="selectTab('inventory')">
-      <mat-icon>inventory_2</mat-icon>
-      Inventory
-    </mat-chip>
-  </mat-chip-set>
+  <!-- Custom Tab Selector -->
+  <div class="custom-tabs inventory-tabs">
+    <div class="tab-labels">
+      <button class="tab-label" [class.active]="selectedTab === 'equipped'" (click)="selectTab('equipped')">
+        <mat-icon>shield</mat-icon>
+        Equipment
+      </button>
+      <button class="tab-label" [class.active]="selectedTab === 'inventory'" (click)="selectTab('inventory')">
+        <mat-icon>inventory_2</mat-icon>
+        Inventory
+      </button>
+    </div>
+  </div>
 
   <!-- Equipped Tab -->
   <div class="equipped-section" *ngIf="selectedTab === 'equipped'">
@@ -138,7 +136,7 @@
   <div class="inventory-section" *ngIf="selectedTab === 'inventory'">
     <mat-accordion class="inventory-list">
       <mat-expansion-panel 
-        *ngFor="let item of getUnequippedItems()"
+        *ngFor="let item of getUnequippedItems(); trackBy: trackByItemId"
         [expanded]="isItemExpanded(item.id)"
         (opened)="toggleItemExpansion(item.id)"
         (closed)="toggleItemExpansion(item.id)"
@@ -147,7 +145,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
-            <span class="item-name">{{ item.name }}</span>
+            <span class="item-name" [matTooltip]="item.name">{{ item.name }}</span>
             <span class="item-quantity" *ngIf="item.quantity > 1">x{{ item.quantity }}</span>
           </mat-panel-title>
           <mat-panel-description>

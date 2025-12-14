@@ -295,6 +295,164 @@
   }
 }
 
+.currency-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--gpSystemDarkGrey);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+
+  .currency-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .currency-icon {
+      color: #ffd700;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .currency-label {
+      font-size: 0.9rem;
+      color: #e8e8e8;
+    }
+
+    .currency-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffd700;
+    }
+  }
+}
+
+.equipped-section,
+.inventory-section {
+  margin-bottom: 1.5rem;
+
+  .subsection-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gpColor-ChalkyBlue);
+    margin-bottom: 0.75rem;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.equipped-items-list {
+  display: grid;
+  gap: 0.5rem;
+
+  .equipped-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: var(--gpSystemDarkGrey);
+    border-radius: 6px;
+    border-left: 3px solid var(--gpColor-ChalkyBlue);
+
+    .item-icon {
+      color: var(--gpColor-ChalkyBlue);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+
+      .item-name {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .item-slot {
+        font-size: 0.8rem;
+        color: #e8e8e8;
+        text-transform: capitalize;
+      }
+    }
+  }
+}
+
+.inventory-items-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+
+  .inventory-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background-color: var(--gpSystemDarkGrey);
+    border-radius: 4px;
+
+    .item-icon {
+      color: #e8e8e8;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .item-name {
+      font-size: 0.9rem;
+      color: #ffffff;
+      flex: 1;
+    }
+
+    .item-quantity {
+      font-size: 0.85rem;
+      color: #e8e8e8;
+      font-weight: 600;
+    }
+  }
+}
+
+.weight-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--gpSystemDarkGrey);
+  border-radius: 6px;
+  margin-top: 1rem;
+
+  .weight-icon {
+    color: #e8e8e8;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .weight-label {
+    font-size: 0.9rem;
+    color: #e8e8e8;
+  }
+
+  .weight-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+}
+
 .empty-state {
   text-align: center;
   color: #e8e8e8;

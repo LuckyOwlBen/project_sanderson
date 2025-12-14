@@ -47,6 +47,7 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
   styleUrl: './character-sheet-view.scss',
 })
 export class CharacterSheetView implements OnInit, OnDestroy {
+  activeTab = 0;
   private destroy$ = new Subject<void>();
   private resourceUpdateSubject = new Subject<void>();
   private autoSaveInterval: any = null;

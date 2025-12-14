@@ -21,6 +21,7 @@ export class CharacterCreationFlowService {
     { label: 'Expertises', route: 'expertises' },
     { label: 'Paths', route: 'paths' },
     { label: 'Talents', route: 'talents' },
+    { label: 'Equipment', route: 'equipment' },
     { label: 'Review', route: 'review' }
   ];
 

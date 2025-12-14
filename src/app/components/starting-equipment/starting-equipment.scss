@@ -1,0 +1,463 @@
+// Force paginator select value and input text to white (deep MDC targeting)
+::ng-deep .mat-mdc-paginator .mat-mdc-select-value,
+::ng-deep .mat-mdc-paginator .mat-mdc-select-trigger,
+::ng-deep .mat-mdc-paginator .mat-mdc-select,
+::ng-deep .mat-mdc-paginator .mat-mdc-select .mat-mdc-select-value,
+::ng-deep .mat-mdc-paginator .mat-mdc-select .mat-mdc-select-value-text,
+::ng-deep .mat-mdc-paginator .mat-mdc-select .mat-mdc-select-placeholder,
+::ng-deep .mat-mdc-paginator .mat-mdc-select .mat-mdc-select-arrow {
+  color: #fff !important;
+}
+::ng-deep .mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  color: #fff !important;
+}
+// Force paginator select value and dropdown text to white (MDC)
+.mat-mdc-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-arrow,
+.mat-mdc-paginator .mat-mdc-select-trigger,
+.mat-mdc-paginator .mat-mdc-select {
+  color: #fff !important;
+}
+.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  color: #fff !important;
+}
+// Force paginator select trigger and dropdown text to white
+.mat-mdc-paginator .mat-mdc-select-trigger {
+  color: #fff !important;
+}
+.mat-mdc-select-panel .mat-mdc-option {
+  color: #fff !important;
+}
+// Dark mode styles for Angular Material paginator
+.mat-mdc-paginator {
+  background: var(--gpSystemDarkerGrey);
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+}
+.mat-mdc-paginator .mat-mdc-select-value,
+.mat-mdc-paginator .mat-mdc-select-arrow {
+  color: #fff;
+}
+.mat-mdc-paginator .mat-mdc-icon-button {
+  color: #fff;
+}
+.mat-mdc-paginator .mat-mdc-paginator-range-label {
+  color: #bbb;
+}
+.mat-mdc-paginator .mat-mdc-select-panel {
+  background: var(--gpSystemDarkGrey);
+  color: #fff;
+}
+// Inventory List Styles
+
+.inventory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.inventory-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--gpSystemDarkerGrey);
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  border: 1px solid var(--gpSystemDarkGrey);
+  padding: 0.5rem 1rem;
+  gap: 0.5rem 1rem;
+  font-size: 1rem;
+  min-width: 0;
+  .item-icon {
+    font-size: 1.3rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  .inv-item-name {
+    font-weight: 600;
+    margin-right: 0.5rem;
+    min-width: 120px;
+    flex-shrink: 1;
+    word-break: break-word;
+  }
+  .inv-item-qty {
+    color: #aaa;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  .item-type, .item-price, .item-weight, .item-value {
+    color: #bbb;
+    margin-right: 0.75rem;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .item-value {
+    font-weight: 600;
+    color: #fff;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+  button[mat-raised-button] {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+}
+// Fix expansion indicator arrow color for MDC
+::ng-deep .mat-expansion-indicator::after {
+  color: #fff !important;
+}
+// For Angular Material 15+ MDC chips, force text label to white
+::ng-deep .category-chips .mat-mdc-chip .mdc-evolution-chip__text-label {
+  color: #fff !important;
+  font-weight: 600;
+}
+.starting-equipment-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.step-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 2rem;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .step-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.equipment-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.items-card,
+.kit-card,
+.inventory-summary {
+  background-color: var(--gpSystemDarkerGrey);
+  color: #fff;
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+
+    .section-icon {
+      color: var(--gpColor-ChalkyBlue);
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    mat-card-title {
+      flex: 1;
+      color: #fff;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .currency-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: gold;
+
+      mat-icon {
+        color: gold;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 1rem;
+  }
+}
+
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  mat-chip {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+    font-weight: 600;
+  }
+
+  mat-chip .mat-chip-content {
+    color: #fff !important;
+    font-weight: 600;
+  }
+
+  mat-chip[highlighted="true"] {
+    background-color: var(--gpColor-ChalkyBlue);
+    color: #fff !important;
+  }
+
+  mat-chip[highlighted="true"] .mat-chip-content {
+    color: #fff !important;
+    font-weight: 600;
+  }
+}
+
+// Strong selector for chips inside the card content filter
+::ng-deep .items-card mat-card-content .category-chips mat-chip .mat-chip-content {
+  color: #fff !important;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  min-height: 400px;
+}
+
+.item-card {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+
+  &.affordable {
+    border-color: rgba(76, 175, 80, 0.3);
+  }
+
+  &.owned {
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+
+    .item-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+
+      &.weapon { color: var(--gpColor-ChalkyBlue); }
+      &.armor { color: var(--gpColor-LightGreen); }
+      &.equipment { color: #ffa726; }
+      &.mount { color: #8d6e63; }
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .item-name {
+        font-weight: 600;
+        color: #fff;
+        font-size: 1rem;
+      }
+
+      .item-type {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: capitalize;
+      }
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: gold;
+      font-size: 1rem;
+    }
+  }
+
+  .item-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+    min-height: 40px;
+  }
+
+  .item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    .item-weight {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .item-owned {
+      font-size: 0.85rem;
+      color: var(--gpColor-LightGreen);
+      font-weight: 600;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 0.25rem;
+      }
+    }
+  }
+}
+
+.starting-kit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.kit-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-style: italic;
+  margin: 0 0 1rem 0;
+}
+
+.kit-items {
+  margin: 1rem 0;
+
+  h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+  }
+}
+
+.kit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+
+  .item-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    &.weapon { color: var(--gpColor-ChalkyBlue); }
+    &.armor { color: var(--gpColor-LightGreen); }
+    &.equipment { color: #ffa726; }
+  }
+
+  .kit-item-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .kit-item-name {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .kit-item-quantity {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.kit-currency {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background-color: rgba(255, 193, 7, 0.1);
+  border-radius: 4px;
+  color: gold;
+  font-weight: 600;
+
+  mat-icon {
+    color: gold;
+  }
+}
+
+.kit-actions {
+  margin-top: 1rem;
+
+  button {
+    width: 100%;
+    mat-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .refund-hint {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+  }
+}
+
+.inventory-summary {
+  .inventory-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+
+      mat-icon {
+        color: var(--gpColor-ChalkyBlue);
+      }
+
+      span {
+        color: #fff;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
