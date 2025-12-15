@@ -687,7 +687,7 @@ export class TalentView implements OnInit, OnDestroy {
     
     // Set validation message
     if (this.character.ancestry === 'singer' && singerTalents === 0) {
-      this.validationMessage = 'Singers must select at least one starting form from the Singer tree';
+      this.validationMessage = 'Please select a Singer path talent first (from the Singer tree) before choosing other talents.';
     } else if (!isValid) {
       const remaining = requiredTalents - unlockedPaidTalents;
       this.validationMessage = `Select ${remaining} more talent${remaining > 1 ? 's' : ''} to continue`;
