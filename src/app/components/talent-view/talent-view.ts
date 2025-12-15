@@ -90,8 +90,8 @@ export class TalentView implements OnInit, OnDestroy {
   private loadCorePathOptions(): void {
     if (!this.character) return;
 
-    // Only show core path selector for humans at level 1
-    this.showCorePathSelector = this.character.ancestry === 'human' && this.character.level === 1;
+    // Show core path selector for humans and singers at level 1
+    this.showCorePathSelector = (this.character.ancestry != null && ['human', 'singer'].includes(this.character.ancestry)) && this.character.level === 1;
     
     if (!this.showCorePathSelector) {
       this.availableCorePaths = [];
@@ -149,25 +149,21 @@ export class TalentView implements OnInit, OnDestroy {
     const mainPathName = this.character.paths[0];
     const specializationName = this.character.paths[1];
     
-    // For humans at level 1, only load their chosen path
-    // They get their path's key talent (tier 0) automatically, which unlocks the specialties
-    // Their bonus talent can be from their path's specialties OR the first talent (key talent) of another path
-    if (this.character.ancestry === 'human' && this.character.level === 1) {
+    // For humans and singers at level 1, load their chosen path, all sub trees, and bonus path logic
+    if ((this.character.ancestry != null && ['human','singer'].includes(this.character.ancestry)) && this.character.level === 1) {
       // Helper to check if a path's key talent is unlocked
       const hasPathKeyTalent = (pathId: string): boolean => {
         const talentPath = getTalentPath(pathId);
         if (!talentPath || !talentPath.talentNodes) return false;
-        
         return talentPath.talentNodes.some(node => 
           node.tier === 0 && this.unlockedTalents.has(node.id)
         );
       };
-      
       // Load the character's chosen main path (key talent auto-unlocked)
       if (mainPathName) {
         const talentPath = getTalentPath(mainPathName);
         if (talentPath) {
-          // Add core tree (contains the key talent - tier 0)
+          // Always auto-unlock tier 0 for main path core tree
           if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
             const coreTree = {
               pathName: `${talentPath.name} - Core`,
@@ -177,7 +173,6 @@ export class TalentView implements OnInit, OnDestroy {
             tempTrees.push(coreTree);
             addedTreeNames.add(coreTree.pathName.toLowerCase());
           }
-          
           // Add specializations from this path (these are unlocked by the key talent)
           talentPath.paths.forEach(specTree => {
             if (!addedTreeNames.has(specTree.pathName.toLowerCase())) {
@@ -188,13 +183,11 @@ export class TalentView implements OnInit, OnDestroy {
           });
         }
       }
-      
       // Check all paths for unlocked key talents and add their specialties
       const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
       allPaths.forEach(pathId => {
         const talentPath = getTalentPath(pathId);
         if (!talentPath) return;
-        
         // If this path's key talent is unlocked, add its specialties
         if (hasPathKeyTalent(pathId)) {
           talentPath.paths.forEach(specTree => {
@@ -314,56 +307,51 @@ export class TalentView implements OnInit, OnDestroy {
       });
     }
 
-    // Filter to only show specialty trees (not core trees) that have tier 1+ talents
+    // For singers, do not filter out core trees, and ensure all sub trees and core tree are present
+    // For both humans and singers, filter out core trees from the chip selector, but keep them for display if needed
     this.availableTrees = tempTrees.filter(tree => {
       const isCoreTree = tree.pathName.toLowerCase().includes('core');
-      if (isCoreTree) {
-        return false; // Don't show core trees in the chip selector
+      // Only show core trees if they're the only option (shouldn't happen, but fallback)
+      if (isCoreTree && tempTrees.length > 1) {
+        return false;
       }
-      
-      // Only keep specialty trees that have tier 1+ talents
+      // Only keep trees that have tier 1+ talents
       const visibleTalents = tree.nodes.filter(talent => talent.tier > 0);
       return visibleTalents.length > 0;
     });
-    
     // Strip " - Core" from any remaining tree names for display (shouldn't be needed now)
     this.availableTrees = this.availableTrees.map(tree => ({
       ...tree,
       pathName: tree.pathName.replace(/ - Core$/i, '')
     }));
-
-    // Sort trees to prioritize the character's chosen path
-    if (this.character.ancestry === 'singer') {
-      // Singers: show Singer tree first
+    // Sort trees to prioritize the character's chosen path or Singer tree for singers
+    if (this.character.ancestry != null && ['human', 'singer'].includes(this.character.ancestry) && specializationName) {
       this.availableTrees.sort((a, b) => {
-        const aIsSinger = a.pathName.toLowerCase().includes('singer');
-        const bIsSinger = b.pathName.toLowerCase().includes('singer');
-        if (aIsSinger && !bIsSinger) return -1;
-        if (!aIsSinger && bIsSinger) return 1;
-        return 0;
-      });
-    } else if (this.character.ancestry === 'human' && specializationName) {
-      // Humans: show their chosen specialization first
-      this.availableTrees.sort((a, b) => {
+        // For singers, show Singer tree first if present
+        if (this.character?.ancestry === 'singer') {
+          const aIsSinger = a.pathName.toLowerCase().includes('singer');
+          const bIsSinger = b.pathName.toLowerCase().includes('singer');
+          if (aIsSinger && !bIsSinger) return -1;
+          if (!aIsSinger && bIsSinger) return 1;
+        }
+        // For both, show chosen specialization first
         const aIsChosen = a.pathName.toLowerCase() === specializationName.toLowerCase();
         const bIsChosen = b.pathName.toLowerCase() === specializationName.toLowerCase();
         if (aIsChosen && !bIsChosen) return -1;
         if (!aIsChosen && bIsChosen) return 1;
-        
-        // Then show core tree of chosen path
-        const aIsCore = mainPathName && a.pathName.toLowerCase().includes(mainPathName.toLowerCase()) && a.pathName.toLowerCase().includes('core');
-        const bIsCore = mainPathName && b.pathName.toLowerCase().includes(mainPathName.toLowerCase()) && b.pathName.toLowerCase().includes('core');
-        if (aIsCore && !bIsCore) return -1;
-        if (!aIsCore && bIsCore) return 1;
-        
         return 0;
       });
     }
-
-    // Select first tree by default
+    // Default selected tree: Singer tree for singers, otherwise first available
     if (this.availableTrees.length > 0 && !this.selectedTree) {
-      this.selectedTree = this.availableTrees[0];
+      if (this.character && this.character.ancestry === 'singer') {
+        const singerTree = this.availableTrees.find(tree => tree.pathName.toLowerCase().includes('singer'));
+        this.selectedTree = singerTree || this.availableTrees[0];
+      } else {
+        this.selectedTree = this.availableTrees[0];
+      }
     }
+      // ...existing code...
   }
 
   private autoUnlockTier0Talents(tree: TalentTree): void {
@@ -451,8 +439,8 @@ export class TalentView implements OnInit, OnDestroy {
 
     // Special handling for tier 0 talents (key talents)
     if (talent.tier === 0) {
-      // At level 1, humans can select tier 0 talents from other paths as their bonus talent
-      if (this.character.ancestry === 'human' && this.character.level === 1) {
+      // At level 1, humans and singers can select tier 0 talents from other paths as their bonus talent
+      if ((this.character.ancestry === 'human' || this.character.ancestry === 'singer') && this.character.level === 1) {
         // Allow if they still have points available
         return true;
       }
@@ -604,14 +592,6 @@ export class TalentView implements OnInit, OnDestroy {
       return [];
     }
     return this.selectedTree.nodes.filter(talent => this.shouldDisplayTalent(talent));
-  }
-
-  getTalentStyle(talent: TalentNode): any {
-    // Position based on tier for now - can be enhanced later
-    return {
-      'grid-column': 'auto',
-      'grid-row': talent.tier + 1
-    };
   }
 
   formatPrerequisite(prereq: string | any): string {

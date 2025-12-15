@@ -86,8 +86,7 @@
         class="talent-node"
         [class.unlocked]="isTalentUnlocked(talent.id)"
         [class.available]="canUnlockTalent(talent)"
-        [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)"
-        [ngStyle]="getTalentStyle(talent)">
+        [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)">
         
         <mat-card-header>
           <mat-card-title>{{ talent.name }}</mat-card-title>

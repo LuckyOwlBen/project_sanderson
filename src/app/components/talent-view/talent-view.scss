@@ -70,14 +70,16 @@
   .core-path-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 4.5rem;
   }
 
   .core-path-card {
+
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
     background-color: var(--gpSystemDarkerGrey) !important;
+    text-align: center;
 
     &:hover {
       transform: translateY(-4px);
@@ -95,11 +97,16 @@
       background-color: var(--gpSystemDarkGrey);
       padding: 1rem;
       margin: -16px -16px 16px -16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
 
       mat-card-title {
         font-size: 1.3rem;
         font-weight: 600;
         color: #ffffff;
+        width: 100%;
+        text-align: center;
       }
     }
 
@@ -109,12 +116,14 @@
         font-size: 1.1rem;
         display: block;
         margin-bottom: 0.5rem;
+        text-align: center;
       }
 
       p {
         color: #e8e8e8;
         font-size: 0.9rem;
         line-height: 1.4;
+        text-align: center;
       }
     }
 
@@ -332,7 +341,6 @@
 
   .core-path-selector {
     padding: 1rem;
-    margin-bottom: 2rem;
 
     h3 {
       font-size: 1.2rem;
@@ -344,7 +352,7 @@
 
     .core-path-grid {
       grid-template-columns: 1fr;
-      gap: 1rem;
+      gap: 3rem;
     }
 
     .core-path-card {
@@ -358,7 +366,7 @@
 
   .talent-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 2rem;
   }
 
   .talent-node {
