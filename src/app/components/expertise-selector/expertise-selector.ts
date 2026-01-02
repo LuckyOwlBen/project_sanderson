@@ -40,6 +40,14 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Scroll to top when component loads
+    setTimeout(() => {
+      const mainContent = document.querySelector('.app-sidenav-content');
+      if (mainContent) {
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 0);
+
     this.characterState.character$
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {

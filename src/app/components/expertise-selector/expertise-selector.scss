@@ -1,6 +1,4 @@
 .expertise-selector-container {
-  padding: 2rem;
-  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -218,5 +216,10 @@
         opacity: 0.8;
       }
     }
+  }
+}
+@media (max-width: 768px) {
+  .expertise-selector-container {
+    padding-bottom: 8rem;
   }
 }
