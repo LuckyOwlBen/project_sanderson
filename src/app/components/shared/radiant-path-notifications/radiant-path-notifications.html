@@ -1,0 +1,49 @@
+<!-- Spren Grant Notification -->
+<mat-card class="spren-notification" *ngIf="pendingSprenGrant">
+  <mat-card-header>
+    <mat-icon class="spren-icon">auto_awesome</mat-icon>
+    <mat-card-title>A Spren Approaches!</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="spren-message">
+      A <strong>{{ pendingSprenGrant.sprenType }}</strong> has offered to bond with you, 
+      granting you the powers of a <strong>{{ pendingSprenGrant.order }}</strong>.
+    </p>
+    <p class="philosophy-text">
+      <em>"{{ pendingSprenGrant.philosophy }}"</em>
+    </p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-raised-button color="primary" (click)="acceptSprenGrant()">
+      <mat-icon>check_circle</mat-icon>
+      Accept Bond
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Speak First Ideal -->
+<mat-card class="ideal-prompt" *ngIf="character && hasSpren() && !hasSpokenIdeal()">
+  <mat-card-header>
+    <mat-icon class="ideal-icon">record_voice_over</mat-icon>
+    <mat-card-title>Speak the First Ideal</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="ideal-message">
+      You have bonded with a spren. To unlock your surges, you must speak the First Ideal of the Knights Radiant:
+    </p>
+    <p class="first-ideal">
+      <strong>"Life before death. Strength before weakness. Journey before destination."</strong>
+    </p>
+    <p class="order-info" *ngIf="getOrderInfo()">
+      As a <strong>{{ getOrderInfo()?.order }}</strong>, 
+      you will gain access to the surges of 
+      <strong>{{ getSurgeNames() }}</strong>.
+    </p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-raised-button color="accent" (click)="speakFirstIdeal()">
+      <mat-icon>bolt</mat-icon>
+      Speak the Words
+    </button>
+  </mat-card-actions>
+</mat-card>

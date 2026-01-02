@@ -1,0 +1,31 @@
+<!-- Header -->
+<div class="sheet-header">
+  <div class="header-left">
+    <h1>{{ character?.name || 'Unnamed Character' }}</h1>
+    <div class="header-subtitle">
+      <span>Level {{ character?.level || 1 }}</span>
+      <span class="separator">•</span>
+      <span>{{ character?.ancestry || 'Unknown' }}</span>
+      <span class="separator" *ngIf="(character?.paths?.length || 0) > 0">•</span>
+      <span *ngFor="let path of character?.paths; let last = last">
+        {{ path }}<span *ngIf="!last">, </span>
+      </span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button mat-raised-button (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+    <button mat-button (click)="onExport()">
+      <mat-icon>download</mat-icon>
+      Export
+    </button>
+    <button mat-button (click)="onBackToList()">
+      <mat-icon>list</mat-icon>
+      Character List
+    </button>
+  </div>
+</div>
+
+<mat-divider></mat-divider>

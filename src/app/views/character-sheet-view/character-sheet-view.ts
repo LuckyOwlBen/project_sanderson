@@ -20,6 +20,8 @@ import { ResourceTracker, Resource } from '../../components/resource-tracker/res
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { InventoryView } from '../../components/inventory-view/inventory-view';
+import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
+import { CharacterSheetHeader } from '../../components/shared/character-sheet-header/character-sheet-header';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -41,7 +43,9 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     MatExpansionModule,
     ResourceTracker,
     CharacterImage,
-    InventoryView
+    InventoryView,
+    RadiantPathNotifications,
+    CharacterSheetHeader
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -572,49 +576,24 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     });
   }
 
-  acceptSpren(): void {
-    if (!this.character || !this.pendingSprenGrant) return;
-
-    console.log('[Character Sheet] Accepting spren:', this.pendingSprenGrant.order);
-    
-    // Grant the spren to the character
-    this.character.radiantPath.grantSpren(this.pendingSprenGrant.order);
-    
-    // Save the character
-    this.characterState.updateCharacter(this.character);
-    this.saveCharacter();
-
-    // Clear the pending grant
+  onSprenAccepted(): void {
+    console.log('[Character Sheet] Spren accepted, saving character');
     this.pendingSprenGrant = null;
-    this.cdr.detectChanges();
-  }
-
-  speakIdeal(): void {
-    if (!this.character) return;
-
-    console.log('[Character Sheet] Speaking First Ideal');
-    
-    // Speak the First Ideal - this unlocks surge skills and surge trees
-    this.character.radiantPath.speakIdeal(this.character.skills);
-
-    // Update character state
-    this.characterState.updateCharacter(this.character);
+    this.characterState.updateCharacter(this.character!);
     this.saveCharacter();
     this.cdr.detectChanges();
   }
 
-  getSurgeNames(): string {
-    if (!this.character) return '';
-    
-    const orderInfo = this.character.radiantPath.getOrderInfo();
-    if (!orderInfo) return '';
+  onSprenDismissed(): void {
+    console.log('[Character Sheet] Spren grant dismissed');
+    this.pendingSprenGrant = null;
+  }
 
-    return orderInfo.surgePair.map(surge => 
-      surge.toLowerCase().replace('_', ' ')
-        .split(' ')
-        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-    ).join(' and ');
+  onIdealSpoken(): void {
+    console.log('[Character Sheet] First Ideal spoken, saving character');
+    this.characterState.updateCharacter(this.character!);
+    this.saveCharacter();
+    this.cdr.detectChanges();
   }
 }
 
