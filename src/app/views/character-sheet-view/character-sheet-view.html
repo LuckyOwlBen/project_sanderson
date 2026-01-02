@@ -35,28 +35,9 @@
         </app-character-portrait-card>
         
         <!-- Defenses Card -->
-        <mat-card class="stats-card">
-          <mat-card-header>
-            <mat-icon class="section-icon">shield</mat-icon>
-            <mat-card-title>Defenses</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="defenses-list">
-              <div class="defense-item">
-                <span class="defense-label">Physical Defense</span>
-                <span class="defense-value">{{ character.defenses.getPhysicalDefense(character.attributes, 0) }}</span>
-              </div>
-              <div class="defense-item">
-                <span class="defense-label">Cognitive Defense</span>
-                <span class="defense-value">{{ character.defenses.getCognitiveDefense(character.attributes, 0) }}</span>
-              </div>
-              <div class="defense-item">
-                <span class="defense-label">Spiritual Defense</span>
-                <span class="defense-value">{{ character.defenses.getSpiritualDefense(character.attributes, 0) }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <app-character-defenses-card [character]="character">
+        </app-character-defenses-card>
+        
         <div class="overview-resources-bar">
           <app-resource-tracker 
             [resource]="healthResource"
@@ -75,77 +56,7 @@
     </div>
     <div class="tab-content" *ngIf="activeTab === 1">
       <div class="sheet-content powers-notes-tab">
-        <!-- Powers Card -->
-        <mat-card class="powers-card">
-          <mat-card-header>
-            <mat-icon class="section-icon">auto_awesome</mat-icon>
-            <mat-card-title>Powers</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="powers-list">
-              <mat-accordion class="powers-accordion" *ngIf="getPowers().length > 0">
-                <mat-expansion-panel *ngFor="let power of getPowers()" class="power-panel">
-                  <mat-expansion-panel-header>
-                    <mat-panel-title class="power-title">
-                      <mat-icon class="power-icon">flash_on</mat-icon>
-                      <span class="power-name">{{ power.name }}</span>
-                    </mat-panel-title>
-                    <mat-panel-description class="power-cost">
-                      {{ getActionCostDisplay(power.actionCost) }}
-                    </mat-panel-description>
-                  </mat-expansion-panel-header>
-                  <div class="power-details">
-                    <div class="power-description">
-                      <p>{{ power.description }}</p>
-                      <p *ngIf="power.specialActivation" class="special-activation">
-                        <strong>Special Activation:</strong> {{ power.specialActivation }}
-                      </p>
-                    </div>
-                    <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
-                      <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
-                      <ul>
-                        <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
-                      </ul>
-                    </div>
-                    <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
-                      <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
-                      <ul>
-                        <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
-                      </ul>
-                    </div>
-                    <div class="power-meta">
-                      <span class="power-tier">Tier {{ power.tier }}</span>
-                      <span class="power-path" *ngIf="power.pathRequirement">
-                        <mat-icon>route</mat-icon> {{ power.pathRequirement }}
-                      </span>
-                    </div>
-                  </div>
-                </mat-expansion-panel>
-              </mat-accordion>
-              <p class="empty-text" *ngIf="getPowers().length === 0">
-                No powers unlocked yet
-              </p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-        <!-- Expertises Card -->
-        <mat-card class="stats-card">
-          <mat-card-header>
-            <mat-icon class="section-icon">auto_stories</mat-icon>
-            <mat-card-title>Expertises</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="expertises-list">
-              <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
-                <mat-icon class="expertise-icon">check_circle</mat-icon>
-                <span class="expertise-name">{{ expertise }}</span>
-              </div>
-              <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
-                No expertises selected
-              </p>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <app-character-powers-tab [character]="character"></app-character-powers-tab>
       </div>
     </div>
     <div class="tab-content" *ngIf="activeTab === 2">

@@ -1,0 +1,23 @@
+<!-- Defenses Card -->
+<mat-card class="stats-card">
+  <mat-card-header>
+    <mat-icon class="section-icon">shield</mat-icon>
+    <mat-card-title>Defenses</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="defenses-list">
+      <div class="defense-item">
+        <span class="defense-label">Physical Defense</span>
+        <span class="defense-value">{{ getPhysicalDefense() }}</span>
+      </div>
+      <div class="defense-item">
+        <span class="defense-label">Cognitive Defense</span>
+        <span class="defense-value">{{ getCognitiveDefense() }}</span>
+      </div>
+      <div class="defense-item">
+        <span class="defense-label">Spiritual Defense</span>
+        <span class="defense-value">{{ getSpiritualDefense() }}</span>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

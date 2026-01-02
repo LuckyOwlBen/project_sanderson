@@ -17,12 +17,13 @@ import { CharacterStorageService } from '../../services/character-storage.servic
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
 import { ResourceTracker, Resource } from '../../components/resource-tracker/resource-tracker';
-import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
 import { CharacterSheetHeader } from '../../components/shared/character-sheet-header/character-sheet-header';
 import { CharacterPortraitCard } from '../../components/shared/character-portrait-card/character-portrait-card';
+import { CharacterDefensesCard } from '../../components/shared/character-defenses-card/character-defenses-card';
+import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -43,11 +44,12 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     MatDialogModule,
     MatExpansionModule,
     ResourceTracker,
-    CharacterImage,
     InventoryView,
     RadiantPathNotifications,
     CharacterSheetHeader,
-    CharacterPortraitCard
+    CharacterPortraitCard,
+    CharacterDefensesCard,
+    CharacterPowersTab
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -392,102 +394,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  }
-
-  getSelectedExpertises(): string[] {
-    return this.character?.selectedExpertises || [];
-  }
-
-  getPowers(): TalentNode[] {
-    const powerIds = Array.from(this.character?.unlockedTalents || []);
-    const powers: TalentNode[] = [];
-    
-    const allTrees: TalentTree[] = [];
-    
-    Object.values(ALL_TALENT_PATHS).forEach(path => {
-      if (path.talentNodes) {
-        allTrees.push({ pathName: path.name, nodes: path.talentNodes });
-      }
-      allTrees.push(...path.paths);
-    });
-    
-    const ancestryTree = getTalentTree('singer');
-    if (ancestryTree) {
-      allTrees.push(ancestryTree);
-    }
-    
-    powerIds.forEach(powerId => {
-      for (const tree of allTrees) {
-        const power = tree.nodes.find(n => n.id === powerId);
-        if (power) {
-          powers.push(power);
-          break;
-        }
-      }
-    });
-    
-    return powers;
-  }
-
-  getActionCostDisplay(actionCost: number | ActionCostCode): string {
-    if (actionCost === ActionCostCode.Passive) {
-      return 'Passive';
-    } else if (actionCost === ActionCostCode.Reaction) {
-      return 'Reaction';
-    } else if (actionCost === ActionCostCode.Special) {
-      return 'Special';
-    } else if (actionCost === ActionCostCode.Free) {
-      return 'Free Action';
-    } else {
-      return `${actionCost} Action${actionCost > 1 ? 's' : ''}`;
-    }
-  }
-
-  getBonusDisplay(power: TalentNode): string[] {
-    if (!power.bonuses || power.bonuses.length === 0) {
-      return [];
-    }
-    
-    return power.bonuses.map(bonus => {
-      const parts: string[] = [];
-      
-      if (bonus.value !== undefined) {
-        const sign = bonus.value >= 0 ? '+' : '';
-        parts.push(`${sign}${bonus.value}`);
-      }
-      
-      if (bonus.type) {
-        parts.push(bonus.type.toString());
-      }
-      
-      if (bonus.target) {
-        parts.push(`to ${bonus.target}`);
-      }
-      
-      if (bonus.condition) {
-        parts.push(`(${bonus.condition})`);
-      }
-      
-      return parts.join(' ');
-    });
-  }
-
-  getOtherEffects(power: TalentNode): string[] {
-    const effects: string[] = [];
-    
-    if (power.grantsAdvantage && power.grantsAdvantage.length > 0) {
-      effects.push(`Grants Advantage on: ${power.grantsAdvantage.join(', ')}`);
-    }
-    
-    if (power.grantsDisadvantage && power.grantsDisadvantage.length > 0) {
-      effects.push(`Grants Disadvantage on: ${power.grantsDisadvantage.join(', ')}`);
-    }
-    
-    if (power.otherEffects && power.otherEffects.length > 0) {
-      effects.push(...power.otherEffects);
-    }
-    
-    return effects;
   }
 
   onPortraitChanged(imageUrl: string | null): void {
