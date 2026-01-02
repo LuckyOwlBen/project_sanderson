@@ -1,0 +1,86 @@
+.portrait-card {
+  background: var(--gpSystemDarkerGrey);
+  padding: 0 !important;
+  overflow: hidden;
+  position: relative;
+
+  mat-card-header {
+    display: none; // Hide default header
+  }
+
+  .portrait-header {
+    padding: 1rem;
+    background: var(--gpSystemDarkGrey);
+    position: relative;
+    z-index: 2;
+
+    .character-name-overlay {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .portrait-image-container {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+    
+    app-character-image {
+      width: 100%;
+      height: 100%;
+
+      ::ng-deep .character-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+
+        .portrait-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center top;
+        }
+
+        .placeholder {
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.1);
+
+          mat-icon {
+            font-size: 120px;
+            width: 120px;
+            height: 120px;
+            color: rgba(255, 255, 255, 0.5);
+          }
+        }
+      }
+    }
+  }
+
+  .portrait-actions {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    background: var(--gpSystemDarkGrey);
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ffffff;
+      background-color: var(--gpSystemDarkerGrey);
+      
+      &:hover {
+        background-color: var(--gpColor-ChalkyBlue);
+      }
+    }
+  }
+}

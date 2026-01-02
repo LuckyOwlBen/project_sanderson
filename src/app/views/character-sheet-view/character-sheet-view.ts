@@ -22,6 +22,7 @@ import { CharacterPortraitUpload } from '../../components/shared/character-portr
 import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
 import { CharacterSheetHeader } from '../../components/shared/character-sheet-header/character-sheet-header';
+import { CharacterPortraitCard } from '../../components/shared/character-portrait-card/character-portrait-card';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -45,7 +46,8 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     CharacterImage,
     InventoryView,
     RadiantPathNotifications,
-    CharacterSheetHeader
+    CharacterSheetHeader,
+    CharacterPortraitCard
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -488,43 +490,18 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     return effects;
   }
 
-  openPortraitUpload(): void {
+  onPortraitChanged(imageUrl: string | null): void {
     if (!this.character) return;
 
-    const dialogRef = this.dialog.open(CharacterPortraitUpload, {
-      width: '600px',
-      data: {
-        currentImageUrl: (this.character as any).portraitUrl || null,
-        characterId: this.characterId || (this.character as any).id,
-        characterName: this.character.name || 'Character'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((imageUrl: string | null | undefined) => {
-      if (imageUrl !== undefined && this.character) {
-        // Defer update to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
-        setTimeout(() => {
-          if (!this.character) return;
-          
-          if (imageUrl) {
-            // Store URL without timestamp (add timestamp during display only)
-            const urlWithoutTimestamp = imageUrl.split('?')[0];
-            (this.character as any).portraitUrl = urlWithoutTimestamp;
-            this.portraitUrl = urlWithoutTimestamp;
-          } else {
-            delete (this.character as any).portraitUrl;
-            this.portraitUrl = null;
-          }
-          this.characterState.updateCharacter(this.character);
-          this.cdr.detectChanges(); // Force change detection
-          this.autoSave();
-        }, 0);
-      }
-    });
-  }
-
-  getPortraitUrl(): string | null {
-    return (this.character as any)?.portraitUrl || null;
+    if (imageUrl) {
+      (this.character as any).portraitUrl = imageUrl;
+      this.portraitUrl = imageUrl;
+    } else {
+      delete (this.character as any).portraitUrl;
+      this.portraitUrl = null;
+    }
+    this.characterState.updateCharacter(this.character);
+    this.autoSave();
   }
 
   private emitPlayerJoin(): void {

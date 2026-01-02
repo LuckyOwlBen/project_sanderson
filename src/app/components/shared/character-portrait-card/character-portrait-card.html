@@ -1,0 +1,20 @@
+<!-- Portrait Card -->
+<mat-card class="portrait-card">
+  <div class="portrait-header">
+    <h3 class="character-name-overlay">{{ character?.name || 'Character' }}</h3>
+  </div>
+  <div class="portrait-image-container">
+    <app-character-image
+      [imageUrl]="portraitUrl"
+      [characterName]="character?.name || 'Character'"
+      [size]="'large'"
+      [showPlaceholder]="true">
+    </app-character-image>
+  </div>
+  <div class="portrait-actions">
+    <button mat-button (click)="openPortraitUpload()">
+      <mat-icon>{{ getPortraitUrl() ? 'edit' : 'add_photo_alternate' }}</mat-icon>
+      {{ getPortraitUrl() ? 'Change Portrait' : 'Add Portrait' }}
+    </button>
+  </div>
+</mat-card>
