@@ -38,20 +38,10 @@
         <app-character-defenses-card [character]="character">
         </app-character-defenses-card>
         
-        <div class="overview-resources-bar">
-          <app-resource-tracker 
-            [resource]="healthResource"
-            (valueChanged)="onResourceChanged('Health', $event)">
-          </app-resource-tracker>
-          <app-resource-tracker 
-            [resource]="focusResource"
-            (valueChanged)="onResourceChanged('Focus', $event)">
-          </app-resource-tracker>
-          <app-resource-tracker 
-            [resource]="investitureResource"
-            (valueChanged)="onResourceChanged('Investiture', $event)">
-          </app-resource-tracker>
-        </div>
+        <app-character-resources-bar 
+          [character]="character"
+          (resourceChanged)="onResourceChanged($event)">
+        </app-character-resources-bar>
       </div>
     </div>
     <div class="tab-content" *ngIf="activeTab === 1">

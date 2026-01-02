@@ -1,0 +1,28 @@
+.character-resources-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  background: var(--gpSystemDarkGrey);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1rem 2rem;
+  align-items: normal;
+
+  app-resource-tracker {
+    flex: 1 1 0;
+    min-width: 0;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.5rem;
+  }
+}

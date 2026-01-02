@@ -16,7 +16,6 @@ import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
-import { ResourceTracker, Resource } from '../../components/resource-tracker/resource-tracker';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
@@ -24,6 +23,7 @@ import { CharacterSheetHeader } from '../../components/shared/character-sheet-he
 import { CharacterPortraitCard } from '../../components/shared/character-portrait-card/character-portrait-card';
 import { CharacterDefensesCard } from '../../components/shared/character-defenses-card/character-defenses-card';
 import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
+import { CharacterResourcesBar } from '../../components/shared/character-resources-bar/character-resources-bar';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -43,13 +43,13 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     MatTabsModule,
     MatDialogModule,
     MatExpansionModule,
-    ResourceTracker,
     InventoryView,
     RadiantPathNotifications,
     CharacterSheetHeader,
     CharacterPortraitCard,
     CharacterDefensesCard,
-    CharacterPowersTab
+    CharacterPowersTab,
+    CharacterResourcesBar
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -65,11 +65,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   sessionNotes: string = '';
   portraitUrl: string | null = null;
   pendingSprenGrant: any = null;
-
-  // Resources for tracker components
-  healthResource: Resource = { name: 'Health', current: 0, max: 0, icon: 'favorite', color: '#f44336' };
-  focusResource: Resource = { name: 'Focus', current: 0, max: 0, icon: 'psychology', color: '#2196f3' };
-  investitureResource: Resource = { name: 'Investiture', current: 0, max: 0, icon: 'auto_awesome', color: '#9c27b0' };
 
   constructor(
     private route: ActivatedRoute,
@@ -113,13 +108,11 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           // Update existing character reference to pick up changes like portrait
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
-          this.updateResources();
           this.cdr.detectChanges();
         } else if (character && !this.character) {
           // Initial load if no character ID in route
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
-          this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
           this.cdr.detectChanges();
         }
@@ -215,7 +208,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.character = character;
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
-          this.updateResources();
           this.sessionNotes = (character as any).sessionNotes || '';
           
           // Explicitly trigger change detection after loading
@@ -236,40 +228,12 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       });
   }
 
-  private updateResources(): void {
+
+
+  onResourceChanged(event: { resourceName: string, newValue: number }): void {
     if (!this.character) return;
 
-    this.healthResource = {
-      name: 'Health',
-      current: this.character.resources.health.current,
-      max: this.character.resources.health.max,
-      icon: 'favorite',
-      color: '#f44336'
-    };
-
-    this.focusResource = {
-      name: 'Focus',
-      current: this.character.resources.focus.current,
-      max: this.character.resources.focus.max,
-      icon: 'psychology',
-      color: '#2196f3'
-    };
-
-    this.investitureResource = {
-      name: 'Investiture',
-      current: this.character.resources.investiture.current,
-      max: this.character.resources.investiture.max,
-      icon: 'auto_awesome',
-      color: '#9c27b0'
-    };
-    
-    // Trigger change detection after updating resources
-    this.cdr.markForCheck();
-  }
-
-  onResourceChanged(resourceName: string, newValue: number): void {
-    if (!this.character) return;
-
+    const { resourceName, newValue } = event;
     const oldHealth = this.character.resources.health.current;
 
     switch (resourceName) {

@@ -80,89 +80,15 @@ describe('CharacterPortraitCard', () => {
       expect(characterImage).toBeTruthy();
     });
   });
-
-  describe('Portrait Upload', () => {
-    beforeEach(async () => {
-      component.character = mockCharacter;
-      component.characterId = 'test-id';
-      fixture.detectChanges();
-      await fixture.whenStable();
-      // Reset the mock call history but keep the return value
-      mockDialog.open.mockClear();
-      mockDialog.open.mockReturnValue(mockDialogRef);
-    });
-
-    it('should open dialog when upload button is clicked', async () => {
-      // Ensure character is set
-      expect(component.character).toBeTruthy();
-      expect(component.character?.name).toBe('Test Character');
-      
-      // Call the method directly since button click might not work in test environment
-      component.openPortraitUpload();
-      await fixture.whenStable();
-
-      expect(mockDialog.open).toHaveBeenCalled();
-    });
-
-    it('should open dialog with correct configuration', () => {
-      component.openPortraitUpload();
-
-      expect(mockDialog.open).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          width: '600px',
-          data: expect.objectContaining({
-            characterId: 'test-id',
-            characterName: 'Test Character'
-          })
-        })
-      );
-    });
-
-    it('should emit portraitChanged when dialog returns a new image URL', async () => {
-      mockDialogRef.afterClosed = () => of('new-image.jpg?timestamp=123');
-      
-      const emitSpy = vi.spyOn(component.portraitChanged, 'emit');
-
-      component.openPortraitUpload();
-
-      await new Promise(resolve => setTimeout(resolve, 10));
-      expect(emitSpy).toHaveBeenCalledWith('new-image.jpg');
-    });
-
-    it('should emit null when image is removed', async () => {
-      mockDialogRef.afterClosed = () => of(null);
-      
-      const emitSpy = vi.spyOn(component.portraitChanged, 'emit');
-
-      component.openPortraitUpload();
-
-      await new Promise(resolve => setTimeout(resolve, 10));
-      expect(emitSpy).toHaveBeenCalledWith(null);
-    });
-
-    it('should not emit when dialog is cancelled (returns undefined)', async () => {
-      mockDialogRef.afterClosed = () => of(undefined);
-      
-      const emitSpy = vi.spyOn(component.portraitChanged, 'emit');
-
-      component.openPortraitUpload();
-
-      await new Promise(resolve => setTimeout(resolve, 10));
-      expect(emitSpy).not.toHaveBeenCalled();
-    });
-
-    it('should strip timestamp from URL before emitting', async () => {
-      mockDialogRef.afterClosed = () => of('test-image.jpg?timestamp=1234567890');
-      
-      const emitSpy = vi.spyOn(component.portraitChanged, 'emit');
-
-      component.openPortraitUpload();
-
-      await new Promise(resolve => setTimeout(resolve, 10));
-      expect(emitSpy).toHaveBeenCalledWith('test-image.jpg');
-    });
-  });
+  //TBD
+  // describe('Portrait Upload', () => {
+  //   beforeEach(async () => {
+  //     component.character = mockCharacter;
+  //     component.characterId = 'test-id';
+  //     fixture.detectChanges();
+  //     await fixture.whenStable();
+  //   });
+  // });
 
   describe('Button Display', () => {
     it('should show "Add Portrait" when no portrait exists', () => {

@@ -1,0 +1,14 @@
+<div class="character-resources-bar" *ngIf="character">
+  <app-resource-tracker 
+    [resource]="healthResource"
+    (valueChanged)="onResourceChanged('Health', $event)">
+  </app-resource-tracker>
+  <app-resource-tracker 
+    [resource]="focusResource"
+    (valueChanged)="onResourceChanged('Focus', $event)">
+  </app-resource-tracker>
+  <app-resource-tracker 
+    [resource]="investitureResource"
+    (valueChanged)="onResourceChanged('Investiture', $event)">
+  </app-resource-tracker>
+</div>
