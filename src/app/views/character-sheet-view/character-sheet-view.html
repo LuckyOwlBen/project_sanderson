@@ -25,7 +25,7 @@
       <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Notes</button>
     </div>
     <div class="tab-content" *ngIf="activeTab === 0">
-      <div class="sheet-content">
+      <div class="sheet-content overview-tab">
         <!-- Portrait Card -->
         <app-character-portrait-card
           [character]="character"
