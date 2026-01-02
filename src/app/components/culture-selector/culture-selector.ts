@@ -133,6 +133,20 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   viewCultureDetails(cultureInfo: CultureInfo): void {
     this.selectedCulture = cultureInfo;
+    
+    // Scroll to top when details open
+    setTimeout(() => {
+      const detailsSection = document.querySelector('.culture-details');
+      if (detailsSection) {
+        detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: scroll the main content area to top
+        const mainContent = document.querySelector('.app-sidenav-content');
+        if (mainContent) {
+          mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    }, 0);
   }
 
   confirmCulture(): void {

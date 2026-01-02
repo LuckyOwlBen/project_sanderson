@@ -401,7 +401,10 @@
   .culture-grid {
     grid-template-columns: 1fr;
   }
-  
+
+  .culture-details {
+    padding-bottom: 10rem;
+  }
   .selected-culture-card {
     .selected-culture-content {
       flex-direction: column;
