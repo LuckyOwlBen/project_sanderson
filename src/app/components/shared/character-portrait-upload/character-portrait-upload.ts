@@ -35,7 +35,14 @@ export class CharacterPortraitUpload {
   }
 
   onImageUploaded(imageUrl: string): void {
-    this.uploadedImageUrl = imageUrl;
+    try {
+      this.uploadedImageUrl = imageUrl;
+    } catch (error: any) {
+      if (error.name === 'QuotaExceededError' || error.code === 22) {
+        alert('Storage quota exceeded. Please delete some old character portraits or clear browser data.');
+      }
+      console.error('Error saving image:', error);
+    }
   }
 
   onImageRemoved(): void {
@@ -47,6 +54,13 @@ export class CharacterPortraitUpload {
   }
 
   onSave(): void {
-    this.dialogRef.close(this.uploadedImageUrl);
+    try {
+      this.dialogRef.close(this.uploadedImageUrl);
+    } catch (error: any) {
+      if (error.name === 'QuotaExceededError' || error.code === 22) {
+        alert('Storage quota exceeded. Unable to save portrait. Please delete some old character portraits or clear browser data.');
+      }
+      console.error('Error saving portrait:', error);
+    }
   }
 }

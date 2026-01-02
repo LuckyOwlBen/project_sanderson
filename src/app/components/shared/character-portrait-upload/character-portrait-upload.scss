@@ -1,35 +1,45 @@
-.portrait-upload-dialog {
-  max-width: 100%;
-  max-height: 100%;
-  background-color: var(--gpSystemDarkerGrey);
-  padding: 1.5rem;
-
-  @media (max-width: 780px) {
-    padding-bottom: 10rem;
+::ng-deep .mat-mdc-dialog-container {
+  .mdc-dialog__container {
+    height: 100%;
   }
 
-  ::ng-deep .mat-mdc-dialog-container {
-    background-color: var(--gpSystemDarkerGrey);
-    overflow: auto !important;
-    
-    .mat-mdc-dialog-surface,
-    .mdc-dialog__surface {
-      overflow: auto !important;
-    }
-    
-    .mat-mdc-dialog-content,
-    .mdc-dialog__content {
-      overflow: visible !important;
-      max-height: none !important;
-    }
+  .mat-mdc-dialog-surface {
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+    max-height: 90vh !important;
+    height: auto !important;
+  }
+
+  .mat-mdc-dialog-content,
+  .mdc-dialog__content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+.portrait-upload-dialog {
+  max-width: 100%;
+  background-color: var(--gpSystemDarkerGrey);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+
+  @media (max-width: 780px) {
+    padding: 1rem;
+    max-height: 85vh;
   }
 
   h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 1rem 0;
     color: #ffffff;
+    flex-shrink: 0;
 
     mat-icon {
       color: var(--gpColor-ChalkyBlue);
@@ -38,13 +48,17 @@
 
   mat-dialog-content {
     padding: 0;
-    overflow: visible !important;
-    max-height: none !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
 
     .dialog-content {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      padding-bottom: 1rem;
 
       .instruction-text {
         font-size: 0.95rem;
@@ -82,10 +96,11 @@
 
   mat-dialog-actions {
     padding: 0;
-    margin: 1.5rem 0 0 0;
+    margin: 1rem 0 0 0;
     gap: 1rem;
     justify-content: flex-end;
     flex-wrap: wrap;
+    flex-shrink: 0;
 
     button {
       display: flex;
