@@ -116,11 +116,6 @@
   color: #fff !important;
   font-weight: 600;
 }
-.starting-equipment-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 2rem;
-}
 
 .step-header {
   margin-bottom: 2rem;
@@ -459,5 +454,11 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .starting-equipment-container {
+    padding-bottom: 6rem;
   }
 }
