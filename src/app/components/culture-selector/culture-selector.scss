@@ -398,6 +398,9 @@
 }
 
 @media (max-width: 768px) {
+  .character-name-container {
+    padding-bottom: 10rem;
+  }
   .culture-grid {
     grid-template-columns: 1fr;
   }
