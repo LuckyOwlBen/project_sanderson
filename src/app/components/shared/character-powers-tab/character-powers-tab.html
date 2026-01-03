@@ -1,23 +1,23 @@
 <div class="sheet-content powers-notes-tab">
   <!-- Powers Card -->
-  <mat-card class="powers-card">
-    <mat-card-header>
-      <mat-icon class="section-icon">auto_awesome</mat-icon>
-      <mat-card-title>Powers</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="powers-card">
+    <div class="card-header">
+      <span class="section-icon">✨</span>
+      <h3 class="card-title">Powers</h3>
+    </div>
+    <div class="card-content">
       <div class="powers-list">
-        <mat-accordion class="powers-accordion" *ngIf="getPowers().length > 0">
-          <mat-expansion-panel *ngFor="let power of getPowers()" class="power-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title class="power-title">
-                <mat-icon class="power-icon">flash_on</mat-icon>
+        <div class="powers-accordion" *ngIf="getPowers().length > 0">
+          <details *ngFor="let power of getPowers()" class="power-panel">
+            <summary class="power-header">
+              <div class="power-title">
+                <span class="power-icon">⚡</span>
                 <span class="power-name">{{ power.name }}</span>
-              </mat-panel-title>
-              <mat-panel-description class="power-cost">
+              </div>
+              <span class="power-cost">
                 {{ getActionCostDisplay(power.actionCost) }}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
+              </span>
+            </summary>
             <div class="power-details">
               <div class="power-description">
                 <p>{{ power.description }}</p>
@@ -26,13 +26,13 @@
                 </p>
               </div>
               <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
-                <h4><mat-icon>trending_up</mat-icon> Bonuses</h4>
+                <h4><span class="bonus-icon">📈</span> Bonuses</h4>
                 <ul>
                   <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
                 </ul>
               </div>
               <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
-                <h4><mat-icon>auto_fix_high</mat-icon> Additional Effects</h4>
+                <h4><span class="effect-icon">✨</span> Additional Effects</h4>
                 <ul>
                   <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
                 </ul>
@@ -40,35 +40,35 @@
               <div class="power-meta">
                 <span class="power-tier">Tier {{ power.tier }}</span>
                 <span class="power-path" *ngIf="power.pathRequirement">
-                  <mat-icon>route</mat-icon> {{ power.pathRequirement }}
+                  <span class="path-icon">🛤️</span> {{ power.pathRequirement }}
                 </span>
               </div>
             </div>
-          </mat-expansion-panel>
-        </mat-accordion>
+          </details>
+        </div>
         <p class="empty-text" *ngIf="getPowers().length === 0">
           No powers unlocked yet
         </p>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
   
   <!-- Expertises Card -->
-  <mat-card class="stats-card">
-    <mat-card-header>
-      <mat-icon class="section-icon">auto_stories</mat-icon>
-      <mat-card-title>Expertises</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="stats-card">
+    <div class="card-header">
+      <span class="section-icon">📚</span>
+      <h3 class="card-title">Expertises</h3>
+    </div>
+    <div class="card-content">
       <div class="expertises-list">
         <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
-          <mat-icon class="expertise-icon">check_circle</mat-icon>
+          <span class="expertise-icon">✓</span>
           <span class="expertise-name">{{ expertise }}</span>
         </div>
         <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
           No expertises selected
         </p>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 </div>
