@@ -161,7 +161,7 @@ mat-divider {
   margin-bottom: 0;
   background: var(--gpSystemDarkerGrey) !important;
 
-  mat-card-header {
+  .card-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -174,7 +174,7 @@ mat-divider {
       color: var(--gpColor-ChalkyBlue);
     }
 
-    mat-card-title {
+    .card-title {
       font-size: 1.1rem;
       font-weight: 600;
       margin: 0;
@@ -182,7 +182,7 @@ mat-divider {
     }
   }
 
-  mat-card-content {
+  .card-content {
     padding: 0.75rem;
     color: #e8e8e8;
   }
@@ -220,18 +220,18 @@ mat-divider {
   .powers-card,
   .notes-card,
   .portrait-card {
-    mat-card-header {
+    .card-header {
       gap: 0.4rem;
       .section-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
       }
-      mat-card-title {
+      .card-title {
         font-size: 1rem;
       }
     }
-    mat-card-content {
+    .card-content {
       padding: 0.5rem;
       font-size: 0.95rem;
     }
@@ -322,18 +322,18 @@ mat-divider {
   }
   .spren-notification, .ideal-prompt {
     margin: 1rem auto;
-    mat-card-header {
+    .card-header {
       padding: 0.5rem;
       .spren-icon, .ideal-icon {
         font-size: 20px;
         width: 20px;
         height: 20px;
       }
-      mat-card-title {
+      .card-title {
         font-size: 1.1rem;
       }
     }
-    mat-card-content {
+    .card-content {
       padding: 0.7rem;
       .spren-message, .ideal-message {
         font-size: 0.95rem;
@@ -350,7 +350,7 @@ mat-divider {
         font-size: 0.9rem;
       }
     }
-    mat-card-actions {
+    .card-actions {
       padding: 0.5rem;
       button {
         font-size: 0.95rem;
@@ -394,18 +394,18 @@ mat-divider {
   .powers-card,
   .notes-card,
   .portrait-card {
-    mat-card-header {
+    .card-header {
       gap: 0.2rem;
       .section-icon {
         font-size: 14px;
         width: 14px;
         height: 14px;
       }
-      mat-card-title {
+      .card-title {
         font-size: 0.95rem;
       }
     }
-    mat-card-content {
+    .card-content {
       padding: 0.3rem;
       font-size: 0.9rem;
     }
@@ -496,18 +496,18 @@ mat-divider {
   }
   .spren-notification, .ideal-prompt {
     margin: 0.5rem auto;
-    mat-card-header {
+    .card-header {
       padding: 0.3rem;
       .spren-icon, .ideal-icon {
         font-size: 14px;
         width: 14px;
         height: 14px;
       }
-      mat-card-title {
+      .card-title {
         font-size: 0.95rem;
       }
     }
-    mat-card-content {
+    .card-content {
       padding: 0.3rem;
       .spren-message, .ideal-message {
         font-size: 0.85rem;
@@ -524,7 +524,7 @@ mat-divider {
         font-size: 0.8rem;
       }
     }
-    mat-card-actions {
+    .card-actions {
       padding: 0.3rem;
       button {
         font-size: 0.85rem;
@@ -541,7 +541,7 @@ mat-divider {
   margin-bottom: 1.5rem;
   background: var(--gpSystemDarkerGrey) !important;
 
-  mat-card-header {
+  .card-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -554,7 +554,7 @@ mat-divider {
       color: var(--gpColor-ChalkyBlue);
     }
 
-    mat-card-title {
+    .card-title {
       font-size: 1.2rem;
       font-weight: 600;
       margin: 0;
@@ -562,7 +562,7 @@ mat-divider {
     }
   }
 
-  mat-card-content {
+  .card-content {
     padding: 1rem;
     color: #e8e8e8;
   }
