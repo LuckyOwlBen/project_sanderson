@@ -94,6 +94,40 @@ export class InventoryView implements OnDestroy {
     return this.character.inventory.isOverencumbered(this.character.attributes.strength);
   }
 
+  // ===== EXPERTISE =====
+
+  hasExpertTraits(item: InventoryItem): boolean {
+    const weaponTraits = item.weaponProperties?.expertTraits || [];
+    const armorTraits = item.armorProperties?.expertTraits || [];
+    return weaponTraits.length > 0 || armorTraits.length > 0;
+  }
+
+  canUseExpertTraits(item: InventoryItem): boolean {
+    if (!this.character || !this.hasExpertTraits(item)) return true;
+    const result = this.character.inventory.canUseExpertTraits(item.id);
+    return result.canUse;
+  }
+
+  getExpertiseTooltip(item: InventoryItem): string {
+    if (!this.character || !this.hasExpertTraits(item)) return '';
+    
+    const result = this.character.inventory.canUseExpertTraits(item.id);
+    
+    if (result.canUse) {
+      return 'Expert traits unlocked';
+    } else if (result.missingExpertises.length > 0) {
+      return `Requires: ${result.missingExpertises.join(', ')}`;
+    }
+    
+    return '';
+  }
+
+  getExpertTraitsList(item: InventoryItem): string[] {
+    const weaponTraits = item.weaponProperties?.expertTraits || [];
+    const armorTraits = item.armorProperties?.expertTraits || [];
+    return [...weaponTraits, ...armorTraits];
+  }
+
   // ===== CURRENCY =====
 
   getCurrency(): number {

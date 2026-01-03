@@ -47,7 +47,17 @@
             <div class="equipped-item">
               <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
               <div class="item-info">
-                <div class="item-name">{{ item.name }}</div>
+                <div class="item-name">
+                  {{ item.name }}
+                  <mat-icon 
+                    *ngIf="hasExpertTraits(item)"
+                    [class.expertise-unlocked]="canUseExpertTraits(item)"
+                    [class.expertise-locked]="!canUseExpertTraits(item)"
+                    [matTooltip]="getExpertiseTooltip(item)"
+                    class="expertise-indicator">
+                    {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
+                  </mat-icon>
+                </div>
                 <div class="item-stats" *ngIf="item.weaponProperties">
                   {{ item.weaponProperties.damage }} {{ item.weaponProperties.damageType }}
                 </div>
@@ -74,7 +84,17 @@
             <div class="equipped-item">
               <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
               <div class="item-info">
-                <div class="item-name">{{ item.name }}</div>
+                <div class="item-name">
+                  {{ item.name }}
+                  <mat-icon 
+                    *ngIf="hasExpertTraits(item)"
+                    [class.expertise-unlocked]="canUseExpertTraits(item)"
+                    [class.expertise-locked]="!canUseExpertTraits(item)"
+                    [matTooltip]="getExpertiseTooltip(item)"
+                    class="expertise-indicator">
+                    {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
+                  </mat-icon>
+                </div>
                 <div class="item-stats" *ngIf="item.weaponProperties">
                   {{ item.weaponProperties.damage }} {{ item.weaponProperties.damageType }}
                 </div>
@@ -98,7 +118,17 @@
             <div class="equipped-item">
               <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
               <div class="item-info">
-                <div class="item-name">{{ item.name }}</div>
+                <div class="item-name">
+                  {{ item.name }}
+                  <mat-icon 
+                    *ngIf="hasExpertTraits(item)"
+                    [class.expertise-unlocked]="canUseExpertTraits(item)"
+                    [class.expertise-locked]="!canUseExpertTraits(item)"
+                    [matTooltip]="getExpertiseTooltip(item)"
+                    class="expertise-indicator">
+                    {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
+                  </mat-icon>
+                </div>
                 <div class="item-stats" *ngIf="item.armorProperties">
                   Deflect: {{ item.armorProperties.deflectValue }}
                 </div>
@@ -148,6 +178,14 @@
           <mat-panel-title>
             <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
             <span class="item-name" [matTooltip]="item.name">{{ item.name }}</span>
+            <mat-icon 
+              *ngIf="hasExpertTraits(item)"
+              [class.expertise-unlocked]="canUseExpertTraits(item)"
+              [class.expertise-locked]="!canUseExpertTraits(item)"
+              [matTooltip]="getExpertiseTooltip(item)"
+              class="expertise-indicator-small">
+              {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
+            </mat-icon>
             <span class="item-quantity" *ngIf="item.quantity > 1">x{{ item.quantity }}</span>
           </mat-panel-title>
           <mat-panel-description>
@@ -158,6 +196,30 @@
 
         <div class="item-details">
           <p class="item-description">{{ getItemDescription(item) }}</p>
+          
+          <!-- Expert Traits -->
+          <div class="expert-traits-section" *ngIf="hasExpertTraits(item)">
+            <div class="expert-traits-header">
+              <mat-icon [class.unlocked]="canUseExpertTraits(item)" [class.locked]="!canUseExpertTraits(item)">
+                {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
+              </mat-icon>
+              <span class="expert-traits-title">Expert Traits</span>
+              <span class="expert-status" [class.unlocked]="canUseExpertTraits(item)" [class.locked]="!canUseExpertTraits(item)">
+                {{ canUseExpertTraits(item) ? 'Unlocked' : 'Locked' }}
+              </span>
+            </div>
+            <div class="expert-traits-list">
+              <mat-chip *ngFor="let trait of getExpertTraitsList(item)" 
+                        [class.disabled]="!canUseExpertTraits(item)"
+                        class="expert-trait-chip">
+                {{ trait }}
+              </mat-chip>
+            </div>
+            <p class="expertise-requirement" *ngIf="!canUseExpertTraits(item)">
+              <mat-icon>info</mat-icon>
+              {{ getExpertiseTooltip(item) }}
+            </p>
+          </div>
           
           <div class="item-actions">
             <button 

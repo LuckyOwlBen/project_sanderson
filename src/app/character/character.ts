@@ -37,6 +37,7 @@ export class Character {
     this.resourceManager = new ResourceManager(this.attributes);
     this.bonusManager.setCharacter(this);
     this.inventoryManager.setBonusManager(this.bonusManager);
+    this.inventoryManager.setCharacter(this);
     this.craftingManager = new CraftingManager(this);
   }
 

@@ -1,12 +1,14 @@
 import { InventoryItem, StartingKit, CurrencyConversion } from './inventoryItem';
 import { getItemById, STARTING_KITS } from './itemDefinitions';
 import { BonusManager } from '../bonuses/bonusManager';
+import type { Character } from '../character';
 
 export class InventoryManager {
   private items: Map<string, InventoryItem> = new Map();
   private equippedItems: Map<string, string> = new Map(); // slot -> itemId
   private currency: number = 0; // stored in marks
   private bonusManager: BonusManager | null = null;
+  private character: Character | null = null;
 
   constructor() {}
 
@@ -14,6 +16,10 @@ export class InventoryManager {
 
   setBonusManager(bonusManager: BonusManager): void {
     this.bonusManager = bonusManager;
+  }
+
+  setCharacter(character: Character): void {
+    this.character = character;
   }
 
   applyStartingKit(kitId: string): boolean {
@@ -142,6 +148,93 @@ export class InventoryManager {
     }
 
     return true;
+  }
+
+  /**
+   * Check if character can use expert traits on an item
+   * Expert traits are unlocked by having specific expertises
+   */
+  canUseExpertTraits(itemId: string): { canUse: boolean; missingExpertises: string[] } {
+    const item = this.items.get(itemId);
+    if (!item || !this.character) {
+      return { canUse: true, missingExpertises: [] };
+    }
+
+    const missingExpertises: string[] = [];
+
+    // Check weapon expert traits
+    if (item.weaponProperties?.expertTraits && item.weaponProperties.expertTraits.length > 0) {
+      const weaponExpertise = this.getWeaponExpertise(item.id, item.name);
+      if (weaponExpertise && !this.character.hasExpertise(weaponExpertise)) {
+        missingExpertises.push(weaponExpertise);
+      }
+    }
+
+    // Check armor expert traits
+    if (item.armorProperties?.expertTraits && item.armorProperties.expertTraits.length > 0) {
+      const armorExpertise = this.getArmorExpertise(item.id, item.name);
+      if (armorExpertise && !this.character.hasExpertise(armorExpertise)) {
+        missingExpertises.push(armorExpertise);
+      }
+    }
+
+    return {
+      canUse: missingExpertises.length === 0,
+      missingExpertises
+    };
+  }
+
+  /**
+   * Get required expertise for weapon based on item ID or name
+   */
+  private getWeaponExpertise(itemId: string, itemName: string): string | null {
+    // Map common weapon types to expertises
+    const weaponMap: Record<string, string> = {
+      'sword': 'Dueling',
+      'axe': 'Axe Fighting',
+      'mace': 'Bludgeoning Weapons',
+      'spear': 'Spear Fighting',
+      'bow': 'Archery',
+      'dagger': 'Knife Fighting',
+      'staff': 'Staff Fighting',
+      'hammer': 'Hammer Fighting',
+      'lance': 'Mounted Combat'
+    };
+
+    const lowerName = itemName.toLowerCase();
+    const lowerId = itemId.toLowerCase();
+
+    for (const [weaponType, expertise] of Object.entries(weaponMap)) {
+      if (lowerName.includes(weaponType) || lowerId.includes(weaponType)) {
+        return expertise;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get required expertise for armor based on item ID or name
+   */
+  private getArmorExpertise(itemId: string, itemName: string): string | null {
+    // Map armor types to expertises
+    const armorMap: Record<string, string> = {
+      'plate': 'Armor Mastery',
+      'mail': 'Armor Mastery',
+      'leather': 'Light Armor',
+      'hide': 'Light Armor'
+    };
+
+    const lowerName = itemName.toLowerCase();
+    const lowerId = itemId.toLowerCase();
+
+    for (const [armorType, expertise] of Object.entries(armorMap)) {
+      if (lowerName.includes(armorType) || lowerId.includes(armorType)) {
+        return expertise;
+      }
+    }
+
+    return null;
   }
 
   unequipItem(itemId: string): boolean {
