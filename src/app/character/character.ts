@@ -8,6 +8,7 @@ import { Ancestry } from './ancestry/ancestry';
 import { CulturalInterface } from './culture/culturalInterface';
 import { RadiantPathManager } from './radiantPath/radiantPathManager';
 import { InventoryManager } from './inventory/inventoryManager';
+import { CraftingManager } from './crafting/craftingManager';
 import { ExpertiseSource } from './expertises/expertiseSource';
 
 
@@ -29,12 +30,14 @@ export class Character {
   private bonusManager = new BonusManager();
   private radiantPathManager = new RadiantPathManager();
   private inventoryManager = new InventoryManager();
+  private craftingManager: CraftingManager;
 
   constructor() {
     this.attributes = new Attributes();
     this.resourceManager = new ResourceManager(this.attributes);
     this.bonusManager.setCharacter(this);
     this.inventoryManager.setBonusManager(this.bonusManager);
+    this.craftingManager = new CraftingManager(this);
   }
 
   get skills(): SkillManager {
@@ -63,6 +66,10 @@ export class Character {
 
   get inventory(): InventoryManager {
     return this.inventoryManager;
+  }
+
+  get crafting(): CraftingManager {
+    return this.craftingManager;
   }
 
   /**

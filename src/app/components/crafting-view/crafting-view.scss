@@ -1,0 +1,403 @@
+.crafting-view-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .craft-result-notification {
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.3s ease-out;
+
+    mat-card {
+      border-left: 4px solid;
+
+      &.success {
+        border-left-color: #4caf50;
+        background-color: rgba(76, 175, 80, 0.1);
+      }
+
+      &.failure {
+        border-left-color: #f44336;
+        background-color: rgba(244, 67, 54, 0.1);
+      }
+
+      .success-icon {
+        color: #4caf50;
+      }
+
+      .error-icon {
+        color: #f44336;
+      }
+
+      .result-details {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+
+        strong {
+          color: #4caf50;
+        }
+      }
+    }
+  }
+
+  .category-tabs-card {
+    margin-bottom: 1.5rem;
+
+    .category-chips {
+      mat-chip-listbox {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        mat-chip-option {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-weight: 500;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+
+          &[aria-selected="true"] {
+            background-color: var(--mat-chip-selected-container-color);
+            color: var(--mat-chip-selected-label-text-color);
+          }
+        }
+      }
+    }
+  }
+
+  .recipes-list {
+    .recipe-panel {
+      margin-bottom: 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      overflow: hidden;
+
+      &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      mat-expansion-panel-header {
+        padding: 0.75rem 1rem;
+
+        mat-panel-title {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+
+          .recipe-icon {
+            color: var(--mat-primary-color);
+          }
+
+          .recipe-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+          }
+        }
+
+        mat-panel-description {
+          justify-content: flex-end;
+
+          mat-chip {
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-height: 24px;
+            padding: 0 8px;
+
+            &.difficulty-trivial {
+              background-color: #e8f5e9;
+              color: #2e7d32;
+            }
+
+            &.difficulty-easy {
+              background-color: #c8e6c9;
+              color: #1b5e20;
+            }
+
+            &.difficulty-moderate {
+              background-color: #fff9c4;
+              color: #f57f17;
+            }
+
+            &.difficulty-hard {
+              background-color: #ffe0b2;
+              color: #e65100;
+            }
+
+            &.difficulty-very-hard {
+              background-color: #ffccbc;
+              color: #bf360c;
+            }
+
+            &.difficulty-masterwork {
+              background-color: #f3e5f5;
+              color: #4a148c;
+            }
+          }
+        }
+      }
+
+      .recipe-details {
+        padding: 1rem;
+
+        .recipe-section {
+          margin-bottom: 1.5rem;
+
+          &:last-of-type {
+            margin-bottom: 1rem;
+          }
+
+          h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 0.75rem 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.7);
+
+            mat-icon {
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .recipe-description {
+            margin: 0;
+            color: rgba(0, 0, 0, 0.6);
+            line-height: 1.5;
+          }
+
+          .expertise-chip {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            font-weight: 500;
+          }
+
+          .materials-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .material-item {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.5rem;
+              border-radius: 4px;
+              transition: background-color 0.2s;
+
+              &.has-material {
+                background-color: rgba(76, 175, 80, 0.1);
+
+                .material-icon {
+                  color: #4caf50;
+                }
+
+                .material-quantity {
+                  color: #2e7d32;
+                  font-weight: 600;
+                }
+              }
+
+              &.lacks-material {
+                background-color: rgba(244, 67, 54, 0.1);
+
+                .material-icon {
+                  color: #f44336;
+                }
+
+                .material-quantity {
+                  color: #c62828;
+                  font-weight: 600;
+                }
+              }
+
+              .material-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+
+              .material-name {
+                flex: 1;
+                font-weight: 500;
+              }
+
+              .material-quantity {
+                font-size: 0.9rem;
+              }
+            }
+          }
+
+          .result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background-color: rgba(156, 39, 176, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid #9c27b0;
+
+            span {
+              font-weight: 600;
+              color: #6a1b9a;
+            }
+
+            .crafting-time {
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+              font-size: 0.85rem;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+        }
+
+        .craft-action {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 1rem;
+
+          .craft-button {
+            min-width: 180px;
+            font-weight: 600;
+
+            mat-icon {
+              margin-right: 0.5rem;
+            }
+
+            &:disabled {
+              cursor: not-allowed;
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: rgba(0, 0, 0, 0.6);
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: rgba(0, 0, 0, 0.3);
+        margin-bottom: 1rem;
+      }
+
+      h3 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 500;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .crafting-view-container {
+    .craft-result-notification {
+      mat-card {
+        &.success {
+          background-color: rgba(76, 175, 80, 0.15);
+        }
+
+        &.failure {
+          background-color: rgba(244, 67, 54, 0.15);
+        }
+
+        .result-details {
+          background-color: rgba(255, 255, 255, 0.05);
+        }
+      }
+    }
+
+    .recipes-list {
+      .recipe-panel {
+        border-color: rgba(255, 255, 255, 0.12);
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .recipe-details {
+          .recipe-section {
+            h4 {
+              color: rgba(255, 255, 255, 0.7);
+            }
+
+            .recipe-description {
+              color: rgba(255, 255, 255, 0.6);
+            }
+
+            .expertise-chip {
+              background-color: rgba(227, 242, 253, 0.2);
+              color: #90caf9;
+            }
+
+            .materials-list {
+              .material-item {
+                &.has-material {
+                  background-color: rgba(76, 175, 80, 0.15);
+                }
+
+                &.lacks-material {
+                  background-color: rgba(244, 67, 54, 0.15);
+                }
+              }
+            }
+
+            .result-item {
+              background-color: rgba(156, 39, 176, 0.15);
+
+              span {
+                color: #ce93d8;
+              }
+            }
+          }
+        }
+      }
+
+      .empty-state {
+        color: rgba(255, 255, 255, 0.6);
+
+        mat-icon {
+          color: rgba(255, 255, 255, 0.3);
+        }
+      }
+    }
+  }
+}

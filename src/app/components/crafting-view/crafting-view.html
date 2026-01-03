@@ -1,0 +1,156 @@
+<div class="crafting-view-container">
+  <!-- Craft Result Notification -->
+  <div class="craft-result-notification" *ngIf="lastCraftResult">
+    <mat-card [class.success]="lastCraftResult.success" [class.failure]="!lastCraftResult.success">
+      <mat-card-header>
+        <mat-icon mat-card-avatar [class.success-icon]="lastCraftResult.success" [class.error-icon]="!lastCraftResult.success">
+          {{ lastCraftResult.success ? 'check_circle' : 'error' }}
+        </mat-icon>
+        <mat-card-title>{{ lastCraftResult.success ? 'Crafting Successful!' : 'Crafting Failed' }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ lastCraftResult.message }}</p>
+        <div *ngIf="lastCraftResult.success && lastCraftResult.itemId" class="result-details">
+          <strong>Created:</strong> {{ lastCraftResult.quantity }}x {{ formatItemName(lastCraftResult.itemId) }}
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button (click)="dismissResult()">
+          <mat-icon>close</mat-icon>
+          Dismiss
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Category Tabs -->
+  <mat-card class="category-tabs-card">
+    <mat-card-content>
+      <div class="category-chips">
+        <mat-chip-listbox [value]="selectedCategory">
+          <mat-chip-option value="all" (click)="selectCategory('all')">
+            <mat-icon>apps</mat-icon>
+            All ({{ availableRecipes.length }})
+          </mat-chip-option>
+          <mat-chip-option value="weapon" (click)="selectCategory('weapon')">
+            <mat-icon>swords</mat-icon>
+            Weapons ({{ getCategoryCount('weapon') }})
+          </mat-chip-option>
+          <mat-chip-option value="armor" (click)="selectCategory('armor')">
+            <mat-icon>shield</mat-icon>
+            Armor ({{ getCategoryCount('armor') }})
+          </mat-chip-option>
+          <mat-chip-option value="fabrial" (click)="selectCategory('fabrial')">
+            <mat-icon>auto_awesome</mat-icon>
+            Fabrials ({{ getCategoryCount('fabrial') }})
+          </mat-chip-option>
+          <mat-chip-option value="consumable" (click)="selectCategory('consumable')">
+            <mat-icon>science</mat-icon>
+            Consumables ({{ getCategoryCount('consumable') }})
+          </mat-chip-option>
+          <mat-chip-option value="equipment" (click)="selectCategory('equipment')">
+            <mat-icon>handyman</mat-icon>
+            Equipment ({{ getCategoryCount('equipment') }})
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recipe List -->
+  <div class="recipes-list">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let recipe of getFilteredRecipes()" class="recipe-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon class="recipe-icon">{{ getCategoryIcon(recipe.category) }}</mat-icon>
+            <span class="recipe-name">{{ recipe.name }}</span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <mat-chip [class]="'difficulty-' + recipe.difficulty">
+              {{ formatDifficulty(recipe.difficulty) }}
+            </mat-chip>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="recipe-details">
+          <!-- Description -->
+          <div class="recipe-section">
+            <p class="recipe-description">{{ recipe.description }}</p>
+          </div>
+
+          <!-- Required Expertise -->
+          <div class="recipe-section">
+            <h4>
+              <mat-icon>school</mat-icon>
+              Required Expertise
+            </h4>
+            <mat-chip class="expertise-chip">{{ recipe.requiredExpertise }}</mat-chip>
+          </div>
+
+          <!-- Materials -->
+          <div class="recipe-section">
+            <h4>
+              <mat-icon>inventory_2</mat-icon>
+              Required Materials
+            </h4>
+            <div class="materials-list">
+              <div *ngFor="let material of recipe.materials" 
+                   class="material-item"
+                   [class.has-material]="hasMaterial(material)"
+                   [class.lacks-material]="!hasMaterial(material)">
+                <mat-icon class="material-icon">
+                  {{ hasMaterial(material) ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+                <span class="material-name">{{ formatItemName(material.itemId) }}</span>
+                <span class="material-quantity">
+                  {{ getItemQuantity(material.itemId) }} / {{ material.quantity }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div class="recipe-section">
+            <h4>
+              <mat-icon>emoji_events</mat-icon>
+              Result
+            </h4>
+            <div class="result-item">
+              <span>{{ recipe.resultQuantity }}x {{ formatItemName(recipe.resultItemId) }}</span>
+              <span *ngIf="recipe.craftingTime" class="crafting-time">
+                <mat-icon>schedule</mat-icon>
+                {{ recipe.craftingTime }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Craft Button -->
+          <div class="craft-action">
+            <button mat-raised-button 
+                    color="primary"
+                    [disabled]="!canCraftRecipe(recipe.id)"
+                    (click)="craftItem(recipe)"
+                    class="craft-button">
+              <mat-icon>construction</mat-icon>
+              {{ canCraftRecipe(recipe.id) ? 'Craft Item' : getCraftabilityMessage(recipe.id) }}
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="getFilteredRecipes().length === 0">
+      <mat-icon>info</mat-icon>
+      <h3>No Recipes Available</h3>
+      <p *ngIf="availableRecipes.length === 0">
+        You need crafting expertises to unlock recipes.
+        Gain expertises through your culture, talents, or from the GM.
+      </p>
+      <p *ngIf="availableRecipes.length > 0">
+        No recipes in this category. Try selecting a different category.
+      </p>
+    </div>
+  </div>
+</div>

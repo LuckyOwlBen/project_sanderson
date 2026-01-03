@@ -92,7 +92,19 @@
     </div>
     <div class="tab-content" *ngIf="activeTab === 3">
       <div class="sheet-content">
-        <app-inventory-view [character]="character"></app-inventory-view>
+        <!-- Equipment Subtabs -->
+        <mat-tab-group class="equipment-tabs" animationDuration="200ms">
+          <mat-tab label="Inventory">
+            <div class="equipment-tab-content">
+              <app-inventory-view [character]="character"></app-inventory-view>
+            </div>
+          </mat-tab>
+          <mat-tab label="Crafting">
+            <div class="equipment-tab-content">
+              <app-crafting-view [character]="character"></app-crafting-view>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
       </div>
     </div>
 

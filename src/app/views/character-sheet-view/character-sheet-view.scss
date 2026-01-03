@@ -849,3 +849,11 @@ mat-divider {
     margin-bottom: 2rem;
   }
 }
+
+// Equipment tabs styling
+.equipment-tabs {
+  .equipment-tab-content {
+    padding-top: 1rem;
+    animation: fadeInTab 0.3s ease-out;
+  }
+}

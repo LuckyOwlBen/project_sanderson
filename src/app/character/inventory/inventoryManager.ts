@@ -112,6 +112,11 @@ export class InventoryManager {
     return item ? item.quantity >= quantity : false;
   }
 
+  getItemQuantity(itemId: string): number {
+    const item = this.items.get(itemId);
+    return item ? item.quantity : 0;
+  }
+
   // ===== EQUIPMENT =====
 
   equipItem(itemId: string): boolean {
