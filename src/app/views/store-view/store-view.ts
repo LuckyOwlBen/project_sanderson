@@ -1,15 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Character } from '../../character/character';
@@ -23,16 +14,7 @@ import { WebsocketService } from '../../services/websocket.service';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSnackBarModule,
-    MatDialogModule
+    FormsModule
   ],
   templateUrl: './store-view.html',
   styleUrl: './store-view.scss'
@@ -62,9 +44,7 @@ export class StoreView implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private websocketService: WebsocketService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private websocketService: WebsocketService
   ) {}
 
   ngOnInit(): void {
@@ -80,7 +60,7 @@ export class StoreView implements OnInit, OnDestroy {
       .subscribe(event => {
         this.storeEnabled = event.enabled;
         if (!event.enabled) {
-          this.snackBar.open('The store has been closed by the GM', 'Dismiss', { duration: 5000 });
+          this.showNotification('The store has been closed by the GM');
         }
       });
   }
@@ -122,12 +102,12 @@ export class StoreView implements OnInit, OnDestroy {
     const totalCost = item.price * quantity;
 
     if (!this.character.inventory.canAfford(totalCost)) {
-      this.snackBar.open('Not enough currency!', 'Dismiss', { duration: 3000 });
+      this.showNotification('Not enough currency!');
       return;
     }
 
     if (this.character.inventory.purchaseItem(item.id, item.price, quantity)) {
-      this.snackBar.open(`Purchased ${quantity}x ${item.name}`, 'Dismiss', { duration: 3000 });
+      this.showNotification(`Purchased ${quantity}x ${item.name}`);
       
       // Emit websocket event for GM tracking
       this.websocketService.emitStoreTransaction({
@@ -208,10 +188,36 @@ export class StoreView implements OnInit, OnDestroy {
     this.converterBroams = conversion.broams;
     this.converterMarks = conversion.marks;
     this.converterChips = conversion.chips;
-    this.snackBar.open('Currency converted!', 'Dismiss', { duration: 2000 });
+    this.showNotification('Currency converted!');
   }
 
   // ===== ITEM DETAILS =====
+
+  getCategoryIcon(iconName: string): string {
+    const iconMap: { [key: string]: string } = {
+      'store': '🏪',
+      'swords': '⚔️',
+      'shield': '🛡️',
+      'backpack': '🎒',
+      'science': '🧪',
+      'auto_awesome': '✨',
+      'pets': '🐴'
+    };
+    return iconMap[iconName] || '📦';
+  }
+
+  getItemIconEmoji(item: InventoryItem): string {
+    switch (item.type) {
+      case 'weapon': return '⚔️';
+      case 'armor': return '🛡️';
+      case 'equipment': return '🎒';
+      case 'consumable': return '🧪';
+      case 'fabrial': return '✨';
+      case 'mount': return '🐴';
+      case 'vehicle': return '⛵';
+      default: return '📦';
+    }
+  }
 
   getItemIcon(item: InventoryItem): string {
     switch (item.type) {
@@ -237,5 +243,13 @@ export class StoreView implements OnInit, OnDestroy {
       return `Charges: ${item.fabrialProperties.charges}`;
     }
     return '';
+  }
+
+  // ===== NOTIFICATIONS =====
+
+  private showNotification(message: string): void {
+    // Simple notification - could be enhanced with a custom notification service
+    console.log('Notification:', message);
+    // You could create a toast/notification component here
   }
 }

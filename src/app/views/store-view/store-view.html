@@ -2,7 +2,7 @@
   <!-- Store Header -->
   <div class="store-header">
     <div class="header-content">
-      <mat-icon class="store-icon">store</mat-icon>
+      <span class="store-icon">🏪</span>
       <div class="header-text">
         <h1>General Store</h1>
         <p class="subtitle">Browse and purchase equipment for your adventures</p>
@@ -11,144 +11,145 @@
 
     <div class="currency-section">
       <div class="currency-display">
-        <mat-icon>paid</mat-icon>
+        <span class="icon">💰</span>
         <span class="currency-amount">{{ getCurrencyDisplay() }}</span>
       </div>
-      <button mat-stroked-button (click)="toggleConverter()">
-        <mat-icon>currency_exchange</mat-icon>
+      <button class="btn btn-secondary" (click)="toggleConverter()">
+        <span class="icon">💱</span>
         {{ showConverter ? 'Hide' : 'Convert' }}
       </button>
     </div>
   </div>
 
   <!-- Currency Converter -->
-  <mat-card class="currency-converter" *ngIf="showConverter">
-    <mat-card-header>
-      <mat-card-title>Currency Converter</mat-card-title>
-      <mat-card-subtitle>Exchange your currency between denominations</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="currency-converter card" *ngIf="showConverter">
+    <div class="card-header">
+      <h3>Currency Converter</h3>
+      <p class="card-subtitle">Exchange your currency between denominations</p>
+    </div>
+    <div class="card-content">
       <div class="converter-fields">
-        <mat-form-field>
-          <mat-label>Broams</mat-label>
-          <input matInput type="number" [(ngModel)]="converterBroams" (ngModelChange)="updateFromBroams()" min="0">
-          <mat-hint>1 broam = 4 marks</mat-hint>
-        </mat-form-field>
+        <div class="form-field">
+          <label for="broams">Broams</label>
+          <input id="broams" type="number" [(ngModel)]="converterBroams" (ngModelChange)="updateFromBroams()" min="0">
+          <span class="hint">1 broam = 4 marks</span>
+        </div>
 
-        <mat-form-field>
-          <mat-label>Marks</mat-label>
-          <input matInput type="number" [(ngModel)]="converterMarks" (ngModelChange)="updateFromMarks()" min="0">
-          <mat-hint>Base currency</mat-hint>
-        </mat-form-field>
+        <div class="form-field">
+          <label for="marks">Marks</label>
+          <input id="marks" type="number" [(ngModel)]="converterMarks" (ngModelChange)="updateFromMarks()" min="0">
+          <span class="hint">Base currency</span>
+        </div>
 
-        <mat-form-field>
-          <mat-label>Chips</mat-label>
-          <input matInput type="number" [(ngModel)]="converterChips" (ngModelChange)="updateFromChips()" min="0" step="0.1">
-          <mat-hint>5 chips = 1 mark</mat-hint>
-        </mat-form-field>
+        <div class="form-field">
+          <label for="chips">Chips</label>
+          <input id="chips" type="number" [(ngModel)]="converterChips" (ngModelChange)="updateFromChips()" min="0" step="0.1">
+          <span class="hint">5 chips = 1 mark</span>
+        </div>
       </div>
-      <button mat-raised-button color="primary" (click)="convertToMixed()">
-        <mat-icon>autorenew</mat-icon>
+      <button class="btn btn-primary" (click)="convertToMixed()">
+        <span class="icon">🔄</span>
         Auto-Convert to Mixed
       </button>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 
   <!-- Search Bar -->
-  <mat-form-field class="search-bar">
-    <mat-label>Search items</mat-label>
-    <input matInput [(ngModel)]="searchQuery" placeholder="Search by name or description...">
-    <mat-icon matPrefix>search</mat-icon>
-  </mat-form-field>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or description...">
+  </div>
 
   <!-- Category Selector -->
-  <mat-chip-set class="category-selector">
-    <mat-chip 
+  <div class="category-selector">
+    <button 
       *ngFor="let category of categories"
-      [highlighted]="selectedCategory === category.id"
+      class="category-chip"
+      [class.active]="selectedCategory === category.id"
       (click)="selectCategory(category.id)">
-      <mat-icon>{{ category.icon }}</mat-icon>
+      <span class="icon">{{ getCategoryIcon(category.icon) }}</span>
       {{ category.label }}
-    </mat-chip>
-  </mat-chip-set>
+    </button>
+  </div>
 
   <!-- Item Grid -->
   <div class="items-grid">
-    <mat-card 
+    <div 
       *ngFor="let item of getAvailableItems()"
-      class="item-card"
+      class="item-card card"
       [class.affordable]="canAfford(item)"
       [class.expensive]="!canAfford(item)">
       
-      <mat-card-header>
-        <mat-icon mat-card-avatar [class]="'item-icon ' + item.type">
-          {{ getItemIcon(item) }}
-        </mat-icon>
-        <mat-card-title>{{ item.name }}</mat-card-title>
-        <mat-card-subtitle>{{ item.type }}</mat-card-subtitle>
-      </mat-card-header>
+      <div class="card-header">
+        <span class="item-icon" [attr.data-type]="item.type">
+          {{ getItemIconEmoji(item) }}
+        </span>
+        <div class="header-text">
+          <h3>{{ item.name }}</h3>
+          <span class="item-type">{{ item.type }}</span>
+        </div>
+      </div>
 
-      <mat-card-content>
+      <div class="card-content">
         <p class="item-description">{{ item.description }}</p>
         
         <div class="item-stats" *ngIf="getItemStats(item)">
-          <mat-icon>info</mat-icon>
+          <span class="icon">ℹ️</span>
           <span>{{ getItemStats(item) }}</span>
         </div>
 
         <div class="item-traits" *ngIf="item.weaponProperties && item.weaponProperties.traits && item.weaponProperties.traits.length > 0">
-          <mat-chip-set>
-            <mat-chip *ngFor="let trait of item.weaponProperties.traits.slice(0, 3)">
-              {{ trait }}
-            </mat-chip>
-          </mat-chip-set>
+          <span class="trait-chip" *ngFor="let trait of item.weaponProperties.traits.slice(0, 3)">
+            {{ trait }}
+          </span>
         </div>
 
         <div class="item-footer">
           <div class="item-weight">
-            <mat-icon>fitness_center</mat-icon>
+            <span class="icon">⚖️</span>
             <span>{{ item.weight }} lbs</span>
           </div>
           <div class="item-price">
-            <mat-icon>paid</mat-icon>
+            <span class="icon">💰</span>
             <span class="price-amount">{{ item.price }}mk</span>
           </div>
         </div>
-      </mat-card-content>
+      </div>
 
-      <mat-card-actions>
+      <div class="card-actions">
         <button 
-          mat-raised-button 
-          [color]="canAfford(item) ? 'primary' : 'basic'"
+          class="btn"
+          [class.btn-primary]="canAfford(item)"
+          [class.btn-disabled]="!canAfford(item)"
           [disabled]="!canAfford(item)"
           (click)="purchaseItem(item, 1)"
-          matTooltip="{{ canAfford(item) ? 'Purchase this item' : 'Not enough currency' }}">
-          <mat-icon>shopping_cart</mat-icon>
+          [title]="canAfford(item) ? 'Purchase this item' : 'Not enough currency'">
+          <span class="icon">🛒</span>
           Buy
         </button>
         
         <button 
-          mat-icon-button
+          class="btn btn-small"
           *ngIf="item.stackable && canAfford(item, 5)"
           (click)="purchaseItem(item, 5)"
-          matTooltip="Buy 5x">
-          <mat-icon>add_shopping_cart</mat-icon>
+          title="Buy 5x">
+          <span class="icon">🛒</span>
           5x
         </button>
-      </mat-card-actions>
-    </mat-card>
+      </div>
+    </div>
   </div>
 
   <div class="empty-results" *ngIf="getAvailableItems().length === 0">
-    <mat-icon>search_off</mat-icon>
-    <p>No items found</p>
+    <span class="large-icon">🔍</span>
+    <h2>No items found</h2>
     <p class="hint">Try a different category or search term</p>
   </div>
 </div>
 
 <!-- Store Closed Message -->
 <div class="store-closed" *ngIf="!storeEnabled">
-  <mat-icon>store</mat-icon>
+  <span class="large-icon">🏪</span>
   <h2>Store Closed</h2>
   <p>The store has been closed by the Game Master</p>
   <p class="hint">Check back later or ask your GM to reopen the store</p>
@@ -156,7 +157,7 @@
 
 <!-- No Character Message -->
 <div class="no-character" *ngIf="!character">
-  <mat-icon>warning</mat-icon>
+  <span class="large-icon">⚠️</span>
   <h2>No Character Loaded</h2>
   <p>Please load a character to access the store</p>
 </div>
