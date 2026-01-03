@@ -20,6 +20,41 @@
         (imageRemoved)="onImageRemoved()">
       </app-image-uploader>
 
+      <div class="cached-images-section" *ngIf="cachedImages.length > 0">
+        <h4>
+          <mat-icon>photo_library</mat-icon>
+          Saved Portraits ({{ cachedImages.length }})
+        </h4>
+        <p class="helper-text">Click to select, or delete unused portraits to free storage</p>
+        <div class="cached-images-grid">
+          <div 
+            *ngFor="let image of cachedImages" 
+            class="cached-image-item"
+            [class.selected]="uploadedImageUrl === image.url">
+            <img [src]="image.url" [alt]="image.characterName || 'Portrait'">
+            <div class="image-overlay">
+              <span class="character-name">{{ image.characterName }}</span>
+              <div class="action-buttons">
+                <button 
+                  mat-icon-button 
+                  class="select-btn"
+                  [matTooltip]="'Use this portrait'"
+                  (click)="selectCachedImage(image.url)">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  class="delete-btn"
+                  [matTooltip]="'Delete this portrait'"
+                  (click)="deleteCachedImage(image, $event)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="tips-section">
         <h4>Tips:</h4>
         <ul>
