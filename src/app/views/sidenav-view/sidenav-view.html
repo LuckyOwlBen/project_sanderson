@@ -21,14 +21,14 @@
       <span matListItemTitle>Character List</span>
     </mat-list-item>
     
-    <mat-divider></mat-divider>
+    <mat-divider *ngIf="hasCharacter"></mat-divider>
     
-    <mat-list-item (click)="navigateTo('/character-sheet')">
+    <mat-list-item *ngIf="hasCharacter" (click)="navigateTo('/character-sheet')">
       <mat-icon matListItemIcon>assignment</mat-icon>
       <span matListItemTitle>Character Sheet</span>
     </mat-list-item>
     
-    <mat-list-item (click)="navigateTo('/store')">
+    <mat-list-item *ngIf="hasCharacter" (click)="navigateTo('/store')">
       <mat-icon matListItemIcon>store</mat-icon>
       <span matListItemTitle>Store</span>
     </mat-list-item>

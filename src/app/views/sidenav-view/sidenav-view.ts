@@ -48,7 +48,8 @@ export class SidenavView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        this.hasCharacter = !!character;
+        // A character is "active" if it has meaningful data (name or ancestry)
+        this.hasCharacter = !!character && !!(character.name || character.ancestry);
         this.updateCreationSteps();
       });
   }
