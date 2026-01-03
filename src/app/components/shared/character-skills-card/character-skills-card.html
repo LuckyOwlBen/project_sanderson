@@ -1,0 +1,25 @@
+<div class="skills-card">
+  <div class="card-header">
+    <span class="section-icon">🎯</span>
+    <h3 class="card-title">Skills</h3>
+  </div>
+  <div class="card-content">
+    <div class="skills-grid">
+      <div class="skill-item" *ngFor="let skill of getAllSkills()" [class]="getSkillClass(skill)">
+        <div class="skill-header">
+          <span class="skill-icon">{{ getSkillIcon(skill) }}</span>
+          <span class="skill-name">{{ skill.name }}</span>
+          <span class="skill-total">+{{ skill.total }}</span>
+        </div>
+        <div class="skill-details">
+          <span class="skill-breakdown">
+            Rank {{ skill.rank }} + {{ skill.associatedAttribute }} {{ skill.attributeValue }}
+          </span>
+        </div>
+      </div>
+      <p class="empty-text" *ngIf="getAllSkills().length === 0">
+        No skills available
+      </p>
+    </div>
+  </div>
+</div>

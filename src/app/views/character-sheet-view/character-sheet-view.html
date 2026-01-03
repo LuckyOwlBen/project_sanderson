@@ -20,9 +20,10 @@
   <div class="sheet-tabs custom-tabs">
     <div class="tab-labels">
       <button class="tab-label" [class.active]="activeTab === 0" (click)="activeTab = 0">Overview</button>
-      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">Talents &amp; Expertises</button>
-      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Equipment</button>
-      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Notes</button>
+      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">Skills</button>
+      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Talents &amp; Expertises</button>
+      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Equipment</button>
+      <button class="tab-label" [class.active]="activeTab === 4" (click)="activeTab = 4">Notes</button>
     </div>
     <div class="tab-content" *ngIf="activeTab === 0">
       <div class="sheet-content overview-tab">
@@ -46,16 +47,21 @@
     </div>
     <div class="tab-content" *ngIf="activeTab === 1">
       <div class="sheet-content powers-notes-tab">
-        <app-character-powers-tab [character]="character"></app-character-powers-tab>
+        <app-character-skills-card [character]="character"></app-character-skills-card>
       </div>
     </div>
     <div class="tab-content" *ngIf="activeTab === 2">
+      <div class="sheet-content powers-notes-tab">
+        <app-character-powers-tab [character]="character"></app-character-powers-tab>
+      </div>
+    </div>
+    <div class="tab-content" *ngIf="activeTab === 3">
       <div class="sheet-content">
         <app-inventory-view [character]="character"></app-inventory-view>
       </div>
     </div>
 
-    <div class="tab-content" *ngIf="activeTab === 3">
+    <div class="tab-content" *ngIf="activeTab === 4">
       <div class="sheet-content powers-notes-tab">
         <mat-card class="notes-card">
           <mat-card-header>

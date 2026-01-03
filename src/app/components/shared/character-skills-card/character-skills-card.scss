@@ -1,0 +1,103 @@
+.skills-card {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #3a3a3a;
+
+    .section-icon {
+      font-size: 1.5rem;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+    }
+  }
+
+  .card-content {
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.75rem;
+
+      .skill-item {
+        background: #1a1a1a;
+        border: 1px solid #3a3a3a;
+        border-radius: 6px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: #4a4a4a;
+          background: #222;
+        }
+
+        // Different styles for skill types
+        &.skill-regular {
+          border-left: 3px solid #4a90e2;
+        }
+
+        &.skill-surge {
+          border-left: 3px solid #9b59b6;
+          background: linear-gradient(135deg, #1a1a1a 0%, #221a2a 100%);
+        }
+
+        &.skill-expertise {
+          border-left: 3px solid #f39c12;
+          background: linear-gradient(135deg, #1a1a1a 0%, #2a2217 100%);
+        }
+
+        .skill-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+
+          .skill-icon {
+            font-size: 1.2rem;
+          }
+
+          .skill-name {
+            flex: 1;
+            font-weight: 500;
+            color: #fff;
+          }
+
+          .skill-total {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4a90e2;
+            padding: 0.25rem 0.5rem;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 4px;
+          }
+        }
+
+        .skill-details {
+          .skill-breakdown {
+            font-size: 0.85rem;
+            color: #888;
+          }
+        }
+      }
+
+      .empty-text {
+        color: #888;
+        font-style: italic;
+        text-align: center;
+        padding: 2rem;
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}

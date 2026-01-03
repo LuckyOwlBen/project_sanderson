@@ -65,4 +65,27 @@ export class Character {
     return this.inventoryManager;
   }
 
+  /**
+   * Get all expertise names (for skill checks)
+   * Expertises function as skills with Intellect as the governing attribute
+   */
+  getExpertiseSkills(): string[] {
+    return this.selectedExpertises.map(e => e.name);
+  }
+
+  /**
+   * Check if character has a specific expertise
+   */
+  hasExpertise(expertiseName: string): boolean {
+    return this.selectedExpertises.some(e => e.name === expertiseName);
+  }
+
+  /**
+   * Get expertise rank for skill checks
+   * Currently all expertises have rank 1, but this allows for future expansion
+   */
+  getExpertiseRank(expertiseName: string): number {
+    return this.hasExpertise(expertiseName) ? 1 : 0;
+  }
+
 }

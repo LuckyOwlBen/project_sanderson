@@ -24,6 +24,7 @@ import { CharacterPortraitCard } from '../../components/shared/character-portrai
 import { CharacterDefensesCard } from '../../components/shared/character-defenses-card/character-defenses-card';
 import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
 import { CharacterResourcesBar } from '../../components/shared/character-resources-bar/character-resources-bar';
+import { CharacterSkillsCard } from '../../components/shared/character-skills-card/character-skills-card';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -49,7 +50,8 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     CharacterPortraitCard,
     CharacterDefensesCard,
     CharacterPowersTab,
-    CharacterResourcesBar
+    CharacterResourcesBar,
+    CharacterSkillsCard
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
