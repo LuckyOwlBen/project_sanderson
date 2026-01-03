@@ -1,77 +1,73 @@
 <div class="crafting-view-container">
   <!-- Craft Result Notification -->
   <div class="craft-result-notification" *ngIf="lastCraftResult">
-    <mat-card [class.success]="lastCraftResult.success" [class.failure]="!lastCraftResult.success">
-      <mat-card-header>
-        <mat-icon mat-card-avatar [class.success-icon]="lastCraftResult.success" [class.error-icon]="!lastCraftResult.success">
-          {{ lastCraftResult.success ? 'check_circle' : 'error' }}
-        </mat-icon>
-        <mat-card-title>{{ lastCraftResult.success ? 'Crafting Successful!' : 'Crafting Failed' }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
+    <div class="notification-card" [class.success]="lastCraftResult.success" [class.failure]="!lastCraftResult.success">
+      <div class="notification-header">
+        <span class="notification-icon" [class.success-icon]="lastCraftResult.success" [class.error-icon]="!lastCraftResult.success">
+          {{ lastCraftResult.success ? '✓' : '✕' }}
+        </span>
+        <h3 class="notification-title">{{ lastCraftResult.success ? 'Crafting Successful!' : 'Crafting Failed' }}</h3>
+      </div>
+      <div class="notification-content">
         <p>{{ lastCraftResult.message }}</p>
         <div *ngIf="lastCraftResult.success && lastCraftResult.itemId" class="result-details">
           <strong>Created:</strong> {{ lastCraftResult.quantity }}x {{ formatItemName(lastCraftResult.itemId) }}
         </div>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-button (click)="dismissResult()">
-          <mat-icon>close</mat-icon>
+      </div>
+      <div class="notification-actions">
+        <button class="btn btn-text" (click)="dismissResult()">
+          <span class="btn-icon">✕</span>
           Dismiss
         </button>
-      </mat-card-actions>
-    </mat-card>
+      </div>
+    </div>
   </div>
 
   <!-- Category Tabs -->
-  <mat-card class="category-tabs-card">
-    <mat-card-content>
-      <div class="category-chips">
-        <mat-chip-listbox [value]="selectedCategory">
-          <mat-chip-option value="all" (click)="selectCategory('all')">
-            <mat-icon>apps</mat-icon>
-            All ({{ availableRecipes.length }})
-          </mat-chip-option>
-          <mat-chip-option value="weapon" (click)="selectCategory('weapon')">
-            <mat-icon>swords</mat-icon>
-            Weapons ({{ getCategoryCount('weapon') }})
-          </mat-chip-option>
-          <mat-chip-option value="armor" (click)="selectCategory('armor')">
-            <mat-icon>shield</mat-icon>
-            Armor ({{ getCategoryCount('armor') }})
-          </mat-chip-option>
-          <mat-chip-option value="fabrial" (click)="selectCategory('fabrial')">
-            <mat-icon>auto_awesome</mat-icon>
-            Fabrials ({{ getCategoryCount('fabrial') }})
-          </mat-chip-option>
-          <mat-chip-option value="consumable" (click)="selectCategory('consumable')">
-            <mat-icon>science</mat-icon>
-            Consumables ({{ getCategoryCount('consumable') }})
-          </mat-chip-option>
-          <mat-chip-option value="equipment" (click)="selectCategory('equipment')">
-            <mat-icon>handyman</mat-icon>
-            Equipment ({{ getCategoryCount('equipment') }})
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  <div class="category-tabs-card">
+    <div class="category-chips">
+      <button class="chip" [class.selected]="selectedCategory === 'all'" (click)="selectCategory('all')">
+        <span class="chip-icon">⊞</span>
+        All ({{ availableRecipes.length }})
+      </button>
+      <button class="chip" [class.selected]="selectedCategory === 'weapon'" (click)="selectCategory('weapon')">
+        <span class="chip-icon">⚔</span>
+        Weapons ({{ getCategoryCount('weapon') }})
+      </button>
+      <button class="chip" [class.selected]="selectedCategory === 'armor'" (click)="selectCategory('armor')">
+        <span class="chip-icon">🛡</span>
+        Armor ({{ getCategoryCount('armor') }})
+      </button>
+      <button class="chip" [class.selected]="selectedCategory === 'fabrial'" (click)="selectCategory('fabrial')">
+        <span class="chip-icon">✦</span>
+        Fabrials ({{ getCategoryCount('fabrial') }})
+      </button>
+      <button class="chip" [class.selected]="selectedCategory === 'consumable'" (click)="selectCategory('consumable')">
+        <span class="chip-icon">⚗</span>
+        Consumables ({{ getCategoryCount('consumable') }})
+      </button>
+      <button class="chip" [class.selected]="selectedCategory === 'equipment'" (click)="selectCategory('equipment')">
+        <span class="chip-icon">🔧</span>
+        Equipment ({{ getCategoryCount('equipment') }})
+      </button>
+    </div>
+  </div>
 
   <!-- Recipe List -->
   <div class="recipes-list">
-    <mat-accordion>
-      <mat-expansion-panel *ngFor="let recipe of getFilteredRecipes()" class="recipe-panel">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon class="recipe-icon">{{ getCategoryIcon(recipe.category) }}</mat-icon>
+    <div class="recipe-accordion">
+      <details class="recipe-panel" *ngFor="let recipe of getFilteredRecipes()">
+        <summary class="recipe-header">
+          <div class="recipe-title">
+            <span class="recipe-icon">{{ getCategoryIcon(recipe.category) }}</span>
             <span class="recipe-name">{{ recipe.name }}</span>
-          </mat-panel-title>
-          <mat-panel-description>
-            <mat-chip [class]="'difficulty-' + recipe.difficulty">
+          </div>
+          <div class="recipe-description-inline">
+            <span class="difficulty-chip difficulty-{{ recipe.difficulty }}">
               {{ formatDifficulty(recipe.difficulty) }}
-            </mat-chip>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
+            </span>
+          </div>
+        </summary>
 
         <div class="recipe-details">
           <!-- Description -->
@@ -82,16 +78,16 @@
           <!-- Required Expertise -->
           <div class="recipe-section">
             <h4>
-              <mat-icon>school</mat-icon>
+              <span class="section-icon">🎓</span>
               Required Expertise
             </h4>
-            <mat-chip class="expertise-chip">{{ recipe.requiredExpertise }}</mat-chip>
+            <span class="expertise-chip">{{ recipe.requiredExpertise }}</span>
           </div>
 
           <!-- Materials -->
           <div class="recipe-section">
             <h4>
-              <mat-icon>inventory_2</mat-icon>
+              <span class="section-icon">📦</span>
               Required Materials
             </h4>
             <div class="materials-list">
@@ -99,9 +95,9 @@
                    class="material-item"
                    [class.has-material]="hasMaterial(material)"
                    [class.lacks-material]="!hasMaterial(material)">
-                <mat-icon class="material-icon">
-                  {{ hasMaterial(material) ? 'check_circle' : 'cancel' }}
-                </mat-icon>
+                <span class="material-icon">
+                  {{ hasMaterial(material) ? '✓' : '✕' }}
+                </span>
                 <span class="material-name">{{ formatItemName(material.itemId) }}</span>
                 <span class="material-quantity">
                   {{ getItemQuantity(material.itemId) }} / {{ material.quantity }}
@@ -113,13 +109,13 @@
           <!-- Result -->
           <div class="recipe-section">
             <h4>
-              <mat-icon>emoji_events</mat-icon>
+              <span class="section-icon">🏆</span>
               Result
             </h4>
             <div class="result-item">
               <span>{{ recipe.resultQuantity }}x {{ formatItemName(recipe.resultItemId) }}</span>
               <span *ngIf="recipe.craftingTime" class="crafting-time">
-                <mat-icon>schedule</mat-icon>
+                <span class="time-icon">⏱</span>
                 {{ recipe.craftingTime }}
               </span>
             </div>
@@ -127,22 +123,20 @@
 
           <!-- Craft Button -->
           <div class="craft-action">
-            <button mat-raised-button 
-                    color="primary"
+            <button class="btn btn-primary craft-button"
                     [disabled]="!canCraftRecipe(recipe.id)"
-                    (click)="craftItem(recipe)"
-                    class="craft-button">
-              <mat-icon>construction</mat-icon>
+                    (click)="craftItem(recipe)">
+              <span class="btn-icon">🔨</span>
               {{ canCraftRecipe(recipe.id) ? 'Craft Item' : getCraftabilityMessage(recipe.id) }}
             </button>
           </div>
         </div>
-      </mat-expansion-panel>
-    </mat-accordion>
+      </details>
+    </div>
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="getFilteredRecipes().length === 0">
-      <mat-icon>info</mat-icon>
+      <span class="empty-icon">ℹ</span>
       <h3>No Recipes Available</h3>
       <p *ngIf="availableRecipes.length === 0">
         You need crafting expertises to unlock recipes.

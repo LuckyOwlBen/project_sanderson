@@ -8,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
@@ -43,7 +42,6 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     MatFormFieldModule,
     MatInputModule,
     MatDividerModule,
-    MatTabsModule,
     MatDialogModule,
     MatExpansionModule,
     InventoryView,
@@ -62,6 +60,7 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
 })
 export class CharacterSheetView implements OnInit, OnDestroy {
   activeTab = 0;
+  equipmentActiveTab: 'inventory' | 'crafting' = 'inventory';
   private destroy$ = new Subject<void>();
   private resourceUpdateSubject = new Subject<void>();
   private autoSaveInterval: any = null;

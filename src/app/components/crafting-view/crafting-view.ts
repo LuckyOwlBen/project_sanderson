@@ -1,13 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
 import { Recipe, CraftingResult, MaterialRequirement } from '../../character/crafting/craftingManager';
@@ -17,15 +9,7 @@ import { CharacterStateService } from '../../character/characterStateService';
   selector: 'app-crafting-view',
   standalone: true,
   imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatExpansionModule,
-    MatTabsModule,
-    MatBadgeModule,
-    MatTooltipModule
+    CommonModule
   ],
   templateUrl: './crafting-view.html',
   styleUrls: ['./crafting-view.scss']

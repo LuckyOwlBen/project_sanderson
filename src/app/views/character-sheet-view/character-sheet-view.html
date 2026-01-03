@@ -93,18 +93,28 @@
     <div class="tab-content" *ngIf="activeTab === 3">
       <div class="sheet-content">
         <!-- Equipment Subtabs -->
-        <mat-tab-group class="equipment-tabs" animationDuration="200ms">
-          <mat-tab label="Inventory">
-            <div class="equipment-tab-content">
-              <app-inventory-view [character]="character"></app-inventory-view>
-            </div>
-          </mat-tab>
-          <mat-tab label="Crafting">
-            <div class="equipment-tab-content">
-              <app-crafting-view [character]="character"></app-crafting-view>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
+        <div class="equipment-tabs">
+          <div class="equipment-tab-headers">
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'inventory'" 
+                    (click)="equipmentActiveTab = 'inventory'">
+              <span class="tab-icon">🎒</span>
+              Inventory
+            </button>
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'crafting'" 
+                    (click)="equipmentActiveTab = 'crafting'">
+              <span class="tab-icon">🔨</span>
+              Crafting
+            </button>
+          </div>
+          <div class="equipment-tab-content" *ngIf="equipmentActiveTab === 'inventory'">
+            <app-inventory-view [character]="character"></app-inventory-view>
+          </div>
+          <div class="equipment-tab-content" *ngIf="equipmentActiveTab === 'crafting'">
+            <app-crafting-view [character]="character"></app-crafting-view>
+          </div>
+        </div>
       </div>
     </div>
 
