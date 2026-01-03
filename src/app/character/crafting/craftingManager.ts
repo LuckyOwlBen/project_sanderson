@@ -48,11 +48,24 @@ export interface CraftingResult {
 
 /**
  * Manages crafting recipes and item creation
+ * 
+ * The CraftingManager handles:
+ * - Recipe storage and retrieval
+ * - Expertise validation for crafting
+ * - Material requirement checking
+ * - Item creation with material consumption
+ * - Rollback on crafting failures
+ * 
+ * Flow: Character with expertise + materials → canCraft() check → craftItem() → new item created
  */
 export class CraftingManager {
   private recipes: Map<string, Recipe> = new Map();
   private character: Character;
 
+  /**
+   * Create a new CraftingManager for a character
+   * @param character - The character who will use this crafting manager
+   */
   constructor(character: Character) {
     this.character = character;
     this.initializeRecipes();
@@ -150,6 +163,7 @@ export class CraftingManager {
 
   /**
    * Add a recipe to the crafting system
+   * @param recipe - The recipe to add to the available recipes
    */
   addRecipe(recipe: Recipe): void {
     this.recipes.set(recipe.id, recipe);
@@ -157,6 +171,9 @@ export class CraftingManager {
 
   /**
    * Get all available recipes
+   * Note: This returns ALL recipes, not just those the character can craft
+   * Use getAvailableRecipes() to get only craftable recipes
+   * @returns Array of all recipes in the system
    */
   getAllRecipes(): Recipe[] {
     return Array.from(this.recipes.values());
@@ -164,6 +181,8 @@ export class CraftingManager {
 
   /**
    * Get recipes the character can craft (has required expertise)
+   * Does NOT check materials - only expertise
+   * @returns Array of recipes the character has expertise to craft
    */
   getAvailableRecipes(): Recipe[] {
     return this.getAllRecipes().filter(recipe => 
@@ -173,6 +192,8 @@ export class CraftingManager {
 
   /**
    * Get recipes by category
+   * @param category - The category to filter by (weapon, armor, utility, etc.)
+   * @returns Array of recipes matching the specified category
    */
   getRecipesByCategory(category: Recipe['category']): Recipe[] {
     return this.getAllRecipes().filter(recipe => recipe.category === category);
@@ -180,6 +201,8 @@ export class CraftingManager {
 
   /**
    * Get a specific recipe by ID
+   * @param recipeId - The unique identifier for the recipe
+   * @returns The recipe if found, undefined otherwise
    */
   getRecipe(recipeId: string): Recipe | undefined {
     return this.recipes.get(recipeId);
@@ -219,6 +242,21 @@ export class CraftingManager {
 
   /**
    * Craft an item from a recipe
+   * 
+   * Process:
+   * 1. Validates recipe exists
+   * 2. Checks expertise and materials via canCraft()
+   * 3. Consumes materials from inventory
+   * 4. Adds crafted item to inventory
+   * 5. Rolls back materials if any step fails
+   * 
+   * @param recipeId - The ID of the recipe to craft
+   * @returns CraftingResult with success status, message, and crafted item details
+   * @example
+   * const result = craftingManager.craftItem('craft-iron-sword');
+   * if (result.success) {
+   *   console.log(`Crafted ${result.quantity}x ${result.itemId}`);
+   * }
    */
   craftItem(recipeId: string): CraftingResult {
     const recipe = this.recipes.get(recipeId);

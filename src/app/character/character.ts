@@ -20,7 +20,7 @@ export class Character {
   ancestry: Ancestry | null = null;
   attributes: Attributes;
   cultures: CulturalInterface[] = [];
-  selectedExpertises: ExpertiseSource[] = [];
+  private _selectedExpertises: ExpertiseSource[] = [];
   unlockedTalents: Set<string> = new Set<string>();
 
   private skillManager = new SkillManager();
@@ -31,6 +31,31 @@ export class Character {
   private radiantPathManager = new RadiantPathManager();
   private inventoryManager = new InventoryManager();
   private craftingManager: CraftingManager;
+  
+  /**
+   * Performance cache: Set of expertise names for O(1) lookup
+   * Invalidated when selectedExpertises changes
+   * @private
+   */
+  private expertiseCache: Set<string> | null = null;
+
+  /**
+   * Get the character's expertises
+   * Direct array access - modifications won't invalidate cache
+   * Use addExpertise/removeExpertise methods or call invalidateExpertiseCache() after manual changes
+   */
+  get selectedExpertises(): ExpertiseSource[] {
+    return this._selectedExpertises;
+  }
+
+  /**
+   * Set the character's expertises
+   * Automatically invalidates cache when array is replaced
+   */
+  set selectedExpertises(value: ExpertiseSource[]) {
+    this._selectedExpertises = value;
+    this.invalidateExpertiseCache();
+  }
 
   constructor() {
     this.attributes = new Attributes();
@@ -76,6 +101,7 @@ export class Character {
   /**
    * Get all expertise names (for skill checks)
    * Expertises function as skills with Intellect as the governing attribute
+   * @returns Array of expertise names the character possesses
    */
   getExpertiseSkills(): string[] {
     return this.selectedExpertises.map(e => e.name);
@@ -83,17 +109,50 @@ export class Character {
 
   /**
    * Check if character has a specific expertise
+   * Uses cached Set for O(1) lookup performance
+   * Cache is rebuilt if selectedExpertises array changes
+   * @param expertiseName - Name of the expertise to check
+   * @returns True if character has the expertise, false otherwise
    */
   hasExpertise(expertiseName: string): boolean {
-    return this.selectedExpertises.some(e => e.name === expertiseName);
+    // Always check if cache needs rebuilding
+    const currentExpertiseCount = this._selectedExpertises.length;
+    const cacheSize = this.expertiseCache?.size ?? -1;
+    
+    // Rebuild cache if array length changed (detects push/splice/etc)
+    if (!this.expertiseCache || cacheSize !== currentExpertiseCount) {
+      this.rebuildExpertiseCache();
+    }
+    
+    return this.expertiseCache!.has(expertiseName);
   }
 
   /**
    * Get expertise rank for skill checks
    * Currently all expertises have rank 1, but this allows for future expansion
+   * @param expertiseName - Name of the expertise
+   * @returns 1 if character has expertise, 0 otherwise
    */
   getExpertiseRank(expertiseName: string): number {
     return this.hasExpertise(expertiseName) ? 1 : 0;
+  }
+
+  /**
+   * Rebuild the expertise cache from selectedExpertises array
+   * Called automatically when cache is invalidated
+   * @private
+   */
+  private rebuildExpertiseCache(): void {
+    this.expertiseCache = new Set(this.selectedExpertises.map(e => e.name));
+  }
+
+  /**
+   * Invalidate expertise cache
+   * Call this whenever selectedExpertises array is modified
+   * Cache will be rebuilt on next hasExpertise() call
+   */
+  invalidateExpertiseCache(): void {
+    this.expertiseCache = null;
   }
 
 }
