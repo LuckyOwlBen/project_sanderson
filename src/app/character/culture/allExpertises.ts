@@ -74,7 +74,58 @@ export const CULTURAL_EXPERTISES: ExpertiseDefinition[] = [
     }
 ];
 
+export const ITEM_EXPERTISES: ExpertiseDefinition[] = [
+    {
+        name: 'Light Weaponry',
+        category: 'weapon',
+        description: 'Proficiency with light melee weapons such as daggers, short swords, and shortbows.'
+    },
+    {
+        name: 'Heavy Weaponry',
+        category: 'weapon',
+        description: 'Proficiency with heavy melee weapons such as greatswords, hammers, and longbows.'
+    },
+    {
+        name: 'Special Weapons',
+        category: 'weapon',
+        description: 'Proficiency with specialized weapons such as improvised weapons, shardblades, and grandbows.'
+    },
+    {
+        name: 'Armor Proficiency',
+        category: 'armor',
+        description: 'Proficiency in wearing and maintaining various types of armor, including light, medium, and heavy armor.'
+    },
+    {
+        name: 'Fabrial Operation',
+        category: 'utility',
+        description: 'Knowledge in operating and repairing common fabrials used for everyday tasks and combat support.'
+    },
+];
+
+export const CRAFTING_EXPERTISES: ExpertiseDefinition[] = [
+    {
+        name: 'Armor Crafting',
+        category: 'specialist',
+        description: 'Skilled in crafting and repairing various types of armor.'
+    },
+    {
+        name: 'Weapon Crafting',
+        category: 'specialist',
+        description: 'Skilled in crafting and maintaining different kinds of weapons.'
+    },
+    {
+        name: 'Fabrial Crafting',
+        category: 'specialist',
+        description: 'Expertise in creating and enchanting fabrials for various uses.'
+    },
+    {
+        name: 'Equipment Crafting',
+        category: 'specialist',
+        description: 'Skilled in crafting and maintaining various types of equipment.'
+    },
+];
 export const ALL_EXPERTISES: ExpertiseDefinition[] = [
-    ...CULTURAL_EXPERTISES
-    // Armor, utility, and weapon expertises will be added later
+    ... CULTURAL_EXPERTISES,
+    ... ITEM_EXPERTISES,
+    ... CRAFTING_EXPERTISES,
 ];
