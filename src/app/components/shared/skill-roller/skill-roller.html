@@ -1,0 +1,60 @@
+<div class="skill-roller" [class.compact]="compact">
+  <mat-card class="roller-card">
+    <mat-card-header>
+      <mat-icon class="header-icon">casino</mat-icon>
+      <mat-card-title>Skill Check</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Skill Selection -->
+      <mat-form-field appearance="outline" class="skill-select">
+        <mat-label>Select Skill</mat-label>
+        <mat-select [(ngModel)]="selectedSkill" [compareWith]="compareSkills">
+          <mat-option *ngFor="let skill of availableSkills" [value]="skill">
+            <span class="skill-option" [class]="getSkillTypeClass(skill)">
+              <span class="skill-icon">{{ getSkillIcon(skill) }}</span>
+              <span class="skill-name">{{ skill.name }}</span>
+              <span class="skill-modifier">+{{ skill.modifier }}</span>
+            </span>
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="selectedSkill">
+          Rank {{ selectedSkill.rank }} + {{ selectedSkill.associatedAttribute }} {{ selectedSkill.attributeValue }}
+        </mat-hint>
+      </mat-form-field>
+
+      <!-- Roll Button -->
+      <button 
+        mat-raised-button 
+        color="primary" 
+        class="roll-button"
+        [disabled]="!selectedSkill"
+        (click)="rollSkillCheck()">
+        <mat-icon>casino</mat-icon>
+        Roll d20
+      </button>
+
+      <!-- Result Display -->
+      <div class="result-container" *ngIf="lastResult">
+        <div class="result-card" [class.critical-success]="lastResult.roll === 20" [class.critical-failure]="lastResult.roll === 1">
+          <div class="result-header">
+            <span class="result-label">Result</span>
+            <button mat-icon-button (click)="clearResult()" class="clear-button">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="result-total">{{ lastResult.total }}</div>
+          <div class="result-breakdown">{{ lastResult.breakdown }}</div>
+          <div class="critical-message" *ngIf="lastResult.roll === 20">
+            <mat-icon>star</mat-icon>
+            Critical Success!
+          </div>
+          <div class="critical-message failure" *ngIf="lastResult.roll === 1">
+            <mat-icon>warning</mat-icon>
+            Critical Failure!
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -330,6 +330,11 @@ if (IS_PRODUCTION) {
 io.on('connection', (socket) => {
   console.log(`[WebSocket] Client connected: ${socket.id}`);
 
+  // Debug: Log all events received on this socket
+  socket.onAny((eventName, ...args) => {
+    console.log(`[WebSocket] 🔍 Event received: "${eventName}" from ${socket.id}`);
+  });
+
   // Player joins session with character
   socket.on('player-join', (data) => {
     const { characterId, name, level, ancestry, health, focus, investiture } = data;
@@ -493,7 +498,33 @@ io.on('connection', (socket) => {
       toggledBy: 'GM'
     });
   });
-
+  // GM grants expertise to a player
+  socket.on('gm-grant-expertise', (data) => {
+    const { characterId, expertiseName, timestamp } = data;
+    console.log(`[GM Action] 📚 Granting expertise "${expertiseName}" to character ${characterId}`);
+    
+    // Find the target player's socket
+    let targetSocket = null;
+    for (const [socketId, player] of activePlayers.entries()) {
+      if (player.characterId === characterId) {
+        targetSocket = socketId;
+        break;
+      }
+    }
+    
+    if (targetSocket) {
+      const payload = {
+        characterId,
+        expertiseName,
+        grantedBy: 'GM',
+        timestamp: timestamp || new Date().toISOString()
+      };
+      console.log(`[GM Action] 📚 Sending expertise-granted to socket ${targetSocket}`);
+      io.to(targetSocket).emit('expertise-granted', payload);
+    } else {
+      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+    }
+  });
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);

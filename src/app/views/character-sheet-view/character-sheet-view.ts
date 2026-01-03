@@ -25,6 +25,7 @@ import { CharacterDefensesCard } from '../../components/shared/character-defense
 import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
 import { CharacterResourcesBar } from '../../components/shared/character-resources-bar/character-resources-bar';
 import { CharacterSkillsCard } from '../../components/shared/character-skills-card/character-skills-card';
+import { SkillRoller } from '../../components/shared/skill-roller/skill-roller';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -51,7 +52,8 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     CharacterDefensesCard,
     CharacterPowersTab,
     CharacterResourcesBar,
-    CharacterSkillsCard
+    CharacterSkillsCard,
+    SkillRoller
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
@@ -67,6 +69,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   sessionNotes: string = '';
   portraitUrl: string | null = null;
   pendingSprenGrant: any = null;
+  pendingExpertiseGrant: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -171,6 +174,40 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           console.log('[Character Sheet] ⭐ No match - character ID mismatch');
         }
       });
+
+    // Listen for expertise grants
+    console.log('[Character Sheet] 📚 Setting up expertise grant listener...');
+    console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
+    this.websocketService.expertiseGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(grant => {
+        console.log('[Character Sheet] 📚📚📚 EXPERTISE GRANT RECEIVED IN SUBSCRIBE 📚📚📚');
+        console.log('[Character Sheet] 📚 Expertise grant received:', grant);
+        console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
+        console.log('[Character Sheet] 📚 Grant character ID:', grant.characterId);
+        if (this.characterId && grant.characterId === this.characterId) {
+          console.log('[Character Sheet] 📚 Match! Adding expertise:', grant.expertiseName);
+          this.pendingExpertiseGrant = grant;
+          
+          // Auto-add expertise and save
+          if (this.character) {
+            this.characterState.addExpertise(grant.expertiseName, 'gm', undefined);
+            this.saveCharacter();
+          }
+          
+          // Auto-dismiss notification after 10 seconds
+          setTimeout(() => {
+            if (this.pendingExpertiseGrant === grant) {
+              this.pendingExpertiseGrant = null;
+              this.cdr.detectChanges();
+            }
+          }, 10000);
+          this.cdr.detectChanges();
+        } else {
+          console.log('[Character Sheet] 📚 No match - character ID mismatch or missing');
+        }
+      });
+    console.log('[Character Sheet] 📚 Expertise grant listener subscription complete');
   }
 
   ngOnDestroy(): void {
@@ -442,6 +479,12 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     console.log('[Character Sheet] First Ideal spoken, saving character');
     this.characterState.updateCharacter(this.character!);
     this.saveCharacter();
+    this.cdr.detectChanges();
+  }
+
+  dismissExpertiseGrant(): void {
+    console.log('[Character Sheet] Expertise grant dismissed');
+    this.pendingExpertiseGrant = null;
     this.cdr.detectChanges();
   }
 }

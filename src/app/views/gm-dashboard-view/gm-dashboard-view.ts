@@ -13,6 +13,7 @@ import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.se
 import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
 import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 import { ItemGrantDialogComponent } from './item-grant-dialog.component';
+import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.component';
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -208,6 +209,24 @@ export class GmDashboardView implements OnInit, OnDestroy {
           player.characterId,
           result.itemId,
           result.quantity
+        );
+      }
+    });
+  }
+
+  openExpertiseGrantDialog(player: PlayerJoinedEvent): void {
+    const dialogRef = this.dialog.open(ExpertiseGrantDialogComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      data: { player }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('[GM Dashboard] Granting expertise:', result);
+        this.websocketService.grantExpertise(
+          player.characterId,
+          result.expertiseName
         );
       }
     });

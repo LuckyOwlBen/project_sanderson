@@ -71,6 +71,13 @@ export interface StoreToggleEvent {
   toggledBy: string;
 }
 
+export interface ExpertiseGrantEvent {
+  characterId: string;
+  expertiseName: string;
+  grantedBy: string;
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -109,6 +116,9 @@ export class WebsocketService implements OnDestroy {
 
   private storeToggleSubject = new Subject<StoreToggleEvent>();
   public storeToggle$ = this.storeToggleSubject.asObservable();
+
+  private expertiseGrantSubject = new Subject<ExpertiseGrantEvent>();
+  public expertiseGrant$ = this.expertiseGrantSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -210,6 +220,16 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] 🏪 Store toggled:', data);
       this.storeToggleSubject.next(data);
     });
+
+    this.socket.on('expertise-granted', (data: ExpertiseGrantEvent) => {
+      console.log('[WebSocket] 📚📚📚 EXPERTISE-GRANTED EVENT RECEIVED 📚📚📚');
+      console.log('[WebSocket] 📚 Expertise granted event data:', data);
+      console.log('[WebSocket] 📚 Broadcasting to expertiseGrantSubject');
+      this.expertiseGrantSubject.next(data);
+      console.log('[WebSocket] 📚 Broadcast complete');
+    });
+    
+    console.log('[WebSocket] ✅ All event listeners registered');
   }
 
   disconnect(): void {
@@ -332,6 +352,23 @@ export class WebsocketService implements OnDestroy {
       storeId,
       enabled
     });
+  }
+
+  grantExpertise(characterId: string, expertiseName: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot grant expertise: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 📤 Granting expertise:', { characterId, expertiseName });
+    console.log('[WebSocket] 📤 Socket ID:', this.socket.id);
+    console.log('[WebSocket] 📤 Socket connected:', this.socket.connected);
+    this.socket.emit('gm-grant-expertise', {
+      characterId,
+      expertiseName,
+      timestamp: new Date().toISOString()
+    });
+    console.log('[WebSocket] 📤 gm-grant-expertise event emitted');
   }
 
   isConnected(): boolean {
