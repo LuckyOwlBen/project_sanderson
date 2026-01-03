@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,6 +17,7 @@ import { WebsocketService, SprenGrantEvent } from '../../services/websocket.serv
 import { SkillType } from '../../character/skills/skillTypes';
 import { TalentEffectParser } from '../../character/talents/talentEffectParser';
 import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 
 interface PathOption {
   id: string;
@@ -40,6 +41,8 @@ interface PathOption {
   styleUrl: './talent-view.scss',
 })
 export class TalentView implements OnInit, OnDestroy {
+  @Output() pendingChange = new EventEmitter<boolean>();
+  
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 7;
   
@@ -61,10 +64,18 @@ export class TalentView implements OnInit, OnDestroy {
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
     private websocketService: WebsocketService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private levelUpManager: LevelUpManager
   ) {}
 
   ngOnInit(): void {
+    // Listen to points changed events from LevelUpManager
+    this.levelUpManager.pointsChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkPendingStatus();
+      });
+
     // Check if we're in level-up mode
     this.activatedRoute.queryParams.pipe(
       takeUntil(this.destroy$)
@@ -849,6 +860,7 @@ export class TalentView implements OnInit, OnDestroy {
       }
       
       this.validationService.setStepValid(this.STEP_INDEX, isValid);
+      this.checkPendingStatus();
       return;
     }
     
@@ -872,6 +884,13 @@ export class TalentView implements OnInit, OnDestroy {
     }
     
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
+    this.checkPendingStatus();
+  }
+
+  private checkPendingStatus(): void {
+    // Has pending changes if there are talent points available to allocate
+    const hasPending = this.availableTalentPoints > 0;
+    this.pendingChange.emit(hasPending);
   }
 
   acceptSpren(): void {

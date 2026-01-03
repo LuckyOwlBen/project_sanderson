@@ -1,10 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { ActivatedRoute } from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({}),
+            queryParams: of({}),
+            snapshot: { params: {}, queryParams: {} },
+          },
+        },
+      ],
     }).compileComponents();
   });
 

@@ -7,6 +7,7 @@ import { WebsocketService } from '../../services/websocket.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { StepValidationService } from '../../services/step-validation.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 
 describe('TalentView', () => {
   let component: TalentView;
@@ -19,6 +20,7 @@ describe('TalentView', () => {
         CharacterStateService,
         WebsocketService,
         StepValidationService,
+        LevelUpManager,
         {
           provide: ActivatedRoute,
           useValue: {

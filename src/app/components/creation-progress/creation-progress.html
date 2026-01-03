@@ -1,0 +1,40 @@
+<!-- Navigation Grid Mode (for sidenav) -->
+<div *ngIf="displayMode === 'navigation-grid'" class="navigation-grid">
+  <div
+    *ngFor="let step of steps"
+    class="nav-card"
+    [class.completed]="step.completed"
+    [class.has-pending]="step.hasPending"
+    [class.current]="isCurrentStep(step)"
+    (click)="navigateToStep(step)">
+    
+    <div class="card-icon-wrapper">
+      <span class="card-icon material-icons">{{ step.icon }}</span>
+      <span *ngIf="step.hasPending" class="pending-dot"></span>
+    </div>
+    
+    <span class="card-label">{{ step.label }}</span>
+  </div>
+</div>
+
+<!-- Inline Progress Mode (for character creator) -->
+<div *ngIf="displayMode === 'inline-progress'" class="inline-progress">
+  <div class="progress-track">
+    <div
+      *ngFor="let step of steps; let i = index"
+      class="progress-step"
+      [class.completed]="step.completed"
+      [class.current]="isCurrentStep(step)"
+      [class.has-pending]="step.hasPending">
+      
+      <div class="step-indicator">
+        <span class="step-icon material-icons">{{ step.icon }}</span>
+        <span *ngIf="step.hasPending" class="pending-dot"></span>
+      </div>
+      
+      <span class="step-label">{{ step.label }}</span>
+      
+      <div *ngIf="i < steps.length - 1" class="step-connector"></div>
+    </div>
+  </div>
+</div>

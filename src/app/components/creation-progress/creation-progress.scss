@@ -1,0 +1,231 @@
+/* Navigation Grid Mode */
+.navigation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.nav-card {
+  background-color: var(--gpSystemDarkerGrey);
+  border: 2px solid transparent;
+  border-radius: 4px;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(102, 192, 244, 0.3);
+    border-color: var(--gpColor-ChalkyBlue);
+  }
+
+  &.current {
+    border-color: var(--gpColor-ChalkyBlue);
+    background-color: rgba(102, 192, 244, 0.1);
+  }
+
+  &.completed {
+    .card-icon {
+      color: var(--gpColor-Green);
+    }
+  }
+
+  &.has-pending {
+    border-color: var(--gpColor-RedHi);
+    box-shadow: 0 4px 20px rgba(238, 86, 59, 0.3);
+  }
+}
+
+.card-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: var(--gpColor-ChalkyBlue);
+}
+
+.card-label {
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--gpSystemLightestGrey);
+  line-height: 1.2;
+}
+
+.pending-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background: var(--gpColor-RedHi);
+  border-radius: 50%;
+  border: 2px solid var(--gpSystemDarkerGrey);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Inline Progress Mode */
+.inline-progress {
+  padding: 1.5rem;
+  background-color: var(--gpSystemDarkestGrey);
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.progress-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.progress-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.step-indicator {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--gpSystemDarkGrey);
+  border: 2px solid var(--gpSystemGrey);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  color: var(--gpSystemLightGrey);
+}
+
+.progress-step.current .step-indicator {
+  background-color: var(--gpColor-ChalkyBlue);
+  border-color: var(--gpColor-ChalkyBlue);
+  box-shadow: 0 0 20px rgba(102, 192, 244, 0.5);
+  
+  .step-icon {
+    color: var(--gpSystemDarkestGrey);
+  }
+}
+
+.progress-step.completed .step-indicator {
+  background-color: var(--gpColor-Green);
+  border-color: var(--gpColor-Green);
+  
+  .step-icon {
+    color: var(--gpSystemDarkestGrey);
+  }
+}
+
+.progress-step.has-pending .step-indicator {
+  border-color: var(--gpColor-RedHi);
+  box-shadow: 0 0 20px rgba(238, 86, 59, 0.5);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--gpSystemLightestGrey);
+  max-width: 80px;
+  line-height: 1.2;
+}
+
+.progress-step.current .step-label {
+  font-weight: 600;
+  color: var(--gpColor-ChalkyBlue);
+}
+
+.progress-step.completed .step-label {
+  color: var(--gpColor-Green);
+}
+
+.step-connector {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  width: calc(100% + 0.5rem);
+  height: 2px;
+  background-color: var(--gpSystemGrey);
+  z-index: 1;
+}
+
+.progress-step.completed .step-connector {
+  background-color: var(--gpColor-Green);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navigation-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .nav-card {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .card-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .card-label {
+    font-size: 0.75rem;
+  }
+
+  .inline-progress {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .progress-track {
+    min-width: max-content;
+  }
+
+  .step-indicator {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .step-icon {
+    font-size: 1.25rem;
+  }
+
+  .step-label {
+    font-size: 0.625rem;
+    max-width: 60px;
+  }
+}

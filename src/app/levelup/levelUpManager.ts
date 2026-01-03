@@ -1,4 +1,14 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+@Injectable({
+    providedIn: 'root'
+})
 export class LevelUpManager {
+    // Observable that emits when points availability changes
+    private pointsChangedSubject = new BehaviorSubject<void>(undefined);
+    public pointsChanged$ = this.pointsChangedSubject.asObservable();
+
     //ATTRIBUTE POINTS WILL BE 12 AT LEVEL 1 THEN 1 POINT AT LEVELS 3,6,9,12,15,18 TO LEVEL 21
     private ATTRIBUTE_POINTS_PER_LEVEL = [12, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0];
     //SKILL POINTS WILL BE 4 AT LEVEL 1 THEN 2 PER LEVEL AFTER TO LEVEL 21
@@ -56,6 +66,11 @@ export class LevelUpManager {
 
     getTalentPointsForLevel(level: number): number {
         return this.TALENT_POINTS_PER_LEVEL[level - 1] || 0;
+    }
+
+    // Trigger a recalculation event for all listening components
+    notifyPointsChanged(): void {
+        this.pointsChangedSubject.next();
     }
 
 }

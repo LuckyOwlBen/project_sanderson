@@ -9,13 +9,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
-
-interface CreationStep {
-  label: string;
-  icon: string;
-  stepNumber: number;
-  completed: boolean;
-}
+import { CreationProgressComponent } from '../../components/creation-progress/creation-progress';
 
 @Component({
   selector: 'app-sidenav-view',
@@ -27,6 +21,7 @@ interface CreationStep {
     MatDividerModule,
     MatListModule,
     MatExpansionModule,
+    CreationProgressComponent,
   ],
   templateUrl: './sidenav-view.html',
   styleUrl: './sidenav-view.scss',
@@ -35,8 +30,8 @@ export class SidenavView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   character: Character | null = null;
-  creationSteps: CreationStep[] = [];
   hasCharacter = false;
+  isInCreatorView = false;
 
   constructor(
     private router: Router,
@@ -48,9 +43,15 @@ export class SidenavView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        // A character is "active" if it has meaningful data (name or ancestry)
-        this.hasCharacter = !!character && !!(character.name || character.ancestry);
-        this.updateCreationSteps();
+        // A character is "active" if it has meaningful data (name or ancestry) and level > 0
+        this.hasCharacter = !!character && !!(character.name || character.ancestry) && (character.level || 0) > 0;
+      });
+
+    // Track if we're in the character creator view
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isInCreatorView = this.router.url.includes('/character-creator-view');
       });
   }
 
@@ -63,103 +64,8 @@ export class SidenavView implements OnInit, OnDestroy {
     this.router.navigate([route]);
   }
 
-  navigateToStep(stepNumber: number): void {
-    const stepRoutes = ['ancestry', 'culture', 'name', 'attributes', 'skills', 'expertises', 'paths', 'talents', 'equipment', 'review'];
-    const route = stepRoutes[stepNumber];
-    if (route) {
-      this.router.navigate(['/character-creator-view', route]);
-    }
-  }
-
-  private updateCreationSteps(): void {
-    if (!this.character) {
-      this.creationSteps = [];
-      return;
-    }
-
-    this.creationSteps = [
-      {
-        label: 'Ancestry',
-        icon: 'groups',
-        stepNumber: 0,
-        completed: !!this.character.ancestry
-      },
-      {
-        label: 'Culture',
-        icon: 'public',
-        stepNumber: 1,
-        completed: this.character.cultures && this.character.cultures.length > 0
-      },
-      {
-        label: 'Name',
-        icon: 'badge',
-        stepNumber: 2,
-        completed: !!this.character.name && this.character.name.length > 0
-      },
-      {
-        label: 'Attributes',
-        icon: 'fitness_center',
-        stepNumber: 3,
-        completed: this.hasAttributesAssigned()
-      },
-      {
-        label: 'Skills',
-        icon: 'school',
-        stepNumber: 4,
-        completed: this.hasSkillsAssigned()
-      },
-      {
-        label: 'Expertises',
-        icon: 'auto_stories',
-        stepNumber: 5,
-        completed: this.character.selectedExpertises && this.character.selectedExpertises.length > 0
-      },
-      {
-        label: 'Path',
-        icon: 'explore',
-        stepNumber: 6,
-        completed: this.character.paths && this.character.paths.length > 0
-      },
-      {
-        label: 'Talents',
-        icon: 'stars',
-        stepNumber: 7,
-        completed: this.character.unlockedTalents && this.character.unlockedTalents.size > 0
-      },
-      {
-        label: 'Equipment',
-        icon: 'inventory_2',
-        stepNumber: 8,
-        completed: true // Can skip this step
-      },
-      {
-        label: 'Review',
-        icon: 'check_circle',
-        stepNumber: 9,
-        completed: this.isCharacterComplete()
-      }
-    ];
-  }
-
-  private hasAttributesAssigned(): boolean {
-    if (!this.character?.attributes) return false;
-    const attrs = this.character.attributes;
-    return attrs.strength > 0 || attrs.speed > 0 || attrs.intellect > 0 ||
-           attrs.willpower > 0 || attrs.awareness > 0 || attrs.presence > 0;
-  }
-
-  private hasSkillsAssigned(): boolean {
-    if (!this.character?.skills) return false;
-    try {
-      const skillRanks = this.character.skills.getAllSkillRanks();
-      return Object.values(skillRanks).some((rank: any) => rank > 0);
-    } catch {
-      return false;
-    }
-  }
-
-  private isCharacterComplete(): boolean {
-    // Don't mark Review as complete initially - it's the final step
-    return false;
+  shouldShowNavigationProgress(): boolean {
+    // Show navigation grid when character is active and NOT currently in creator view
+    return this.hasCharacter && !this.isInCreatorView;
   }
 }

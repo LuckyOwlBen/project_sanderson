@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -28,6 +28,8 @@ interface SkillConfig {
   styleUrls: ['./skill-manager.scss']
 })
 export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, OnDestroy {
+  @Output() pendingChange = new EventEmitter<boolean>();
+  
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 4; // Skills is step 4
   
@@ -51,6 +53,13 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   ngOnInit(): void {
+    // Listen to points changed events from LevelUpManager
+    this.levelUpManager.pointsChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkPendingStatus();
+      });
+
     // Combine queryParams and character$ to avoid race conditions
     combineLatest([
       this.activatedRoute.queryParams,
@@ -61,6 +70,9 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         this.character = character;
         if (this.character) {
           this.initializeSkills();
+          this.checkPendingStatus();
+          // Always update validation when character changes, even if already initialized
+          this.updateValidation();
         }
       });
   }
@@ -182,6 +194,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     // All points must be allocated (remainingPoints === 0)
     const isValid = this.remainingPoints === 0;
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
+    this.checkPendingStatus();
     
     // Scroll to show navigation buttons when all points are allocated
     if (isValid) {
@@ -192,5 +205,11 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         }
       }, 150);
     }
+  }
+
+  private checkPendingStatus(): void {
+    // Has pending changes if there are points available to allocate
+    const hasPending = this.remainingPoints > 0;
+    this.pendingChange.emit(hasPending);
   }
 }

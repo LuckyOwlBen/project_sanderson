@@ -43,34 +43,11 @@
 </nav>
 
 <!-- Character Creation Progress -->
-<div class="character-progress" *ngIf="hasCharacter">
+<div class="character-progress" *ngIf="shouldShowNavigationProgress()">
   <mat-divider></mat-divider>
   
-  <mat-accordion class="creation-accordion">
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>auto_stories</mat-icon>
-          <span>Creation Progress</span>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
-
-      <mat-nav-list class="step-list">
-        <mat-list-item 
-          *ngFor="let step of creationSteps"
-          (click)="navigateToStep(step.stepNumber)"
-          [class.completed]="step.completed"
-          class="creation-step">
-          <mat-icon matListItemIcon>{{ step.icon }}</mat-icon>
-          <span matListItemTitle>{{ step.label }}</span>
-          <mat-icon 
-            matListItemMeta 
-            *ngIf="step.completed"
-            class="check-icon">
-            check_circle
-          </mat-icon>
-        </mat-list-item>
-      </mat-nav-list>
-    </mat-expansion-panel>
-  </mat-accordion>
-</div>
+  <app-creation-progress
+    [displayMode]="'navigation-grid'"
+    [character]="character"
+    [isLevelUpMode]="false">
+  </app-creation-progress>

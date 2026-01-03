@@ -20,9 +20,59 @@
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   gap: 1rem;
+}
+
+.toolbar-progress {
+  flex: 1;
+  
+  ::ng-deep .inline-progress {
+    padding: 0;
+    background: transparent;
+    margin: 0;
+  }
+
+  ::ng-deep .progress-track {
+    gap: 0.25rem;
+  }
+
+  ::ng-deep .step-indicator {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  ::ng-deep .step-icon {
+    font-size: 1rem;
+  }
+
+  ::ng-deep .step-label {
+    font-size: 0.65rem;
+  }
+}
+
+.toolbar-navigation {
+  flex: 1;
+  
+  ::ng-deep .navigation-grid {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  ::ng-deep .nav-card {
+    padding: 0.5rem 0.25rem;
+  }
+
+  ::ng-deep .card-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  ::ng-deep .card-label {
+    font-size: 0.7rem;
+  }
 }
 
 .menu-button {

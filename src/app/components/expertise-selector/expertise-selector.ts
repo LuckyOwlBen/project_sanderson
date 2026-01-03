@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 
 @Component({
   selector: 'app-expertise-selector',
@@ -24,8 +25,11 @@ import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertis
   styleUrl: './expertise-selector.scss',
 })
 export class ExpertiseSelector implements OnInit, OnDestroy {
+  @Output() pendingChange = new EventEmitter<boolean>();
+  
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 5;
+  private isInitialized = false;
   
   character: Character | null = null;
   availableExpertises: ExpertiseDefinition[] = CULTURAL_EXPERTISES;
@@ -37,10 +41,18 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private levelUpManager: LevelUpManager
   ) {}
 
   ngOnInit(): void {
+    // Listen to points changed events from LevelUpManager
+    this.levelUpManager.pointsChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkPendingStatus();
+      });
+
     // Scroll to top when component loads
     setTimeout(() => {
       const mainContent = document.querySelector('.app-sidenav-content');
@@ -73,12 +85,15 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       .map(culture => culture.name)
       .filter(name => CULTURAL_EXPERTISES.some(exp => exp.name === name));
     
-    // Auto-add cultural expertises if not already selected
-    this.culturalExpertises.forEach(expertise => {
-      if (!this.selectedExpertises.some(e => e.name === expertise)) {
-        this.characterState.addExpertise(expertise, 'culture', `culture:${expertise}`);
-      }
-    });
+    // Only auto-add cultural expertises on first initialization to avoid loops
+    if (!this.isInitialized) {
+      this.culturalExpertises.forEach(expertise => {
+        if (!this.selectedExpertises.some(e => e.name === expertise)) {
+          this.characterState.addExpertise(expertise, 'culture', `culture:${expertise}`);
+        }
+      });
+      this.isInitialized = true;
+    }
   }
 
   private calculateAvailablePoints(): void {
@@ -107,6 +122,13 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     }
     
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
+    this.checkPendingStatus();
+  }
+
+  private checkPendingStatus(): void {
+    // Has pending changes if there are points available to allocate
+    const hasPending = this.availablePoints > 0;
+    this.pendingChange.emit(hasPending);
   }
 
   isExpertiseSelected(expertise: ExpertiseDefinition): boolean {

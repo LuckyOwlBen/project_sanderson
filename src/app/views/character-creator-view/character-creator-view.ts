@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
+import { CreationProgressComponent } from '../../components/creation-progress/creation-progress';
 
 @Component({
   selector: 'app-character-creator-view',
@@ -23,12 +24,14 @@ import { Observable, Subject } from 'rxjs';
     CommonModule,
     RouterOutlet,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './character-creator-view.html',
   styleUrl: './character-creator-view.scss',
 })
 export class CharacterCreatorView implements OnInit, OnDestroy {
+  @ViewChild(CreationProgressComponent) creationProgress?: CreationProgressComponent;
+  
   private destroy$ = new Subject<void>();
   
   steps: CreationStep[];
@@ -322,6 +325,12 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     return talentId.split('_').map(w => 
       w.charAt(0).toUpperCase() + w.slice(1)
     ).join(' ');
+  }
+
+  onStepPendingChange(stepNumber: number, hasPending: boolean): void {
+    if (this.creationProgress) {
+      this.creationProgress.updateStepPending(stepNumber, hasPending);
+    }
   }
 }
 

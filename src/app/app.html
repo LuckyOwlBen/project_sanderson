@@ -3,7 +3,24 @@
         <button mat-icon-button class="menu-button" (click)="drawer.toggle()">
             <mat-icon>menu</mat-icon>
         </button>
-        <span>Project Sanderson</span>
+        
+        <!-- Inline Progress during creation/level-up -->
+        <app-creation-progress 
+            *ngIf="shouldShowInlineProgress() && character"
+            [displayMode]="'inline-progress'"
+            [character]="character"
+            [isLevelUpMode]="isLevelUpMode"
+            class="toolbar-progress">
+        </app-creation-progress>
+
+        <!-- Navigation Grid when character is active -->
+        <app-creation-progress 
+            *ngIf="shouldShowNavigationGrid() && character"
+            [displayMode]="'navigation-grid'"
+            [character]="character"
+            [isLevelUpMode]="false"
+            class="toolbar-navigation">
+        </app-creation-progress>
     </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container [hasBackdrop]="false" class="app-sidenav-container">

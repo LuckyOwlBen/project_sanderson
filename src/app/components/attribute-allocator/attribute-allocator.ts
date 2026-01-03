@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -24,6 +24,8 @@ interface AttributeConfig {
   styleUrls: ['./attribute-allocator.scss']
 })
 export class AttributeAllocator extends BaseAllocator<AttributeConfig> implements OnInit, OnDestroy {
+  @Output() pendingChange = new EventEmitter<boolean>();
+  
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 3; // Attributes is step 3
   
@@ -43,6 +45,13 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   ngOnInit(): void {
+    // Listen to points changed events from LevelUpManager
+    this.levelUpManager.pointsChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkPendingStatus();
+      });
+
     // Combine queryParams and character$ to avoid race conditions
     combineLatest([
       this.activatedRoute.queryParams,
@@ -53,6 +62,9 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
         this.character = character;
         if (this.character) {
           this.initializeAttributes();
+          this.checkPendingStatus();
+          // Always update validation when character changes, even if already initialized
+          this.updateValidation();
         }
       });
   }
@@ -130,5 +142,12 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     // All points must be allocated (remainingPoints === 0)
     const isValid = this.remainingPoints === 0;
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
+    this.checkPendingStatus();
+  }
+
+  private checkPendingStatus(): void {
+    // Has pending changes if there are points available to allocate
+    const hasPending = this.remainingPoints > 0;
+    this.pendingChange.emit(hasPending);
   }
 }
