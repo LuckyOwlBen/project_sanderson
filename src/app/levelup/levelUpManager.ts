@@ -18,8 +18,24 @@ export class LevelUpManager {
         return this.ATTRIBUTE_POINTS_PER_LEVEL[level - 1] || 0;
     }
 
+    getTotalAttributePointsUpToLevel(level: number): number {
+        let total = 0;
+        for (let i = 0; i < level && i < this.ATTRIBUTE_POINTS_PER_LEVEL.length; i++) {
+            total += this.ATTRIBUTE_POINTS_PER_LEVEL[i];
+        }
+        return total;
+    }
+
     getSkillPointsForLevel(level: number): number {
         return this.SKILL_POINTS_PER_LEVEL[level - 1] || 0;
+    }
+
+    getTotalSkillPointsUpToLevel(level: number): number {
+        let total = 0;
+        for (let i = 0; i < level && i < this.SKILL_POINTS_PER_LEVEL.length; i++) {
+            total += this.SKILL_POINTS_PER_LEVEL[i];
+        }
+        return total;
     }
 
     getHealthForLevel(level: number, strengthModifier: number): number {

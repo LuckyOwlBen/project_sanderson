@@ -332,6 +332,103 @@ mat-divider {
   }
 }
 
+// Level-Up Warning Notification
+.level-up-warning-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  max-width: 500px;
+  animation: slideInDown 0.4s ease-out;
+
+  @keyframes slideInDown {
+    from {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+
+  .level-up-warning {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a1717 100%);
+    border: 3px solid #e74c3c;
+    box-shadow: 0 6px 30px rgba(231, 76, 60, 0.4);
+
+    mat-card-header {
+      .warning-icon {
+        background: #e74c3c;
+        color: white;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      mat-card-title {
+        color: #e74c3c;
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      mat-card-subtitle {
+        color: #bbb;
+        font-size: 1rem;
+      }
+    }
+
+    .level-up-warning-content {
+      .warning-message {
+        color: #ddd;
+        line-height: 1.6;
+        margin: 0;
+        font-size: 1rem;
+        padding: 1rem;
+        background: rgba(231, 76, 60, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #e74c3c;
+      }
+    }
+
+    mat-card-actions {
+      padding-top: 1rem;
+      border-top: 1px solid rgba(231, 76, 60, 0.2);
+      
+      button {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    transform: translateX(0);
+
+    @keyframes slideInDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  }
+}
+
 @media (max-width: 900px) {
   .sheet-content {
     padding: 0.5rem;

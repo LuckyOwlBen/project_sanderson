@@ -18,7 +18,7 @@
           <app-value-stepper
             [label]="skill.name"
             [currentValue]="skill.currentValue"
-            [minValue]="minValue"
+            [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
             (valueChanged)="onValueChanged($event)">
@@ -39,7 +39,7 @@
           <app-value-stepper
             [label]="skill.name"
             [currentValue]="skill.currentValue"
-            [minValue]="minValue"
+            [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
             (valueChanged)="onValueChanged($event)">
@@ -60,7 +60,7 @@
           <app-value-stepper
             [label]="skill.name"
             [currentValue]="skill.currentValue"
-            [minValue]="minValue"
+            [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
             (valueChanged)="onValueChanged($event)">

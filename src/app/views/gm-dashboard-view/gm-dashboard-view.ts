@@ -8,6 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
 import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.service';
 import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
@@ -27,7 +28,8 @@ import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.componen
     MatProgressBarModule,
     MatBadgeModule,
     MatDialogModule,
-    MatListModule
+    MatListModule,
+    MatSnackBarModule
   ],
   templateUrl: './gm-dashboard-view.html',
   styleUrl: './gm-dashboard-view.scss',
@@ -47,7 +49,8 @@ export class GmDashboardView implements OnInit, OnDestroy {
   constructor(
     private websocketService: WebsocketService,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -120,6 +123,24 @@ export class GmDashboardView implements OnInit, OnDestroy {
         console.log('[GM Dashboard] CRITICAL ALERT:', alert.message);
         this.criticalPlayers.add(alert.characterId);
         this.cdr.detectChanges();
+      });
+
+    // Subscribe to level-up events
+    this.websocketService.levelUp$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[GM Dashboard] 🆙 Level-up event received:', event);
+        const player = this.activePlayers.get(event.characterId);
+        if (player) {
+          this.snackBar.open(
+            `${player.name} is now level ${event.newLevel}!`,
+            'OK',
+            { duration: 10000 }
+          );
+          // Update player level in the UI
+          player.level = event.newLevel;
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -230,6 +251,11 @@ export class GmDashboardView implements OnInit, OnDestroy {
         );
       }
     });
+  }
+
+  grantLevelUp(player: PlayerJoinedEvent): void {
+    console.log('[GM Dashboard] Granting level up to:', player.name);
+    this.websocketService.grantLevelUp(player.characterId);
   }
 
   toggleStore(storeId: string): void {

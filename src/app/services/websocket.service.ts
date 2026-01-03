@@ -78,6 +78,13 @@ export interface ExpertiseGrantEvent {
   timestamp: string;
 }
 
+export interface LevelUpEvent {
+  characterId: string;
+  newLevel: number;
+  grantedBy: string;
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -119,6 +126,9 @@ export class WebsocketService implements OnDestroy {
 
   private expertiseGrantSubject = new Subject<ExpertiseGrantEvent>();
   public expertiseGrant$ = this.expertiseGrantSubject.asObservable();
+
+  private levelUpSubject = new Subject<LevelUpEvent>();
+  public levelUp$ = this.levelUpSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -227,6 +237,14 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] 📚 Broadcasting to expertiseGrantSubject');
       this.expertiseGrantSubject.next(data);
       console.log('[WebSocket] 📚 Broadcast complete');
+    });
+
+    this.socket.on('level-up-granted', (data: LevelUpEvent) => {
+      console.log('[WebSocket] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
+      console.log('[WebSocket] 🆙 Level-up event data:', data);
+      console.log('[WebSocket] 🆙 Broadcasting to levelUpSubject');
+      this.levelUpSubject.next(data);
+      console.log('[WebSocket] 🆙 Broadcast complete');
     });
     
     console.log('[WebSocket] ✅ All event listeners registered');
@@ -369,6 +387,22 @@ export class WebsocketService implements OnDestroy {
       timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 📤 gm-grant-expertise event emitted');
+  }
+
+  grantLevelUp(characterId: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot grant level up: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 📤🆙 Granting level up:', { characterId });
+    console.log('[WebSocket] 📤 Socket ID:', this.socket.id);
+    console.log('[WebSocket] 📤 Socket connected:', this.socket.connected);
+    this.socket.emit('gm-grant-level-up', {
+      characterId,
+      timestamp: new Date().toISOString()
+    });
+    console.log('[WebSocket] 📤 gm-grant-level-up event emitted');
   }
 
   isConnected(): boolean {

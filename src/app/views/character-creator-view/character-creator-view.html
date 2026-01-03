@@ -1,4 +1,15 @@
 <div class="character-creator-container">
+    <!-- Level-Up Mode Banner -->
+    <div class="level-up-banner" *ngIf="isLevelUpMode">
+        <mat-card class="level-up-info-card">
+            <mat-icon>trending_up</mat-icon>
+            <div class="level-up-text">
+                <strong>Level-Up Mode</strong>
+                <span>Complete the following steps to advance your character</span>
+            </div>
+        </mat-card>
+    </div>
+
     <div class="creator-main">
 
         <!-- The router-outlet will render the child component here -->
@@ -8,8 +19,8 @@
             <button mat-button (click)="previousStep()" [disabled]="!canGoPrevious()">
                 Back
             </button>
-            <button *ngIf="currentStep < steps.length - 1" mat-raised-button color="primary" (click)="nextStep()" [disabled]="!canGoNext()">
-                Next
+            <button *ngIf="currentStep < steps.length - 1 || isLevelUpMode" mat-raised-button color="primary" (click)="nextStep()" [disabled]="!canGoNext()">
+                {{ isLevelUpMode && currentStep >= steps.length - 2 ? 'Complete Level-Up' : 'Next' }}
             </button>
         </div>
     </div>

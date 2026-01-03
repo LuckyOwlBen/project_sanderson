@@ -44,6 +44,30 @@
     </mat-card>
   </div>
 
+  <!-- Level-Up Warning -->
+  <div class="level-up-warning-notification" *ngIf="character.pendingLevelPoints > 0">
+    <mat-card class="notification-card level-up-warning">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="notification-icon warning-icon">warning</mat-icon>
+        <mat-card-title>Pending Level-Up!</mat-card-title>
+        <mat-card-subtitle>You have {{ character.pendingLevelPoints }} unspent level{{ character.pendingLevelPoints > 1 ? 's' : '' }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="level-up-warning-content">
+          <p class="warning-message">
+            You must spend your pending level points before continuing. Click the button below to proceed with character advancement.
+          </p>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="warn" (click)="navigateToLevelUp()">
+          <mat-icon>trending_up</mat-icon>
+          Level Up Now
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
   <!-- Main Content -->
   <div class="sheet-tabs custom-tabs">
     <div class="tab-labels">

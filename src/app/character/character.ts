@@ -16,6 +16,7 @@ export class Character {
 
   name: string = '';
   level: number = 1;
+  pendingLevelPoints: number = 0; // Track levels that haven't been spent yet
   paths: string[] = [];
   ancestry: Ancestry | null = null;
   attributes: Attributes;

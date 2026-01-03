@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -29,8 +30,11 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   character: Character | null = null;
   movementSpeed: number = 0;
   recoveryDie: string = '';
+  isLevelUpMode: boolean = false;
+  private isInitialized: boolean = false;
 
   constructor(
+    private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
     private levelUpManager: LevelUpManager,
     private validationService: StepValidationService
@@ -39,10 +43,13 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   ngOnInit(): void {
-    // Subscribe to character state to get updates and persist state
-    this.characterStateService.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
+    // Combine queryParams and character$ to avoid race conditions
+    combineLatest([
+      this.activatedRoute.queryParams,
+      this.characterStateService.character$
+    ]).pipe(takeUntil(this.destroy$))
+      .subscribe(([params, character]) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
         this.character = character;
         if (this.character) {
           this.initializeAttributes();
@@ -56,7 +63,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   private initializeAttributes(): void {
-    if (!this.character) return;
+    if (!this.character || this.isInitialized) return;
 
     const attributes: AttributeConfig[] = [
       { name: 'Strength', key: 'strength', currentValue: this.character.attributes.strength },
@@ -68,10 +75,17 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     ];
 
     const currentLevel = this.character.level || 1;
-    const totalPoints = this.levelUpManager.getAttributePointsForLevel(currentLevel);
     
-    this.initialize(attributes, totalPoints);
+    // In level-up mode: use incremental points for the current level only
+    // In character creation mode: use cumulative total from levels 1 to current
+    const useBaseline = this.isLevelUpMode && currentLevel > 1;
+    const totalPoints = useBaseline 
+      ? this.levelUpManager.getAttributePointsForLevel(currentLevel)
+      : this.levelUpManager.getTotalAttributePointsUpToLevel(currentLevel);
+    
+    this.initialize(attributes, totalPoints, useBaseline);
     this.updateDerivedAttributes();
+    this.isInitialized = true;
   }
 
   private updateDerivedAttributes(): void {

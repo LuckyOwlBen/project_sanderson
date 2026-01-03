@@ -15,7 +15,7 @@
         *ngFor="let attr of items"
         [label]="attr.name"
         [currentValue]="attr.currentValue"
-        [minValue]="minValue"
+        [minValue]="getMinValue(attr)"
         [maxValue]="maxValue"
         [pointsRemaining]="remainingPoints"
         (valueChanged)="onValueChanged($event)">

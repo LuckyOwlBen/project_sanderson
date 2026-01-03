@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -32,6 +33,8 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   
   character: Character | null = null;
   private skillAssociationTable = new SkillAssociationTable();
+  isLevelUpMode: boolean = false;
+  private isInitialized: boolean = false;
 
   // Group skills by category for better UI organization
   physicalSkills: SkillConfig[] = [];
@@ -39,6 +42,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   socialSkills: SkillConfig[] = [];
 
   constructor(
+    private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
     private levelUpManager: LevelUpManager,
     private validationService: StepValidationService
@@ -47,10 +51,13 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   ngOnInit(): void {
-    // Subscribe to character state to get updates and persist state
-    this.characterStateService.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
+    // Combine queryParams and character$ to avoid race conditions
+    combineLatest([
+      this.activatedRoute.queryParams,
+      this.characterStateService.character$
+    ]).pipe(takeUntil(this.destroy$))
+      .subscribe(([params, character]) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
         this.character = character;
         if (this.character) {
           this.initializeSkills();
@@ -64,7 +71,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   private initializeSkills(): void {
-    if (!this.character) return;
+    if (!this.character || this.isInitialized) return;
 
     const skills: SkillConfig[] = Object.values(SkillType).map(skillType => {
       const currentRank = this.character!.skills.getSkillRank(skillType);
@@ -84,9 +91,16 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     this.categorizeSkills(skills);
 
     const currentLevel = this.character.level || 1;
-    const totalPoints = this.levelUpManager.getSkillPointsForLevel(currentLevel);
     
-    this.initialize(skills, totalPoints);
+    // In level-up mode: use incremental points for the current level only
+    // In character creation mode: use cumulative total from levels 1 to current
+    const useBaseline = this.isLevelUpMode && currentLevel > 1;
+    const totalPoints = useBaseline 
+      ? this.levelUpManager.getSkillPointsForLevel(currentLevel)
+      : this.levelUpManager.getTotalSkillPointsUpToLevel(currentLevel);
+    
+    this.initialize(skills, totalPoints, useBaseline);
+    this.isInitialized = true;
   }
 
   private categorizeSkills(skills: SkillConfig[]): void {

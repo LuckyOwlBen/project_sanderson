@@ -12,6 +12,43 @@
   }
 }
 
+.level-up-banner {
+  grid-column: 1 / -1;
+  margin-bottom: 1rem;
+
+  .level-up-info-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a1a17 100%);
+    border: 2px solid #e74c3c;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: #e74c3c;
+    }
+
+    .level-up-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      strong {
+        font-size: 1.2rem;
+        color: #e74c3c;
+      }
+
+      span {
+        color: #bbb;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
 .creator-main {
   min-height: 600px;
   display: flex;

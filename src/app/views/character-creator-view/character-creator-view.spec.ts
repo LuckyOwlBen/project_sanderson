@@ -16,6 +16,7 @@ describe('CharacterCreatorView', () => {
           provide: ActivatedRoute,
           useValue: {
             params: of({}),
+            queryParams: of({}),
             snapshot: { params: {} }
           }
         }

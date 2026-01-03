@@ -3,11 +3,13 @@ import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/ro
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { StepValidationService } from '../../services/step-validation.service';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 
@@ -21,6 +23,7 @@ import { Observable, Subject } from 'rxjs';
     CommonModule,
     RouterOutlet,
     MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './character-creator-view.html',
   styleUrl: './character-creator-view.scss',
@@ -30,6 +33,7 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   
   steps: CreationStep[];
   currentStep: number = 0;
+  isLevelUpMode: boolean = false;
 
   constructor(
     private router: Router,
@@ -42,6 +46,14 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   }
 
     ngOnInit(): void {
+    // Check if we're in level-up mode
+    this.activatedRoute.queryParams.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      this.isLevelUpMode = params['levelUp'] === 'true';
+      console.log('[Character Creator] Level-up mode:', this.isLevelUpMode);
+    });
+
     // Subscribe to flow service changes and update local property
     this.flowService.currentStep$.pipe(
       takeUntil(this.destroy$)
@@ -55,9 +67,14 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     // Check if we're at parent route with no child - redirect to first step
     const hasChildRoute = this.activatedRoute.firstChild !== null;
     if (!hasChildRoute) {
-      const firstStepRoute = this.flowService.getStepRoute(0);
+      const firstStepRoute = this.isLevelUpMode 
+        ? this.getNextLevelUpStep(0) 
+        : this.flowService.getStepRoute(0);
       if (firstStepRoute) {
-        this.router.navigate([firstStepRoute], { relativeTo: this.activatedRoute });
+        this.router.navigate([firstStepRoute], { 
+          relativeTo: this.activatedRoute,
+          queryParamsHandling: 'preserve'
+        });
       }
     }
 
@@ -84,7 +101,21 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   }
 
   nextStep(): void {
-    if (this.flowService.canGoNext()) {
+    if (this.isLevelUpMode) {
+      // In level-up mode, skip to the next relevant step
+      const currentIndex = this.flowService.getCurrentStep();
+      const nextRoute = this.getNextLevelUpStep(currentIndex + 1);
+      if (nextRoute) {
+        console.log('[Character Creator] Navigating to next level-up step:', nextRoute);
+        this.router.navigate([nextRoute], { 
+          relativeTo: this.activatedRoute,
+          queryParamsHandling: 'preserve'
+        });
+      } else {
+        // No more level-up steps, complete level-up
+        this.completeLevelUp();
+      }
+    } else if (this.flowService.canGoNext()) {
       const nextIndex = this.flowService.getCurrentStep() + 1;
       const nextRoute = this.flowService.getStepRoute(nextIndex);
       if (nextRoute) {
@@ -95,7 +126,17 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   }
 
   previousStep(): void {
-    if (this.flowService.canGoPrevious()) {
+    if (this.isLevelUpMode) {
+      // In level-up mode, go back to previous relevant step
+      const currentIndex = this.flowService.getCurrentStep();
+      const prevRoute = this.getPreviousLevelUpStep(currentIndex - 1);
+      if (prevRoute) {
+        this.router.navigate([prevRoute], { 
+          relativeTo: this.activatedRoute,
+          queryParamsHandling: 'preserve'
+        });
+      }
+    } else if (this.flowService.canGoPrevious()) {
       const prevIndex = this.flowService.getCurrentStep() - 1;
       const prevRoute = this.flowService.getStepRoute(prevIndex);
       if (prevRoute) {
@@ -104,7 +145,71 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Get the next step that applies to level-up
+   * Steps during level-up: attributes (if points available), skills, talents, review
+   */
+  private getNextLevelUpStep(fromIndex: number): string | null {
+    const levelUpSteps = ['attributes', 'skills', 'talents', 'review'];
+    const character = this.characterState.getCharacter();
+    const levelUpManager = new LevelUpManager();
+    
+    for (let i = fromIndex; i < this.steps.length; i++) {
+      const step = this.steps[i];
+      if (levelUpSteps.includes(step.route)) {
+        // For attributes, check if there are points to spend at this level
+        if (step.route === 'attributes' && character) {
+          const attributePoints = levelUpManager.getAttributePointsForLevel(character.level || 1);
+          if (attributePoints === 0) {
+            // Skip attributes if no points available
+            continue;
+          }
+        }
+        return step.route;
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Get the previous step that applies to level-up
+   */
+  private getPreviousLevelUpStep(fromIndex: number): string | null {
+    const levelUpSteps = ['attributes', 'skills', 'talents', 'review'];
+    
+    for (let i = fromIndex; i >= 0; i--) {
+      const step = this.steps[i];
+      if (levelUpSteps.includes(step.route)) {
+        return step.route;
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Complete level-up process
+   */
+  private completeLevelUp(): void {
+    const character = this.characterState.getCharacter();
+    if (character && character.pendingLevelPoints > 0) {
+      character.pendingLevelPoints -= 1;
+      this.characterState.updateCharacter(character);
+      console.log('[Character Creator] Level-up completed, pending points:', character.pendingLevelPoints);
+      
+      // Navigate back to character sheet and clear levelUp query param
+      this.router.navigate(['/character-sheet'], {
+        queryParams: {}
+      });
+    }
+  }
+
   canGoNext(): boolean {
+    if (this.isLevelUpMode) {
+      // In level-up mode, always allow next (we'll skip irrelevant steps)
+      return true;
+    }
     return this.flowService.canGoNext();
   }
 

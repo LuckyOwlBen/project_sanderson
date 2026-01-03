@@ -525,6 +525,45 @@ io.on('connection', (socket) => {
       console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
     }
   });
+
+  // GM grants a level-up to a player
+  socket.on('gm-grant-level-up', (data) => {
+    const { characterId, timestamp } = data;
+    console.log(`[GM Action] 🆙 Granting level-up to character ${characterId}`);
+    
+    // Find the target player's socket and update their level
+    let targetSocket = null;
+    let player = null;
+    for (const [socketId, p] of activePlayers.entries()) {
+      if (p.characterId === characterId) {
+        targetSocket = socketId;
+        player = p;
+        break;
+      }
+    }
+    
+    if (targetSocket && player) {
+      // Increment level
+      player.level += 1;
+      const newLevel = player.level;
+      
+      const payload = {
+        characterId,
+        newLevel,
+        grantedBy: 'GM',
+        timestamp: timestamp || new Date().toISOString()
+      };
+      
+      console.log(`[GM Action] 🆙 Sending level-up-granted to socket ${targetSocket}, new level: ${newLevel}`);
+      io.to(targetSocket).emit('level-up-granted', payload);
+      
+      // Also notify GM with updated player info
+      io.emit('player-joined', player);
+    } else {
+      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+    }
+  });
+
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);

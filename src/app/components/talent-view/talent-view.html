@@ -85,6 +85,7 @@
         *ngFor="let talent of getVisibleTalents()"
         class="talent-node"
         [class.unlocked]="isTalentUnlocked(talent.id)"
+        [class.baseline-locked]="isTalentUnlocked(talent.id) && !canRemoveTalent(talent.id)"
         [class.available]="canUnlockTalent(talent)"
         [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)">
         
@@ -131,10 +132,17 @@
           <button 
             mat-raised-button 
             color="warn"
-            *ngIf="isTalentUnlocked(talent.id)"
+            *ngIf="isTalentUnlocked(talent.id) && canRemoveTalent(talent.id)"
             (click)="removeTalent(talent.id); $event.stopPropagation()">
             <mat-icon>remove_circle</mat-icon>
             Remove
+          </button>
+          <button 
+            mat-button
+            *ngIf="isTalentUnlocked(talent.id) && !canRemoveTalent(talent.id)"
+            disabled>
+            <mat-icon>lock</mat-icon>
+            Locked (Previous Level)
           </button>
           <mat-icon *ngIf="isTalentUnlocked(talent.id)" class="unlocked-badge">check_circle</mat-icon>
         </mat-card-actions>

@@ -15,6 +15,7 @@ import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
@@ -209,6 +210,25 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         }
       });
     console.log('[Character Sheet] 📚 Expertise grant listener subscription complete');
+
+    // Listen for level-up grants
+    console.log('[Character Sheet] 🆙 Setting up level-up listener...');
+    this.websocketService.levelUp$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
+        console.log('[Character Sheet] 🆙 Level-up event:', event);
+        if (this.characterId && event.characterId === this.characterId) {
+          console.log('[Character Sheet] 🆙 Match! Incrementing level and pending points');
+          if (this.character) {
+            this.character.level = event.newLevel;
+            this.character.pendingLevelPoints += 1;
+            this.saveCharacter();
+            this.cdr.detectChanges();
+          }
+        }
+      });
+    console.log('[Character Sheet] 🆙 Level-up listener subscription complete');
   }
 
   ngOnDestroy(): void {
@@ -488,5 +508,26 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     this.pendingExpertiseGrant = null;
     this.cdr.detectChanges();
   }
-}
 
+  navigateToLevelUp(): void {
+    if (!this.character || this.character.pendingLevelPoints <= 0) {
+      return;
+    }
+    
+    console.log('[Character Sheet] Navigating to level-up screen');
+    // Save character before navigating
+    this.saveCharacter();
+    
+    // Determine the first valid level-up step
+    const levelUpManager = new LevelUpManager();
+    const attributePoints = levelUpManager.getAttributePointsForLevel(this.character.level || 1);
+    
+    // Start with skills if no attribute points, otherwise start with attributes
+    const firstStep = attributePoints > 0 ? 'attributes' : 'skills';
+    
+    // Navigate to character creator with level-up mode
+    this.router.navigate([`/character-creator-view/${firstStep}`], {
+      queryParams: { levelUp: 'true' }
+    });
+  }
+}

@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { SkillSelector } from './skill-selector';
+import { CharacterStateService } from '../../character/characterStateService';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 
 describe('SkillSelector', () => {
   let component: SkillSelector;
@@ -8,7 +11,17 @@ describe('SkillSelector', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SkillSelector]
+      imports: [SkillSelector],
+      providers: [
+        CharacterStateService,
+        LevelUpManager,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({})
+          }
+        }
+      ]
     })
     .compileComponents();
 
