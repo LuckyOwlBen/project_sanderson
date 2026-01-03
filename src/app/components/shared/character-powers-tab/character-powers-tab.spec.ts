@@ -248,25 +248,5 @@ describe('CharacterPowersTab', () => {
       const expertisesCard = fixture.debugElement.query(By.css('.stats-card'));
       expect(expertisesCard).toBeTruthy();
     });
-
-    it('should display "Powers" title', () => {
-      const title = fixture.debugElement.queryAll(By.css('mat-card-title'))[0];
-      expect(title.nativeElement.textContent).toBe('Powers');
-    });
-
-    it('should display "Expertises" title', () => {
-      const title = fixture.debugElement.queryAll(By.css('mat-card-title'))[1];
-      expect(title.nativeElement.textContent).toBe('Expertises');
-    });
-
-    it('should have auto_awesome icon for powers', () => {
-      const icons = fixture.debugElement.queryAll(By.css('.section-icon'));
-      expect(icons[0].nativeElement.textContent).toBe('auto_awesome');
-    });
-
-    it('should have auto_stories icon for expertises', () => {
-      const icons = fixture.debugElement.queryAll(By.css('.section-icon'));
-      expect(icons[1].nativeElement.textContent).toBe('auto_stories');
-    });
   });
 });

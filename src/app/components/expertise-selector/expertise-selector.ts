@@ -8,7 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
-import { CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/culture/allExpertises';
+import { CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
 
 @Component({
   selector: 'app-expertise-selector',
