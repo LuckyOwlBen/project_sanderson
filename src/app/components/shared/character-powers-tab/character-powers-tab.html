@@ -63,7 +63,10 @@
       <div class="expertises-list">
         <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
           <span class="expertise-icon">✓</span>
-          <span class="expertise-name">{{ expertise }}</span>
+          <span class="expertise-name">{{ expertise.name }}</span>
+          <span class="expertise-source-badge" [class]="'badge-' + expertise.source">
+            {{ getExpertiseSourceBadge(expertise) }}
+          </span>
         </div>
         <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
           No expertises selected

@@ -9,6 +9,7 @@ import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
+import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 
 @Component({
   selector: 'app-expertise-selector',
@@ -28,7 +29,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   
   character: Character | null = null;
   availableExpertises: ExpertiseDefinition[] = CULTURAL_EXPERTISES;
-  selectedExpertises: string[] = [];
+  selectedExpertises: ExpertiseSource[] = [];
   culturalExpertises: string[] = []; // Auto-granted from culture selection
   availablePoints: number = 0;
   totalPoints: number = 0;
@@ -74,9 +75,8 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     
     // Auto-add cultural expertises if not already selected
     this.culturalExpertises.forEach(expertise => {
-      if (!this.selectedExpertises.includes(expertise)) {
-        this.selectedExpertises.push(expertise);
-        this.characterState.addExpertise(expertise);
+      if (!this.selectedExpertises.some(e => e.name === expertise)) {
+        this.characterState.addExpertise(expertise, 'culture', `culture:${expertise}`);
       }
     });
   }
@@ -89,7 +89,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     
     // Available points = total - selected (excluding cultural auto-grants which are free)
     const nonCulturalSelections = this.selectedExpertises.filter(
-      exp => !this.culturalExpertises.includes(exp)
+      exp => !this.culturalExpertises.includes(exp.name)
     ).length;
     
     this.availablePoints = this.totalPoints - nonCulturalSelections;
@@ -110,7 +110,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   isExpertiseSelected(expertise: ExpertiseDefinition): boolean {
-    return this.selectedExpertises.includes(expertise.name);
+    return this.selectedExpertises.some(e => e.name === expertise.name);
   }
 
   isCulturalExpertise(expertise: ExpertiseDefinition): boolean {
@@ -141,22 +141,17 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   private selectExpertise(expertise: ExpertiseDefinition): void {
-    if (!this.selectedExpertises.includes(expertise.name)) {
-      this.selectedExpertises.push(expertise.name);
-      this.characterState.addExpertise(expertise.name);
+    if (!this.selectedExpertises.some(e => e.name === expertise.name)) {
+      this.characterState.addExpertise(expertise.name, 'manual');
       this.calculateAvailablePoints();
       this.updateValidation();
     }
   }
 
   private deselectExpertise(expertise: ExpertiseDefinition): void {
-    const index = this.selectedExpertises.indexOf(expertise.name);
-    if (index !== -1) {
-      this.selectedExpertises.splice(index, 1);
-      this.characterState.removeExpertise(expertise.name);
-      this.calculateAvailablePoints();
-      this.updateValidation();
-    }
+    this.characterState.removeExpertise(expertise.name);
+    this.calculateAvailablePoints();
+    this.updateValidation();
   }
 
   getExpertisesByCategory(category: string): ExpertiseDefinition[] {
@@ -164,9 +159,16 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   removeExpertiseByName(expertiseName: string): void {
-    const expertise = this.availableExpertises.find(e => e.name === expertiseName);
-    if (expertise) {
-      this.deselectExpertise(expertise);
-    }
+    this.characterState.removeExpertise(expertiseName);
+  }
+
+  getSourceBadge(expertiseName: string): string {
+    const expertise = this.selectedExpertises.find(e => e.name === expertiseName);
+    return expertise ? ExpertiseSourceHelper.getSourceBadge(expertise.source) : '';
+  }
+
+  canRemoveExpertise(expertiseName: string): boolean {
+    const expertise = this.selectedExpertises.find(e => e.name === expertiseName);
+    return expertise ? ExpertiseSourceHelper.canRemove(expertise) : false;
   }
 }

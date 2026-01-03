@@ -4,6 +4,7 @@ import { Character } from '../../../character/character';
 import { By } from '@angular/platform-browser';
 import { ActionCostCode } from '../../../character/talents/talentInterface';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 
 describe('CharacterPowersTab', () => {
   let component: CharacterPowersTab;
@@ -20,7 +21,11 @@ describe('CharacterPowersTab', () => {
     
     // Create a mock character
     mockCharacter = new Character();
-    mockCharacter.selectedExpertises = ['Combat', 'Stealth', 'Persuasion'];
+    mockCharacter.selectedExpertises = [
+      ExpertiseSourceHelper.create('Combat', 'manual'),
+      ExpertiseSourceHelper.create('Stealth', 'talent', 'talent:spy'),
+      ExpertiseSourceHelper.create('Persuasion', 'culture', 'culture:Alethi')
+    ];
   });
 
   it('should create', () => {
@@ -36,9 +41,9 @@ describe('CharacterPowersTab', () => {
     it('should display selected expertises', () => {
       const expertises = component.getSelectedExpertises();
       expect(expertises.length).toBe(3);
-      expect(expertises).toContain('Combat');
-      expect(expertises).toContain('Stealth');
-      expect(expertises).toContain('Persuasion');
+      expect(expertises.some(e => e.name === 'Combat')).toBe(true);
+      expect(expertises.some(e => e.name === 'Stealth')).toBe(true);
+      expect(expertises.some(e => e.name === 'Persuasion')).toBe(true);
     });
 
     it('should return empty array when character has no expertises', () => {

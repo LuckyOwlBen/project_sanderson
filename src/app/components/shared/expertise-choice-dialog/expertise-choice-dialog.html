@@ -1,0 +1,55 @@
+<div class="expertise-choice-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>school</mat-icon>
+    {{ data.talentName }} - Choose Expertise
+  </h2>
+
+  <mat-dialog-content>
+    <p class="dialog-description">
+      <span *ngIf="data.description">{{ data.description }}</span>
+      <span *ngIf="!data.description">
+        Choose {{ data.choiceCount === 1 ? 'one' : data.choiceCount }} 
+        expertise{{ data.choiceCount > 1 ? 's' : '' }} from the options below:
+      </span>
+    </p>
+
+    <div class="selection-status">
+      <mat-chip-set>
+        <mat-chip *ngFor="let expertise of Array.from(selectedExpertises)" highlighted>
+          {{ expertise }}
+          <button matChipRemove (click)="toggleExpertise(expertise)">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      </mat-chip-set>
+      <p class="selection-count">
+        Selected: {{ selectedExpertises.size }} / {{ data.choiceCount }}
+      </p>
+    </div>
+
+    <mat-selection-list class="expertise-options">
+      <mat-list-option 
+        *ngFor="let option of data.options"
+        [selected]="isSelected(option)"
+        [disabled]="!canSelect(option)"
+        (click)="toggleExpertise(option)">
+        <div class="option-content">
+          <mat-icon *ngIf="isSelected(option)" class="selected-icon">check_circle</mat-icon>
+          <mat-icon *ngIf="!isSelected(option)" class="unselected-icon">radio_button_unchecked</mat-icon>
+          <span class="option-name">{{ option }}</span>
+        </div>
+      </mat-list-option>
+    </mat-selection-list>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onConfirm()"
+      [disabled]="!canConfirm()">
+      Confirm Selection
+    </button>
+  </mat-dialog-actions>
+</div>

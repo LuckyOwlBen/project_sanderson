@@ -1,0 +1,114 @@
+.expertise-choice-dialog {
+  min-width: 500px;
+  max-width: 600px;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gpColor-ChalkyBlue);
+    margin: 0;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  .dialog-description {
+    margin: 1rem 0;
+    color: #e8e8e8;
+    line-height: 1.6;
+  }
+
+  .selection-status {
+    background: rgba(74, 179, 232, 0.1);
+    border: 1px solid rgba(74, 179, 232, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+
+    mat-chip-set {
+      margin-bottom: 0.5rem;
+    }
+
+    mat-chip {
+      background: var(--gpColor-ChalkyBlue);
+      color: white;
+    }
+
+    .selection-count {
+      margin: 0.5rem 0 0 0;
+      font-size: 0.9rem;
+      color: var(--gpColor-ChalkyBlue);
+      font-weight: 600;
+    }
+  }
+
+  .expertise-options {
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--gpSystemDarkGrey);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+
+    mat-list-option {
+      height: auto;
+      min-height: 48px;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover:not(.mat-mdc-list-option-disabled) {
+        background: rgba(74, 179, 232, 0.1);
+      }
+
+      &.mat-mdc-list-option-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .option-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+
+        .selected-icon {
+          color: var(--gpColor-ChalkyBlue);
+        }
+
+        .unselected-icon {
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        .option-name {
+          font-size: 1rem;
+          font-weight: 500;
+          color: #ffffff;
+        }
+      }
+    }
+  }
+
+  mat-dialog-actions {
+    padding: 1rem 0 0 0;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    button {
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .expertise-choice-dialog {
+    min-width: unset;
+    width: 100%;
+  }
+}

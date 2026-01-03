@@ -6,6 +6,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Character } from '../../../character/character';
 import { TalentNode, TalentTree, ActionCostCode } from '../../../character/talents/talentInterface';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/talentTrees/talentTrees';
+import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 
 @Component({
   selector: 'app-character-powers-tab',
@@ -22,8 +23,12 @@ import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/tale
 export class CharacterPowersTab {
   @Input() character: Character | null = null;
 
-  getSelectedExpertises(): string[] {
+  getSelectedExpertises(): ExpertiseSource[] {
     return this.character?.selectedExpertises || [];
+  }
+
+  getExpertiseSourceBadge(expertise: ExpertiseSource): string {
+    return ExpertiseSourceHelper.getSourceBadge(expertise.source);
   }
 
   getPowers(): TalentNode[] {

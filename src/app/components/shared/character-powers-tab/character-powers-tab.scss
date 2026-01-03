@@ -78,6 +78,36 @@
     .expertise-name {
       font-weight: 500;
       color: #ffffff;
+      flex: 1;
+    }
+
+    .expertise-source-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.badge-culture {
+        background: #7e57c2;
+        color: white;
+      }
+
+      &.badge-talent {
+        background: #ff9800;
+        color: white;
+      }
+
+      &.badge-gm {
+        background: #f44336;
+        color: white;
+      }
+
+      &.badge-manual {
+        background: rgba(255, 255, 255, 0.15);
+        color: #e8e8e8;
+      }
     }
   }
 }

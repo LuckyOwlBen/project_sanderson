@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Character } from './character';
 import { Ancestry } from './ancestry/ancestry';
 import { CulturalInterface } from './culture/culturalInterface';
+import { ExpertiseSource, ExpertiseSourceType, ExpertiseSourceHelper } from './expertises/expertiseSource';
 
 @Injectable({
   providedIn: 'root'
@@ -70,22 +71,67 @@ export class CharacterStateService {
     return this.character.unlockedTalents;
   }
 
-  addExpertise(expertise: string): void {
-    if (!this.character.selectedExpertises.includes(expertise)) {
-      this.character.selectedExpertises.push(expertise);
+  /**
+   * Add an expertise with source tracking for cascade removal
+   */
+  addExpertise(expertiseName: string, source: ExpertiseSourceType = 'manual', sourceId?: string): void {
+    // Check if expertise already exists
+    const existingIndex = this.character.selectedExpertises.findIndex(e => e.name === expertiseName);
+    
+    if (existingIndex === -1) {
+      // Add new expertise
+      this.character.selectedExpertises.push(
+        ExpertiseSourceHelper.create(expertiseName, source, sourceId)
+      );
       this.characterSubject.next(this.character);
+    } else {
+      // Expertise exists - update only if new source is more specific
+      const existing = this.character.selectedExpertises[existingIndex];
+      // Keep the first source (culture/talent over manual)
+      if (existing.source === 'manual' && source !== 'manual') {
+        existing.source = source;
+        existing.sourceId = sourceId;
+        this.characterSubject.next(this.character);
+      }
     }
   }
 
-  removeExpertise(expertise: string): void {
-    const index = this.character.selectedExpertises.indexOf(expertise);
-    if (index !== -1) {
+  /**
+   * Remove a specific expertise by name (only if manually removable)
+   */
+  removeExpertise(expertiseName: string): void {
+    const index = this.character.selectedExpertises.findIndex(e => e.name === expertiseName);
+    if (index !== -1 && ExpertiseSourceHelper.canRemove(this.character.selectedExpertises[index])) {
       this.character.selectedExpertises.splice(index, 1);
       this.characterSubject.next(this.character);
     }
   }
 
+  /**
+   * Remove all expertises granted by a specific source (e.g., when talent is removed)
+   */
+  removeExpertisesBySource(sourceId: string): void {
+    const originalLength = this.character.selectedExpertises.length;
+    this.character.selectedExpertises = this.character.selectedExpertises.filter(
+      e => e.sourceId !== sourceId
+    );
+    
+    if (this.character.selectedExpertises.length !== originalLength) {
+      this.characterSubject.next(this.character);
+    }
+  }
+
+  /**
+   * Get expertise names as string array (backward compatibility)
+   */
   getSelectedExpertises(): string[] {
+    return ExpertiseSourceHelper.toStringArray(this.character.selectedExpertises);
+  }
+
+  /**
+   * Get full expertise objects with source information
+   */
+  getSelectedExpertisesWithSource(): ExpertiseSource[] {
     return this.character.selectedExpertises;
   }
 }

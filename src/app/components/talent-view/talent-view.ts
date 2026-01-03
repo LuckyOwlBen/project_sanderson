@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
@@ -13,6 +14,8 @@ import { getTalentTree, getTalentPath } from '../../character/talents/talentTree
 import { StepValidationService } from '../../services/step-validation.service';
 import { WebsocketService, SprenGrantEvent } from '../../services/websocket.service';
 import { SkillType } from '../../character/skills/skillTypes';
+import { TalentEffectParser } from '../../character/talents/talentEffectParser';
+import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
 
 interface PathOption {
   id: string;
@@ -28,6 +31,8 @@ interface PathOption {
     MatCardModule,
     MatButtonModule,
     MatChipsModule,
+    MatIconModule,
+    MatDialogModule,
     MatIconModule
   ],
   templateUrl: './talent-view.html',
@@ -50,7 +55,8 @@ export class TalentView implements OnInit, OnDestroy {
   constructor(
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -473,23 +479,83 @@ export class TalentView implements OnInit, OnDestroy {
 
   unlockTalent(talent: TalentNode): void {
     if (this.canUnlockTalent(talent) && this.character) {
-      // Update local state
-      this.unlockedTalents.add(talent.id);
-      this.calculateAvailablePoints();
+      // Parse expertise grants from talent
+      const expertiseGrants = TalentEffectParser.parseExpertiseGrants(talent.otherEffects || []);
       
-      // Apply talent effects using BonusManager
-      this.character.bonuses.unlockTalent(talent.id, talent);
-      
-      // Persist to character state service
-      this.characterState.unlockTalent(talent.id);
-      
-      // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
-      if (talent.tier === 0 && this.character.ancestry === 'human' && this.character.level === 1) {
-        this.loadAvailableTrees();
+      if (expertiseGrants.length > 0) {
+        // Handle expertise grants
+        this.handleExpertiseGrants(talent, expertiseGrants, 0);
+      } else {
+        // No expertise grants, proceed normally
+        this.applyTalentUnlock(talent);
       }
-      
-      this.updateValidation();
     }
+  }
+
+  private handleExpertiseGrants(talent: TalentNode, grants: any[], grantIndex: number): void {
+    if (grantIndex >= grants.length) {
+      // All grants processed, apply talent unlock
+      this.applyTalentUnlock(talent);
+      return;
+    }
+
+    const grant = grants[grantIndex];
+
+    if (grant.type === 'single') {
+      // Auto-grant single expertises
+      grant.expertises.forEach((expertiseName: string) => {
+        this.character!.bonuses.grantExpertise(talent.id, expertiseName);
+      });
+      // Process next grant
+      this.handleExpertiseGrants(talent, grants, grantIndex + 1);
+    } else if (grant.type === 'choice') {
+      // Show dialog for choice
+      const dialogRef = this.dialog.open(ExpertiseChoiceDialog, {
+        width: '600px',
+        panelClass: 'dark-dialog',
+        data: {
+          talentName: talent.name,
+          options: grant.expertises,
+          choiceCount: grant.choiceCount || 1,
+          description: `Choose ${grant.choiceCount || 1} expertise${(grant.choiceCount || 1) > 1 ? 's' : ''} from this talent.`
+        } as ExpertiseChoiceData
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result && result.selected) {
+          // Grant selected expertises
+          result.selected.forEach((expertiseName: string) => {
+            this.character!.bonuses.grantExpertise(talent.id, expertiseName);
+          });
+          // Process next grant
+          this.handleExpertiseGrants(talent, grants, grantIndex + 1);
+        } else {
+          // User cancelled - don't unlock the talent
+          console.log('Expertise choice cancelled');
+        }
+      });
+    }
+  }
+
+  private applyTalentUnlock(talent: TalentNode): void {
+    if (!this.character) return;
+
+    // Update local state
+    this.unlockedTalents.add(talent.id);
+    this.calculateAvailablePoints();
+    
+    // Apply talent effects using BonusManager
+    this.character.bonuses.unlockTalent(talent.id, talent);
+    
+    // Persist to character state service
+    this.characterState.unlockTalent(talent.id);
+    
+    // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
+    if (talent.tier === 0 && this.character.ancestry === 'human' && this.character.level === 1) {
+      this.loadAvailableTrees();
+    }
+    
+    this.updateValidation();
   }
 
   removeTalent(talentId: string): void {
@@ -509,6 +575,9 @@ export class TalentView implements OnInit, OnDestroy {
       
       // Remove talent bonuses using the source format that matches unlockTalent
       this.character.bonuses.bonuses.removeBonus(`talent:${talentId}`);
+      
+      // Remove expertises granted by this talent
+      this.character.bonuses.removeExpertisesByTalent(talentId);
       
       // Persist to character state service
       this.characterState.removeTalent(talentId);

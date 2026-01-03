@@ -9,9 +9,11 @@ export class BonusManager {
   private advantageModule = new AdvantageModule();
   private unlockedTalents: Set<string> = new Set();
   private activeForm?: string; //track current Singer form
-  private prerequisiteChecker?: TalentPrerequisiteChecker
+  private prerequisiteChecker?: TalentPrerequisiteChecker;
+  private character?: Character; // Reference to character for expertise grants
 
   setCharacter(character: Character): void {
+    this.character = character;
     this.prerequisiteChecker = new TalentPrerequisiteChecker(character, this.unlockedTalents);
   }
 
@@ -76,5 +78,41 @@ export class BonusManager {
     talentNode.grantsDisadvantage?.forEach(situation => {
       this.advantageModule.addDisadvantage(`form:${formId}:${situation}`);
     });
+  }
+
+  /**
+   * Grant expertise from a talent
+   * This is called manually when a talent grants expertises
+   */
+  grantExpertise(talentId: string, expertiseName: string): void {
+    if (!this.character) {
+      console.warn('Cannot grant expertise: character not set');
+      return;
+    }
+
+    // Add expertise with talent source
+    const existing = this.character.selectedExpertises.find(e => e.name === expertiseName);
+    if (!existing) {
+      this.character.selectedExpertises.push({
+        name: expertiseName,
+        source: 'talent',
+        sourceId: `talent:${talentId}`
+      });
+    }
+  }
+
+  /**
+   * Remove all expertises granted by a specific talent
+   * Called when a talent is removed
+   */
+  removeExpertisesByTalent(talentId: string): void {
+    if (!this.character) {
+      return;
+    }
+
+    const sourceId = `talent:${talentId}`;
+    this.character.selectedExpertises = this.character.selectedExpertises.filter(
+      e => e.sourceId !== sourceId
+    );
   }
 }

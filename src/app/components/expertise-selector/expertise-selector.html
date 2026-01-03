@@ -78,10 +78,13 @@
     <mat-chip-set>
       <mat-chip 
         *ngFor="let expertise of selectedExpertises"
-        [removable]="true"
-        (removed)="removeExpertiseByName(expertise)">
-        {{ expertise }}
-        <mat-icon matChipRemove>cancel</mat-icon>
+        [removable]="canRemoveExpertise(expertise.name)"
+        (removed)="removeExpertiseByName(expertise.name)">
+        {{ expertise.name }}
+        <span class="expertise-source-badge" [class]="'badge-' + expertise.source">
+          {{ getSourceBadge(expertise.name) }}
+        </span>
+        <mat-icon matChipRemove *ngIf="canRemoveExpertise(expertise.name)">cancel</mat-icon>
       </mat-chip>
     </mat-chip-set>
   </div>

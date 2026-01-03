@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Character } from '../character/character';
 import { Ancestry } from '../character/ancestry/ancestry';
+import { ExpertiseSourceHelper } from '../character/expertises/expertiseSource';
 
 export interface SavedCharacter {
   id: string;
@@ -171,7 +172,20 @@ export class CharacterStorageService {
     character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];
     character.paths = data.paths || [];
-    character.selectedExpertises = data.selectedExpertises || [];
+    
+    // Migrate selectedExpertises from old string[] format to new ExpertiseSource[] format
+    if (data.selectedExpertises) {
+      if (Array.isArray(data.selectedExpertises) && data.selectedExpertises.length > 0) {
+        // Check if it's old format (string[]) or new format (ExpertiseSource[])
+        if (typeof data.selectedExpertises[0] === 'string') {
+          // Old format - migrate to new format
+          character.selectedExpertises = ExpertiseSourceHelper.migrateFromStringArray(data.selectedExpertises);
+        } else {
+          // New format - use as is
+          character.selectedExpertises = data.selectedExpertises;
+        }
+      }
+    }
     
     if (data.attributes) {
       character.attributes.strength = data.attributes.strength || 0;

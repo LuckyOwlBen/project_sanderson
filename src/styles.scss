@@ -49,3 +49,13 @@ app-root { display: flex; flex-direction: column; height: 100vh; }
     max-height: none !important;
   }
 }
+
+// Dark theme dialog styling
+.dark-dialog {
+  .mat-mdc-dialog-container {
+    .mat-mdc-dialog-surface {
+      background-color: var(--gpSystemDarkerGrey) !important;
+      color: var(--gpSystemLightestGrey) !important;
+    }
+  }
+}

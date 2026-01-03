@@ -148,7 +148,10 @@
         <div class="expertises-display" *ngIf="getSelectedExpertises().length > 0">
           <div class="expertise-item" *ngFor="let expertise of getSelectedExpertises()">
             <mat-icon class="expertise-icon">check_circle</mat-icon>
-            <span class="expertise-name">{{ expertise }}</span>
+            <span class="expertise-name">{{ expertise.name }}</span>
+            <span class="expertise-source-badge" [class]="'badge-' + expertise.source">
+              {{ getExpertiseSourceBadge(expertise) }}
+            </span>
           </div>
         </div>
         <p class="empty-state" *ngIf="getSelectedExpertises().length === 0">

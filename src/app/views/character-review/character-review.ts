@@ -13,6 +13,7 @@ import { CharacterStorageService } from '../../services/character-storage.servic
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
+import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { TalentTree } from '../../character/talents/talentInterface';
 
 @Component({
@@ -86,8 +87,12 @@ export class CharacterReview implements OnInit, OnDestroy {
       .join(' ');
   }
 
-  getSelectedExpertises(): string[] {
+  getSelectedExpertises(): ExpertiseSource[] {
     return this.character?.selectedExpertises || [];
+  }
+
+  getExpertiseSourceBadge(expertise: ExpertiseSource): string {
+    return ExpertiseSourceHelper.getSourceBadge(expertise.source);
   }
 
   getTalentIds(): string[] {

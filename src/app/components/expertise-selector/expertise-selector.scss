@@ -207,6 +207,35 @@
     background: #4caf50;
     color: white;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .expertise-source-badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.badge-culture {
+        background: #7e57c2;
+      }
+
+      &.badge-talent {
+        background: #ff9800;
+      }
+
+      &.badge-gm {
+        background: #f44336;
+      }
+
+      &.badge-manual {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
 
     mat-icon {
       color: white;

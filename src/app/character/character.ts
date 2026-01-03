@@ -8,6 +8,7 @@ import { Ancestry } from './ancestry/ancestry';
 import { CulturalInterface } from './culture/culturalInterface';
 import { RadiantPathManager } from './radiantPath/radiantPathManager';
 import { InventoryManager } from './inventory/inventoryManager';
+import { ExpertiseSource } from './expertises/expertiseSource';
 
 
 export class Character {
@@ -18,7 +19,7 @@ export class Character {
   ancestry: Ancestry | null = null;
   attributes: Attributes;
   cultures: CulturalInterface[] = [];
-  selectedExpertises: string[] = [];
+  selectedExpertises: ExpertiseSource[] = [];
   unlockedTalents: Set<string> = new Set<string>();
 
   private skillManager = new SkillManager();
