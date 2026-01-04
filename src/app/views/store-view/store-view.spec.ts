@@ -26,8 +26,11 @@ describe('StoreView - Category Filtering', () => {
     };
 
     mockWebsocketService = {
+      connect: vi.fn(),
+      connected$: of(true),
       storeToggle$: storeToggleSubject.asObservable(),
-      emitStoreTransaction: vi.fn()
+      emitStoreTransaction: vi.fn(),
+      requestStoreState: vi.fn()
     };
 
     mockActivatedRoute = {
@@ -236,8 +239,11 @@ describe('StoreView - Store Info', () => {
     };
 
     mockWebsocketService = {
+      connect: vi.fn(),
+      connected$: of(true),
       storeToggle$: of(),
-      emitStoreTransaction: vi.fn()
+      emitStoreTransaction: vi.fn(),
+      requestStoreState: vi.fn()
     };
 
     mockActivatedRoute = {
