@@ -54,14 +54,33 @@
 
 .toolbar-navigation {
   flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--gpSystemDarkGrey);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--gpColor-ChalkyBlue);
+    border-radius: 2px;
+  }
   
   ::ng-deep .navigation-grid {
     padding: 0.5rem;
     gap: 0.5rem;
+    min-width: min-content;
   }
 
   ::ng-deep .nav-card {
     padding: 0.5rem 0.25rem;
+    min-width: 70px;
   }
 
   ::ng-deep .card-icon {
@@ -94,6 +113,7 @@
   height: 100%;
   overflow: hidden;
   border-radius: 0;
+  contain: layout style paint;
   
   ::ng-deep {
     .mat-drawer-inner-container {
@@ -101,6 +121,7 @@
       min-height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
   }
 }
@@ -120,12 +141,28 @@
 
   .app-sidenav-content {
     overflow-y: auto;
+    padding: 0 !important;
   }
+
   .menu-button {
     display: block; // Show hamburger on mobile
   }
 
-  .app-sidenav-content {
-    padding: 0 !important;
+  .app-sidenav {
+    // Ensure sidenav doesn't leak when closed
+    &:not(.mat-drawer-opened) {
+      visibility: hidden;
+      pointer-events: none;
+      
+      * {
+        visibility: hidden;
+        pointer-events: none;
+      }
+    }
+  }
+
+  // Hide toolbar navigation on mobile (use sidenav version instead)
+  .toolbar-navigation {
+    display: none !important;
   }
 }

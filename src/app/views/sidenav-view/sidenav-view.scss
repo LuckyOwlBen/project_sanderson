@@ -52,6 +52,8 @@
 .character-progress {
   margin-top: 1rem;
   flex: 1;
+  overflow: hidden;
+  contain: layout style;
 
   .creation-accordion {
     box-shadow: none;
