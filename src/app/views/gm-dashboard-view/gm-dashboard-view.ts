@@ -43,7 +43,11 @@ export class GmDashboardView implements OnInit, OnDestroy {
   storeEnabled = new Map<string, boolean>([
     ['main-store', true],
     ['weapons-shop', true],
-    ['armor-shop', true]
+    ['armor-shop', true],
+    ['equipment-shop', true],
+    ['consumables-shop', true],
+    ['fabrials-shop', true],
+    ['mounts-shop', true]
   ]);
 
   constructor(
@@ -141,6 +145,15 @@ export class GmDashboardView implements OnInit, OnDestroy {
           player.level = event.newLevel;
           this.cdr.detectChanges();
         }
+      });
+
+    // Subscribe to store toggle events to keep GM dashboard in sync
+    this.websocketService.storeToggle$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[GM Dashboard] 🏪 Store toggle event received:', event);
+        this.storeEnabled.set(event.storeId, event.enabled);
+        this.cdr.detectChanges();
       });
   }
 
@@ -261,6 +274,7 @@ export class GmDashboardView implements OnInit, OnDestroy {
   toggleStore(storeId: string): void {
     const currentState = this.storeEnabled.get(storeId) ?? true;
     const newState = !currentState;
+    console.log(`[GM Dashboard] Toggling store ${storeId} from ${currentState} to ${newState}`);
     this.storeEnabled.set(storeId, newState);
     this.websocketService.toggleStore(storeId, newState);
     console.log(`[GM Dashboard] Store ${storeId} ${newState ? 'opened' : 'closed'}`);

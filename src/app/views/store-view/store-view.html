@@ -1,11 +1,11 @@
-<div class="store-container" *ngIf="character && storeEnabled">
+<div class="store-container" *ngIf="!isLoading && character && storeEnabled; else loadingOrClosed">
   <!-- Store Header -->
   <div class="store-header">
     <div class="header-content">
-      <span class="store-icon">🏪</span>
+      <span class="store-icon">{{ getStoreIcon() }}</span>
       <div class="header-text">
-        <h1>General Store</h1>
-        <p class="subtitle">Browse and purchase equipment for your adventures</p>
+        <h1>{{ getStoreName() }}</h1>
+        <p class="subtitle">{{ getStoreDescription() }}</p>
       </div>
     </div>
 
@@ -55,18 +55,29 @@
   </div>
 
   <!-- Search Bar -->
-  <div class="search-bar">
+  <div class="search-bar" [class.disabled]="!storeEnabled">
     <span class="search-icon">🔍</span>
-    <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or description...">
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or description..." [disabled]="!storeEnabled">
+  </div>
+
+  <!-- Closed Categories Notice -->
+  <div class="closed-categories-notice" *ngIf="getDisabledCategories().length > 0">
+    <span class="icon">⚠️</span>
+    <span class="message">
+      The GM has closed the following sections: 
+      <strong>{{ getDisabledCategoriesMessage() }}</strong>
+    </span>
   </div>
 
   <!-- Category Selector -->
-  <div class="category-selector">
+  <div class="category-selector" [class.disabled]="!storeEnabled">
     <button 
       *ngFor="let category of categories"
       class="category-chip"
-      [class.active]="selectedCategory === category.id"
-      (click)="selectCategory(category.id)">
+      [class.active]="selectedCategory === category.id && storeEnabled"
+      [disabled]="!storeEnabled"
+      [style.display]="category.id === 'all' || categoryEnabled.get(category.id) !== false ? 'inline-flex' : 'none'"
+      (click)="storeEnabled && selectCategory(category.id)">
       <span class="icon">{{ getCategoryIcon(category.icon) }}</span>
       {{ category.label }}
     </button>
@@ -75,7 +86,7 @@
   <!-- Item Grid -->
   <div class="items-grid">
     <div 
-      *ngFor="let item of getAvailableItems()"
+      *ngFor="let item of availableItems"
       class="item-card card"
       [class.affordable]="canAfford(item)"
       [class.expensive]="!canAfford(item)">
@@ -140,24 +151,34 @@
     </div>
   </div>
 
-  <div class="empty-results" *ngIf="getAvailableItems().length === 0">
+  <div class="empty-results" *ngIf="availableItems.length === 0">
     <span class="large-icon">🔍</span>
     <h2>No items found</h2>
     <p class="hint">Try a different category or search term</p>
   </div>
 </div>
 
-<!-- Store Closed Message -->
-<div class="store-closed" *ngIf="!storeEnabled">
-  <span class="large-icon">🏪</span>
-  <h2>Store Closed</h2>
-  <p>The store has been closed by the Game Master</p>
-  <p class="hint">Check back later or ask your GM to reopen the store</p>
-</div>
+<!-- Loading/Closed States -->
+<ng-template #loadingOrClosed>
+  <!-- Loading State -->
+  <div class="store-loading" *ngIf="isLoading">
+    <span class="large-icon">⏳</span>
+    <h2>Loading Store...</h2>
+    <p>Connecting to store server...</p>
+  </div>
 
-<!-- No Character Message -->
-<div class="no-character" *ngIf="!character">
-  <span class="large-icon">⚠️</span>
-  <h2>No Character Loaded</h2>
-  <p>Please load a character to access the store</p>
-</div>
+  <!-- Store Closed Message -->
+  <div class="store-closed" *ngIf="!isLoading && !storeEnabled">
+    <span class="large-icon">🏪</span>
+    <h2>Store Closed</h2>
+    <p>The store has been closed by the Game Master</p>
+    <p class="hint">Check back later or ask your GM to reopen the store</p>
+  </div>
+
+  <!-- No Character Message -->
+  <div class="no-character" *ngIf="!isLoading && !character">
+    <span class="large-icon">⚠️</span>
+    <h2>No Character Loaded</h2>
+    <p>Please load a character to access the store</p>
+  </div>
+</ng-template>

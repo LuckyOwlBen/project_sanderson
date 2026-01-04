@@ -24,6 +24,17 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 // Track active players
 const activePlayers = new Map(); // socketId -> {characterId, name, level, ancestry, joinedAt}
 
+// Track store state
+const storeState = {
+  'main-store': true,
+  'weapons-shop': true,
+  'armor-shop': true,
+  'equipment-shop': true,
+  'consumables-shop': true,
+  'fabrials-shop': true,
+  'mounts-shop': true
+};
+
 // Configure multer for file uploads (in-memory storage)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -414,6 +425,22 @@ io.on('connection', (socket) => {
     socket.emit('active-players', Array.from(activePlayers.values()));
   });
 
+  // Handle request for current store state
+  socket.on('request-store-state', () => {
+    console.log('[WebSocket] 📥 Store state requested by:', socket.id);
+    
+    // Send current state of all stores
+    Object.entries(storeState).forEach(([storeId, enabled]) => {
+      socket.emit('store-toggle', {
+        storeId,
+        enabled,
+        toggledBy: 'SERVER'
+      });
+    });
+    
+    console.log('[WebSocket] 📤 Sent current store state:', storeState);
+  });
+
   // GM grants spren to a player
   socket.on('gm-grant-spren', (data) => {
     const { characterId, order, sprenType, surgePair, philosophy } = data;
@@ -490,6 +517,9 @@ io.on('connection', (socket) => {
   socket.on('gm-toggle-store', (data) => {
     const { storeId, enabled } = data;
     console.log(`[GM Action] 🏪 Store ${storeId} toggled: ${enabled ? 'OPEN' : 'CLOSED'}`);
+    
+    // Update server-side store state
+    storeState[storeId] = enabled;
     
     // Broadcast to all clients
     io.emit('store-toggle', {

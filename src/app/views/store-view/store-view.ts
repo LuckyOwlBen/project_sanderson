@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Character } from '../../character/character';
@@ -25,6 +26,32 @@ export class StoreView implements OnInit, OnDestroy {
   storeEnabled: boolean = true;
   selectedCategory: ItemType | 'all' = 'all';
   searchQuery: string = '';
+  isLoading: boolean = true;
+  isConnected: boolean = false;
+  private stateReceived: boolean = false;
+  
+  // Cached items list that will trigger re-render
+  availableItems: InventoryItem[] = [];
+  
+  // Track which category sections are enabled by GM (make public for template access)
+  public categoryEnabled = new Map<ItemType, boolean>([
+    ['weapon', true],
+    ['armor', true],
+    ['equipment', true],
+    ['consumable', true],
+    ['fabrial', true],
+    ['mount', true]
+  ]);
+  
+  // Map store toggle IDs to item categories
+  private storeIdToCategory = new Map<string, ItemType>([
+    ['weapons-shop', 'weapon'],
+    ['armor-shop', 'armor'],
+    ['equipment-shop', 'equipment'],
+    ['consumables-shop', 'consumable'],
+    ['fabrials-shop', 'fabrial'],
+    ['mounts-shop', 'mount']
+  ]);
   
   // Currency converter
   showConverter: boolean = false;
@@ -44,24 +71,64 @@ export class StoreView implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Connect to WebSocket server
+    this.websocketService.connect();
+    
+    // Wait for WebSocket connection before requesting state
+    this.websocketService.connected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.isConnected = connected;
+        
+        if (connected && !this.stateReceived) {
+          // Request current store state from server
+          this.websocketService.requestStoreState();
+        }
+      });
+    
     this.characterState.character$
       .pipe(takeUntil(this.destroy$))
       .subscribe((character: Character | null) => {
         this.character = character;
+        this.updateAvailableItems();
       });
 
     // Listen for store toggle events from GM
     this.websocketService.storeToggle$
       .pipe(takeUntil(this.destroy$))
       .subscribe(event => {
-        this.storeEnabled = event.enabled;
-        if (!event.enabled) {
-          this.showNotification('The store has been closed by the GM');
+        // Mark state as received (initial load complete)
+        if (!this.stateReceived) {
+          this.stateReceived = true;
+          this.isLoading = false;
         }
+        
+        // Handle main-store toggle (all categories)
+        if (event.storeId === 'main-store') {
+          this.storeEnabled = event.enabled;
+          if (!event.enabled) {
+            this.selectedCategory = 'all';
+            this.searchQuery = '';
+          }
+        } else {
+          // Handle category-specific toggles
+          const category = this.storeIdToCategory.get(event.storeId);
+          if (category) {
+            this.categoryEnabled.set(category, event.enabled);
+          }
+        }
+        
+        // Update the items list to trigger re-render
+        this.updateAvailableItems();
+        
+        // Force change detection to update UI
+        this.cdr.detectChanges();
       });
   }
 
@@ -74,15 +141,28 @@ export class StoreView implements OnInit, OnDestroy {
 
   selectCategory(category: ItemType | 'all'): void {
     this.selectedCategory = category;
+    this.updateAvailableItems();
   }
 
-  getAvailableItems(): InventoryItem[] {
+  updateAvailableItems(): void {
+    this.availableItems = this.computeAvailableItems();
+  }
+
+  computeAvailableItems(): InventoryItem[] {
     let items = ALL_ITEMS.filter(item => item.rarity === 'common');
 
+    // Filter out items from disabled categories
+    items = items.filter(item => {
+      const itemType = item.type === 'vehicle' ? 'mount' : item.type;
+      return this.categoryEnabled.get(itemType as ItemType) !== false;
+    });
+
+    // Filter by selected category
     if (this.selectedCategory !== 'all') {
       items = items.filter(item => item.type === this.selectedCategory);
     }
 
+    // Filter by search query
     if (this.searchQuery) {
       const query = this.searchQuery.toLowerCase();
       items = items.filter(item =>
@@ -245,11 +325,51 @@ export class StoreView implements OnInit, OnDestroy {
     return '';
   }
 
+  // ===== STORE INFO =====
+
+  getStoreName(): string {
+    return 'General Store';
+  }
+
+  getStoreIcon(): string {
+    return '🏪';
+  }
+
+  getStoreDescription(): string {
+    return 'Browse and purchase equipment for your adventures';
+  }
+  
+  getDisabledCategories(): ItemType[] {
+    const disabled: ItemType[] = [];
+    this.categoryEnabled.forEach((enabled, category) => {
+      if (!enabled) disabled.push(category);
+    });
+    return disabled;
+  }
+  
+  getCategoryDisplayName(category: ItemType): string {
+    const names: Record<ItemType, string> = {
+      'weapon': 'Weapons',
+      'armor': 'Armor',
+      'equipment': 'Equipment',
+      'consumable': 'Consumables',
+      'fabrial': 'Fabrials',
+      'mount': 'Mounts & Vehicles',
+      'vehicle': 'Mounts & Vehicles'
+    };
+    return names[category] || category;
+  }
+  
+  getDisabledCategoriesMessage(): string {
+    const disabled = this.getDisabledCategories();
+    if (disabled.length === 0) return '';
+    return disabled.map(c => this.getCategoryDisplayName(c)).join(', ');
+  }
+
   // ===== NOTIFICATIONS =====
 
   private showNotification(message: string): void {
     // Simple notification - could be enhanced with a custom notification service
-    console.log('Notification:', message);
     // You could create a toast/notification component here
   }
 }

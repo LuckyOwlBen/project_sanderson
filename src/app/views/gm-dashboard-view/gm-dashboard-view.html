@@ -122,7 +122,7 @@
         <div class="store-toggle">
           <div class="store-info">
             <mat-icon>store</mat-icon>
-            <span class="store-name">Main Store</span>
+            <span class="store-name">General Store</span>
           </div>
           <button 
             mat-raised-button 
@@ -135,7 +135,7 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>swords</mat-icon>
+            <mat-icon>{{'{{'}}isStoreEnabled('weapons-shop') ? 'swords' : 'lock'{{'}}'}}</mat-icon>
             <span class="store-name">Weapons Shop</span>
           </div>
           <button 
@@ -149,7 +149,7 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>shield</mat-icon>
+            <mat-icon>{{'{{'}}isStoreEnabled('armor-shop') ? 'shield' : 'lock'{{'}}'}}</mat-icon>
             <span class="store-name">Armor Shop</span>
           </div>
           <button 
@@ -160,7 +160,61 @@
             {{ isStoreEnabled('armor-shop') ? 'Open' : 'Closed' }}
           </button>
         </div>
-      </div>
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>{{isStoreEnabled('equipment-shop') ? 'backpack' : 'lock'}}</mat-icon>
+            <span class="store-name">Equipment Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('equipment-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('equipment-shop')">
+            <mat-icon>{{ isStoreEnabled('equipment-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('equipment-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>{{isStoreEnabled('consumables-shop') ? 'science' : 'lock'}}</mat-icon>
+            <span class="store-name">Consumables Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('consumables-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('consumables-shop')">
+            <mat-icon>{{ isStoreEnabled('consumables-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('consumables-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>{{isStoreEnabled('fabrials-shop') ? 'auto_awesome' : 'lock'}}</mat-icon>
+            <span class="store-name">Fabrials Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('fabrials-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('fabrials-shop')">
+            <mat-icon>{{ isStoreEnabled('fabrials-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('fabrials-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>
+
+        <div class="store-toggle">
+          <div class="store-info">
+            <mat-icon>{{isStoreEnabled('mounts-shop') ? 'pets' : 'lock'}}</mat-icon>
+            <span class="store-name">Mounts Shop</span>
+          </div>
+          <button 
+            mat-raised-button 
+            [color]="isStoreEnabled('mounts-shop') ? 'primary' : 'warn'"
+            (click)="toggleStore('mounts-shop')">
+            <mat-icon>{{ isStoreEnabled('mounts-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+            {{ isStoreEnabled('mounts-shop') ? 'Open' : 'Closed' }}
+          </button>
+        </div>      </div>
     </mat-card-content>
   </mat-card>
 

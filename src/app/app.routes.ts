@@ -20,7 +20,7 @@ export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
   { path: 'landing', component: LandingView },
   { path: 'gm-control-center', component: GmDashboardView },
-  { path: 'store', component: StoreView, title: 'Store' },
+  { path: 'store', component: StoreView, title: 'General Store' },
   { 
     path: 'character-creator-view', 
     component: CharacterCreatorView,

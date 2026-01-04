@@ -372,6 +372,16 @@ export class WebsocketService implements OnDestroy {
     });
   }
 
+  requestStoreState(): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot request store state: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 📥 Requesting current store state');
+    this.socket.emit('request-store-state');
+  }
+
   grantExpertise(characterId: string, expertiseName: string): void {
     if (!this.socket?.connected) {
       console.warn('[WebSocket] Cannot grant expertise: not connected');
