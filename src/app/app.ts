@@ -37,6 +37,7 @@ export class App implements OnInit, OnDestroy {
   hasCharacter = false;
   isInCreatorView = false;
   isLevelUpMode = false;
+  isInCharacterSheetView = false;
 
   @ViewChild('drawer') drawer!: MatSidenav;
 
@@ -47,6 +48,9 @@ export class App implements OnInit, OnDestroy {
   ) {
     this.checkMobile();
     
+    // Initialize view states based on current URL (fixes reload flash)
+    this.updateViewStates();
+    
     // Close drawer on navigation when in mobile mode
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -54,9 +58,15 @@ export class App implements OnInit, OnDestroy {
         if (this.isMobile && this.drawer) {
           this.drawer.close();
         }
-        // Track if we're in creator view
-        this.isInCreatorView = this.router.url.includes('/character-creator-view');
+        // Update view states on navigation
+        this.updateViewStates();
       });
+  }
+
+  private updateViewStates(): void {
+    const url = this.router.url;
+    this.isInCreatorView = url.includes('/character-creator-view');
+    this.isInCharacterSheetView = url.includes('/character-sheet');
   }
 
   ngOnInit(): void {
@@ -92,8 +102,10 @@ export class App implements OnInit, OnDestroy {
   }
 
   shouldShowNavigationGrid(): boolean {
-    // Show navigation grid when character is active and NOT in creator view
-    return this.hasCharacter && !this.isInCreatorView;
+    // Show navigation grid when:
+    // 1. Character is active and NOT in creator view (normal case)
+    // 2. OR we're in the character-sheet view (even if character hasn't loaded yet)
+    return (this.hasCharacter && !this.isInCreatorView) || this.isInCharacterSheetView;
   }
 
   @HostListener('window:resize')

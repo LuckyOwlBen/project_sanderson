@@ -32,6 +32,7 @@ export class SidenavView implements OnInit, OnDestroy {
   character: Character | null = null;
   hasCharacter = false;
   isInCreatorView = false;
+  isInCharacterSheetView = false;
 
   constructor(
     private router: Router,
@@ -47,12 +48,21 @@ export class SidenavView implements OnInit, OnDestroy {
         this.hasCharacter = !!character && !!(character.name || character.ancestry) && (character.level || 0) > 0;
       });
 
-    // Track if we're in the character creator view
+    // Initialize view states based on current URL (fixes reload flash)
+    this.updateViewStates();
+
+    // Track if we're in the character creator view or character sheet view
     this.router.events
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.isInCreatorView = this.router.url.includes('/character-creator-view');
+        this.updateViewStates();
       });
+  }
+
+  private updateViewStates(): void {
+    const url = this.router.url;
+    this.isInCreatorView = url.includes('/character-creator-view');
+    this.isInCharacterSheetView = url.includes('/character-sheet');
   }
 
   ngOnDestroy(): void {
@@ -65,7 +75,9 @@ export class SidenavView implements OnInit, OnDestroy {
   }
 
   shouldShowNavigationProgress(): boolean {
-    // Show navigation grid when character is active and NOT currently in creator view
-    return this.hasCharacter && !this.isInCreatorView;
+    // Show navigation grid when:
+    // 1. Character is active and NOT currently in creator view (normal case)
+    // 2. OR we're in the character-sheet view (even if character hasn't loaded yet)
+    return (this.hasCharacter && !this.isInCreatorView) || this.isInCharacterSheetView;
   }
 }
