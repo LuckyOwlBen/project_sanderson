@@ -97,8 +97,8 @@ export class App implements OnInit, OnDestroy {
   }
 
   shouldShowInlineProgress(): boolean {
-    // Show inline progress when in creator view
-    return this.isInCreatorView && this.hasCharacter;
+    // Show inline progress when in creator view (even if character is just being created)
+    return this.isInCreatorView && !!this.character;
   }
 
   shouldShowNavigationGrid(): boolean {

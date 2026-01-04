@@ -13,9 +13,10 @@
       You receive <strong>2 cultural expertises</strong> from your chosen culture(s) automatically, 
       plus additional expertises equal to your <strong>Intellect score ({{ totalPoints }})</strong>.
     </p>
-    <p *ngIf="culturalExpertises.length > 0">
+    <p *ngIf="culturalExpertises.length > 0" class="cultural-info">
+      <mat-icon>public</mat-icon>
       <strong>Cultural Expertises from your culture(s):</strong> {{ culturalExpertises.join(', ') }}
-      (These can be deselected if desired)
+      <span class="cultural-note">(These can be deselected if desired)</span>
     </p>
   </div>
 
@@ -25,22 +26,32 @@
   </div>
 
   <div class="expertise-categories">
-    <div class="category-section">
-      <h3>Cultural Expertises</h3>
+    <div class="category-section" *ngFor="let category of categories">
+      <div class="category-header">
+        <mat-icon class="category-icon">{{ getCategoryIcon(category) }}</mat-icon>
+        <div class="category-text">
+          <h3>{{ getCategoryTitle(category) }}</h3>
+          <p class="category-description">{{ getCategoryDescription(category) }}</p>
+        </div>
+      </div>
+      
       <div class="expertise-grid">
         <mat-card 
-          *ngFor="let expertise of getExpertisesByCategory('cultural')"
+          *ngFor="let expertise of getExpertisesByCategory(category)"
           class="expertise-card"
           [class.selected]="isExpertiseSelected(expertise)"
           [class.cultural-auto]="isCulturalExpertise(expertise)"
           [class.available]="canSelectExpertise(expertise)"
           [class.locked]="!canSelectExpertise(expertise) && !isExpertiseSelected(expertise)"
+          [attr.data-category]="category"
           (click)="toggleExpertise(expertise)">
           
           <mat-card-header>
             <mat-card-title>
+              <mat-icon class="expertise-icon">{{ getCategoryIcon(category) }}</mat-icon>
               {{ expertise.name }}
               <mat-chip *ngIf="isCulturalExpertise(expertise)" class="auto-chip">
+                <mat-icon>stars</mat-icon>
                 From Culture
               </mat-chip>
             </mat-card-title>

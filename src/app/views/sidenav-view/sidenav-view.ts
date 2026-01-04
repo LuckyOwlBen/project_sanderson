@@ -76,8 +76,9 @@ export class SidenavView implements OnInit, OnDestroy {
 
   shouldShowNavigationProgress(): boolean {
     // Show navigation grid when:
-    // 1. Character is active and NOT currently in creator view (normal case)
+    // 1. Character is active (has name/ancestry and level > 0)
     // 2. OR we're in the character-sheet view (even if character hasn't loaded yet)
-    return (this.hasCharacter && !this.isInCreatorView) || this.isInCharacterSheetView;
+    // 3. OR we're in the creator view (even if character is just being created)
+    return this.hasCharacter || this.isInCharacterSheetView || (this.isInCreatorView && !!this.character);
   }
 }

@@ -44,6 +44,29 @@
     color: #e8e8e8;
   }
 
+  .cultural-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(100, 149, 237, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--gpColor-ChalkyBlue);
+
+    mat-icon {
+      color: var(--gpColor-ChalkyBlue);
+      margin-top: 2px;
+    }
+
+    .cultural-note {
+      display: block;
+      font-size: 0.85rem;
+      color: #b0b0b0;
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+  }
+
   strong {
     color: var(--gpColor-ChalkyBlue);
   }
@@ -80,14 +103,45 @@
 }
 
 .category-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 
-  h3 {
-    font-size: 1.5rem;
-    color: #ffffff;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--gpColor-ChalkyBlue);
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+
+    .category-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--gpColor-ChalkyBlue);
+      background: rgba(100, 149, 237, 0.15);
+      border-radius: 8px;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .category-text {
+      flex: 1;
+
+      h3 {
+        font-size: 1.5rem;
+        color: #ffffff;
+        margin: 0 0 0.25rem 0;
+      }
+
+      .category-description {
+        margin: 0;
+        color: #b0b0b0;
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+    }
   }
 }
 
@@ -102,6 +156,24 @@
   transition: all 0.3s ease;
   border: 2px solid transparent;
   background-color: var(--gpSystemDarkerGrey) !important;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: transparent;
+    transition: background 0.3s ease;
+  }
+
+  &[data-category="cultural"]::before { background: #6495ed; }
+  &[data-category="weapon"]::before { background: #ff6347; }
+  &[data-category="armor"]::before { background: #ffa500; }
+  &[data-category="utility"]::before { background: #32cd32; }
+  &[data-category="specialist"]::before { background: #9370db; }
 
   &:hover {
     transform: translateY(-2px);
@@ -151,6 +223,13 @@
       font-size: 1.1rem;
       font-weight: 600;
       color: #ffffff;
+
+      .expertise-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--gpColor-ChalkyBlue);
+      }
     }
   }
 
@@ -177,11 +256,20 @@
   }
 
   .auto-chip {
-    font-size: 0.75rem;
-    height: 20px;
-    min-height: 20px;
+    font-size: 0.7rem;
+    height: 22px;
+    min-height: 22px;
     background: var(--gpColor-ChalkyBlue);
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    mat-icon {
+      font-size: 0.9rem;
+      width: 0.9rem;
+      height: 0.9rem;
+    }
   }
 }
 

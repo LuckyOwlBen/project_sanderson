@@ -8,7 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
-import { CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
+import { ALL_EXPERTISES, CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 
@@ -32,7 +32,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   private isInitialized = false;
   
   character: Character | null = null;
-  availableExpertises: ExpertiseDefinition[] = CULTURAL_EXPERTISES;
+  availableExpertises: ExpertiseDefinition[] = ALL_EXPERTISES;
   selectedExpertises: ExpertiseSource[] = [];
   culturalExpertises: string[] = []; // Auto-granted from culture selection
   availablePoints: number = 0;
@@ -192,5 +192,42 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   canRemoveExpertise(expertiseName: string): boolean {
     const expertise = this.selectedExpertises.find(e => e.name === expertiseName);
     return expertise ? ExpertiseSourceHelper.canRemove(expertise) : false;
+  }
+
+  getCategoryIcon(category: string): string {
+    const icons: { [key: string]: string } = {
+      'cultural': 'public',
+      'weapon': 'military_tech',
+      'armor': 'shield',
+      'utility': 'construction',
+      'specialist': 'engineering'
+    };
+    return icons[category] || 'help';
+  }
+
+  getCategoryTitle(category: string): string {
+    const titles: { [key: string]: string } = {
+      'cultural': 'Cultural Expertises',
+      'weapon': 'Weapon Proficiencies',
+      'armor': 'Armor Proficiencies',
+      'utility': 'Utility Proficiencies',
+      'specialist': 'Crafting Specializations'
+    };
+    return titles[category] || category;
+  }
+
+  getCategoryDescription(category: string): string {
+    const descriptions: { [key: string]: string } = {
+      'cultural': 'Knowledge and understanding of different cultures and their customs.',
+      'weapon': 'Proficiency with various types of weapons in combat.',
+      'armor': 'Training in wearing and maintaining different types of armor.',
+      'utility': 'Skills in using specialized tools and equipment.',
+      'specialist': 'Advanced knowledge in crafting and creating items.'
+    };
+    return descriptions[category] || '';
+  }
+
+  get categories(): string[] {
+    return ['cultural', 'weapon', 'armor', 'utility', 'specialist'];
   }
 }
