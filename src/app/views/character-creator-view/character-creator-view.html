@@ -91,6 +91,19 @@
                         </div>
                     </div>
 
+                    <!-- Expertises -->
+                    <div class="preview-section" *ngIf="character.selectedExpertises && character.selectedExpertises.length > 0">
+                        <h3>Expertises</h3>
+                        <div class="expertises-list">
+                            <div *ngFor="let expertise of character.selectedExpertises" class="expertise-item">
+                                <span class="expertise-name">{{ expertise.name }}</span>
+                                <span class="expertise-source" [class]="'source-' + expertise.source">
+                                    {{ getExpertiseSourceBadge(expertise.source) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Talents -->
                     <div class="preview-section" *ngIf="getUnlockedTalents(character).length > 0">
                         <h3>Talents</h3>

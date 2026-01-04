@@ -327,6 +327,16 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).join(' ');
   }
 
+  getExpertiseSourceBadge(source: string): string {
+    const badges: { [key: string]: string } = {
+      'culture': 'Culture',
+      'manual': 'Selected',
+      'talent': 'Talent',
+      'gm': 'GM Grant'
+    };
+    return badges[source] || source;
+  }
+
   onStepPendingChange(stepNumber: number, hasPending: boolean): void {
     if (this.creationProgress) {
       this.creationProgress.updateStepPending(stepNumber, hasPending);

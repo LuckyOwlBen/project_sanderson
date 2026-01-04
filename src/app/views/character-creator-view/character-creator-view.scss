@@ -255,6 +255,57 @@
       }
     }
 
+    .expertises-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      
+      .expertise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0.5rem;
+        background-color: var(--gpSystemDarkGrey);
+        border-radius: 4px;
+        font-size: 0.85rem;
+        
+        .expertise-name {
+          flex: 1;
+          font-weight: 500;
+          color: #e8e8e8;
+        }
+        
+        .expertise-source {
+          font-size: 0.7rem;
+          padding: 0.15rem 0.5rem;
+          border-radius: 10px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+
+          &.source-culture {
+            background: #7e57c2;
+            color: white;
+          }
+
+          &.source-talent {
+            background: #ff9800;
+            color: white;
+          }
+
+          &.source-gm {
+            background: #f44336;
+            color: white;
+          }
+
+          &.source-manual {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+          }
+        }
+      }
+    }
+
     .talents-list {
       display: flex;
       flex-direction: column;
