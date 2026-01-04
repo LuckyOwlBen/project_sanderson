@@ -82,6 +82,8 @@ export class CultureSelector implements OnInit, OnDestroy {
         } else {
           this.showValidation = false;
         }
+        // Re-initialize culture infos when character changes (e.g., ancestry changes)
+        this.initializeCultureInfos();
       });
   }
 
@@ -96,15 +98,29 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   private initializeCultureInfos(): void {
-    this.allCultureInfos = ALL_CULTURES.map(culture => ({
-      culture: culture,
-      name: culture.name,
-      expertise: culture.expertise,
-      description: culture.description,
-      imagePlaceholder: this.getImagePlaceholder(culture.name),
-      imageUrl: this.getImageUrl(culture.name),
-      suggestedNames: culture.suggestedNames
-    }));
+    // Get current character ancestry from the service
+    let currentCharacter: any = null;
+    const subscription = this.characterState.character$.subscribe(char => currentCharacter = char);
+    subscription.unsubscribe();
+    const currentAncestry = currentCharacter?.ancestry;
+    
+    this.allCultureInfos = ALL_CULTURES
+      .filter(culture => {
+        // Filter out cultures restricted to specific ancestries if character doesn't match
+        if (culture.restrictedToAncestry) {
+          return currentAncestry === culture.restrictedToAncestry;
+        }
+        return true;
+      })
+      .map(culture => ({
+        culture: culture,
+        name: culture.name,
+        expertise: culture.expertise,
+        description: culture.description,
+        imagePlaceholder: this.getImagePlaceholder(culture.name),
+        imageUrl: this.getImageUrl(culture.name),
+        suggestedNames: culture.suggestedNames
+      }));
   }
 
   private getImagePlaceholder(cultureName: string): string {
