@@ -83,13 +83,8 @@ async function ensureDirectories() {
 }
 
 //Wireguard invite validation
-app.get('/invite/:token', (req, res) => {
-  if(!isValidToken(req.params.token)) {
-    return res.status(403).send('Invalid invite token');
-  }
-  const conf = fs.readFileSync(`/etc/wireguard/peers/${peerId}.conf`);
-  res.setHeader('Content-Disposition', 'attachment; filename="game.conf"');
-  res.send(conf);
+app.get('/invite/:name', (req, res) => {
+   
 });
 
 // Save character
