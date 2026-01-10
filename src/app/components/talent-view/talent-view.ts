@@ -16,6 +16,7 @@ import { StepValidationService } from '../../services/step-validation.service';
 import { WebsocketService, SprenGrantEvent } from '../../services/websocket.service';
 import { SkillType } from '../../character/skills/skillTypes';
 import { TalentEffectParser } from '../../character/talents/talentEffectParser';
+import { applyTalentEffects } from '../../character/talents/talentEffects';
 import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 
@@ -611,6 +612,9 @@ export class TalentView implements OnInit, OnDestroy {
     
     // Apply talent effects using BonusManager
     this.character.bonuses.unlockTalent(talent.id, talent);
+    
+    // Apply special talent effects (e.g., grant Singer forms)
+    applyTalentEffects(this.character, talent.id);
     
     // Persist to character state service
     this.characterState.unlockTalent(talent.id);

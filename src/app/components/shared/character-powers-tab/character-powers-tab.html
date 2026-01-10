@@ -1,4 +1,62 @@
 <div class="sheet-content powers-notes-tab">
+  <!-- Universal Abilities Card (for Radiant and other special abilities) -->
+  <div class="abilities-card" *ngIf="getUniversalAbilities().length > 0">
+    <div class="card-header">
+      <span class="section-icon">🌟</span>
+      <h3 class="card-title">Universal Abilities</h3>
+    </div>
+    <div class="card-content">
+      <div class="abilities-list">
+        <div class="abilities-accordion">
+          <details *ngFor="let ability of getUniversalAbilities()" class="ability-panel">
+            <summary class="ability-header">
+              <div class="ability-title">
+                <span class="ability-icon">💫</span>
+                <span class="ability-name">{{ ability.name }}</span>
+                <span class="ability-category-badge">{{ ability.category }}</span>
+              </div>
+              <span class="ability-cost">
+                {{ formatAbilityActionCost(ability.actionCost) }}
+              </span>
+            </summary>
+            <div class="ability-details">
+              <div class="ability-description">
+                <p>{{ ability.description }}</p>
+                <p *ngIf="ability.specialActivation" class="special-activation">
+                  <strong>Special Activation:</strong> {{ ability.specialActivation }}
+                </p>
+              </div>
+              <div class="ability-resource-cost" *ngIf="ability.resourceCost">
+                <h4><span class="resource-icon">💎</span> Cost</h4>
+                <p>{{ getAbilityResourceCost(ability) }}</p>
+              </div>
+              <div class="ability-effects" *ngIf="ability.effects && ability.effects.length > 0">
+                <h4><span class="effect-icon">✨</span> Effects</h4>
+                <ul>
+                  <li *ngFor="let effect of ability.effects">{{ effect }}</li>
+                </ul>
+              </div>
+              <div class="ability-limitations" *ngIf="ability.limitations && ability.limitations.length > 0">
+                <h4><span class="limit-icon">⚠️</span> Limitations</h4>
+                <ul>
+                  <li *ngFor="let limitation of ability.limitations">{{ limitation }}</li>
+                </ul>
+              </div>
+              <div class="ability-meta">
+                <span class="ability-source">
+                  <span class="source-icon">📜</span> Source: {{ ability.source }}
+                </span>
+                <span class="ability-unconscious" *ngIf="ability.canUseWhileUnconscious">
+                  <span class="unconscious-icon">😵</span> Usable while unconscious
+                </span>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Powers Card -->
   <div class="powers-card">
     <div class="card-header">

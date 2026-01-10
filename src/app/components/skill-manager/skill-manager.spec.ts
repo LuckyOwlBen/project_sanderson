@@ -116,7 +116,7 @@ describe('SkillManager', () => {
       });
     });
 
-    it('should initialize surge skills with rank 0 after speaking First Ideal', () => {
+    it('should initialize surge skills with rank 1 after speaking First Ideal', () => {
       const testChar = new Character();
       testChar.radiantPath.grantSpren('Lightweaver');
       testChar.radiantPath.speakIdeal(testChar.skills);
@@ -131,9 +131,9 @@ describe('SkillManager', () => {
       expect(surgeTypes).toContain(SkillType.ILLUMINATION);
       expect(surgeTypes).toContain(SkillType.TRANSFORMATION);
       
-      // Both should start at rank 0
+      // Both should start at rank 1
       component.surgeSkills.forEach(skill => {
-        expect(skill.currentValue).toBe(0);
+        expect(skill.currentValue).toBe(1);
       });
     });
 

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
@@ -21,6 +21,7 @@ export interface CreationStepStatus {
   imports: [CommonModule],
   templateUrl: './creation-progress.html',
   styleUrl: './creation-progress.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreationProgressComponent implements OnInit, OnDestroy {
   @Input() displayMode: 'inline-progress' | 'navigation-grid' = 'navigation-grid';
@@ -35,7 +36,8 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private flowService: CharacterCreationFlowService,
-    private characterState: CharacterStateService
+    private characterState: CharacterStateService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -45,6 +47,7 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(index => {
         this.currentStepIndex = index;
+        this.cdr.markForCheck();
       });
 
     // Subscribe to character changes to update step completion statuses
@@ -53,6 +56,7 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
       .subscribe(character => {
         this.character = character;
         this.updateStepStatuses();
+        this.cdr.markForCheck();
       });
   }
 

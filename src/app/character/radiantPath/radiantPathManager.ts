@@ -1,5 +1,6 @@
 import { SkillType } from "../skills/skillTypes";
 import { SkillManager } from "../skills/skillManager";
+import { UniversalAbility, getAvailableAbilities } from "../abilities/universalAbilities";
 
 export interface RadiantOrderInfo {
     order: string;
@@ -159,6 +160,14 @@ export class RadiantPathManager {
             return null;
         }
         return RADIANT_ORDERS[this.boundOrder];
+    }
+
+    /**
+     * Get universal abilities available to this Radiant
+     * Returns all Radiant universal abilities if the First Ideal has been spoken
+     */
+    getUniversalAbilities(): UniversalAbility[] {
+        return getAvailableAbilities(this.idealSpoken);
     }
 
     /**

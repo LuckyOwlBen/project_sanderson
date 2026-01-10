@@ -7,6 +7,7 @@ import { Character } from '../../../character/character';
 import { TalentNode, TalentTree, ActionCostCode } from '../../../character/talents/talentInterface';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/talentTrees/talentTrees';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
+import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
 
 @Component({
   selector: 'app-character-powers-tab',
@@ -29,6 +30,23 @@ export class CharacterPowersTab {
 
   getExpertiseSourceBadge(expertise: ExpertiseSource): string {
     return ExpertiseSourceHelper.getSourceBadge(expertise.source);
+  }
+
+  getUniversalAbilities(): UniversalAbility[] {
+    return this.character?.getUniversalAbilities() || [];
+  }
+
+  formatAbilityActionCost(cost: number | string): string {
+    return formatActionCost(cost);
+  }
+
+  getAbilityResourceCost(ability: UniversalAbility): string {
+    if (!ability.resourceCost) {
+      return '';
+    }
+    const { resourceType, amount } = ability.resourceCost;
+    const displayType = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
+    return `${amount} ${displayType}`;
   }
 
   getPowers(): TalentNode[] {

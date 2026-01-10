@@ -5,6 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Character } from '../character/character';
 import { Ancestry } from '../character/ancestry/ancestry';
 import { ExpertiseSourceHelper } from '../character/expertises/expertiseSource';
+import { applyTalentEffects } from '../character/talents/talentEffects';
 
 export interface SavedCharacter {
   id: string;
@@ -144,6 +145,7 @@ export class CharacterStorageService {
       },
       skills: character.skills.getAllSkillRanks(),
       unlockedTalents: Array.from(character.unlockedTalents),
+      unlockedSingerForms: character.unlockedSingerForms || [],
       health: {
         current: character.resources.health.current,
         max: character.resources.health.max
@@ -205,6 +207,18 @@ export class CharacterStorageService {
     if (data.unlockedTalents) {
       data.unlockedTalents.forEach((talentId: string) => {
         character.unlockedTalents.add(talentId);
+      });
+    }
+    
+    if (data.unlockedSingerForms) {
+      data.unlockedSingerForms.forEach((formId: string) => {
+        character.unlockSingerForm(formId);
+      });
+    } else if (data.unlockedTalents && data.unlockedTalents.length > 0) {
+      // Migration: If character has talents but no unlocked forms, re-apply talent effects
+      // This handles characters created before the talent effects system was added
+      data.unlockedTalents.forEach((talentId: string) => {
+        applyTalentEffects(character, talentId);
       });
     }
     
