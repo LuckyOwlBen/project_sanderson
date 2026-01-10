@@ -71,7 +71,19 @@ export class SidenavView implements OnInit, OnDestroy {
   }
 
   navigateTo(route: string): void {
-    this.router.navigate([route]);
+    // If navigating to character creator, create a fresh character first
+    if (route === '/character-creator-view') {
+      this.createNewCharacter();
+    } else {
+      this.router.navigate([route]);
+    }
+  }
+
+  createNewCharacter(): void {
+    // Create a fresh character and reset state
+    const newCharacter = new Character();
+    this.characterState.updateCharacter(newCharacter);
+    this.router.navigate(['/character-creator-view']);
   }
 
   shouldShowNavigationProgress(): boolean {
