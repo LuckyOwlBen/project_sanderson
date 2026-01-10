@@ -215,8 +215,8 @@ export class Character {
       return;
     }
 
-    // Validate that the form is unlocked
-    if (!this.hasSingerForm(formId)) {
+    // Validate that the form is unlocked (dullform is always available)
+    if (formId !== 'dullform' && !this.hasSingerForm(formId)) {
       throw new Error(`Cannot activate form "${formId}" - it has not been unlocked`);
     }
 
@@ -234,7 +234,10 @@ export class Character {
    * Get list of available Singer forms for selection
    */
   getAvailableForms(): UniversalAbility[] {
-    return SINGER_FORMS.filter(form => this.hasSingerForm(form.id));
+    // Dullform is always available for Singers
+    return SINGER_FORMS.filter(form => 
+      form.id === 'dullform' || this.hasSingerForm(form.id)
+    );
   }
 
   /**
@@ -260,6 +263,9 @@ export class Character {
     // This is a limitation of the current BonusModule design
     // For now, return indication that bonuses are active
     switch (this.activeForm) {
+      case 'dullform':
+        // Dullform provides no bonuses
+        return [];
       case 'nimbleform':
         bonuses.push({ type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
         break;

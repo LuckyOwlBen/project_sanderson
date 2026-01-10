@@ -16,6 +16,31 @@
     </div>
   </div>
 
+  <!-- World Events Control -->
+  <div class="world-events-section">
+    <mat-card class="world-event-card highstorm-card" [class.active]="isHighstormActive">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="event-icon">flash_on</mat-icon>
+        <mat-card-title>Highstorm</mat-card-title>
+        <mat-card-subtitle>Allow Singers to change forms</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="event-description">
+          {{ isHighstormActive ? 'Singers can currently change forms during this highstorm.' : 'Trigger a highstorm to allow Singers to change forms.' }}
+        </p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button 
+          mat-raised-button 
+          [color]="isHighstormActive ? 'warn' : 'accent'"
+          (click)="toggleHighstorm()">
+          <mat-icon>{{ isHighstormActive ? 'flash_off' : 'flash_on' }}</mat-icon>
+          {{ isHighstormActive ? 'End Highstorm' : 'Trigger Highstorm' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
   <!-- Active Players Grid -->
   <div class="players-grid" *ngIf="activePlayers.size > 0">
     <mat-card *ngFor="let player of getActivePlayersArray()" 

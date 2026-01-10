@@ -35,6 +35,9 @@ const storeState = {
   'mounts-shop': true
 };
 
+// Track highstorm state
+let highstormActive = false;
+
 // Configure multer for file uploads (in-memory storage)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -597,6 +600,23 @@ io.on('connection', (socket) => {
     } else {
       console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
     }
+  });
+
+  // Handle highstorm toggle from GM
+  socket.on('gm-toggle-highstorm', ({ active, timestamp }) => {
+    console.log(`[GM Action] ⚡ GM toggling highstorm: ${active}`);
+    
+    highstormActive = active;
+    
+    const payload = {
+      active,
+      triggeredBy: 'GM',
+      timestamp: timestamp || new Date().toISOString()
+    };
+    
+    // Broadcast to all connected clients
+    io.emit('highstorm-toggle', payload);
+    console.log(`[GM Action] ⚡ Highstorm ${active ? 'activated' : 'ended'}`);
   });
 
   // Handle disconnect

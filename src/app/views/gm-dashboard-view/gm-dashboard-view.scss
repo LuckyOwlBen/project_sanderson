@@ -51,6 +51,43 @@
   }
 }
 
+.world-events-section {
+  margin-bottom: 32px;
+  
+  .world-event-card {
+    background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 40, 0.9) 100%);
+    border: 2px solid rgba(150, 150, 150, 0.3);
+    transition: all 0.3s ease;
+    
+    &.highstorm-card {
+      .event-icon {
+        background: rgba(150, 150, 150, 0.2);
+        color: #b0b0b0;
+      }
+      
+      &.active {
+        border-color: rgba(255, 215, 0, 0.6);
+        box-shadow: 0 4px 30px rgba(255, 215, 0, 0.3);
+        
+        .event-icon {
+          background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+          color: #000;
+        }
+        
+        mat-card-title {
+          color: #ffd700;
+        }
+      }
+    }
+    
+    .event-description {
+      color: #e8e8e8;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
 .players-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));

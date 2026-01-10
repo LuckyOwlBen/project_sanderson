@@ -3,6 +3,19 @@
   to { opacity: 1; transform: none; }
 }
 
+@keyframes highstormPulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.4),
+                0 -2px 8px 0 rgba(255, 215, 0, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                0 0 60px rgba(255, 215, 0, 0.6),
+                0 -2px 8px 0 rgba(255, 215, 0, 0.5);
+  }
+}
+
 .custom-tabs {
   .tab-labels {
     display: flex;
@@ -45,7 +58,20 @@
       background: var(--gpSystemDarkGrey);
       box-shadow: 0 -2px 8px 0 rgba(74,179,232,0.08);
       z-index: 2;
+      
+      &.highstorm-active {
+        color: #ffd700;
+        background: var(--gpSystemDarkGrey);
+        animation: highstormPulse 2s ease-in-out infinite;
+        z-index: 3;
+      }
     }
+    
+    &.highstorm-active:not(.active) {
+      color: #ffd700;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    
     &:not(.active):hover {
       background: rgba(74,179,232,0.08);
       color: #fff;
@@ -944,6 +970,41 @@ mat-divider {
 
   p {
     margin-bottom: 2rem;
+  }
+}
+
+// Singer Forms tab styling
+.singer-forms-tab {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  .highstorm-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    color: #ffd700;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+    
+    .status-icon {
+      width: 32px;
+      height: 32px;
+    }
+    
+    &.waiting {
+      background: linear-gradient(135deg, rgba(100, 100, 100, 0.15) 0%, rgba(100, 100, 100, 0.05) 100%);
+      border: 2px solid rgba(150, 150, 150, 0.3);
+      color: #b0b0b0;
+      box-shadow: none;
+    }
   }
 }
 

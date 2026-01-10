@@ -48,16 +48,19 @@ describe('Character Active Form', () => {
       
       const availableForms = character.getAvailableForms();
       
-      expect(availableForms.length).toBe(4); // 2 from each category
+      // Dullform (always available) + 4 unlocked forms
+      expect(availableForms.length).toBe(5);
+      expect(availableForms.find(f => f.id === 'dullform')).toBeDefined();
       expect(availableForms.find(f => f.id === 'nimbleform')).toBeDefined();
       expect(availableForms.find(f => f.id === 'artform')).toBeDefined();
       expect(availableForms.find(f => f.id === 'meditationform')).toBeDefined();
       expect(availableForms.find(f => f.id === 'scholarform')).toBeDefined();
     });
 
-    it('should return empty array when no forms unlocked', () => {
+    it('should return only dullform when no other forms unlocked', () => {
       const availableForms = character.getAvailableForms();
-      expect(availableForms).toEqual([]);
+      expect(availableForms.length).toBe(1);
+      expect(availableForms[0].id).toBe('dullform');
     });
   });
 

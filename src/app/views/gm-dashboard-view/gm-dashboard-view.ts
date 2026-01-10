@@ -39,6 +39,7 @@ export class GmDashboardView implements OnInit, OnDestroy {
   
   activePlayers = new Map<string, PlayerJoinedEvent>();
   isConnected = false;
+  isHighstormActive = false;
   criticalPlayers = new Set<string>(); // Characters at 0 health
   storeEnabled = new Map<string, boolean>([
     ['main-store', true],
@@ -137,14 +138,20 @@ export class GmDashboardView implements OnInit, OnDestroy {
         const player = this.activePlayers.get(event.characterId);
         if (player) {
           this.snackBar.open(
-            `${player.name} is now level ${event.newLevel}!`,
-            'OK',
-            { duration: 10000 }
+            `${player.name} leveled up to ${event.newLevel}!`,
+            'Close',
+            { duration: 5000 }
           );
-          // Update player level in the UI
-          player.level = event.newLevel;
-          this.cdr.detectChanges();
         }
+      });
+
+    // Subscribe to highstorm events
+    this.websocketService.highstorm$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[GM Dashboard] ⚡ Highstorm event received:', event);
+        this.isHighstormActive = event.active;
+        this.cdr.detectChanges();
       });
 
     // Subscribe to store toggle events to keep GM dashboard in sync
@@ -269,6 +276,17 @@ export class GmDashboardView implements OnInit, OnDestroy {
   grantLevelUp(player: PlayerJoinedEvent): void {
     console.log('[GM Dashboard] Granting level up to:', player.name);
     this.websocketService.grantLevelUp(player.characterId);
+  }
+
+  toggleHighstorm(): void {
+    console.log('[GM Dashboard] Toggling highstorm:', !this.isHighstormActive);
+    this.websocketService.toggleHighstorm(!this.isHighstormActive);
+    
+    this.snackBar.open(
+      this.isHighstormActive ? 'Highstorm ended' : 'Highstorm triggered!',
+      'Close',
+      { duration: 3000 }
+    );
   }
 
   toggleStore(storeId: string): void {

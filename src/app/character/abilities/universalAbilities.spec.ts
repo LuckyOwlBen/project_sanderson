@@ -44,8 +44,8 @@ describe('Universal Abilities', () => {
   });
 
   describe('SINGER_FORMS', () => {
-    it('should contain all 12 Singer forms', () => {
-      expect(SINGER_FORMS).toHaveLength(12);
+    it('should contain all 13 Singer forms', () => {
+      expect(SINGER_FORMS).toHaveLength(13);
       
       const formIds = SINGER_FORMS.map(f => f.id);
       expect(formIds).toContain('nimbleform');

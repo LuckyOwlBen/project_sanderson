@@ -1,9 +1,5 @@
-import { Component, OnInit, Output, EventEmitter, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
 import { CharacterStateService } from '../../../character/characterStateService';
 import { Character } from '../../../character/character';
 import { UniversalAbility } from '../../../character/abilities/universalAbilities';
@@ -15,34 +11,32 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'app-form-selector',
   standalone: true,
   imports: [
-    CommonModule,
-    MatSelectModule,
-    MatFormFieldModule,
-    MatTooltipModule,
-    MatButtonModule
+    CommonModule
   ],
   template: `
     <div class="form-selector">
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Active Singer Form</mat-label>
-        <mat-select 
-          [value]="selectedFormId"
-          (selectionChange)="onFormSelected($event.value)"
-          [disabled]="availableForms.length === 0">
+      <div class="form-field">
+        <label class="form-label">Active Singer Form</label>
+        <select 
+          class="form-select"
+          [value]="selectedFormId || ''"
+          (change)="onFormSelected($any($event.target).value || undefined)"
+          [disabled]="availableForms.length === 0 || !highstormActive">
           
-          <mat-option [value]="undefined" data-testid="no-form-option">
+          <option value="" data-testid="no-form-option">
             No Active Form
-          </mat-option>
+          </option>
           
-          <mat-option 
+          <option 
             *ngFor="let form of availableForms" 
             [value]="form.id"
             [attr.data-form-id]="form.id"
-            [matTooltip]="form.description">
+            [title]="form.description">
             {{ form.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          </option>
+        </select>
+        <div *ngIf="!highstormActive" class="form-hint">Requires a highstorm to change forms</div>
+      </div>
       
       <div *ngIf="availableForms.length === 0 && character" class="no-forms-message">
         <p>No Singer forms unlocked. Unlock forms through talents.</p>
@@ -50,16 +44,20 @@ import { takeUntil } from 'rxjs/operators';
           <small>Unlocked Singer forms: {{ character.unlockedSingerForms.length }}</small><br>
           <small>Has form talents: {{ hasFormTalents() }}</small>
         </p>
-        <button *ngIf="hasFormTalents()" mat-stroked-button color="primary" (click)="reapplyTalentEffects()">
+        <button *ngIf="hasFormTalents()" class="refresh-button" (click)="reapplyTalentEffects()">
           Refresh Forms
         </button>
       </div>
       
       <div *ngIf="selectedFormId && activeFormInfo" class="active-form-info">
-        <h4>{{ activeFormInfo.name }} Bonuses</h4>
-        <ul>
-          <li *ngFor="let effect of activeFormInfo.effects">{{ effect }}</li>
-        </ul>
+        <h4>{{ activeFormInfo.name }}</h4>
+        <p class="form-description">{{ activeFormInfo.description }}</p>
+        <div *ngIf="activeFormInfo.effects && activeFormInfo.effects.length > 0" class="form-effects">
+          <h5>Effects:</h5>
+          <ul>
+            <li *ngFor="let effect of activeFormInfo.effects">{{ effect }}</li>
+          </ul>
+        </div>
       </div>
     </div>
   `,
@@ -70,47 +68,137 @@ import { takeUntil } from 'rxjs/operators';
 
     .form-field {
       width: 100%;
-      max-width: 400px;
+      max-width: 600px;
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      color: rgba(255, 255, 255, 0.87);
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.23);
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.87);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .form-select:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-select:focus:not(:disabled) {
+      border-color: #4ab3e8;
+      background: rgba(74, 179, 232, 0.1);
+    }
+
+    .form-select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .form-select option {
+      background: #1e1e1e;
+      color: #fff;
+    }
+
+    .form-hint {
+      margin-top: 4px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
     }
 
     .no-forms-message {
-      color: #666;
+      color: #b0b0b0;
       font-style: italic;
       margin-top: 8px;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .debug-info {
-      margin-top: 8px;
-      color: #999;
+      margin-top: 12px;
+      color: #808080;
+      font-size: 0.85rem;
     }
 
-    button {
+    .refresh-button {
       margin-top: 12px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #4ab3e8;
+      border-radius: 4px;
+      color: #4ab3e8;
+      font-family: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .refresh-button:hover {
+      background: rgba(74, 179, 232, 0.1);
     }
 
     .active-form-info {
-      margin-top: 16px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 4px;
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(74, 179, 232, 0.08) 0%, rgba(74, 179, 232, 0.03) 100%);
+      border-radius: 12px;
+      border: 1px solid rgba(74, 179, 232, 0.2);
     }
 
     .active-form-info h4 {
       margin: 0 0 8px 0;
-      color: #ffd700;
+      color: #4ab3e8;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .form-description {
+      margin: 0 0 16px 0;
+      color: #c8c8c8;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .form-effects h5 {
+      margin: 0 0 8px 0;
+      color: #4ab3e8;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .active-form-info ul {
       margin: 0;
-      padding-left: 20px;
+      padding-left: 24px;
+      color: #e8e8e8;
     }
 
     .active-form-info li {
-      margin: 4px 0;
+      margin: 8px 0;
+      line-height: 1.5;
     }
   `]
 })
 export class FormSelectorComponent implements OnInit, OnDestroy {
+  @Input() highstormActive: boolean = false;
+  
   selectedFormId?: string;
   availableForms: UniversalAbility[] = [];
   activeFormInfo?: UniversalAbility;
@@ -133,8 +221,7 @@ export class FormSelectorComponent implements OnInit, OnDestroy {
           this.availableForms = character.getAvailableForms();
           this.selectedFormId = character.activeForm;
           this.activeFormInfo = character.getActiveFormInfo();
-          // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
-          setTimeout(() => this.cdr.detectChanges(), 0);
+          this.cdr.markForCheck();
         }
       });
   }

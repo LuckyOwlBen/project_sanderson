@@ -146,6 +146,7 @@ export class CharacterStorageService {
       skills: character.skills.getAllSkillRanks(),
       unlockedTalents: Array.from(character.unlockedTalents),
       unlockedSingerForms: character.unlockedSingerForms || [],
+      activeForm: character.activeForm,
       health: {
         current: character.resources.health.current,
         max: character.resources.health.max
@@ -261,6 +262,13 @@ export class CharacterStorageService {
     
     if (data.inventory) {
       character.inventory.deserialize(data.inventory);
+    }
+    
+    // Set active form - default to dullform for Singers if not set
+    if (data.activeForm) {
+      character.setActiveForm(data.activeForm);
+    } else if (character.ancestry === Ancestry.SINGER) {
+      character.setActiveForm('dullform');
     }
     
     (character as any).sessionNotes = data.sessionNotes || '';

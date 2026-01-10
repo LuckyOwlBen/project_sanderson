@@ -85,6 +85,12 @@ export interface LevelUpEvent {
   timestamp: string;
 }
 
+export interface HighstormEvent {
+  active: boolean;
+  triggeredBy: string;
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -129,6 +135,9 @@ export class WebsocketService implements OnDestroy {
 
   private levelUpSubject = new Subject<LevelUpEvent>();
   public levelUp$ = this.levelUpSubject.asObservable();
+
+  private highstormSubject = new Subject<HighstormEvent>();
+  public highstorm$ = this.highstormSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -245,6 +254,12 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] 🆙 Broadcasting to levelUpSubject');
       this.levelUpSubject.next(data);
       console.log('[WebSocket] 🆙 Broadcast complete');
+    });
+
+    this.socket.on('highstorm-toggle', (data: HighstormEvent) => {
+      console.log('[WebSocket] ⚡⚡⚡ HIGHSTORM EVENT RECEIVED ⚡⚡⚡');
+      console.log('[WebSocket] ⚡ Highstorm event data:', data);
+      this.highstormSubject.next(data);
     });
     
     console.log('[WebSocket] ✅ All event listeners registered');
@@ -413,6 +428,19 @@ export class WebsocketService implements OnDestroy {
       timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 📤 gm-grant-level-up event emitted');
+  }
+
+  toggleHighstorm(active: boolean): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot toggle highstorm: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] ⚡ Toggling highstorm:', { active });
+    this.socket.emit('gm-toggle-highstorm', {
+      active,
+      timestamp: new Date().toISOString()
+    });
   }
 
   isConnected(): boolean {

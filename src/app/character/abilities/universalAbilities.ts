@@ -100,6 +100,19 @@ export const RADIANT_UNIVERSAL_ABILITIES: UniversalAbility[] = [
  * These are the various forms that Singers can assume during highstorms
  */
 export const SINGER_FORMS: UniversalAbility[] = [
+    // Default Form
+    {
+        id: 'dullform',
+        name: 'Dullform',
+        description: 'The default form of Singers, conferring no particular advantages or disadvantages. This is the form Singers are born into and return to when they have no other form active.',
+        actionCost: 'passive',
+        category: AbilityCategory.OTHER,
+        source: 'Singer Forms - Default',
+        effects: [
+            'No bonuses or penalties'
+        ]
+    },
+    
     // Basic Forms (available through Forms of Finesse)
     {
         id: 'nimbleform',

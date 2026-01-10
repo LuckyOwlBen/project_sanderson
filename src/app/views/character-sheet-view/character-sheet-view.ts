@@ -74,6 +74,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   portraitUrl: string | null = null;
   pendingSprenGrant: any = null;
   pendingExpertiseGrant: any = null;
+  isHighstormActive: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -232,6 +233,17 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         }
       });
     console.log('[Character Sheet] 🆙 Level-up listener subscription complete');
+    
+    // Set up highstorm listener
+    console.log('[Character Sheet] ⚡ Setting up highstorm listener...');
+    this.websocketService.highstorm$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] ⚡ Highstorm event:', event);
+        this.isHighstormActive = event.active;
+        setTimeout(() => this.cdr.detectChanges(), 0);
+      });
+    console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
   }
 
   ngOnDestroy(): void {

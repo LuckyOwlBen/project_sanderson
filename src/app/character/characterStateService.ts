@@ -31,6 +31,15 @@ export class CharacterStateService {
   // Specific update methods
   setAncestry(ancestry: Ancestry): void {
     this.character.ancestry = ancestry;
+    
+    // Set default dullform for Singer ancestry
+    if (ancestry === Ancestry.SINGER) {
+      // Always set dullform if no form is active
+      if (!this.character.activeForm) {
+        this.character.setActiveForm('dullform');
+      }
+    }
+    
     this.characterSubject.next(this.character);
   }
 

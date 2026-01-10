@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormSelectorComponent } from './form-selector';
 import { Character } from '../../../character/character';
+import { Ancestry } from '../../../character/ancestry/ancestry';
 import { applyTalentEffects } from '../../../character/talents/talentEffects';
 import { CharacterStateService } from '../../../character/characterStateService';
 import { of } from 'rxjs';
@@ -61,6 +62,8 @@ describe('FormSelectorComponent', () => {
       characterStateService.updateCharacter(character);
       fixture.detectChanges();
       
+      expect(component.selectedFormId).toBe('nimbleform');
+      
       component.onFormSelected(undefined);
       
       expect(component.selectedFormId).toBeUndefined();
@@ -77,12 +80,12 @@ describe('FormSelectorComponent', () => {
     it('should display form names correctly', () => {
       const forms = component.availableForms;
       
-      expect(forms.some(f => f.name === 'Nimbleform')).toBe(true);
-      expect(forms.some(f => f.name === 'Artform')).toBe(true);
+      expect(forms.some((f: any) => f.name === 'Nimbleform')).toBe(true);
+      expect(forms.some((f: any) => f.name === 'Artform')).toBe(true);
     });
 
     it('should show form description on hover or selection', () => {
-      const nimbleform = component.availableForms.find(f => f.id === 'nimbleform');
+      const nimbleform = component.availableForms.find((f: any) => f.id === 'nimbleform');
       
       expect(nimbleform?.name).toBe('Nimbleform');
       expect(nimbleform?.description).toBeTruthy();
@@ -100,18 +103,24 @@ describe('FormSelectorComponent', () => {
   describe('No Forms Available', () => {
     it('should handle character with no unlocked forms', () => {
       const noFormCharacter = new Character();
+      noFormCharacter.ancestry = Ancestry.SINGER;
       characterStateService.updateCharacter(noFormCharacter);
       fixture.detectChanges();
       
-      expect(component.availableForms.length).toBe(0);
+      // Dullform is always available
+      expect(component.availableForms.length).toBe(1);
+      expect(component.availableForms[0].id).toBe('dullform');
     });
 
-    it('should show helpful message when no forms available', () => {
+    it('should show helpful message when no additional forms available', () => {
       const noFormCharacter = new Character();
+      noFormCharacter.ancestry = Ancestry.SINGER;
       characterStateService.updateCharacter(noFormCharacter);
       fixture.detectChanges();
       
-      expect(component.availableForms.length).toBe(0);
+      // Dullform is always available
+      expect(component.availableForms.length).toBe(1);
+      expect(component.availableForms[0].id).toBe('dullform');
       expect(component.selectedFormId).toBeUndefined();
     });
   });
