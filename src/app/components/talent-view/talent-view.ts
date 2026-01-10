@@ -771,6 +771,16 @@ export class TalentView implements OnInit, OnDestroy {
       case 'level':
         return `Level ${prereq.value || 1}+`;
       
+      case 'ideal':
+        const idealNames: Record<string, string> = {
+          'first': 'First Ideal',
+          'second': 'Second Ideal',
+          'third': 'Third Ideal',
+          'fourth': 'Fourth Ideal',
+          'fifth': 'Fifth Ideal'
+        };
+        return idealNames[prereq.target] || `${prereq.target} Ideal`;
+      
       default:
         return String(prereq);
     }

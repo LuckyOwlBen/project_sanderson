@@ -107,10 +107,10 @@ export class RadiantPathManager {
             return;
         }
 
-        // Add the two surge skills at rank 0
+        // Add the two surge skills at rank 1
         const [surge1, surge2] = this.surgePair;
-        skillManager.setSkillRank(surge1, 0);
-        skillManager.setSkillRank(surge2, 0);
+        skillManager.setSkillRank(surge1, 1);
+        skillManager.setSkillRank(surge2, 1);
 
         this.idealSpoken = true;
     }

@@ -56,6 +56,15 @@ export class TalentPrerequisiteChecker {
       case 'level':
         return this.character.level >= (prereq.value ?? 0);
 
+      case 'ideal':
+        // Check if the character has spoken the required ideal
+        // For now, we only check if First Ideal has been spoken
+        if (prereq.target === 'first') {
+          return this.character.radiantPath.hasSpokenIdeal();
+        }
+        // Future ideals would be checked here (second, third, etc.)
+        return false;
+
       default:
         return false;
     }
