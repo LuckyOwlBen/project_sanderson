@@ -1,18 +1,153 @@
-import { TalentPath } from "../../talentInterface";
+import { TalentPath, TalentTree, ActionCostCode } from "../../talentInterface";
+
+const ASHSPREN_BOND_TREE: TalentTree = {
+    pathName: "Ashspren Bond",
+    nodes: [
+        {
+            id: 'dustbringer_key_talent',
+            name: 'First Ideal (Dustbringer Key)',
+            description: 'You begin bonding an ashspren, allowing you to breathe in and use Stormlight. You might be aware of this nascent bond, or you might use the powers subconsciously until you get closer to speaking the First Ideal. When you acquire this talent, you gain access to Investiture, beginning with a maximum Investiture of 2 + your Awareness or Presence (whichever is higher). You can now use the Breathe Stormlight, Enhance, and Regenerate actions. Additionally, you gain the goal "Speak the First Ideal." After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You gain the Abrasion and Division surges. You gain an additional skill on your character sheet for the above surges, starting with 1 rank in each.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When bonding an ashspren at level 2+',
+            prerequisites: [{ type: 'level', target: 'character', value: 2 }],
+            tier: 0,
+            bonuses: [],
+            otherEffects: [
+                'Grants Investiture resource (max = 2 + higher of Awareness or Presence)',
+                'Unlocks Breathe Stormlight, Enhance, and Regenerate actions',
+                'Grants goal: Speak the First Ideal',
+                'Reward: Become Empowered until end of scene',
+                'Reward: Gain Abrasion and Division surge skills at rank 1',
+                'Reward: Grants access to Abrasion and Division surge trees'
+            ]
+        },
+        {
+            id: 'dustbringer_searing_dust_storm',
+            name: 'Searing Dust Storm',
+            description: 'You combine the mobility of Abrasion with the destruction of Division to leave trails of dust in your wake. These stinging storms assail enemies foolish enough to enter, leaving them open to attack. When you use the Move action to move along a solid surface, you can spend 1 Investiture or more to kick up an obscuring cloud of dust in spaces of your choice that you enter or leave during that movement. This cloud remains for a number of rounds equal to the Investiture spent, or until a reasonably strong wind disperses it. When each enemy within this cloud takes damage for the first time during a round, that damage increases by your ranks in Discipline.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you use the Move action',
+            prerequisites: [{ type: 'ideal', target: 'first', value: 1 }],
+            tier: 1,
+            bonuses: [],
+            otherEffects: [
+                'Creates obscuring dust cloud in movement spaces',
+                'Cloud lasts rounds equal to Investiture spent',
+                'Enemies in cloud take bonus damage equal to Discipline ranks on first damage per round'
+            ]
+        },
+        {
+            id: 'dustbringer_invested',
+            name: 'Invested',
+            description: 'You learn to hold and wield greater quantities of Stormlight within yourself. When you acquire this talent, your maximum Investiture increases by a number equal to your tier. When your tier increases by 1, your maximum Investiture does as well.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [{ type: 'talent', target: 'dustbringer_searing_dust_storm' }],
+            tier: 2,
+            bonuses: [],
+            otherEffects: ['Increases max Investiture by tier value permanently']
+        },
+        {
+            id: 'dustbringer_second_ideal',
+            name: 'Second Ideal (Dustbringer)',
+            description: 'You seek to deepen your Nahel bond with your ashspren by speaking the Second Ideal. You gain the goal "Speak the Second Ideal." After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. Your Enhance action becomes more powerful. While you have 1 Investiture or more, you can use Enhance as a free action, and you don\'t need to spend Investiture to use this action or maintain its effect.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'Upon acquiring this talent',
+            prerequisites: [
+                { type: 'level', target: 'character', value: 4 },
+                { type: 'ideal', target: 'first', value: 1 }
+            ],
+            tier: 3,
+            bonuses: [],
+            otherEffects: [
+                'Grants goal: Speak the Second Ideal',
+                'Reward: Become Empowered until end of scene',
+                'Reward: Enhance becomes free action while having 1+ Investiture',
+                'Reward: Enhance no longer costs Investiture to use or maintain'
+            ]
+        },
+        {
+            id: 'dustbringer_wound_regeneration',
+            name: 'Wound Regeneration',
+            description: 'You can use Stormlight to rapidly recover from injuries. When you use the Regenerate free action, you can spend Investiture to instantly recover from an injury of your choice (either instead of or in addition to healing yourself). Spend 2 Investiture to recover from a temporary injury, or spend 3 Investiture to recover from a permanent one.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you use the Regenerate action',
+            prerequisites: [{ type: 'talent', target: 'dustbringer_invested' }],
+            tier: 4,
+            bonuses: [],
+            otherEffects: [
+                'Can heal temporary injury for 2 Investiture',
+                'Can heal permanent injury for 3 Investiture'
+            ]
+        },
+        {
+            id: 'dustbringer_third_ideal',
+            name: 'Third Ideal (Dustbringer)',
+            description: 'You seek to advance your Nahel bond even further by speaking the Third Ideal. You gain the goal "Speak the Third Ideal." After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can summon your spren as a Radiant Shardblade (see chapter 7).',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'Upon acquiring this talent',
+            prerequisites: [
+                { type: 'level', target: 'character', value: 8 },
+                { type: 'ideal', target: 'second', value: 2 }
+            ],
+            tier: 5,
+            bonuses: [],
+            otherEffects: [
+                'Grants goal: Speak the Third Ideal',
+                'Reward: Become Empowered until end of scene',
+                'Reward: Can summon Radiant Shardblade'
+            ]
+        },
+        {
+            id: 'dustbringer_deepened_bond',
+            name: 'Deepened Bond',
+            description: 'The strength of your Nahel bond now allows your spren to manifest more fully in the Physical Realm. Your spren bond range increases from 30 feet to 100 feet. Additionally, when you spend focus to give your spren a task, it costs you 1 fewer focus (to a minimum cost of 1).',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [{ type: 'ideal', target: 'third', value: 3 }],
+            tier: 6,
+            bonuses: [],
+            otherEffects: [
+                'Spren bond range increases to 100 feet',
+                'Spren tasks cost 1 fewer focus (minimum 1)'
+            ]
+        },
+        {
+            id: 'dustbringer_take_squire',
+            name: 'Take Squire (Dustbringer)',
+            description: 'You begin taking other people under your wing, allowing them to breathe Stormlight and use surges before they\'ve established their own Nahel bond. After a long rest, choose a companion or player character you can influence to take as your squire. To choose them, they must be willing and sapient, you must have known them for at least 1 game session, and they must not have bonded a Radiant spren. When you choose a squire, decide whether you want to grant them both of your surges, one of them, or none. That character becomes your squire, gaining the surges you chose plus the other benefits in the "Squires" section earlier in this chapter. You can have a maximum number of squires up to your current Ideal (such as three for the Third Ideal). If you already have the maximum number of squires, you must choose one to dismiss as your squire before choosing a new one.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'After a long rest',
+            prerequisites: [{ type: 'ideal', target: 'third', value: 3 }],
+            tier: 6,
+            bonuses: [],
+            otherEffects: [
+                'Can choose willing, sapient, non-Radiant character as squire',
+                'Must have known them for at least 1 session',
+                'Grant 0, 1, or both surges to squire',
+                'Max squires equals current Ideal level'
+            ]
+        },
+        {
+            id: 'dustbringer_fourth_ideal',
+            name: 'Fourth Ideal (Dustbringer)',
+            description: 'You seek to become a full Knight Radiant by speaking the Fourth Ideal. You gain the goal "Speak the Fourth Ideal." After you complete this goal, you gain the following reward: You become Empowered until the end of that scene. You can call a swarm of flamespren as Radiant Shardplate (see chapter 7).',
+            actionCost: ActionCostCode.Free,
+            prerequisites: [
+                { type: 'level', target: 'character', value: 13 },
+                { type: 'ideal', target: 'third', value: 3 }
+            ],
+            tier: 7,
+            bonuses: [],
+            otherEffects: [
+                'Grants goal: Speak the Fourth Ideal',
+                'Reward: Become Empowered until end of scene',
+                'Reward: Can summon Radiant Shardplate'
+            ]
+        }
+    ]
+};
 
 export const DUSTBRINGER_TALENT_TREE: TalentPath = {
     name: "Dustbringer",
-    paths: [],
-    talentNodes: [
-        {
-            id: 'dustbringer_key_talent',
-            name: 'Dustbringer\'s Discipline',
-            description: 'You have bonded an Ashspren and become a Dustbringer. Philosophy: Great power requires strong discipline. You may now speak the First Ideal to unlock your Surges of Division and Abrasion.',
-            actionCost: Infinity,
-            prerequisites: [],
-            tier: 0,
-            bonuses: [],
-            otherEffects: ['Grants access to Division and Abrasion surge trees upon speaking the First Ideal.']
-        }
-    ]
+    paths: [ASHSPREN_BOND_TREE],
+    talentNodes: []
 };
