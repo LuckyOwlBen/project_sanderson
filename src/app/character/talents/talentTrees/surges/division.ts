@@ -1,30 +1,155 @@
-import { TalentTree } from "../../talentInterface";
+import { TalentTree, ActionCostCode } from "../../talentInterface";
 
 export const DIVISION_SURGE_TREE: TalentTree = {
     pathName: "Division",
     nodes: [
         {
-            id: 'division_placeholder_1',
-            name: 'Division Power (Placeholder)',
-            description: 'Surge ability to be populated from rulebook.',
-            actionCost: 1,
-            prerequisites: [{ type: 'skill', target: 'DIVISION', value: 1 }],
-            tier: 1,
+            id: 'division_base',
+            name: 'Division',
+            description: 'You can use this surge to decay a character, object, or area within your reach. You must have a hand free and touch the target. Targeting a Character: You can target a character regardless of their size. Spend 1 Investiture to make a melee Division attack against the Spiritual defense of the target, rolling 3d4 spirit damage. If this reduces the target to 0 health, they crumble into dust and die. The size of this attack\'s damage dice increases with your ranks in Division; at 2 ranks, roll 3d6 (instead of 3d4), and so on. As usual, on a hit, add your Division modifier to damage, and on a miss, you can spend 1 focus to graze with the attack. Targeting an Object or Area: To destroy an object or the contents of an area, spend Investiture equal to the number of surge ranks required to affect a target of that size: 1 for Small, 2 for Medium, and so on. This object or area can\'t exceed the surge size for your ranks in Division. If you\'re in combat or another tense situation, you must succeed on a Division test (see "Division Under Pressure" to determine the DC). On a success (or if you\'re not under pressure), your target decays in a manner of your choosing. For example, you could crumble the object into dust, etch writing or art into the object, destroy parts of an object to form a smaller object, or create a smokescreen that lasts for 1 round in the destroyed object\'s area. You can\'t use this surge on Invested objects (like Shardplate) or objects that have been infused with Stormlight.',
+            actionCost: 2,
+            prerequisites: [
+                { type: 'skill', target: 'DIVISION', value: 1 }
+            ],
+            tier: 0,
             bonuses: [],
-            otherEffects: ['To be populated with actual surge power.']
+            otherEffects: [
+                'Attack characters: 1 Investiture, 3d4 spirit damage (scales with ranks)',
+                'Target dies and crumbles at 0 health',
+                'Destroy objects/areas: Investiture cost based on size',
+                'Decay objects in chosen manner (crumble, etch, shape, smokescreen)',
+                'Combat/tense situations require Division test',
+                'Can\'t affect Invested or Stormlight-infused objects'
+            ]
         },
         {
-            id: 'division_placeholder_2',
-            name: 'Advanced Division (Placeholder)',
-            description: 'Advanced surge ability to be populated from rulebook.',
+            id: 'division_bodily_decay',
+            name: 'Bodily Decay',
+            description: 'You atrophy the bodies of your enemies, inflicting debilitating wounds. When you hit with a Division attack, you can spend C to inflict an injury on one target of that attack.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you hit with a Division attack',
+            prerequisites: [
+                { type: 'ideal', target: 'first', value: 1 },
+                { type: 'skill', target: 'DIVISION', value: 1 }
+            ],
+            tier: 1,
+            bonuses: [],
+            otherEffects: ['Spend C on hit to inflict injury']
+        },
+        {
+            id: 'division_eroding_escape',
+            name: 'Eroding Escape',
+            description: 'Your ability to decay what you touch ensures you can\'t be contained for long. Spend 1 Investiture or more to end that many effects on yourself or an ally within your reach. The chosen effects must either be applying the Immobilized or Restrained condition, or be adding a disadvantage to one or more physical tests. Depending on the effect\'s source, this talent might not fully destroy the source at the GM\'s discretion, but it creates space or opportunity for your target to move around it or free themself from its constraint. If the effect\'s source remains at the end of the target\'s next turn (such as when swimming or when wearing armor with the Cumbersome trait), the effect then reasserts itself.',
             actionCost: 1,
             prerequisites: [
-                { type: 'skill', target: 'DIVISION', value: 3 },
-                { type: 'talent', target: 'division_placeholder_1' }
+                { type: 'ideal', target: 'first', value: 1 },
+                { type: 'skill', target: 'DIVISION', value: 1 }
+            ],
+            tier: 1,
+            bonuses: [],
+            otherEffects: [
+                'Spend X Investiture to end X effects on self or ally',
+                'Effects must be Immobilized, Restrained, or physical test disadvantages',
+                'Effect may reassert if source remains'
+            ]
+        },
+        {
+            id: 'division_igniting_division',
+            name: 'Igniting Division',
+            description: 'You can make anything burn, even materials that are usually nonflammable. When you affect a target with Division, you can spend 1 or more additional Investiture to cause that target to catch fire for a number of rounds equal to the Investiture spent. If you didn\'t already have to make a Division test when you affected that target (see "Division Under Pressure"), you must succeed on one now to do so. For the duration, the target becomes Afflicted, and the area within 5 feet of the target is lit on fire and becomes dangerous terrain. Both effects deal energy damage equal to your Division modifier. At the GM\'s discretion, the dangerous terrain can spread on subsequent rounds. The target or a character within reach of it can Use a Skill to make an Agility or Athletics test opposed by your Division. If they succeed, the target\'s Afflicted condition ends early, but the ignited area continues to burn.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you affect a target with Division',
+            prerequisites: [
+                { type: 'talent', target: 'division_bodily_decay' },
+                { type: 'skill', target: 'DIVISION', value: 2 }
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ['To be populated with actual surge power.']
+            otherEffects: [
+                'Spend 1+ Investiture to ignite target for that many rounds',
+                'Target becomes Afflicted, 5-foot radius becomes dangerous terrain',
+                'Both deal energy damage equal to Division modifier',
+                'Can be extinguished with opposed Agility/Athletics test'
+            ]
+        },
+        {
+            id: 'division_spark_sending',
+            name: 'Spark Sending',
+            description: 'You annihilate your targets from a distance by sending your entropic spark racing through a physical object, creating a chain reaction at its destination. You can use Division and its talents as though your reach is 20 feet, as long as there is a solid surface from you to your target (such as a wall or floor) along which you can send an entropic spark.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'skill', target: 'DIVISION', value: 2 }
+            ],
+            tier: 2,
+            bonuses: [],
+            otherEffects: [
+                'Use Division and talents with 20 feet reach',
+                'Must have solid surface path to target'
+            ]
+        },
+        {
+            id: 'division_gout_of_flame',
+            name: 'Gout of Flame',
+            description: 'You use Division to spray heat and flame across a wide area. Spend 3 Investiture and choose an area up to one size larger than you can normally affect with your ranks in Division; if you already have 5 ranks in Division, you can instead affect an area up to 25 feet in each dimension. Make a Division attack against the Physical defense of each target who is at least partially within the chosen area, rolling 3d4 energy damage. The size of these damage dice increases with your ranks in Division; at 2 ranks, roll 3d6 (instead of 3d4), and so on.',
+            actionCost: 2,
+            prerequisites: [
+                { type: 'talent', target: 'division_igniting_division' },
+                { type: 'skill', target: 'DIVISION', value: 3 }
+            ],
+            tier: 3,
+            bonuses: [],
+            otherEffects: [
+                'Spend 3 Investiture for area attack',
+                'Area: one size larger than normal (or 25 feet at rank 5)',
+                'Damage: 3d4 (rank 1), 3d6 (rank 2), 3d8 (rank 3), etc.'
+            ]
+        },
+        {
+            id: 'division_inescapable_spark',
+            name: 'Inescapable Spark',
+            description: 'You can send your spark to far greater distances, seeking out targets around corners and through walls and corners. You can use Division and its talents as though your reach equals your spren bond range. You still need a solid surface from you to your target (such as a wall or floor) along which you can send an entropic spark, but you don\'t need line of effect to your target while you can sense them. Additionally, your target can\'t benefit from the Brace action against any of your Division attacks.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'talent', target: 'division_spark_sending' },
+                { type: 'skill', target: 'DIVISION', value: 3 }
+            ],
+            tier: 3,
+            bonuses: [],
+            otherEffects: [
+                'Reach equals spren bond range',
+                'Don\'t need line of effect if you can sense target',
+                'Still need solid surface path',
+                'Targets can\'t Brace against Division attacks'
+            ]
+        },
+        {
+            id: 'division_devastating_division',
+            name: 'Devastating Division',
+            description: 'Your Division is especially potent and destructive. When you roll damage for Division or its talents, roll an additional damage die of the same size.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'talent', target: 'division_gout_of_flame' },
+                { type: 'skill', target: 'DIVISION', value: 4 }
+            ],
+            tier: 4,
+            bonuses: [],
+            otherEffects: ['Roll one extra damage die for all Division damage']
+        },
+        {
+            id: 'division_unleashed_entropy',
+            name: 'Unleashed Entropy',
+            description: 'You\'ve grown so powerful that the ability to destroy everything around you is almost alarmingly easy. It costs you one C fewer to use Division (but not its talents). Additionally, your DCs on the Division Under Pressure table are reduced by 5.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When using Division',
+            prerequisites: [
+                { type: 'skill', target: 'DIVISION', value: 4 }
+            ],
+            tier: 4,
+            bonuses: [],
+            otherEffects: [
+                'Division costs 1 fewer C (not talents)',
+                'Division Under Pressure DCs reduced by 5'
+            ]
         }
     ]
 };

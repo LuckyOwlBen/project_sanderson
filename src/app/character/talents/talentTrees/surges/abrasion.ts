@@ -1,30 +1,152 @@
-import { TalentTree } from "../../talentInterface";
+import { TalentTree, ActionCostCode } from "../../talentInterface";
 
 export const ABRASION_SURGE_TREE: TalentTree = {
     pathName: "Abrasion",
     nodes: [
         {
-            id: 'abrasion_placeholder_1',
-            name: 'Abrasion Power (Placeholder)',
-            description: 'Surge ability to be populated from rulebook.',
-            actionCost: 1,
-            prerequisites: [{ type: 'skill', target: 'ABRASION', value: 1 }],
-            tier: 1,
-            bonuses: [],
-            otherEffects: ['To be populated with actual surge power.']
-        },
-        {
-            id: 'abrasion_placeholder_2',
-            name: 'Advanced Abrasion (Placeholder)',
-            description: 'Advanced surge ability to be populated from rulebook.',
+            id: 'abrasion_base',
+            name: 'Abrasion',
+            description: 'Spend 1 Investiture or more to infuse an object or portion of a surface within your reach, making it nearly frictionless; to do so, you must have a hand free and touch the target. This infusion uses 1 Investiture each round, and for the duration, the object or surface slides freely. This target can\'t exceed the surge size for your ranks in Abrasion. You can\'t use this surge on other characters, Invested objects (like Shardplate), or objects that have been infused with Stormlight (like infused spheres or objects affected by surges). Alternatively, you can infuse your body with Abrasion, regardless of your size, spending 1 Investiture each round to maintain the surge. While infused, you can freely change which parts of your body are frictionless, and you can use Skate and Slide until the surge ends: Skate (Free Action) - You can skate across the ground as if it were ice. Spend 2 focus to Move (as free action) in a straight line on the ground. You can accomplish this frictionless movement without practice—though you\'ll need experience to do it gracefully! Slide (Passive Ability) - You instinctively remove friction from parts of your body to more easily slide over obstacles or escape bonds. You count as one size smaller when squeezing through spaces, and you gain an advantage on tests to escape restraints that hold you via friction or pressure.',
             actionCost: 1,
             prerequisites: [
-                { type: 'skill', target: 'ABRASION', value: 3 },
-                { type: 'talent', target: 'abrasion_placeholder_1' }
+                { type: 'skill', target: 'ABRASION', value: 1 }
+            ],
+            tier: 0,
+            bonuses: [],
+            otherEffects: [
+                'Make objects/surfaces frictionless',
+                'Or infuse self for Skate and Slide abilities',
+                'Skate: Spend 2 focus to Move as free action in straight line',
+                'Slide: Count as one size smaller when squeezing, advantage on escape tests',
+                'Uses 1 Investiture per round',
+                'Can\'t affect characters, Invested objects, or Stormlight-infused objects'
+            ]
+        },
+        {
+            id: 'abrasion_frictionless_motion',
+            name: 'Frictionless Motion',
+            description: 'You become increasingly adept at using Abrasion to glide through your environment. While infused with Abrasion, your movement rate increases by 10 feet, and you ignore the Slowed condition when imposed by difficult terrain, climbing, crawling, and swimming.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'ideal', target: 'first', value: 1 },
+                { type: 'skill', target: 'ABRASION', value: 1 }
+            ],
+            tier: 1,
+            bonuses: [],
+            otherEffects: [
+                '+10 feet movement rate while infused with Abrasion',
+                'Ignore Slowed condition from difficult terrain, climbing, crawling, and swimming'
+            ]
+        },
+        {
+            id: 'abrasion_reverse_abrasion',
+            name: 'Reverse Abrasion',
+            description: 'Instead of making objects frictionless with Abrasion, you can now increase friction. When you infuse an object or surface with Abrasion, you can choose to increase the infused target\'s friction instead of reducing it, making it easier to grip and traverse. When a character interacts with such an object, they gain an advantage on Agility and Athletics tests made to do so. When a character moves across such a surface, they ignore any Slowed condition the surface would normally apply (such as due to climbing or difficult terrain).',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you infuse an object or surface with Abrasion',
+            prerequisites: [
+                { type: 'ideal', target: 'first', value: 1 },
+                { type: 'skill', target: 'ABRASION', value: 1 }
+            ],
+            tier: 1,
+            bonuses: [],
+            otherEffects: [
+                'Can increase friction instead of reducing it',
+                'Advantage on Agility and Athletics tests when interacting with increased-friction objects',
+                'Ignore Slowed condition from surfaces with increased friction'
+            ]
+        },
+        {
+            id: 'abrasion_graceful_skating',
+            name: 'Graceful Skating',
+            description: 'You dynamically skate around the battlefield, easily slipping away from your foes. When you Skate, you aren\'t restricted to moving in a straight line.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'talent', target: 'abrasion_frictionless_motion' },
+                { type: 'skill', target: 'ABRASION', value: 2 }
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ['To be populated with actual surge power.']
+            otherEffects: ['Can move in any direction when using Skate, not just straight lines']
+        },
+        {
+            id: 'abrasion_distant_surgebinding',
+            name: 'Distant Surgebinding',
+            description: 'You can infuse targets from a greater distance. You can use your surges and their talents as though your reach is 20 feet, and you don\'t need to touch the target.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'talent', target: 'abrasion_reverse_abrasion' },
+                { type: 'skill', target: 'ABRASION', value: 2 }
+            ],
+            tier: 2,
+            bonuses: [],
+            otherEffects: [
+                'Use surges and talents with 20 feet reach',
+                'No touch required for infusion'
+            ]
+        },
+        {
+            id: 'abrasion_stormlight_reclamation',
+            name: 'Stormlight Reclamation',
+            description: 'You can reclaim Stormlight from active infusions. After your infusions expend their infused Investiture at the start of your turn, you can end any number of those infusions within your reach, recovering all remaining Investiture they were infused with.',
+            actionCost: ActionCostCode.Free,
+            prerequisites: [
+                { type: 'talent', target: 'abrasion_reverse_abrasion' },
+                { type: 'skill', target: 'ABRASION', value: 2 }
+            ],
+            tier: 2,
+            bonuses: [],
+            otherEffects: ['Recover Investiture from infusions within reach']
+        },
+        {
+            id: 'abrasion_slippery_target',
+            name: 'Slippery Target',
+            description: 'You make yourself so slick that glancing and hasty blows slide right off you. While you are infused with Abrasion, attacks can\'t graze you and Reactive Strikes against you gain a disadvantage.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'While infused with Abrasion',
+            prerequisites: [
+                { type: 'talent', target: 'abrasion_graceful_skating' },
+                { type: 'skill', target: 'ABRASION', value: 3 }
+            ],
+            tier: 3,
+            bonuses: [],
+            otherEffects: [
+                'Attacks can\'t graze you',
+                'Reactive Strikes against you gain disadvantage'
+            ]
+        },
+        {
+            id: 'abrasion_slick_combatant',
+            name: 'Slick Combatant',
+            description: 'You are poetry in motion, able to perform nearly any feat without slowing down. When you Skate or otherwise Move while infused with Abrasion, you can interrupt your movement at one or more points, use other actions as if you\'d finished your Move, then use your remaining movement as if you were still in the middle of that Move action. Once per round, when you make a melee weapon attack after starting that Move but before finishing it, you can roll an extra 1d4 damage for that attack. The size of this die increases with your ranks in Abrasion: at 2 ranks, roll an extra 1d6 damage (instead of 1d4), and so on. However, if you add this damage die, the GM can spend C from the attack test to cause you to fall Prone and immediately end your Move action.',
+            actionCost: ActionCostCode.Special,
+            specialActivation: 'When you Skate or Move while infused with Abrasion',
+            prerequisites: [
+                { type: 'talent', target: 'abrasion_slippery_target' },
+                { type: 'skill', target: 'ABRASION', value: 4 }
+            ],
+            tier: 4,
+            bonuses: [],
+            otherEffects: [
+                'Interrupt movement to take other actions, then continue moving',
+                'Extra damage on melee attacks during movement: 1d4 (rank 1), 1d6 (rank 2), 1d8 (rank 3), etc.',
+                'GM can spend C to knock you Prone and end movement if damage die is used'
+            ]
+        },
+        {
+            id: 'abrasion_smooth_operator',
+            name: 'Smooth Operator',
+            description: 'You\'ve become so efficient at infusing yourself with Abrasion that it becomes subconscious, allowing you to slip around with effortless grace. While you have 1 Investiture or more, you gain the benefits of being infused with Abrasion without spending Investiture, and it costs you 1 fewer focus to Skate.',
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'skill', target: 'ABRASION', value: 4 }
+            ],
+            tier: 4,
+            bonuses: [],
+            otherEffects: [
+                'Gain Abrasion infusion benefits with 1+ Investiture without spending it',
+                'Skate costs 1 fewer focus'
+            ]
         }
     ]
 };
