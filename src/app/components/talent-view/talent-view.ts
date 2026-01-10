@@ -915,29 +915,4 @@ export class TalentView implements OnInit, OnDestroy {
     this.loadAvailableTrees();
     this.updateValidation();
   }
-
-  speakIdeal(): void {
-    if (!this.character) return;
-
-    // Speak the First Ideal - this unlocks surge skills and surge trees
-    this.character.radiantPath.speakIdeal(this.character.skills);
-
-    // Update character state
-    this.characterState.updateCharacter(this.character);
-
-    // Reload trees to show surge trees
-    this.loadAvailableTrees();
-    this.updateValidation();
-  }
-
-  getSurgeNames(): string {
-    if (!this.character) return '';
-    
-    const orderInfo = this.character.radiantPath.getOrderInfo();
-    if (!orderInfo) return '';
-
-    return orderInfo.surgePair.map(surge => 
-      this.formatSkillName(surge)
-    ).join(' and ');
-  }
 }

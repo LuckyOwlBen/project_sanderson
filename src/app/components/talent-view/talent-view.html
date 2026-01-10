@@ -35,33 +35,6 @@
     </mat-card-actions>
   </mat-card>
 
-  <!-- Speak First Ideal -->
-  <mat-card class="ideal-prompt" *ngIf="character && character.radiantPath.hasSpren() && !character.radiantPath.hasSpokenIdeal()">
-    <mat-card-header>
-      <mat-icon class="ideal-icon">record_voice_over</mat-icon>
-      <mat-card-title>Speak the First Ideal</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <p class="ideal-message">
-        You have bonded with a spren. To unlock your surges, you must speak the First Ideal of the Knights Radiant:
-      </p>
-      <p class="first-ideal">
-        <strong>"Life before death. Strength before weakness. Journey before destination."</strong>
-      </p>
-      <p class="order-info" *ngIf="character.radiantPath.getOrderInfo()">
-        As a <strong>{{ character.radiantPath.getOrderInfo()?.order }}</strong>, 
-        you will gain access to the surges of 
-        <strong>{{ getSurgeNames() }}</strong>.
-      </p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-raised-button color="accent" (click)="speakIdeal()">
-        <mat-icon>bolt</mat-icon>
-        Speak the Words
-      </button>
-    </mat-card-actions>
-  </mat-card>
-
   <div class="tree-selector" *ngIf="availableTrees.length > 1">
     <mat-chip-set>
       <mat-chip 
