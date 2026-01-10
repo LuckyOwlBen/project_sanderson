@@ -82,6 +82,11 @@ async function ensureDirectories() {
   }
 }
 
+//Wireguard invite validation
+app.get('/invite/:name', (req, res) => {
+   
+});
+
 // Save character
 app.post('/api/characters/save', async (req, res) => {
   try {
