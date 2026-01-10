@@ -72,5 +72,26 @@
         </div>
       </div>
     </div>
+
+    <!-- Surge Skills (only shown after First Ideal is spoken) -->
+    <div class="skill-category" *ngIf="surgeSkills.length > 0">
+      <h3 class="category-title">Surge Skills</h3>
+      <div class="skills-list">
+        <div *ngFor="let skill of surgeSkills" class="skill-row">
+          <app-value-stepper
+            [label]="skill.name"
+            [currentValue]="skill.currentValue"
+            [minValue]="getMinValue(skill)"
+            [maxValue]="maxValue"
+            [pointsRemaining]="remainingPoints"
+            (valueChanged)="onValueChanged($event)">
+          </app-value-stepper>
+          <div class="skill-info">
+            <span class="attribute-badge">{{ skill.associatedAttribute }}</span>
+            <span class="total-value">Total: {{ skill.total }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

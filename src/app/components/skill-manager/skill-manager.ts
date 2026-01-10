@@ -8,7 +8,7 @@ import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
-import { SkillType } from '../../character/skills/skillTypes';
+import { SkillType, isSurgeSkill } from '../../character/skills/skillTypes';
 import { SkillAssociationTable } from '../../character/skills/skillAssociationTable';
 
 interface SkillConfig {
@@ -42,6 +42,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   physicalSkills: SkillConfig[] = [];
   mentalSkills: SkillConfig[] = [];
   socialSkills: SkillConfig[] = [];
+  surgeSkills: SkillConfig[] = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -134,6 +135,17 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     this.physicalSkills = skills.filter(s => physical.includes(s.type));
     this.mentalSkills = skills.filter(s => mental.includes(s.type));
     this.socialSkills = skills.filter(s => social.includes(s.type));
+    
+    // Include surge skills only if character has spoken the First Ideal
+    if (this.character?.radiantPath.hasSpokenIdeal()) {
+      const orderInfo = this.character.radiantPath.getOrderInfo();
+      if (orderInfo?.surgePair) {
+        const surgePair = orderInfo.surgePair;
+        this.surgeSkills = skills.filter(s => surgePair.includes(s.type));
+      }
+    } else {
+      this.surgeSkills = [];
+    }
   }
 
   private formatSkillName(skillType: SkillType): string {
