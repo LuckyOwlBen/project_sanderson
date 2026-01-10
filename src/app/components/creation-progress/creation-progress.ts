@@ -94,6 +94,29 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
     this.steps[7].completed = (this.character.unlockedTalents?.size ?? 0) > 0;
     this.steps[8].completed = true; // Equipment is optional
     this.steps[9].completed = false; // Review is never "completed"
+    
+    // Update pending status (for character sheet view)
+    this.updatePendingStatuses();
+  }
+  
+  private updatePendingStatuses(): void {
+    if (!this.character) {
+      return;
+    }
+    
+    // Check if character has pending level points to spend
+    const hasPendingLevels = (this.character.pendingLevelPoints ?? 0) > 0;
+    
+    if (hasPendingLevels) {
+      // Highlight sections where points can be spent during level-up
+      this.steps[3].hasPending = true; // Attributes
+      this.steps[4].hasPending = true; // Skills
+      this.steps[7].hasPending = true; // Talents
+      // Note: Expertises are only gained at specific levels, would need more complex logic
+    } else {
+      // Clear all pending flags
+      this.steps.forEach(step => step.hasPending = false);
+    }
   }
 
   private hasAttributesAllocated(): boolean {

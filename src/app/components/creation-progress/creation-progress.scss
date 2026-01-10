@@ -7,27 +7,26 @@
 }
 
 .nav-card {
-  background-color: var(--gpSystemDarkerGrey);
-  border: 2px solid transparent;
+  background-color: var(--gpSystemDarkGrey);
+  border: 1px solid var(--gpSystemGrey);
   border-radius: 4px;
-  padding: 1rem 0.5rem;
+  padding: 0.75rem 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   position: relative;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(102, 192, 244, 0.3);
+    background-color: var(--gpSystemDarkerGrey);
     border-color: var(--gpColor-ChalkyBlue);
   }
 
   &.current {
     border-color: var(--gpColor-ChalkyBlue);
-    background-color: rgba(102, 192, 244, 0.1);
+    background-color: rgba(102, 192, 244, 0.15);
   }
 
   &.completed {
@@ -37,8 +36,27 @@
   }
 
   &.has-pending {
-    border-color: var(--gpColor-RedHi);
-    box-shadow: 0 4px 20px rgba(238, 86, 59, 0.3);
+    border-color: #FFD700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+    animation: goldenPulse 2s ease-in-out infinite;
+    
+    .card-icon {
+      color: #FFD700;
+      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+    }
+    
+    .card-label {
+      color: #FFD700;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.35), rgba(255, 215, 0, 0.25));
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4);
+      transform: scale(1.05);
+    }
   }
 }
 
@@ -69,9 +87,10 @@
   right: -4px;
   width: 12px;
   height: 12px;
-  background: var(--gpColor-RedHi);
+  background: #FFD700;
   border-radius: 50%;
-  border: 2px solid var(--gpSystemDarkerGrey);
+  border: 2px solid var(--gpSystemDarkGrey);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
   animation: pulse 2s infinite;
 }
 
@@ -83,6 +102,15 @@
   50% {
     transform: scale(1.2);
     opacity: 0.8;
+  }
+}
+
+@keyframes goldenPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.5);
   }
 }
 
