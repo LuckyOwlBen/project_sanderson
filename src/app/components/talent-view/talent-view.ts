@@ -307,15 +307,15 @@ export class TalentView implements OnInit, OnDestroy {
       const orderTreeId = this.character.radiantPath.getOrderTree();
       if (orderTreeId) {
         const orderPath = getTalentPath(orderTreeId);
-        if (orderPath && orderPath.talentNodes && orderPath.talentNodes.length > 0) {
-          const radiantCoreTree = {
-            pathName: `${orderPath.name} - Radiant`,
-            nodes: orderPath.talentNodes
-          };
-          this.autoUnlockTier0Talents(radiantCoreTree);
-          if (!addedTreeNames.has(radiantCoreTree.pathName.toLowerCase())) {
-            tempTrees.push(radiantCoreTree);
-            addedTreeNames.add(radiantCoreTree.pathName.toLowerCase());
+        if (orderPath) {
+          // Radiant orders have their talents in paths[0], not talentNodes
+          if (orderPath.paths && orderPath.paths.length > 0) {
+            const radiantTree = orderPath.paths[0];
+            this.autoUnlockTier0Talents(radiantTree);
+            if (!addedTreeNames.has(radiantTree.pathName.toLowerCase())) {
+              tempTrees.push(radiantTree);
+              addedTreeNames.add(radiantTree.pathName.toLowerCase());
+            }
           }
         }
       }
