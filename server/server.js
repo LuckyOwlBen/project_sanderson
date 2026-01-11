@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs').promises;
+const util = require('util');
 const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
@@ -38,6 +39,44 @@ const storeState = {
 // Track highstorm state
 let highstormActive = false;
 
+// Track recent server logs for transparency/ops
+const LOG_BUFFER_SIZE = 100;
+const logBuffer = [];
+
+function recordLog(level, args) {
+  const message = util.format(...args);
+  logBuffer.push({
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+  });
+  if (logBuffer.length > LOG_BUFFER_SIZE) {
+    logBuffer.shift();
+  }
+}
+
+const originalConsole = {
+  log: console.log,
+  error: console.error,
+  warn: console.warn,
+};
+
+console.log = (...args) => {
+  recordLog('info', args);
+  originalConsole.log(...args);
+};
+
+console.error = (...args) => {
+  recordLog('error', args);
+  originalConsole.error(...args);
+};
+
+console.warn = (...args) => {
+  recordLog('warn', args);
+  originalConsole.warn(...args);
+};
+
 // Configure multer for file uploads (in-memory storage)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -60,6 +99,15 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve images directory as static
 app.use('/images', express.static(IMAGES_DIR));
+
+// Lightweight operational logs endpoint (newest first)
+app.get('/api/logs', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 200, LOG_BUFFER_SIZE);
+  const start = Math.max(logBuffer.length - limit, 0);
+  const logs = logBuffer.slice(start).reverse();
+  originalConsole.log(`[API] GET /api/logs requested. Buffer size: ${logBuffer.length}, returning ${logs.length} logs`);
+  res.json({ logs });
+});
 
 // Serve static Angular files in production
 if (IS_PRODUCTION) {

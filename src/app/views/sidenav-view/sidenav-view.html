@@ -20,6 +20,11 @@
       <mat-icon matListItemIcon>list</mat-icon>
       <span matListItemTitle>Character List</span>
     </mat-list-item>
+
+    <mat-list-item (click)="navigateTo('/logs')">
+      <mat-icon matListItemIcon>receipt_long</mat-icon>
+      <span matListItemTitle>Server Logs</span>
+    </mat-list-item>
     
     <mat-divider *ngIf="hasCharacter"></mat-divider>
     

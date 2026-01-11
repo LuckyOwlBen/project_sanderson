@@ -1,0 +1,43 @@
+<ng-container *ngIf="vm$ | async as vm">
+  <div class="logs-header">
+    <div>
+      <h2>Server Logs</h2>
+      <p class="hint">Auto-refreshing every 5 seconds</p>
+    </div>
+    <div class="header-actions">
+      <button class="ghost" (click)="onRefresh()" [disabled]="vm.loading">Refresh</button>
+      <span *ngIf="vm.lastUpdated" class="timestamp">Updated {{ vm.lastUpdated | date:'shortTime' }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="vm.error" class="error-banner">{{ vm.error }}</div>
+
+  <div class="loading-state" *ngIf="vm.loading">
+    <span class="spinner" aria-hidden="true"></span>
+    <span>Loading logs...</span>
+  </div>
+
+  <div *ngIf="!vm.loading && vm.logs.length > 0" class="logs-container">
+    <div class="log-list">
+      <div class="log-row" *ngFor="let log of getPagedLogs(vm.logs); trackBy: trackByLogId">
+        <span class="icon" [ngClass]="log.level" aria-hidden="true">●</span>
+        <div class="log-meta">
+          <span class="timestamp">{{ log.timestamp | date:'short' }}</span>
+          <span class="level" [ngClass]="log.level">{{ log.level }}</span>
+        </div>
+        <div class="message">{{ log.message }}</div>
+      </div>
+    </div>
+
+    <div class="pagination">
+      <button class="pager" (click)="prevPage()" [disabled]="currentPage <= 1">← Prev</button>
+      <span class="page-info">Page {{ currentPage }} of {{ getTotalPages(vm.logs.length) }}</span>
+      <button class="pager" (click)="nextPage(vm.logs.length)" [disabled]="currentPage >= getTotalPages(vm.logs.length)">Next →</button>
+    </div>
+  </div>
+
+  <div *ngIf="!vm.loading && !vm.logs.length" class="empty-state">
+    <span class="icon hollow" aria-hidden="true">○</span>
+    <p>No logs available yet.</p>
+  </div>
+</ng-container>

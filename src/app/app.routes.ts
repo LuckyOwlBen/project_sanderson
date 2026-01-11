@@ -15,6 +15,7 @@ import { CharacterSheetView } from './views/character-sheet-view/character-sheet
 import { CharacterListView } from './views/character-list-view/character-list-view';
 import { GmDashboardView } from './views/gm-dashboard-view/gm-dashboard-view';
 import { StoreView } from './views/store-view/store-view';
+import { LogsView } from './views/logs-view/logs-view';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
@@ -41,5 +42,6 @@ export const routes: Routes = [
   { path: 'character-sheet', component: CharacterSheetView },
   { path: 'load-character', component: CharacterListView },
   { path: 'character-list', component: CharacterListView },
+  { path: 'logs', component: LogsView },
   { path: '**', redirectTo: '' }
 ];
