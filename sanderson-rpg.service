@@ -3,15 +3,17 @@ Description=Sanderson RPG Character Management System
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=gamebawx
 WorkingDirectory=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson
-ExecStart=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson/start.sh
-ExecStop=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson/stop.sh
+ExecStart=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson/start.sh prod
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
 
 # Environment
 Environment="NODE_ENV=production"

@@ -25,6 +25,19 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Sanderson RPG Server Startup${NC}"
 echo -e "${BLUE}========================================${NC}"
 
+# Stop any running servers first
+if [ -f "$SCRIPT_DIR/stop.sh" ]; then
+    echo -e "${YELLOW}Stopping any running servers...${NC}"
+    bash "$SCRIPT_DIR/stop.sh"
+    sleep 1
+fi
+
+# Clean up old builds
+echo -e "${YELLOW}Cleaning old build files...${NC}"
+rm -rf "$SCRIPT_DIR/dist"
+rm -rf "$SCRIPT_DIR/server/dist"
+echo -e "${GREEN}✓ Cleanup complete${NC}"
+
 # Function to check if a port is in use
 check_port() {
     local port=$1
@@ -40,24 +53,16 @@ build_angular() {
     echo -e "${YELLOW}Building Angular application...${NC}"
     cd "$SCRIPT_DIR"
     
-    if [ ! -d "dist/project-sanderson/browser" ]; then
-        npm run build
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ Angular build complete${NC}"
-            # Copy built files to server directory
-            rm -rf server/dist
-            cp -r dist/project-sanderson/browser server/dist
-            return 0
-        else
-            echo -e "${RED}✗ Angular build failed${NC}"
-            return 1
-        fi
-    else
-        echo -e "${GREEN}✓ Using existing build${NC}"
-        # Ensure server has the built files
+    npm run build
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Angular build complete${NC}"
+        # Copy built files to server directory
         rm -rf server/dist
         cp -r dist/project-sanderson/browser server/dist
         return 0
+    else
+        echo -e "${RED}✗ Angular build failed${NC}"
+        return 1
     fi
 }
 
@@ -74,21 +79,32 @@ start_backend() {
     cd "$SCRIPT_DIR/server"
     
     if [ "$mode" == "prod" ]; then
-        NODE_ENV=production nohup node server.js > "$LOG_DIR/backend.log" 2>&1 &
+        # Check if running under systemd
+        if [ -n "$INVOCATION_ID" ] || [ "${SYSTEMD_EXEC_PID:-}" ]; then
+            # Running under systemd - run in foreground
+            echo -e "${GREEN}Running under systemd - foreground mode${NC}"
+            NODE_ENV=production exec node server.js
+        else
+            # Manual invocation - run in background
+            NODE_ENV=production nohup node server.js > "$LOG_DIR/backend.log" 2>&1 &
+            echo $! > "$PID_DIR/backend.pid"
+        fi
     else
         nohup node server.js > "$LOG_DIR/backend.log" 2>&1 &
+        echo $! > "$PID_DIR/backend.pid"
     fi
     
-    echo $! > "$PID_DIR/backend.pid"
-    
-    sleep 2
-    
-    if check_port 3000; then
-        echo -e "${GREEN}✓ Backend server started on port 3000${NC}"
-        return 0
-    else
-        echo -e "${RED}✗ Failed to start backend server${NC}"
-        return 1
+    # Only check port if running in background
+    if [ "$mode" != "prod" ] || [ -z "$INVOCATION_ID" ]; then
+        sleep 2
+        
+        if check_port 3000; then
+            echo -e "${GREEN}✓ Backend server started on port 3000${NC}"
+            return 0
+        else
+            echo -e "${RED}✗ Failed to start backend server${NC}"
+            return 1
+        fi
     fi
 }
 
