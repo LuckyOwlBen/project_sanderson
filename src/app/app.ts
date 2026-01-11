@@ -38,6 +38,7 @@ export class App implements OnInit, OnDestroy {
   isInCreatorView = false;
   isLevelUpMode = false;
   isInCharacterSheetView = false;
+  isInLandingView = false;
 
   @ViewChild('drawer') drawer!: MatSidenav;
 
@@ -65,8 +66,10 @@ export class App implements OnInit, OnDestroy {
 
   private updateViewStates(): void {
     const url = this.router.url;
+    const cleanUrl = url.split('?')[0];
     this.isInCreatorView = url.includes('/character-creator-view');
     this.isInCharacterSheetView = url.includes('/character-sheet');
+    this.isInLandingView = cleanUrl === '/' || cleanUrl === '/landing';
   }
 
   ngOnInit(): void {
