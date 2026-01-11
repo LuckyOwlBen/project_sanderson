@@ -75,7 +75,7 @@
       <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">Skills</button>
       <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Talents &amp; Expertises</button>
       <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Equipment</button>
-      <button class="tab-label" *ngIf="character?.ancestry === 'singer'" [class.active]="activeTab === 4" [class.highstorm-active]="isHighstormActive" (click)="activeTab = 4">Singer Forms</button>
+      <button class="tab-label" *ngIf="character.ancestry === 'singer'" [class.active]="activeTab === 4" [class.highstorm-active]="isHighstormActive" (click)="activeTab = 4">Singer Forms</button>
       <button class="tab-label" [class.active]="activeTab === 5" (click)="activeTab = 5">Notes</button>
     </div>
     <div class="tab-content" *ngIf="activeTab === 0">
@@ -143,7 +143,7 @@
       </div>
     </div>
 
-    <div class="tab-content" *ngIf="activeTab === 4 && character?.ancestry === 'singer'">
+    <div class="tab-content" *ngIf="activeTab === 4 && character.ancestry === 'singer'">
       <div class="sheet-content singer-forms-tab">
         <div class="highstorm-status" *ngIf="isHighstormActive">
           <svg class="status-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
