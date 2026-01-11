@@ -25,6 +25,25 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Sanderson RPG Server Startup${NC}"
 echo -e "${BLUE}========================================${NC}"
 
+# Check if we have permission to bind to port 80
+if [ "$MODE" == "prod" ] && [ -z "$PORT" ]; then
+    # Check if Node.js has the capability to bind to privileged ports
+    if ! getcap $(which node) 2>/dev/null | grep -q cap_net_bind_service; then
+        echo -e "${RED}========================================${NC}"
+        echo -e "${RED}  ERROR: Port 80 Requires Privileges${NC}"
+        echo -e "${RED}========================================${NC}"
+        echo -e "${YELLOW}Port 80 is a privileged port. Grant Node.js permission:${NC}"
+        echo ""
+        echo -e "  ${GREEN}sudo setcap 'cap_net_bind_service=+ep' \$(which node)${NC}"
+        echo ""
+        echo -e "${YELLOW}Or set a different port:${NC}"
+        echo -e "  ${GREEN}export PORT=3000${NC}"
+        echo -e "  ${GREEN}./start.sh prod${NC}"
+        echo -e "${RED}========================================${NC}"
+        exit 1
+    fi
+fi
+
 # Stop any running servers first
 if [ -f "$SCRIPT_DIR/stop.sh" ]; then
     echo -e "${YELLOW}Stopping any running servers...${NC}"
@@ -41,11 +60,37 @@ echo -e "${GREEN}✓ Cleanup complete${NC}"
 # Function to check if a port is in use
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        return 0
-    else
-        return 1
+    # Try multiple methods to check if port is in use
+    
+    # Method 1: Try lsof (Linux/Mac)
+    if command -v lsof >/dev/null 2>&1; then
+        if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+            return 0
+        fi
     fi
+    
+    # Method 2: Try netstat (most systems)
+    if command -v netstat >/dev/null 2>&1; then
+        if netstat -tln 2>/dev/null | grep -q ":$port "; then
+            return 0
+        fi
+    fi
+    
+    # Method 3: Try ss (modern Linux)
+    if command -v ss >/dev/null 2>&1; then
+        if ss -tln 2>/dev/null | grep -q ":$port "; then
+            return 0
+        fi
+    fi
+    
+    # Method 4: Try nc (netcat) - attempt to connect
+    if command -v nc >/dev/null 2>&1; then
+        if nc -z localhost $port 2>/dev/null; then
+            return 0
+        fi
+    fi
+    
+    return 1
 }
 
 # Function to build Angular app
@@ -71,8 +116,8 @@ start_backend() {
     local mode=$1
     echo -e "${YELLOW}Starting backend server (${mode} mode)...${NC}"
     
-    if check_port 3000; then
-        echo -e "${RED}Port 3000 already in use. Backend may already be running.${NC}"
+    if check_port 80; then
+        echo -e "${RED}Port 80 already in use. Backend may already be running.${NC}"
         return 1
     fi
     
@@ -98,8 +143,8 @@ start_backend() {
     if [ "$mode" != "prod" ] || [ -z "$INVOCATION_ID" ]; then
         sleep 2
         
-        if check_port 3000; then
-            echo -e "${GREEN}✓ Backend server started on port 3000${NC}"
+        if check_port 80; then
+            echo -e "${GREEN}✓ Backend server started on port 80${NC}"
             return 0
         else
             echo -e "${RED}✗ Failed to start backend server${NC}"
@@ -140,7 +185,7 @@ if [ "$MODE" == "dev" ]; then
     echo -e "${BLUE}========================================${NC}"
     echo -e "${GREEN}Startup complete!${NC}"
     echo ""
-    echo -e "Backend API:  ${GREEN}http://localhost:3000${NC}"
+    echo -e "Backend API:  ${GREEN}http://localhost:80${NC}"
     echo -e "Frontend App: ${GREEN}http://localhost:4200${NC}"
     echo ""
     echo -e "Logs: ${YELLOW}$LOG_DIR${NC}"
@@ -169,9 +214,9 @@ else
     echo -e "${BLUE}========================================${NC}"
     echo -e "${GREEN}Startup complete!${NC}"
     echo ""
-    echo -e "Application:  ${GREEN}http://localhost:3000${NC}"
-    echo -e "Network:      ${GREEN}http://$(hostname -I | awk '{print $1}'):3000${NC}"
-    echo -e "              ${GREEN}http://sanderson-rpg.local:3000${NC} (if mDNS configured)"
+    echo -e "Application:  ${GREEN}http://localhost${NC}"
+    echo -e "Network:      ${GREEN}http://$(hostname -I | awk '{print $1}')${NC}"
+    echo -e "              ${GREEN}http://sanderson-rpg.local${NC} (if mDNS configured)"
     echo ""
     echo -e "Logs: ${YELLOW}$LOG_DIR${NC}"
     echo -e "PIDs: ${YELLOW}$PID_DIR${NC}"

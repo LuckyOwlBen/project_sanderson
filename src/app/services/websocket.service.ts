@@ -96,7 +96,7 @@ export interface HighstormEvent {
 })
 export class WebsocketService implements OnDestroy {
   private socket: Socket | null = null;
-  private serverUrl = 'http://localhost:3000'; // Will use same host in production
+  private serverUrl = 'http://localhost:80'; // Will use same host in production
 
   // Connection state
   private connectedSubject = new BehaviorSubject<boolean>(false);
@@ -142,10 +142,10 @@ export class WebsocketService implements OnDestroy {
   constructor() {
     // Determine server URL based on current location
     if (typeof window !== 'undefined') {
-      // In development (port 4200), connect to backend at port 3000
-      // In production (port 3000), connect to same port
+      // In development (port 4200), connect to backend at port 80
+      // In production (port 80), connect to same port
       const isDevelopment = window.location.port === '4200';
-      const port = isDevelopment ? '3000' : (window.location.port || '3000');
+      const port = isDevelopment ? '80' : (window.location.port || '80');
       this.serverUrl = `${window.location.protocol}//${window.location.hostname}:${port}`;
     }
   }

@@ -20,7 +20,7 @@ export interface ImageListResponse {
   providedIn: 'root'
 })
 export class ImageUploadService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:80/api';
   private serverAvailable = false;
   private readonly LOCALSTORAGE_PREFIX = 'character_image_';
 
@@ -229,11 +229,11 @@ export class ImageUploadService {
     
     // If already starts with /images/, return with server base (keep query params)
     if (pathWithoutQuery.startsWith('/images/')) {
-      return `http://localhost:3000${imagePath}`;
+      return `http://localhost:80${imagePath}`;
     }
     
     // Otherwise, assume it's just a filename (keep query params)
-    return `http://localhost:3000/images/${imagePath}`;
+    return `http://localhost:80/images/${imagePath}`;
   }
 
   isServerAvailable(): boolean {

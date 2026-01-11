@@ -16,7 +16,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 const CHARACTERS_DIR = path.join(__dirname, 'characters');
 const IMAGES_DIR = path.join(__dirname, 'images');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';

@@ -21,9 +21,9 @@ export interface SavedCharacter {
 })
 export class CharacterStorageService {
   // In production, API is served from same origin (no CORS needed)
-  // In dev mode, backend runs on port 3000, frontend on 4200
+  // In dev mode, backend runs on port 80, frontend on 4200
   private apiUrl = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api/characters'  // Dev mode
+    ? 'http://localhost:80/api/characters'  // Dev mode
     : '/api/characters';                       // Production mode
   private useServer = false; // Will auto-detect
   private serverAvailable: boolean | null = null;

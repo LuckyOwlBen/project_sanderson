@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 User=gamebawx
 WorkingDirectory=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson
+ExecStartPre=/bin/bash -c 'if ! getcap $(which node) | grep -q cap_net_bind_service; then echo "ERROR: Node.js needs permission to bind to port 80. Run: sudo setcap '"'"'cap_net_bind_service=+ep'"'"' $(which node)"; exit 1; fi'
 ExecStart=/home/gamebawx/gitrepos/sanderson_rpg/project_sanderson/start.sh prod
 Restart=on-failure
 RestartSec=10
@@ -17,7 +18,7 @@ TimeoutStopSec=30
 
 # Environment
 Environment="NODE_ENV=production"
-Environment="PORT=3000"
+Environment="PORT=80"
 
 [Install]
 WantedBy=multi-user.target
