@@ -40,7 +40,9 @@ export class StoreView implements OnInit, OnDestroy {
     ['equipment', true],
     ['consumable', true],
     ['fabrial', true],
-    ['mount', true]
+    ['mount', true],
+    ['vehicle', false],
+    ['pet', false]
   ]);
   
   // Map store toggle IDs to item categories
@@ -355,7 +357,8 @@ export class StoreView implements OnInit, OnDestroy {
       'consumable': 'Consumables',
       'fabrial': 'Fabrials',
       'mount': 'Mounts & Vehicles',
-      'vehicle': 'Mounts & Vehicles'
+      'vehicle': 'Mounts & Vehicles',
+      'pet': 'Pets'
     };
     return names[category] || category;
   }

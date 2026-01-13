@@ -48,7 +48,8 @@ export class GmDashboardView implements OnInit, OnDestroy {
     ['equipment-shop', true],
     ['consumables-shop', true],
     ['fabrials-shop', true],
-    ['mounts-shop', true]
+    ['mounts-shop', true],
+    ['pets-shop', true]
   ]);
 
   constructor(

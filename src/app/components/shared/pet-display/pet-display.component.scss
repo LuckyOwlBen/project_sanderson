@@ -1,0 +1,267 @@
+// Dark mode theme matching the application style
+.pet-card {
+  background: linear-gradient(135deg, var(--gpStoreDarkGrey), var(--gpStoreDarkerGrey));
+  border: 1px solid var(--gpSystemDarkGrey);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  &:hover {
+    background: linear-gradient(135deg, var(--gpStoreGrey), var(--gpStoreDarkGrey));
+    border-color: var(--gpColor-Blue);
+    box-shadow: 0 6px 16px rgba(26, 159, 255, 0.15);
+  }
+
+  .pet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gpSystemDarkGrey);
+
+    .pet-name-section {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex: 1;
+
+      .pet-species-icon {
+        font-size: 28px;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .pet-info {
+        margin: 0;
+
+        .pet-name {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--gpColor-BlueHi);
+          text-shadow: 0 0 8px rgba(0, 187, 255, 0.2);
+        }
+
+        .pet-type {
+          margin: 4px 0 0 0;
+          font-size: 12px;
+          color: var(--gpSystemLightGrey);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+      }
+    }
+
+    .pet-status {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+
+        &.equipped {
+          background: rgba(91, 163, 43, 0.2);
+          color: var(--gpColor-GreenHi);
+          border: 1px solid rgba(91, 163, 43, 0.4);
+        }
+
+        &.available {
+          background: rgba(227, 94, 28, 0.2);
+          color: var(--gpColor-Orange);
+          border: 1px solid rgba(227, 94, 28, 0.4);
+        }
+      }
+    }
+  }
+
+  .pet-description {
+    font-size: 13px;
+    color: var(--gpSystemLighterGrey);
+    margin-bottom: 12px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .pet-stats {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(61, 68, 80, 0.5);
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(61, 68, 80, 0.3);
+
+      &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gpSystemLightGrey);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 100px;
+      }
+
+      .stat-value {
+        font-size: 13px;
+        color: var(--gpSystemLightestGrey);
+        text-align: right;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+
+        .intelligence-icon {
+          font-size: 16px;
+        }
+      }
+
+      .abilities-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+        flex: 1;
+
+        .ability {
+          background: rgba(26, 159, 255, 0.15);
+          color: var(--gpColor-ChalkyBlue);
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          border: 1px solid rgba(26, 159, 255, 0.3);
+          white-space: nowrap;
+          text-shadow: 0 0 4px rgba(26, 159, 255, 0.1);
+        }
+      }
+    }
+  }
+
+  .pet-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .action-button {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &.bond-button {
+        background: linear-gradient(135deg, rgba(91, 163, 43, 0.3), rgba(89, 191, 64, 0.2));
+        color: var(--gpColor-GreenHi);
+        border: 1px solid rgba(91, 163, 43, 0.5);
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(91, 163, 43, 0.5), rgba(89, 191, 64, 0.4));
+          border-color: var(--gpColor-GreenHi);
+          box-shadow: 0 0 12px rgba(91, 163, 43, 0.3);
+        }
+      }
+
+      &.unbond-button {
+        background: linear-gradient(135deg, rgba(227, 94, 28, 0.3), rgba(238, 86, 59, 0.2));
+        color: var(--gpColor-RedHi);
+        border: 1px solid rgba(227, 94, 28, 0.5);
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(227, 94, 28, 0.5), rgba(238, 86, 59, 0.4));
+          border-color: var(--gpColor-RedHi);
+          box-shadow: 0 0 12px rgba(227, 94, 28, 0.3);
+        }
+      }
+
+      &.remove-button {
+        background: rgba(211, 211, 211, 0.1);
+        color: var(--gpSystemLighterGrey);
+        border: 1px solid rgba(139, 146, 154, 0.3);
+
+        &:hover {
+          background: rgba(211, 211, 211, 0.15);
+          border-color: var(--gpSystemLighterGrey);
+          color: var(--gpSystemLightestGrey);
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pet-card {
+    .pet-header {
+      flex-direction: column;
+      gap: 12px;
+
+      .pet-status {
+        width: 100%;
+        flex-direction: row;
+      }
+    }
+
+    .pet-stats {
+      .stat-row {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .stat-value {
+          justify-content: flex-start;
+          margin-top: 4px;
+          width: 100%;
+        }
+
+        .abilities-list {
+          justify-content: flex-start;
+        }
+      }
+    }
+
+    .pet-actions {
+      flex-direction: column;
+
+      .action-button {
+        width: 100%;
+      }
+    }
+  }
+}

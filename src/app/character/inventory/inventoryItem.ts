@@ -1,6 +1,6 @@
 import { BonusEffect } from '../bonuses/bonusModule';
 
-export type ItemType = 'weapon' | 'armor' | 'equipment' | 'consumable' | 'mount' | 'vehicle' | 'fabrial';
+export type ItemType = 'weapon' | 'armor' | 'equipment' | 'consumable' | 'mount' | 'vehicle' | 'fabrial' | 'pet';
 export type ItemRarity = 'common' | 'reward-only' | 'talent-only';
 export type EquipmentSlot = 'mainHand' | 'offHand' | 'armor' | 'accessory' | 'mount';
 export type WeaponSkill = 'light-weaponry' | 'heavy-weaponry' | 'athletics';

@@ -46,6 +46,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
           <mat-option value="consumable">Consumables</mat-option>
           <mat-option value="fabrial">Fabrials</mat-option>
           <mat-option value="mount">Mounts</mat-option>
+          <mat-option value="pet">Pets</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -59,17 +60,17 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       <!-- Rarity Filter -->
       <mat-chip-set class="rarity-chips">
         <mat-chip 
-          [highlighted]="showCommon"
+          [class.active]="showCommon"
           (click)="toggleCommon()">
           Common Items
         </mat-chip>
         <mat-chip 
-          [highlighted]="showRewardOnly"
+          [class.active]="showRewardOnly"
           (click)="toggleRewardOnly()">
           Reward Only
         </mat-chip>
         <mat-chip 
-          [highlighted]="showTalentOnly"
+          [class.active]="showTalentOnly"
           (click)="toggleTalentOnly()">
           Talent Only
         </mat-chip>
@@ -107,8 +108,21 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
             <span *ngIf="item.armorProperties">
               Deflect: {{ item.armorProperties.deflectValue }}
             </span>
+            <span *ngIf="item.type === 'pet' && item.properties">
+              <span class="pet-property">🧬 {{ item.properties['species'] }}</span>
+              <span class="pet-property" *ngIf="item.properties['intelligence']">
+                {{ item.properties['intelligence'] === 'sapient' ? '🧠' : '🦅' }} {{ item.properties['intelligence'] }}
+              </span>
+              <span class="pet-property" *ngIf="item.properties['flyingSpeed']">
+                ✈️ {{ item.properties['flyingSpeed'] }} ft/round
+              </span>
+              <span class="pet-property" *ngIf="item.properties['movementSpeed']">
+                🏃 {{ item.properties['movementSpeed'] }} ft/round
+              </span>
+            </span>
             <span class="item-weight">{{ item.weight }} lbs</span>
-            <span class="item-price">{{ item.price }}mk</span>
+            <span class="item-price" *ngIf="item.price > 0">{{ item.price }}mk</span>
+            <span class="item-price-free" *ngIf="item.price === 0">GM Grant Only</span>
           </div>
         </mat-card>
 
@@ -153,7 +167,12 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
   `,
   styles: [`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
       background-color: var(--gpSystemDarkerGrey);
     }
 
@@ -175,7 +194,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
     mat-dialog-content {
       min-width: 500px;
       max-width: 600px;
-      max-height: 60vh;
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -188,6 +207,15 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       background-color: var(--gpSystemDarkerGrey);
       padding: 1rem 1.5rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      margin-top: auto;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 56px;
+      position: relative;
+      z-index: 10;
     }
 
     .category-select,
@@ -205,8 +233,14 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
         cursor: pointer;
         background-color: rgba(255, 255, 255, 0.1);
         color: #fff;
+        pointer-events: auto;
+        transition: all 0.2s ease;
 
-        &[highlighted="true"] {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        &.active {
           background-color: var(--gpColor-ChalkyBlue);
           color: #000;
         }
@@ -218,7 +252,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      max-height: 300px;
+      max-height: 250px;
       padding-right: 0.5rem;
     }
 
@@ -265,6 +299,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
         &.equipment { color: #ffa726; }
         &.fabrial { color: gold; }
         &.mount { color: #8d6e63; }
+        &.pet { color: #ff6b9d; }
       }
 
       .item-info {
@@ -289,6 +324,8 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
         font-size: 0.7rem;
         min-height: 24px;
         padding: 0 8px;
+        pointer-events: none;
+        cursor: default;
       }
     }
 
@@ -305,13 +342,28 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       color: rgba(255, 255, 255, 0.6);
       padding-top: 0.5rem;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
 
       span {
         color: rgba(255, 255, 255, 0.7);
       }
 
+      .pet-property {
+        background-color: rgba(26, 159, 255, 0.15);
+        color: var(--gpColor-ChalkyBlue);
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(26, 159, 255, 0.3);
+        font-size: 0.8rem;
+      }
+
       .item-price {
         color: gold;
+        font-weight: 600;
+      }
+
+      .item-price-free {
+        color: rgba(91, 163, 43, 0.8);
         font-weight: 600;
       }
     }
@@ -390,11 +442,6 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
         font-size: 0.9rem;
       }
     }
-
-    mat-dialog-actions {
-      padding: 1rem;
-      gap: 0.5rem;
-    }
   `]
 })
 export class ItemGrantDialogComponent {
@@ -469,6 +516,7 @@ export class ItemGrantDialogComponent {
       case 'fabrial': return 'auto_awesome';
       case 'mount': return 'pets';
       case 'vehicle': return 'directions_boat';
+      case 'pet': return 'cruelty_free';
       default: return 'inventory_2';
     }
   }

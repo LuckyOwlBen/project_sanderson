@@ -1,0 +1,76 @@
+<div class="pet-card" *ngIf="pet">
+  <div class="pet-header">
+    <div class="pet-name-section">
+      <span class="pet-species-icon">🦅</span>
+      <div class="pet-info">
+        <h3 class="pet-name">{{ pet.name }}</h3>
+        <p class="pet-type">{{ getPetProperties()?.species }}</p>
+      </div>
+    </div>
+    <div class="pet-status">
+      <span *ngIf="isEquipped()" class="status-badge equipped">Bonded</span>
+      <span *ngIf="!isEquipped()" class="status-badge available">Available</span>
+    </div>
+  </div>
+
+  <div class="pet-description">
+    {{ pet.description }}
+  </div>
+
+  <div class="pet-stats">
+    <div class="stat-row">
+      <span class="stat-label">Intelligence:</span>
+      <span class="stat-value">
+        <span class="intelligence-icon">{{ getIntelligenceIcon() }}</span>
+        {{ getIntelligenceLabel() }}
+      </span>
+    </div>
+
+    <div class="stat-row" *ngIf="getPetProperties()?.behavior">
+      <span class="stat-label">Behavior:</span>
+      <span class="stat-value">{{ getPetProperties()?.behavior }}</span>
+    </div>
+
+    <div class="stat-row" *ngIf="getMovementInfo()">
+      <span class="stat-label">Movement:</span>
+      <span class="stat-value">{{ getMovementInfo() }}</span>
+    </div>
+
+    <div class="stat-row" *ngIf="getPetProperties()?.specialAbilities">
+      <span class="stat-label">Abilities:</span>
+      <div class="abilities-list">
+        <span class="ability" *ngFor="let ability of getPetProperties()?.specialAbilities">
+          {{ ability }}
+        </span>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <span class="stat-label">Weight:</span>
+      <span class="stat-value">{{ pet.weight }} lbs</span>
+    </div>
+  </div>
+
+  <div class="pet-actions">
+    <button 
+      *ngIf="!isEquipped()" 
+      class="action-button bond-button"
+      (click)="equipPet()"
+      title="Bond with this pet">
+      🔗 Bond Pet
+    </button>
+    <button 
+      *ngIf="isEquipped()" 
+      class="action-button unbond-button"
+      (click)="unequipPet()"
+      title="Release this pet">
+      ✂️ Release
+    </button>
+    <button 
+      class="action-button remove-button"
+      (click)="removePet()"
+      title="Remove pet from inventory">
+      🗑️ Remove
+    </button>
+  </div>
+</div>

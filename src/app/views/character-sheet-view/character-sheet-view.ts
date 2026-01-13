@@ -28,6 +28,8 @@ import { CharacterSkillsCard } from '../../components/shared/character-skills-ca
 import { SkillRoller } from '../../components/shared/skill-roller/skill-roller';
 import { CraftingView } from '../../components/crafting-view/crafting-view';
 import { FormSelectorComponent } from '../../components/shared/form-selector/form-selector';
+import { PetDisplayComponent } from '../../components/shared/pet-display/pet-display.component';
+import { InventoryItem } from '../../character/inventory/inventoryItem';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -56,14 +58,15 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     CharacterSkillsCard,
     SkillRoller,
     CraftingView,
-    FormSelectorComponent
+    FormSelectorComponent,
+    PetDisplayComponent
   ],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
 })
 export class CharacterSheetView implements OnInit, OnDestroy {
   activeTab = 0;
-  equipmentActiveTab: 'inventory' | 'crafting' = 'inventory';
+  equipmentActiveTab: 'inventory' | 'crafting' | 'companions' = 'inventory';
   private destroy$ = new Subject<void>();
   private resourceUpdateSubject = new Subject<void>();
   private autoSaveInterval: any = null;
@@ -544,5 +547,15 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     this.router.navigate([`/character-creator-view/${firstStep}`], {
       queryParams: { levelUp: 'true' }
     });
+  }
+
+  getEquippedPet(): InventoryItem | null {
+    if (!this.character) return null;
+    
+    const equippedAccessory = this.character.inventory.getEquippedItem('accessory');
+    if (equippedAccessory && equippedAccessory.type === 'pet') {
+      return equippedAccessory;
+    }
+    return null;
   }
 }

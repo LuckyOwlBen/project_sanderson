@@ -132,12 +132,36 @@
               <span class="tab-icon">🔨</span>
               Crafting
             </button>
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'companions'" 
+                    (click)="equipmentActiveTab = 'companions'">
+              <span class="tab-icon">🐾</span>
+              Companions
+            </button>
           </div>
           <div class="equipment-tab-content" *ngIf="equipmentActiveTab === 'inventory'">
             <app-inventory-view [character]="character"></app-inventory-view>
           </div>
           <div class="equipment-tab-content" *ngIf="equipmentActiveTab === 'crafting'">
             <app-crafting-view [character]="character"></app-crafting-view>
+          </div>
+          <div class="equipment-tab-content" *ngIf="equipmentActiveTab === 'companions'">
+            <div class="companions-section">
+              <div class="section-header">
+                <h3>Active Companion</h3>
+              </div>
+              <div class="companions-content">
+                <ng-container *ngIf="getEquippedPet(); else noPet">
+                  <app-pet-display [pet]="getEquippedPet()!" [character]="character"></app-pet-display>
+                </ng-container>
+                <ng-template #noPet>
+                  <div class="no-companion-message">
+                    <mat-icon>sentiment_satisfied_alt</mat-icon>
+                    <p>No active companion. Grant yourself a pet from the GM dashboard!</p>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
           </div>
         </div>
       </div>

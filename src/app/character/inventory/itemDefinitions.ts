@@ -1,5 +1,6 @@
 import { InventoryItem, ItemType, ItemRarity, StartingKit } from './inventoryItem';
 import { BonusType } from '../bonuses/bonusModule';
+import { PET_ITEMS } from './petDefinitions';
 
 // ===== WEAPONS =====
 
@@ -1534,7 +1535,8 @@ export const ALL_ITEMS: InventoryItem[] = [
   ...FABRIAL_ITEMS,
   ...MOUNT_ITEMS,
   ...VEHICLE_ITEMS,
-  ...CRAFTING_MATERIALS
+  ...CRAFTING_MATERIALS,
+  ...PET_ITEMS
 ];
 
 export function getItemById(itemId: string): InventoryItem | undefined {
