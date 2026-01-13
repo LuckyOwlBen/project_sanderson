@@ -287,6 +287,11 @@ mat-chip-set {
 
   button {
     opacity: 0.6;
+    color: #fff;
+
+    mat-icon {
+      color: #fff;
+    }
 
     &:hover {
       opacity: 1;

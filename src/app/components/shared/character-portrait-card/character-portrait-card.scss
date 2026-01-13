@@ -86,7 +86,10 @@
 }
 
 @media (max-width: 720px) {
+  .portrait-card {
+    margin: 0;
+  }
   .portrait-image-container {
-    width: 80%;
+    width: 100%;
   }
 }
