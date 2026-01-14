@@ -12,6 +12,8 @@ import { CraftingManager } from './crafting/craftingManager';
 import { ExpertiseSource } from './expertises/expertiseSource';
 import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilities/universalAbilities';
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
+import { AttackCalculator } from './attacks/attackCalculator';
+import { Attack, Stance } from './attacks/attackInterfaces';
 
 
 export class Character {
@@ -403,6 +405,23 @@ export class Character {
       const source = this.getActiveFormSource();
       this.bonusManager.bonuses.removeBonus(source);
     }
+  }
+
+  /**
+   * Get all available attacks for combat
+   * Combines equipped weapons and combat talents
+   */
+  getAvailableAttacks(): Attack[] {
+    const calculator = new AttackCalculator(this);
+    return calculator.getAvailableAttacks();
+  }
+
+  /**
+   * Get available combat stances
+   */
+  getAvailableStances(): Stance[] {
+    const calculator = new AttackCalculator(this);
+    return calculator.getAvailableStances();
   }
 
 }

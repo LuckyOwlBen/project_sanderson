@@ -1,0 +1,278 @@
+<div class="attacks-section">
+  <!-- Attacks Card -->
+  <div class="attacks-card">
+    <div class="card-header">
+      <span class="section-icon">⚔️</span>
+      <h3 class="card-title">Attacks</h3>
+    </div>
+    <div class="card-content">
+      <!-- Melee Attacks -->
+      <div class="attack-group" *ngIf="getAttacks().melee.length > 0">
+        <h4 class="group-title">
+          <span class="group-icon">🗡️</span>
+          Melee
+        </h4>
+        <div class="attacks-list">
+          <details *ngFor="let attack of getAttacks().melee" class="attack-panel">
+            <summary class="attack-header">
+              <div class="attack-title">
+                <span class="attack-icon">{{ getSourceIcon(attack.source) }}</span>
+                <span class="attack-name">{{ attack.name }}</span>
+                <span class="attack-quick-stats">
+                  <span class="attack-bonus">{{ formatBonus(attack.attackBonus) }}</span>
+                  <span class="stat-separator">|</span>
+                  <span class="attack-damage">{{ attack.damage }}</span>
+                  <span class="damage-type-badge" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </span>
+              </div>
+              <div class="attack-meta">
+                <span class="action-cost">{{ attack.actionCost }} ⚡</span>
+                <span class="defense-target" [class]="getDefenseClass(attack.targetDefense)">
+                  vs {{ attack.targetDefense }}
+                </span>
+              </div>
+            </summary>
+            <div class="attack-details">
+              <div class="attack-description">
+                <p>{{ attack.description }}</p>
+              </div>
+              <div class="attack-stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Attack Bonus</span>
+                  <span class="stat-value">{{ formatBonus(attack.attackBonus) }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage</span>
+                  <span class="stat-value">{{ attack.damage }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage Type</span>
+                  <span class="stat-value" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Range</span>
+                  <span class="stat-value">{{ attack.range }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Target Defense</span>
+                  <span class="stat-value" [class]="getDefenseClass(attack.targetDefense)">
+                    {{ attack.targetDefense }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Action Cost</span>
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+              <div class="attack-resource-cost" *ngIf="attack.resourceCost">
+                <h5><span class="resource-icon">💎</span> Resource Cost</h5>
+                <p>{{ attack.resourceCost.amount }} {{ attack.resourceCost.type }}</p>
+              </div>
+              <div class="attack-traits" *ngIf="attack.traits.length > 0">
+                <h5><span class="traits-icon">🏷️</span> Traits</h5>
+                <div class="traits-list">
+                  <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Ranged Attacks -->
+      <div class="attack-group" *ngIf="getAttacks().ranged.length > 0">
+        <h4 class="group-title">
+          <span class="group-icon">🏹</span>
+          Ranged
+        </h4>
+        <div class="attacks-list">
+          <details *ngFor="let attack of getAttacks().ranged" class="attack-panel">
+            <summary class="attack-header">
+              <div class="attack-title">
+                <span class="attack-icon">{{ getSourceIcon(attack.source) }}</span>
+                <span class="attack-name">{{ attack.name }}</span>
+                <span class="attack-quick-stats">
+                  <span class="attack-bonus">{{ formatBonus(attack.attackBonus) }}</span>
+                  <span class="stat-separator">|</span>
+                  <span class="attack-damage">{{ attack.damage }}</span>
+                  <span class="damage-type-badge" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </span>
+              </div>
+              <div class="attack-meta">
+                <span class="action-cost">{{ attack.actionCost }} ⚡</span>
+                <span class="defense-target" [class]="getDefenseClass(attack.targetDefense)">
+                  vs {{ attack.targetDefense }}
+                </span>
+              </div>
+            </summary>
+            <div class="attack-details">
+              <div class="attack-description">
+                <p>{{ attack.description }}</p>
+              </div>
+              <div class="attack-stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Attack Bonus</span>
+                  <span class="stat-value">{{ formatBonus(attack.attackBonus) }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage</span>
+                  <span class="stat-value">{{ attack.damage }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage Type</span>
+                  <span class="stat-value" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Range</span>
+                  <span class="stat-value">{{ attack.range }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Target Defense</span>
+                  <span class="stat-value" [class]="getDefenseClass(attack.targetDefense)">
+                    {{ attack.targetDefense }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Action Cost</span>
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+              <div class="attack-resource-cost" *ngIf="attack.resourceCost">
+                <h5><span class="resource-icon">💎</span> Resource Cost</h5>
+                <p>{{ attack.resourceCost.amount }} {{ attack.resourceCost.type }}</p>
+              </div>
+              <div class="attack-traits" *ngIf="attack.traits.length > 0">
+                <h5><span class="traits-icon">🏷️</span> Traits</h5>
+                <div class="traits-list">
+                  <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Special Attacks -->
+      <div class="attack-group" *ngIf="getAttacks().special.length > 0">
+        <h4 class="group-title">
+          <span class="group-icon">✨</span>
+          Special
+        </h4>
+        <div class="attacks-list">
+          <details *ngFor="let attack of getAttacks().special" class="attack-panel">
+            <summary class="attack-header">
+              <div class="attack-title">
+                <span class="attack-icon">{{ getSourceIcon(attack.source) }}</span>
+                <span class="attack-name">{{ attack.name }}</span>
+                <span class="attack-quick-stats">
+                  <span class="attack-bonus">{{ formatBonus(attack.attackBonus) }}</span>
+                  <span class="stat-separator">|</span>
+                  <span class="attack-damage">{{ attack.damage }}</span>
+                  <span class="damage-type-badge" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </span>
+              </div>
+              <div class="attack-meta">
+                <span class="action-cost">{{ attack.actionCost }} ⚡</span>
+                <span class="defense-target" [class]="getDefenseClass(attack.targetDefense)">
+                  vs {{ attack.targetDefense }}
+                </span>
+              </div>
+            </summary>
+            <div class="attack-details">
+              <div class="attack-description">
+                <p>{{ attack.description }}</p>
+              </div>
+              <div class="attack-stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Attack Bonus</span>
+                  <span class="stat-value">{{ formatBonus(attack.attackBonus) }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage</span>
+                  <span class="stat-value">{{ attack.damage }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Damage Type</span>
+                  <span class="stat-value" [class]="getDamageTypeClass(attack.damageType)">
+                    {{ attack.damageType }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Range</span>
+                  <span class="stat-value">{{ attack.range }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Target Defense</span>
+                  <span class="stat-value" [class]="getDefenseClass(attack.targetDefense)">
+                    {{ attack.targetDefense }}
+                  </span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Action Cost</span>
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
+                </div>
+              </div>
+              <div class="attack-resource-cost" *ngIf="attack.resourceCost">
+                <h5><span class="resource-icon">💎</span> Resource Cost</h5>
+                <p>{{ attack.resourceCost.amount }} {{ attack.resourceCost.type }}</p>
+              </div>
+              <div class="attack-traits" *ngIf="attack.traits.length > 0">
+                <h5><span class="traits-icon">🏷️</span> Traits</h5>
+                <div class="traits-list">
+                  <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <p class="empty-text" *ngIf="getAttacks().melee.length === 0 && getAttacks().ranged.length === 0 && getAttacks().special.length === 0">
+        No attacks available. Equip a weapon to see your attack options.
+      </p>
+    </div>
+  </div>
+
+  <!-- Stances Card -->
+  <div class="stances-card" *ngIf="getStances().length > 0">
+    <div class="card-header">
+      <span class="section-icon">🧘</span>
+      <h3 class="card-title">Combat Stances</h3>
+    </div>
+    <div class="card-content">
+      <div class="stances-list">
+        <details *ngFor="let stance of getStances()" class="stance-panel">
+          <summary class="stance-header">
+            <div class="stance-title">
+              <span class="stance-icon">🛡️</span>
+              <span class="stance-name">{{ stance.name }}</span>
+            </div>
+            <span class="stance-cost">{{ stance.activationCost }} action{{ stance.activationCost > 1 ? 's' : '' }}</span>
+          </summary>
+          <div class="stance-details">
+            <div class="stance-description">
+              <p>{{ stance.description }}</p>
+            </div>
+            <div class="stance-effects" *ngIf="stance.effects.length > 0">
+              <h5><span class="effect-icon">✨</span> Effects</h5>
+              <ul>
+                <li *ngFor="let effect of stance.effects">{{ effect }}</li>
+              </ul>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,7 @@ import { TalentNode, TalentTree, ActionCostCode } from '../../../character/talen
 import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/talentTrees/talentTrees';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
+import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
 
 @Component({
   selector: 'app-character-powers-tab',
@@ -16,7 +17,8 @@ import { UniversalAbility, formatActionCost } from '../../../character/abilities
     CommonModule,
     MatCardModule,
     MatIconModule,
-    MatExpansionModule
+    MatExpansionModule,
+    CharacterAttacksComponent
   ],
   templateUrl: './character-powers-tab.html',
   styleUrl: './character-powers-tab.scss',

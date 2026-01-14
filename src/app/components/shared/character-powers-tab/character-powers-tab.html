@@ -1,4 +1,7 @@
 <div class="sheet-content powers-notes-tab">
+  <!-- Attacks Section - Top of Tab -->
+  <app-character-attacks [character]="character"></app-character-attacks>
+
   <!-- Universal Abilities Card (for Radiant and other special abilities) -->
   <div class="abilities-card" *ngIf="getUniversalAbilities().length > 0">
     <div class="card-header">
