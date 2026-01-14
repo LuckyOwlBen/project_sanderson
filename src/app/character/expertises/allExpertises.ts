@@ -81,6 +81,16 @@ export const ITEM_EXPERTISES: ExpertiseDefinition[] = [
         description: 'Proficiency with light melee weapons such as daggers, short swords, and shortbows.'
     },
     {
+        name: 'Knives',
+        category: 'weapon',
+        description: 'Specialized proficiency with knives and similar bladed tools. Granted by talents like Killing Edge.'
+    },
+    {
+        name: 'Slings',
+        category: 'weapon',
+        description: 'Specialized proficiency with slings and similar thrown weapons. Granted by talents like Killing Edge.'
+    },
+    {
         name: 'Heavy Weaponry',
         category: 'weapon',
         description: 'Proficiency with heavy melee weapons such as greatswords, hammers, and longbows.'

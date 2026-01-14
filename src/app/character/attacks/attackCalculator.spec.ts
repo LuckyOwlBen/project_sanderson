@@ -55,6 +55,41 @@ describe('AttackCalculator', () => {
       expect(attacks[0].traits).toContain('Discreet');
       expect(attacks[0].traits.length).toBeGreaterThan(0);
     });
+
+    it('should include expert traits from talent trait grants when character has expertise', () => {
+      // Set up: character gets Killing Edge talent which grants Deadly and Quickdraw to knives and slings
+      character.unlockedTalents.add('killing_edge');
+      character.selectedExpertises.push({ name: 'Knives', source: 'talent', sourceId: 'killing_edge' });
+      
+      character.inventory.addItem('knife', 1);
+      character.inventory.equipItem('knife');
+      
+      const attacks = calculator.getAvailableAttacks();
+      
+      expect(attacks.length).toBeGreaterThan(0);
+      const knifeAttack = attacks.find(a => a.name === 'Knife');
+      expect(knifeAttack).toBeDefined();
+      expect(knifeAttack!.traits).toContain('Expert: Deadly');
+      expect(knifeAttack!.traits).toContain('Expert: Quickdraw');
+    });
+
+    it('should not include expert traits from talent trait grants when character lacks expertise', () => {
+      // Set up: character gets Killing Edge talent BUT does not have Knives expertise
+      character.unlockedTalents.add('killing_edge');
+      // NOT adding Knives expertise
+      
+      character.inventory.addItem('knife', 1);
+      character.inventory.equipItem('knife');
+      
+      const attacks = calculator.getAvailableAttacks();
+      
+      expect(attacks.length).toBeGreaterThan(0);
+      const knifeAttack = attacks.find(a => a.name === 'Knife');
+      expect(knifeAttack).toBeDefined();
+      // Should NOT have the expert traits from Killing Edge
+      expect(knifeAttack!.traits.filter(t => t.includes('Deadly'))).toHaveLength(0);
+      expect(knifeAttack!.traits.filter(t => t.includes('Quickdraw'))).toHaveLength(0);
+    });
   });
 
   describe('Talent Attacks', () => {

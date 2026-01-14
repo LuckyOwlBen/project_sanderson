@@ -15,6 +15,11 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            expertiseGrants: [
+                { type: 'category', choiceCount: 1, category: 'weapon' },
+                { type: 'category', choiceCount: 1, category: 'armor' },
+                { type: 'fixed', expertises: ['Military Life'] }
+            ],
             otherEffects: ["Once per round, can graze on miss without spending focus", "Gain weapon expertise", "Gain armor expertise", "Gain Military Life cultural expertise"]
         },
         {

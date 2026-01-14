@@ -1,4 +1,5 @@
 import { TalentEffectParser } from './talentEffectParser';
+import { TalentNode, ActionCostCode } from './talentInterface';
 
 describe('TalentEffectParser', () => {
   describe('parseExpertiseGrants', () => {
@@ -165,6 +166,170 @@ describe('TalentEffectParser', () => {
       expect(options).toContain('Light Weaponry');
       expect(options).toContain('Armor Crafting');
       expect(options).toContain('Weapon Crafting');
+    });
+  });
+
+  describe('parseExpertiseGrantsFromTalent - Structured Data Migration', () => {
+    
+    it('should parse fixed expertise grants from killing_edge', () => {
+      const talent: TalentNode = {
+        id: 'killing_edge',
+        name: 'Killing Edge',
+        description: 'Test',
+        actionCost: ActionCostCode.Passive,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Knives', 'Slings'] }
+        ]
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(1);
+      expect(grants[0].type).toBe('single');
+      expect(grants[0].expertises).toEqual(['Knives', 'Slings']);
+    });
+
+    it('should parse choice from options in shard_training', () => {
+      const talent: TalentNode = {
+        id: 'shard_training',
+        name: 'Shard Training',
+        description: 'Test',
+        actionCost: ActionCostCode.Special,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Shardplate'] },
+          { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] }
+        ]
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(2);
+      expect(grants[0].type).toBe('single');
+      expect(grants[0].expertises).toEqual(['Shardplate']);
+      expect(grants[1].type).toBe('choice');
+      expect(grants[1].expertises).toEqual(['Grandbows', 'Shardblades', 'Warhammers']);
+      expect(grants[1].choiceCount).toBe(1);
+    });
+
+    it('should parse category-based choices from combat_training', () => {
+      const talent: TalentNode = {
+        id: 'combat_training',
+        name: 'Combat Training',
+        description: 'Test',
+        actionCost: ActionCostCode.Special,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'category', choiceCount: 1, category: 'weapon' },
+          { type: 'category', choiceCount: 1, category: 'armor' },
+          { type: 'fixed', expertises: ['Military Life'] }
+        ]
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(3);
+      expect(grants[0].type).toBe('choice');
+      expect(grants[0].expertises).toContain('Light Weaponry');
+      expect(grants[0].expertises).toContain('Heavy Weaponry');
+      expect(grants[1].type).toBe('choice');
+      expect(grants[1].expertises).toContain('Armor Proficiency');
+      expect(grants[2].type).toBe('single');
+      expect(grants[2].expertises).toEqual(['Military Life']);
+    });
+
+    it('should parse single fixed expertise from lessons_in_patience', () => {
+      const talent: TalentNode = {
+        id: 'lessons_in_patience',
+        name: 'Lessons in Patience',
+        description: 'Test',
+        actionCost: ActionCostCode.Passive,
+        prerequisites: [],
+        tier: 2,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Motivational Speech'] }
+        ]
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(1);
+      expect(grants[0].type).toBe('single');
+      expect(grants[0].expertises).toEqual(['Motivational Speech']);
+    });
+
+    it('should fallback to text parsing when no structured data exists', () => {
+      const talent: TalentNode = {
+        id: 'legacy_talent',
+        name: 'Legacy Talent',
+        description: 'Test',
+        actionCost: ActionCostCode.Passive,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        otherEffects: ['Gain Sleight of Hand expertise']
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(1);
+      expect(grants[0].type).toBe('single');
+      expect(grants[0].expertises).toContain('Sleight of Hand');
+    });
+
+    it('should prefer structured data over otherEffects when both exist', () => {
+      const talent: TalentNode = {
+        id: 'hybrid_talent',
+        name: 'Hybrid Talent',
+        description: 'Test',
+        actionCost: ActionCostCode.Passive,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Structured Expertise'] }
+        ],
+        otherEffects: ['Gain Text Expertise expertise']
+      };
+
+      const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
+      
+      expect(grants).toHaveLength(1);
+      expect(grants[0].expertises).toEqual(['Structured Expertise']);
+    });
+  });
+
+  describe('Trait Grant Validation', () => {
+    it('should store trait grants on killing_edge talent', () => {
+      const talent: TalentNode = {
+        id: 'killing_edge',
+        name: 'Killing Edge',
+        description: 'Test',
+        actionCost: ActionCostCode.Passive,
+        prerequisites: [],
+        tier: 1,
+        bonuses: [],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Knives', 'Slings'] }
+        ],
+        traitGrants: [
+          { targetItems: ['knife', 'sling'], traits: ['Deadly', 'Quickdraw'], expert: true }
+        ]
+      };
+
+      expect(talent.traitGrants).toBeDefined();
+      expect(talent.traitGrants).toHaveLength(1);
+      expect(talent.traitGrants![0].targetItems).toEqual(['knife', 'sling']);
+      expect(talent.traitGrants![0].traits).toEqual(['Deadly', 'Quickdraw']);
+      expect(talent.traitGrants![0].expert).toBe(true);
     });
   });
 });

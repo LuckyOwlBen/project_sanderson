@@ -15,6 +15,12 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Knives', 'Slings'] }
+            ],
+            traitGrants: [
+                { targetItems: ['knife', 'sling'], traits: ['Deadly', 'Quickdraw'], expert: true }
+            ],
             otherEffects: ["Gain Knives weapon expertise", "Gain Slings weapon expertise", "Knives and slings gain Deadly and Quickdraw traits"]
         },
         {

@@ -15,6 +15,10 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Shardplate'] },
+                { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] }
+            ],
             otherEffects: ["Once per round: Strike with Shardblade can graze additional targets (up to skill ranks) if Physical defense ≤ test result", "Gain Shardplate specialist expertise", "Gain Grandbows, Shardblades, or Warhammers specialist expertise", "Shardplate has +2 charges for you", "Requires access to Shardblade and Shardplate for training"]
         },
         {

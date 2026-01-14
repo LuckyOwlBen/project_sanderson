@@ -1,8 +1,15 @@
 /**
  * Parser for extracting structured effects from talent otherEffects strings.
  * This converts narrative text like "Gain Light Weaponry expertise" into actionable data.
+ * 
+ * DEPRECATION NOTICE: This text-based parser is being phased out in favor of
+ * structured ExpertiseGrant fields on TalentNode. New talents should use the
+ * structured fields instead of relying on text parsing.
  */
 
+import { TalentNode, ExpertiseGrant as StructuredExpertiseGrant } from './talentInterface';
+
+// Legacy interface for backward compatibility
 export interface ExpertiseGrant {
   type: 'single' | 'choice';
   expertises: string[];
@@ -11,7 +18,62 @@ export interface ExpertiseGrant {
 
 export class TalentEffectParser {
   /**
-   * Extract expertise grants from talent otherEffects array
+   * Extract expertise grants from a talent.
+   * Prioritizes structured expertiseGrants field, falls back to parsing otherEffects.
+   * 
+   * @param talent - The talent node to extract expertise grants from
+   * @returns Array of expertise grants in legacy format
+   */
+  static parseExpertiseGrantsFromTalent(talent: TalentNode): ExpertiseGrant[] {
+    // Prefer structured data if available
+    if (talent.expertiseGrants && talent.expertiseGrants.length > 0) {
+      return this.convertStructuredGrants(talent.expertiseGrants);
+    }
+
+    // Fallback to text parsing (deprecated)
+    if (talent.otherEffects && talent.otherEffects.length > 0) {
+      console.warn(`[DEPRECATED] Talent '${talent.id}' is using text-based expertise grants. Please migrate to structured expertiseGrants field.`);
+      return this.parseExpertiseGrants(talent.otherEffects);
+    }
+
+    return [];
+  }
+
+  /**
+   * Convert structured ExpertiseGrant to legacy format
+   */
+  private static convertStructuredGrants(structuredGrants: StructuredExpertiseGrant[]): ExpertiseGrant[] {
+    return structuredGrants.map(grant => {
+      if (grant.type === 'fixed') {
+        // Fixed grants become 'single' type
+        return {
+          type: 'single',
+          expertises: grant.expertises || [],
+        };
+      } else if (grant.type === 'choice') {
+        // Choice grants
+        return {
+          type: 'choice',
+          expertises: grant.options || [],
+          choiceCount: grant.choiceCount || 1
+        };
+      } else if (grant.type === 'category') {
+        // Category grants expand to options
+        const options = this.getExpertisesByCategory(grant.category || '');
+        return {
+          type: 'choice',
+          expertises: options,
+          choiceCount: grant.choiceCount || 1
+        };
+      }
+      return { type: 'single', expertises: [] };
+    });
+  }
+
+  /**
+   * Extract expertise grants from talent otherEffects array (LEGACY)
+   * 
+   * @deprecated Use parseExpertiseGrantsFromTalent() instead which prioritizes structured data
    * 
    * Patterns supported:
    * - "Gain [Name] expertise" → single expertise
@@ -153,7 +215,7 @@ export class TalentEffectParser {
    * Get expertise options by category keyword
    */
   private static getExpertisesByCategory(category: string): string[] {
-    switch (category) {
+    switch (category.toLowerCase()) {
       case 'weapon':
         return ['Light Weaponry', 'Heavy Weaponry', 'Special Weapons'];
       case 'armor':
@@ -164,6 +226,8 @@ export class TalentEffectParser {
       case 'cultural':
         return ['Alethi', 'Azish', 'Herdazian', 'Iriali', 'Kharbranthian', 'Listener', 
                 'Natan', 'Reshi', 'Shin', 'Thaylen', 'Unkalaki', 'Veden', 'Wayfarer'];
+      case 'specialist':
+        return ['Grandbows', 'Shardblades', 'Warhammers', 'Shardplate'];
       default:
         return [];
     }

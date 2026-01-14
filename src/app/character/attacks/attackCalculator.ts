@@ -118,6 +118,10 @@ export class AttackCalculator {
     const expertiseCheck = this.character.inventory.canUseExpertTraits(weapon.id);
     if (expertiseCheck.canUse) {
       traits.push(...props.expertTraits.map(t => `Expert: ${t}`));
+      
+      // Add trait grants from talents (e.g., Killing Edge adds Deadly and Quickdraw)
+      const talentTraitGrants = this.getTraitGrantsForWeapon(weapon);
+      traits.push(...talentTraitGrants.map(t => `Expert: ${t}`));
     }
 
     // Check for Mighty talent to add damage bonus
@@ -302,6 +306,100 @@ export class AttackCalculator {
     // For now, we handle this through the weapon attacks with modifiers
     // Future: could create explicit combined attacks for clarity
     return [];
+  }
+
+  /**
+   * Get trait grants from talents that apply to a specific weapon
+   */
+  private getTraitGrantsForWeapon(weapon: InventoryItem): string[] {
+    const traits: string[] = [];
+    const weaponId = weapon.id;
+    
+    // Get the base item ID (remove quantity suffixes like "-1", "-2", etc.)
+    const baseWeaponId = weaponId.split('-')[0];
+    
+    // Iterate through all unlocked talents
+    const unlockedTalents = Array.from(this.character.unlockedTalents)
+      .map(id => this.allTalents.get(id))
+      .filter(t => t !== undefined) as TalentNode[];
+
+    for (const talent of unlockedTalents) {
+      if (!talent.traitGrants) continue;
+
+      for (const grant of talent.traitGrants) {
+        // Check if this grant applies to the current weapon
+        const appliesTo = this.traitGrantAppliesToWeapon(grant, baseWeaponId, weapon);
+        if (appliesTo) {
+          // Check if expert traits are required and character has the expertise
+          if (grant.expert) {
+            const hasExpertise = this.characterHasExpertiseForItem(baseWeaponId, weapon.name);
+            if (hasExpertise) {
+              traits.push(...grant.traits);
+            }
+          } else {
+            // Non-expert traits are always added
+            traits.push(...grant.traits);
+          }
+        }
+      }
+    }
+
+    return traits;
+  }
+
+  /**
+   * Check if a trait grant applies to a specific weapon
+   */
+  private traitGrantAppliesToWeapon(
+    grant: any, // TraitGrant type
+    weaponId: string,
+    weapon: InventoryItem
+  ): boolean {
+    const targetItems = grant.targetItems;
+
+    // Handle different target item formats
+    if (Array.isArray(targetItems)) {
+      // Check if weapon ID matches any of the target item IDs
+      return targetItems.includes(weaponId) || targetItems.includes(weapon.name.toLowerCase());
+    }
+
+    if (targetItems === 'all') {
+      return true;
+    }
+
+    // Handle category targets { category: 'string' }
+    if (typeof targetItems === 'object' && targetItems.category) {
+      // For now, just return false - category matching would need item categorization
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if character has the appropriate expertise for a specific item
+   * Maps item IDs to required expertise names for trait grants
+   */
+  private characterHasExpertiseForItem(itemId: string, itemName: string): boolean {
+    // Map item IDs to required expertises for trait grants
+    const itemExpertiseMap: Record<string, string> = {
+      'knife': 'Knives',
+      'sling': 'Slings',
+      'axe': 'Heavy Weaponry',
+      'sword': 'Light Weaponry',
+      // Add more mappings as needed for other talents' trait grants
+    };
+
+    const expertise = itemExpertiseMap[itemId] || itemExpertiseMap[itemName.toLowerCase()];
+    if (!expertise) {
+      // If no mapping exists, default to checking if item has weapon properties
+      // and the character has any weapon expertise
+      return this.character.hasExpertise('Light Weaponry') || 
+             this.character.hasExpertise('Heavy Weaponry') ||
+             this.character.hasExpertise('Special Weapons');
+    }
+
+    return this.character.hasExpertise(expertise);
   }
 
   /**

@@ -545,8 +545,8 @@ export class TalentView implements OnInit, OnDestroy {
 
   unlockTalent(talent: TalentNode): void {
     if (this.canUnlockTalent(talent) && this.character) {
-      // Parse expertise grants from talent
-      const expertiseGrants = TalentEffectParser.parseExpertiseGrants(talent.otherEffects || []);
+      // Parse expertise grants from talent (prioritizes structured expertiseGrants)
+      const expertiseGrants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
       
       if (expertiseGrants.length > 0) {
         // Handle expertise grants

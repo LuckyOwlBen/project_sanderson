@@ -40,6 +40,9 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Motivational Speech'] }
+            ],
             otherEffects: ["After using Rousing Presence, target recovers 1 focus", "Gain Motivational Speech utility expertise"]
         },
         {
