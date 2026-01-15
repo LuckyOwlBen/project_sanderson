@@ -70,7 +70,9 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'shadowing' }
             ],
             tier: 3,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'focus_recovery', value: 1, condition: 'after killing/incapacitating quarry' }
+            ],
             otherEffects: ["After killing/incapacitating quarry, recover 1 focus and designate new quarry"]
         },
         {
@@ -113,7 +115,9 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'cold_eyes' }
             ],
             tier: 3,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.SKILL, target: 'damage', formula: '1 + tier' }
+            ],
             otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
         },
         {

@@ -11,6 +11,7 @@ import { InventoryItem } from '../inventory/inventoryItem';
 import { TalentNode, ActionCostCode, TalentPath } from '../talents/talentInterface';
 import { ALL_TALENT_PATHS, getTalentTree } from '../talents/talentTrees/talentTrees';
 import { SkillType } from '../skills/skillTypes';
+import { BonusType } from '../bonuses/bonusModule';
 
 export class AttackCalculator {
   private character: Character;
@@ -512,10 +513,32 @@ export class AttackCalculator {
    */
   private getMightyDamageBonus(): number {
     if (this.character.unlockedTalents.has('mighty')) {
-      const tier = Math.ceil(this.character.level / 4);
-      return 1 + tier; // Base 1 + tier for 1-action attack
+      // Use the bonus manager with formula evaluation
+      const context = {
+        tier: Math.ceil(this.character.level / 4),
+        skillRanks: this.buildSkillRanksMap()
+      };
+      const bonus = this.character.bonuses.bonuses.evaluateBonus(
+        { type: BonusType.SKILL, target: 'attack', formula: '1 + tier' },
+        context
+      );
+      return bonus;
     }
     return 0;
+  }
+
+  /**
+   * Build skill ranks map for bonus formula evaluation
+   */
+  private buildSkillRanksMap(): Map<string, number> {
+    const map = new Map<string, number>();
+    map.set('perception', this.character.skills.getSkillRank(SkillType.PERCEPTION));
+    map.set('athletics', this.character.skills.getSkillRank(SkillType.ATHLETICS));
+    map.set('agility', this.character.skills.getSkillRank(SkillType.AGILITY));
+    map.set('stealth', this.character.skills.getSkillRank(SkillType.STEALTH));
+    map.set('discipline', this.character.skills.getSkillRank(SkillType.DISCIPLINE));
+    map.set('intimidation', this.character.skills.getSkillRank(SkillType.INTIMIDATION));
+    return map;
   }
 
   /**

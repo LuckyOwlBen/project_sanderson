@@ -80,7 +80,8 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [
-                { type: BonusType.DERIVED, target: 'movement', value: 10 }
+                { type: BonusType.DERIVED, target: 'movement', value: 10 },
+                { type: BonusType.DEFENSE, target: 'terrain_damage_reduction', formula: '2 * tier' }
             ],
             otherEffects: ["Reduce terrain/falling damage by 2×tier"]
         },

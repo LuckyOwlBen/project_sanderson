@@ -154,9 +154,20 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(event => {
         if (this.character && event.characterId === this.characterId) {
-          console.log('[Character Sheet] Item granted:', event.itemId, 'x', event.quantity);
-          this.character.inventory.addItem(event.itemId, event.quantity);
-          this.saveCharacter();
+          console.log('[Character Sheet] 🎁 Item granted:', event.itemId, 'x', event.quantity);
+          
+          // Add item (inventory.addItem is already idempotent - it stacks or adds new instance)
+          const added = this.character.inventory.addItem(event.itemId, event.quantity);
+          
+          if (added) {
+            this.saveCharacter();
+            console.log('[Character Sheet] 🎁 Sending ack for item:', event.itemId, 'x', event.quantity);
+            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
+          } else {
+            console.warn('[Character Sheet] 🎁 Failed to add item:', event.itemId);
+            // Still ack to prevent infinite retry of invalid items
+            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
+          }
         }
       });
 
@@ -168,7 +179,15 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] ⭐⭐⭐ SPREN GRANT RECEIVED IN CHARACTER SHEET ⭐⭐⭐');
         console.log('[Character Sheet] ⭐ Spren grant received:', grant);
         console.log('[Character Sheet] ⭐ Current character ID:', this.characterId);
-        if (this.characterId && grant.characterId === this.characterId) {
+        if (this.characterId && grant.characterId === this.characterId && this.character) {
+          // Check if already has spren (idempotency)
+          if (this.character.radiantPath.hasSpren()) {
+            console.log('[Character Sheet] ⭐ Character already has spren - ignoring duplicate grant');
+            // Still ack to clear from server queue
+            this.websocketService.ackSprenGrant(this.characterId, grant.order);
+            return;
+          }
+
           console.log('[Character Sheet] ⭐ Match! Showing spren notification');
           this.pendingSprenGrant = grant;
           // Auto-dismiss after 30 seconds
@@ -194,15 +213,26 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] 📚 Expertise grant received:', grant);
         console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
         console.log('[Character Sheet] 📚 Grant character ID:', grant.characterId);
-        if (this.characterId && grant.characterId === this.characterId) {
+        if (this.characterId && grant.characterId === this.characterId && this.character) {
+          // Check if already has expertise (idempotency)
+          const existingExpertises = this.characterState.getSelectedExpertises();
+          if (existingExpertises.includes(grant.expertiseName)) {
+            console.log('[Character Sheet] 📚 Character already has expertise:', grant.expertiseName, '- ignoring duplicate');
+            // Still ack to clear from server queue
+            this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
+            return;
+          }
+
           console.log('[Character Sheet] 📚 Match! Adding expertise:', grant.expertiseName);
           this.pendingExpertiseGrant = grant;
           
           // Auto-add expertise and save
-          if (this.character) {
-            this.characterState.addExpertise(grant.expertiseName, 'gm', undefined);
-            this.saveCharacter();
-          }
+          this.characterState.addExpertise(grant.expertiseName, 'gm', undefined);
+          this.saveCharacter();
+
+          // Send acknowledgment
+          console.log('[Character Sheet] 📚 Sending ack for expertise:', grant.expertiseName);
+          this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
           
           // Auto-dismiss notification after 10 seconds
           setTimeout(() => {
@@ -225,13 +255,20 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .subscribe(event => {
         console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
         console.log('[Character Sheet] 🆙 Level-up event:', event);
-        if (this.characterId && event.characterId === this.characterId) {
-          console.log('[Character Sheet] 🆙 Match! Incrementing level and pending points');
-          if (this.character) {
+        if (this.characterId && event.characterId === this.characterId && this.character) {
+          // Only increment if we haven't already processed this specific level
+          if (event.newLevel > this.character.level) {
+            console.log('[Character Sheet] 🆙 Applying level increment from', this.character.level, 'to', event.newLevel);
             this.character.level = event.newLevel;
             this.character.pendingLevelPoints += 1;
             this.saveCharacter();
             this.cdr.detectChanges();
+
+            // Acknowledge receipt
+            console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
+            this.websocketService.ackLevelUp(this.characterId, event.newLevel);
+          } else {
+            console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character.level, 'event:', event.newLevel, ')');
           }
         }
       });
@@ -503,6 +540,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   onSprenAccepted(): void {
     console.log('[Character Sheet] Spren accepted, saving character');
+    if (this.pendingSprenGrant && this.characterId) {
+      // Send acknowledgment to server
+      this.websocketService.ackSprenGrant(this.characterId, this.pendingSprenGrant.order);
+    }
     this.pendingSprenGrant = null;
     this.characterState.updateCharacter(this.character!);
     this.saveCharacter();
@@ -511,6 +552,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   onSprenDismissed(): void {
     console.log('[Character Sheet] Spren grant dismissed');
+    if (this.pendingSprenGrant && this.characterId) {
+      // Still ack even on dismiss so server knows we received it
+      this.websocketService.ackSprenGrant(this.characterId, this.pendingSprenGrant.order);
+    }
     this.pendingSprenGrant = null;
   }
 

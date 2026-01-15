@@ -430,6 +430,46 @@ export class WebsocketService implements OnDestroy {
     console.log('[WebSocket] 📤 gm-grant-level-up event emitted');
   }
 
+  ackLevelUp(characterId: string, newLevel: number): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot ack level up: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 📬 Acking level up:', { characterId, newLevel });
+    this.socket.emit('level-up-ack', { characterId, newLevel });
+  }
+
+  ackSprenGrant(characterId: string, order: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot ack spren grant: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] ⭐✅ Acking spren grant:', { characterId, order });
+    this.socket.emit('spren-grant-ack', { characterId, order });
+  }
+
+  ackExpertiseGrant(characterId: string, expertiseName: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot ack expertise grant: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 📚✅ Acking expertise grant:', { characterId, expertiseName });
+    this.socket.emit('expertise-grant-ack', { characterId, expertiseName });
+  }
+
+  ackItemGrant(characterId: string, itemId: string, quantity: number): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot ack item grant: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 🎁✅ Acking item grant:', { characterId, itemId, quantity });
+    this.socket.emit('item-grant-ack', { characterId, itemId, quantity });
+  }
+
   toggleHighstorm(active: boolean): void {
     if (!this.socket?.connected) {
       console.warn('[WebSocket] Cannot toggle highstorm: not connected');

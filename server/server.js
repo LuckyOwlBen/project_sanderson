@@ -39,6 +39,27 @@ const storeState = {
 // Track highstorm state
 let highstormActive = false;
 
+// Track level-up delivery state
+// pendingLevelUps stores queued payloads per characterId to allow retries
+// lastConfirmedLevels tracks the last acknowledged level per characterId
+const pendingLevelUps = new Map();
+const lastConfirmedLevels = new Map();
+
+// Track spren grant delivery state
+// pendingSprenGrants stores queued spren grants per characterId
+// confirmedSprenGrants tracks which characters have received spren (Set of characterIds)
+const pendingSprenGrants = new Map();
+const confirmedSprenGrants = new Set();
+
+// Track expertise grant delivery state
+// pendingExpertiseGrants stores queued expertise grants per characterId (array of grant objects)
+const pendingExpertiseGrants = new Map();
+const confirmedExpertiseGrants = new Map(); // characterId -> Set of expertiseNames
+
+// Track item grant delivery state
+// pendingItemGrants stores queued item grants per characterId (array of grant objects)
+const pendingItemGrants = new Map();
+
 // Track recent server logs for transparency/ops
 const LOG_BUFFER_SIZE = 100;
 const logBuffer = [];
@@ -130,6 +151,78 @@ async function ensureDirectories() {
   } catch {
     await fs.mkdir(IMAGES_DIR, { recursive: true });
     console.log('Created images directory:', IMAGES_DIR);
+  }
+}
+
+function findSocketIdByCharacterId(characterId) {
+  for (const [socketId, player] of activePlayers.entries()) {
+    if (player.characterId === characterId) {
+      return socketId;
+    }
+  }
+  return null;
+}
+
+function sendPendingLevelUp(characterId) {
+  const queue = pendingLevelUps.get(characterId);
+  if (!queue || queue.length === 0) {
+    return;
+  }
+
+  const targetSocket = findSocketIdByCharacterId(characterId);
+  if (targetSocket) {
+    const payload = queue[0];
+    console.log(`[GM Action] 🆙 Sending pending level-up to socket ${targetSocket}, new level: ${payload.newLevel}`);
+    io.to(targetSocket).emit('level-up-granted', payload);
+  } else {
+    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending level-up`);
+  }
+}
+
+function sendPendingSprenGrant(characterId) {
+  const grant = pendingSprenGrants.get(characterId);
+  if (!grant) {
+    return;
+  }
+
+  const targetSocket = findSocketIdByCharacterId(characterId);
+  if (targetSocket) {
+    console.log(`[GM Action] ⭐ Sending pending spren grant to socket ${targetSocket}`);
+    io.to(targetSocket).emit('spren-granted', grant);
+  } else {
+    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending spren grant`);
+  }
+}
+
+function sendPendingExpertiseGrants(characterId) {
+  const queue = pendingExpertiseGrants.get(characterId);
+  if (!queue || queue.length === 0) {
+    return;
+  }
+
+  const targetSocket = findSocketIdByCharacterId(characterId);
+  if (targetSocket) {
+    const grant = queue[0];
+    console.log(`[GM Action] 📚 Sending pending expertise grant to socket ${targetSocket}: ${grant.expertiseName}`);
+    io.to(targetSocket).emit('expertise-granted', grant);
+  } else {
+    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending expertise grant`);
+  }
+}
+
+function sendPendingItemGrants(characterId) {
+  const queue = pendingItemGrants.get(characterId);
+  if (!queue || queue.length === 0) {
+    return;
+  }
+
+  const targetSocket = findSocketIdByCharacterId(characterId);
+  if (targetSocket) {
+    const grant = queue[0];
+    console.log(`[GM Action] 🎁 Sending pending item grant to socket ${targetSocket}: ${grant.itemId} x${grant.quantity}`);
+    io.to(targetSocket).emit('item-granted', grant);
+  } else {
+    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending item grant`);
   }
 }
 
@@ -409,11 +502,29 @@ io.on('connection', (socket) => {
     // Handle ancestry - should always be a string from Ancestry enum (e.g., 'human', 'singer')
     // Fallback to 'Unknown' if null/undefined
     const ancestryName = ancestry || 'Unknown';
+    let effectiveLevel = level;
+
+    const confirmedLevel = lastConfirmedLevels.get(characterId);
+    const existingQueue = pendingLevelUps.get(characterId) || [];
+    if (confirmedLevel && confirmedLevel > level) {
+      console.warn(`[Session] Detected level mismatch for ${characterId}: client ${level}, confirmed ${confirmedLevel}. Queuing catch-up events.`);
+      let baseLevel = existingQueue.length > 0 ? existingQueue[existingQueue.length - 1].newLevel : level;
+      for (let nextLevel = baseLevel + 1; nextLevel <= confirmedLevel; nextLevel++) {
+        existingQueue.push({
+          characterId,
+          newLevel: nextLevel,
+          grantedBy: 'RESYNC',
+          timestamp: new Date().toISOString()
+        });
+      }
+      pendingLevelUps.set(characterId, existingQueue);
+      effectiveLevel = confirmedLevel;
+    }
     
     activePlayers.set(socket.id, {
       characterId,
       name,
-      level,
+      level: effectiveLevel,
       ancestry: ancestryName,
       health: health || { current: 0, max: 0 },
       focus: focus || { current: 0, max: 0 },
@@ -421,12 +532,20 @@ io.on('connection', (socket) => {
       joinedAt: new Date().toISOString(),
       socketId: socket.id
     });
+
+    lastConfirmedLevels.set(characterId, effectiveLevel);
     
     console.log(`[Session] Player joined: ${name} (${characterId})`);
     
     // Broadcast updated player list to all GM clients
     io.emit('player-joined', activePlayers.get(socket.id));
     io.emit('active-players', Array.from(activePlayers.values()));
+
+    // Send any pending grants to the reconnected player
+    sendPendingLevelUp(characterId);
+    sendPendingSprenGrant(characterId);
+    sendPendingExpertiseGrants(characterId);
+    sendPendingItemGrants(characterId);
   });
 
   // Player leaves session
@@ -502,32 +621,38 @@ io.on('connection', (socket) => {
     const { characterId, order, sprenType, surgePair, philosophy } = data;
     console.log(`[GM Action] ⭐⭐⭐ RECEIVED GM-GRANT-SPREN REQUEST ⭐⭐⭐`);
     console.log(`[GM Action] Granting ${order} spren to character ${characterId}`);
-    console.log(`[GM Action] Current active players:`, Array.from(activePlayers.entries()).map(([sid, p]) => ({ socketId: sid, characterId: p.characterId, name: p.name })));
     
-    // Find the target player's socket
-    let targetSocket = null;
-    for (const [socketId, player] of activePlayers.entries()) {
-      if (player.characterId === characterId) {
-        targetSocket = socketId;
-        break;
-      }
+    // Check if spren already confirmed
+    if (confirmedSprenGrants.has(characterId)) {
+      console.warn(`[GM Action] ⚠️ Character ${characterId} already has confirmed spren grant - ignoring duplicate`);
+      return;
+    }
+
+    // Check if already queued
+    if (pendingSprenGrants.has(characterId)) {
+      console.warn(`[GM Action] ⚠️ Spren grant already queued for ${characterId} - ignoring duplicate`);
+      return;
     }
     
+    const targetSocket = findSocketIdByCharacterId(characterId);
+    
+    const payload = {
+      characterId,
+      order,
+      sprenType,
+      surgePair,
+      philosophy
+    };
+
+    // Queue the grant
+    pendingSprenGrants.set(characterId, payload);
+    console.log(`[GM Action] ⭐ Spren grant queued for ${characterId}`);
+
+    // Send if player is online
     if (targetSocket) {
-      // Send spren grant to specific player
-      const payload = {
-        characterId,
-        order,
-        sprenType,
-        surgePair,
-        philosophy
-      };
-      console.log(`[GM Action] ⭐ Sending spren-granted to socket ${targetSocket} with payload:`, payload);
-      io.to(targetSocket).emit('spren-granted', payload);
-      console.log(`[GM Action] ⭐ Spren grant sent to socket ${targetSocket}`);
+      sendPendingSprenGrant(characterId);
     } else {
-      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
-      console.warn(`[GM Action] ⚠️ Available character IDs:`, Array.from(activePlayers.values()).map(p => p.characterId));
+      console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
     }
   });
 
@@ -545,27 +670,27 @@ io.on('connection', (socket) => {
     const { characterId, itemId, quantity, timestamp } = data;
     console.log(`[GM Action] 🎁 Granting ${quantity}x ${itemId} to character ${characterId}`);
     
-    // Find the target player's socket
-    let targetSocket = null;
-    for (const [socketId, player] of activePlayers.entries()) {
-      if (player.characterId === characterId) {
-        targetSocket = socketId;
-        break;
-      }
-    }
+    const targetSocket = findSocketIdByCharacterId(characterId);
     
+    const payload = {
+      characterId,
+      itemId,
+      quantity,
+      grantedBy: 'GM',
+      timestamp: timestamp || new Date().toISOString()
+    };
+
+    // Add to queue
+    const queue = pendingItemGrants.get(characterId) || [];
+    queue.push(payload);
+    pendingItemGrants.set(characterId, queue);
+    console.log(`[GM Action] 🎁 Item queued. Queue size: ${queue.length}`);
+
+    // Send if player is online
     if (targetSocket) {
-      const payload = {
-        characterId,
-        itemId,
-        quantity,
-        grantedBy: 'GM',
-        timestamp: timestamp || new Date().toISOString()
-      };
-      console.log(`[GM Action] 🎁 Sending item-granted to socket ${targetSocket}`);
-      io.to(targetSocket).emit('item-granted', payload);
+      sendPendingItemGrants(characterId);
     } else {
-      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+      console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
     }
   });
 
@@ -589,26 +714,26 @@ io.on('connection', (socket) => {
     const { characterId, expertiseName, timestamp } = data;
     console.log(`[GM Action] 📚 Granting expertise "${expertiseName}" to character ${characterId}`);
     
-    // Find the target player's socket
-    let targetSocket = null;
-    for (const [socketId, player] of activePlayers.entries()) {
-      if (player.characterId === characterId) {
-        targetSocket = socketId;
-        break;
-      }
-    }
+    const targetSocket = findSocketIdByCharacterId(characterId);
     
+    const payload = {
+      characterId,
+      expertiseName,
+      grantedBy: 'GM',
+      timestamp: timestamp || new Date().toISOString()
+    };
+
+    // Add to queue
+    const queue = pendingExpertiseGrants.get(characterId) || [];
+    queue.push(payload);
+    pendingExpertiseGrants.set(characterId, queue);
+    console.log(`[GM Action] 📚 Expertise queued. Queue size: ${queue.length}`);
+
+    // Send if player is online
     if (targetSocket) {
-      const payload = {
-        characterId,
-        expertiseName,
-        grantedBy: 'GM',
-        timestamp: timestamp || new Date().toISOString()
-      };
-      console.log(`[GM Action] 📚 Sending expertise-granted to socket ${targetSocket}`);
-      io.to(targetSocket).emit('expertise-granted', payload);
+      sendPendingExpertiseGrants(characterId);
     } else {
-      console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
+      console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
     }
   });
 
@@ -617,37 +742,136 @@ io.on('connection', (socket) => {
     const { characterId, timestamp } = data;
     console.log(`[GM Action] 🆙 Granting level-up to character ${characterId}`);
     
-    // Find the target player's socket and update their level
-    let targetSocket = null;
-    let player = null;
-    for (const [socketId, p] of activePlayers.entries()) {
-      if (p.characterId === characterId) {
-        targetSocket = socketId;
-        player = p;
-        break;
-      }
-    }
+    const targetSocket = findSocketIdByCharacterId(characterId);
+    const player = targetSocket ? activePlayers.get(targetSocket) : null;
     
-    if (targetSocket && player) {
-      // Increment level
-      player.level += 1;
-      const newLevel = player.level;
-      
+    if (player) {
+      const queue = pendingLevelUps.get(characterId) || [];
+      const baseLevel = queue.length > 0 ? queue[queue.length - 1].newLevel : player.level;
+      const newLevel = baseLevel + 1;
       const payload = {
         characterId,
         newLevel,
         grantedBy: 'GM',
         timestamp: timestamp || new Date().toISOString()
       };
-      
-      console.log(`[GM Action] 🆙 Sending level-up-granted to socket ${targetSocket}, new level: ${newLevel}`);
-      io.to(targetSocket).emit('level-up-granted', payload);
-      
-      // Also notify GM with updated player info
+
+      queue.push(payload);
+      pendingLevelUps.set(characterId, queue);
+
+      // Keep GM dashboards optimistic while we wait for ack
+      player.level = Math.max(player.level, newLevel);
+      console.log(`[GM Action] 🆙 Queue size for ${characterId}: ${queue.length}. Next level: ${newLevel}`);
+
+      sendPendingLevelUp(characterId);
+
       io.emit('player-joined', player);
+      io.emit('active-players', Array.from(activePlayers.values()));
     } else {
       console.warn(`[GM Action] ⚠️ Could not find active player with characterId ${characterId}`);
     }
+  });
+
+  socket.on('level-up-ack', ({ characterId, newLevel }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[LevelUp] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    const queue = pendingLevelUps.get(characterId) || [];
+    if (queue.length > 0 && queue[0].newLevel === newLevel) {
+      queue.shift();
+    } else {
+      const idx = queue.findIndex(entry => entry.newLevel === newLevel);
+      if (idx !== -1) {
+        queue.splice(idx, 1);
+      } else {
+        console.warn(`[LevelUp] ⚠️ Received ack for unexpected level ${newLevel} on character ${characterId}`);
+      }
+    }
+    pendingLevelUps.set(characterId, queue);
+
+    player.level = Math.max(player.level, newLevel);
+    lastConfirmedLevels.set(characterId, newLevel);
+
+    console.log(`[LevelUp] ✅ Ack received for ${characterId} level ${newLevel}. Remaining queue: ${queue.length}`);
+    io.emit('player-joined', player);
+    io.emit('active-players', Array.from(activePlayers.values()));
+
+    // If more level-ups are queued, send the next one now
+    sendPendingLevelUp(characterId);
+  });
+
+  socket.on('spren-grant-ack', ({ characterId, order }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    console.log(`[Spren] ✅ Ack received for ${characterId} spren: ${order}`);
+    
+    // Mark as confirmed and remove from pending
+    confirmedSprenGrants.add(characterId);
+    pendingSprenGrants.delete(characterId);
+  });
+
+  socket.on('expertise-grant-ack', ({ characterId, expertiseName }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[Expertise] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    const queue = pendingExpertiseGrants.get(characterId) || [];
+    if (queue.length > 0 && queue[0].expertiseName === expertiseName) {
+      queue.shift();
+    } else {
+      const idx = queue.findIndex(entry => entry.expertiseName === expertiseName);
+      if (idx !== -1) {
+        queue.splice(idx, 1);
+      } else {
+        console.warn(`[Expertise] ⚠️ Received ack for unexpected expertise ${expertiseName} on character ${characterId}`);
+      }
+    }
+    pendingExpertiseGrants.set(characterId, queue);
+
+    // Track confirmed expertises
+    const confirmed = confirmedExpertiseGrants.get(characterId) || new Set();
+    confirmed.add(expertiseName);
+    confirmedExpertiseGrants.set(characterId, confirmed);
+
+    console.log(`[Expertise] ✅ Ack received for ${characterId} expertise: ${expertiseName}. Remaining queue: ${queue.length}`);
+
+    // Send next queued expertise if any
+    sendPendingExpertiseGrants(characterId);
+  });
+
+  socket.on('item-grant-ack', ({ characterId, itemId, quantity }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    const queue = pendingItemGrants.get(characterId) || [];
+    if (queue.length > 0 && queue[0].itemId === itemId && queue[0].quantity === quantity) {
+      queue.shift();
+    } else {
+      const idx = queue.findIndex(entry => entry.itemId === itemId && entry.quantity === quantity);
+      if (idx !== -1) {
+        queue.splice(idx, 1);
+      } else {
+        console.warn(`[Item] ⚠️ Received ack for unexpected item ${itemId} x${quantity} on character ${characterId}`);
+      }
+    }
+    pendingItemGrants.set(characterId, queue);
+
+    console.log(`[Item] ✅ Ack received for ${characterId} item: ${itemId} x${quantity}. Remaining queue: ${queue.length}`);
+
+    // Send next queued item if any
+    sendPendingItemGrants(characterId);
   });
 
   // Handle highstorm toggle from GM

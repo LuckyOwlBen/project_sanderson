@@ -32,7 +32,9 @@ export const ARCHER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'combat_training' }
             ],
             tier: 2,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.SKILL, target: 'ranged_damage', formula: 'perception.ranks', condition: 'on ranged weapon hit' }
+            ],
             otherEffects: ["Ranged weapon ranges increase by 50%", "Deal extra damage equal to Perception ranks on ranged weapon hits"]
         },
         {
@@ -79,7 +81,9 @@ export const ARCHER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'steady_aim' }
             ],
             tier: 4,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'health', value: 1, condition: 'per character level' }
+            ],
             otherEffects: ["Increase max and current health by 1 per level (retroactive and future)"]
         },
         {
