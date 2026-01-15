@@ -34,6 +34,16 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Cognitive',
+                range: 'melee',
+                specialMechanics: [
+                    "Can use unarmed or improvised weapon",
+                    "On hit or graze: target becomes Surprised until end of your next turn",
+                    "Only works on targets of same size or smaller"
+                ]
+            },
             otherEffects: ["Attack unarmed/improvised weapon vs Cognitive defense", "On hit or graze, target becomes Surprised until end of next turn", "Only works on targets of same size or smaller"]
         },
         {
@@ -74,6 +84,24 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'light',
+                targetDefense: 'Cognitive',
+                range: 'melee',
+                baseDamage: '4d4',
+                damageScaling: [
+                    { tier: 3, damage: '6d4' },
+                    { tier: 4, damage: '8d4' },
+                    { tier: 5, damage: '10d4' }
+                ],
+                conditionalAdvantages: [
+                    { condition: 'weapon has Discreet trait', value: 2 }
+                ],
+                specialMechanics: [
+                    "Target must be Surprised, doesn't sense you, or doesn't view you as a threat",
+                    "Each max die roll subtracts 2 from target's injury roll"
+                ]
+            },
             otherEffects: ["Attack vs Cognitive defense with light weapon against Surprised/unaware target", "Discreet weapon grants two advantages", "Add 4d4 damage (6d4 at tier 3, 8d4 at tier 4, 10d4 at tier 5)", "Each max die roll subtracts 2 from target's injury roll"]
         },
         {

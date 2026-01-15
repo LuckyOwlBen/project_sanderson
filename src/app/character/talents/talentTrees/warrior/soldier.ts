@@ -59,6 +59,17 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'melee',
+                baseDamage: '2d8',
+                damageScaling: [
+                    { tier: 3, damage: '3d8' },
+                    { tier: 4, damage: '4d8' },
+                    { tier: 5, damage: '5d8' }
+                ]
+            },
             otherEffects: ["Melee attack vs Physical with extra damage", "Extra damage: 2d8 (3d8 at T3, 4d8 at T4, 5d8 at T5)"]
         },
         {
@@ -96,6 +107,15 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'special',
+                resourceCost: { type: 'focus', amount: 1 },
+                specialMechanics: [
+                    "Make a second Strike with a hand already used for Strike this turn"
+                ]
+            },
             otherEffects: ["Spend 1 focus to Strike again with same hand"]
         },
         {

@@ -100,6 +100,21 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Physical',
+                range: 'melee',
+                resourceCost: { type: 'focus', amount: 2 },
+                conditionalAdvantages: [
+                    { condition: 'wearing Shardplate', value: 1 }
+                ],
+                specialMechanics: [
+                    "Leap up to quarter movement rate before attacking",
+                    "Attacks all chosen targets within reach",
+                    "Roll double damage dice",
+                    "On hit: targets with lower Strength knocked Prone"
+                ]
+            },
             otherEffects: ["Spend 2 focus, leap quarter movement rate", "Unarmed attack vs Physical of all chosen targets in reach", "Advantage when wearing Shardplate", "Roll double damage dice", "Hit: targets with lower Strength knocked Prone"]
         },
         {

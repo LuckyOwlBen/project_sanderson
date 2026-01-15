@@ -164,4 +164,109 @@ describe('AttackCalculator', () => {
       expect(allAttacks.length).toBeGreaterThanOrEqual(1);
     });
   });
+
+  describe('Structured Attack Definitions (Phase 2)', () => {
+    it('should generate talent attack from structured attackDefinition', () => {
+      // Fatal Thrust should generate an attack
+      character.level = 5; // Tier 1
+      character.unlockedTalents.add('fatal_thrust');
+      character.skills.setSkillRank(SkillType.LIGHT_WEAPONRY, 3);
+      
+      const attacks = calculator.getAvailableAttacks();
+      const fatalThrust = attacks.find(a => a.talentId === 'fatal_thrust');
+      
+      expect(fatalThrust).toBeDefined();
+      expect(fatalThrust?.name).toBe('Fatal Thrust');
+      expect(fatalThrust?.source).toBe('talent');
+      expect(fatalThrust?.targetDefense).toBe('Cognitive');
+      expect(fatalThrust?.range).toBe('Melee');
+      expect(fatalThrust?.damage).toBe('4d4'); // Base damage at tier 1
+      expect(fatalThrust?.actionCost).toBe(2);
+    });
+
+    it('should apply tier scaling to talent damage', () => {
+      character.unlockedTalents.add('fatal_thrust');
+      character.skills.setSkillRank(SkillType.LIGHT_WEAPONRY, 3);
+      
+      // Tier 1 (level 1-5)
+      character.level = 3;
+      let attacks = calculator.getAvailableAttacks();
+      let fatalThrust = attacks.find(a => a.talentId === 'fatal_thrust');
+      expect(fatalThrust?.damage).toBe('4d4');
+      
+      // Tier 3 (level 11-15)
+      character.level = 13;
+      calculator = new AttackCalculator(character);
+      attacks = calculator.getAvailableAttacks();
+      fatalThrust = attacks.find(a => a.talentId === 'fatal_thrust');
+      expect(fatalThrust?.damage).toBe('6d4');
+      
+      // Tier 4 (level 16-20)
+      character.level = 18;
+      calculator = new AttackCalculator(character);
+      attacks = calculator.getAvailableAttacks();
+      fatalThrust = attacks.find(a => a.talentId === 'fatal_thrust');
+      expect(fatalThrust?.damage).toBe('8d4');
+      
+      // Tier 5 (level 21+)
+      character.level = 22;
+      calculator = new AttackCalculator(character);
+      attacks = calculator.getAvailableAttacks();
+      fatalThrust = attacks.find(a => a.talentId === 'fatal_thrust');
+      expect(fatalThrust?.damage).toBe('10d4');
+    });
+
+    it('should include resource cost from attackDefinition', () => {
+      character.level = 5;
+      character.unlockedTalents.add('wits_end');
+      character.skills.setSkillRank(SkillType.LIGHT_WEAPONRY, 3);
+      
+      const attacks = calculator.getAvailableAttacks();
+      const witsEnd = attacks.find(a => a.talentId === 'wits_end');
+      
+      expect(witsEnd).toBeDefined();
+      expect(witsEnd?.resourceCost).toEqual({ type: 'focus', amount: 1 });
+    });
+
+    it('should generate attack for different weapon types', () => {
+      character.level = 5;
+      character.skills.setSkillRank(SkillType.ATHLETICS, 3);
+      
+      // Startling Blow uses unarmed
+      character.unlockedTalents.add('startling_blow');
+      let attacks = calculator.getAvailableAttacks();
+      let startlingBlow = attacks.find(a => a.talentId === 'startling_blow');
+      
+      expect(startlingBlow).toBeDefined();
+      // Athletics skill rank (3) + Strength attribute (2) = 5
+      expect(startlingBlow?.attackBonus).toBe(5);
+      expect(startlingBlow?.targetDefense).toBe('Cognitive');
+    });
+
+    it('should include special mechanics in traits', () => {
+      character.level = 5;
+      character.unlockedTalents.add('tagging_shot');
+      
+      const attacks = calculator.getAvailableAttacks();
+      const taggingShot = attacks.find(a => a.talentId === 'tagging_shot');
+      
+      expect(taggingShot).toBeDefined();
+      expect(taggingShot?.traits).toContain('Move up to 5 feet before attacking');
+      expect(taggingShot?.traits).toContain('On hit or graze: target becomes your quarry');
+    });
+
+    it('should use best weapon skill for "any" weapon type', () => {
+      character.level = 5;
+      character.unlockedTalents.add('devastating_blow');
+      character.skills.setSkillRank(SkillType.LIGHT_WEAPONRY, 4);
+      character.skills.setSkillRank(SkillType.HEAVY_WEAPONRY, 2);
+      
+      const attacks = calculator.getAvailableAttacks();
+      const devastatingBlow = attacks.find(a => a.talentId === 'devastating_blow');
+      
+      expect(devastatingBlow).toBeDefined();
+      // Should use light weaponry skill rank (4) + Speed attribute (1) = 5
+      expect(devastatingBlow?.attackBonus).toBe(5);
+    });
+  });
 });

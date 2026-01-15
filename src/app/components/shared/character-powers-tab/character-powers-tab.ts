@@ -78,7 +78,20 @@ export class CharacterPowersTab {
         }
       }
     });
-    
+    // If the character has spoken the First Ideal, ensure base surge powers are shown
+    if (this.character?.radiantPath.hasSpokenIdeal()) {
+      const surgeTreeIds = this.character.radiantPath.getSurgeTrees();
+      surgeTreeIds.forEach(treeId => {
+        const surgeTree = getTalentTree(treeId);
+        if (surgeTree) {
+          const baseNode = surgeTree.nodes.find(n => n.tier === 0);
+          if (baseNode && !powers.some(p => p.id === baseNode.id)) {
+            powers.push(baseNode);
+          }
+        }
+      });
+    }
+
     return powers;
   }
 

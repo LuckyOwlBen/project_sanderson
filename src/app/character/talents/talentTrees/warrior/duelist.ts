@@ -111,6 +111,24 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Cognitive',
+                range: 'melee',
+                baseDamage: '4d6',
+                damageScaling: [
+                    { tier: 3, damage: '6d6' },
+                    { tier: 4, damage: '8d6' },
+                    { tier: 5, damage: '10d6' }
+                ],
+                resourceCost: { type: 'focus', amount: 1 },
+                specialMechanics: [
+                    "Move up to half movement rate before attacking",
+                    "Target must have 0 focus",
+                    "Ignores target's deflect value",
+                    "Cannot graze, only miss or hit"
+                ]
+            },
             otherEffects: ["Spend 1 focus, move half movement rate", "Attack vs Cognitive defense of 0-focus target", "Ignores deflect, deals +4d6 damage (no graze)", "Scales: 6d6 at T3, 8d6 at T4, 10d6 at T5"]
         }
     ],

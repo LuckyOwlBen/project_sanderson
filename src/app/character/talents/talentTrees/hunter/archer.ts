@@ -46,6 +46,15 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'ranged',
+                specialMechanics: [
+                    "Move up to 5 feet before attacking",
+                    "On hit or graze: target becomes your quarry"
+                ]
+            },
             otherEffects: ["Move up to 5 feet and make ranged attack", "On hit or graze, target becomes your quarry"]
         },
         {

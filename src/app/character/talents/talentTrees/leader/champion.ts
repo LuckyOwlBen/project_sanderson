@@ -28,6 +28,19 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Spiritual',
+                range: 'special',
+                resourceCost: { type: 'focus', amount: 1 },
+                specialMechanics: [
+                    "Move up to 10 feet before attacking",
+                    "Uses Athletics test (not attack test)",
+                    "Must be able to influence target",
+                    "Success: target has disadvantage on tests vs allies until end of their next turn",
+                    "If target resists: gain advantage on next test vs them"
+                ]
+            },
             otherEffects: ["Spend 1 focus to move 10 feet and test Athletics vs Spiritual", "Success: target has disadvantage on tests vs allies until end of their next turn", "If resisted: gain advantage on next test vs them"]
         },
         {

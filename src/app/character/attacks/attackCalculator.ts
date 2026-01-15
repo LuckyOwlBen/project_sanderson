@@ -172,11 +172,19 @@ export class AttackCalculator {
       return null;
     }
 
+    // Prefer structured attackDefinition if available
+    if (talent.attackDefinition) {
+      return this.generateAttackFromDefinition(talent);
+    }
+
+    // Fallback to text parsing (deprecated)
     const description = talent.description.toLowerCase();
     if (!description.includes('attack') && !description.includes('strike')) {
       return null;
     }
 
+    console.warn(`[DEPRECATED] Talent '${talent.id}' is using text-based attack parsing. Please migrate to attackDefinition.`);
+    
     // Parse talent description for attack details
     const attackDetails = this.parseTalentAttack(talent);
     if (!attackDetails) return null;
@@ -192,10 +200,82 @@ export class AttackCalculator {
       range: attackDetails.range,
       targetDefense: attackDetails.targetDefense,
       actionCost: typeof talent.actionCost === 'number' ? talent.actionCost : 1,
-      traits: attackDetails.traits,
+      // Surface surge/power effects as traits for visibility on attack cards
+      traits: [
+        ...(attackDetails.traits || []),
+        ...((talent.otherEffects || []) as string[])
+      ],
       description: talent.description,
       resourceCost: attackDetails.resourceCost,
     };
+  }
+
+  /**
+   * Generate attack from structured attackDefinition
+   */
+  private generateAttackFromDefinition(talent: TalentNode): Attack | null {
+    const def = talent.attackDefinition!;
+    const tier = Math.floor((this.character.level - 1) / 5) + 1; // Calculate tier: 1-5, 6-10, 11-15, 16-20, 21+
+
+    // Calculate attack bonus based on weapon type
+    let attackBonus = 0;
+    if (def.weaponType === 'light') {
+      attackBonus = this.character.skills.calculateSkillTotal(SkillType.LIGHT_WEAPONRY, this.character.attributes);
+    } else if (def.weaponType === 'heavy') {
+      attackBonus = this.character.skills.calculateSkillTotal(SkillType.HEAVY_WEAPONRY, this.character.attributes);
+    } else if (def.weaponType === 'unarmed') {
+      attackBonus = this.character.skills.calculateSkillTotal(SkillType.ATHLETICS, this.character.attributes);
+    } else {
+      // For 'any', use best weapon skill
+      const lightTotal = this.character.skills.calculateSkillTotal(SkillType.LIGHT_WEAPONRY, this.character.attributes);
+      const heavyTotal = this.character.skills.calculateSkillTotal(SkillType.HEAVY_WEAPONRY, this.character.attributes);
+      attackBonus = Math.max(lightTotal, heavyTotal);
+    }
+
+    // Get damage with tier scaling
+    let damage = def.baseDamage || '0';
+    if (def.damageScaling) {
+      // Find the highest tier scaling that applies
+      const applicableScaling = def.damageScaling
+        .filter(s => tier >= s.tier)
+        .sort((a, b) => b.tier - a.tier);
+      if (applicableScaling.length > 0) {
+        damage = applicableScaling[0].damage;
+      }
+    }
+
+    // Build traits array
+    const traits: string[] = [];
+    if (def.specialMechanics) {
+      def.specialMechanics.forEach(mechanic => {
+        traits.push(mechanic);
+      });
+    }
+
+    return {
+      id: `talent_${talent.id}`,
+      name: talent.name,
+      source: 'talent',
+      talentId: talent.id,
+      attackBonus,
+      damage,
+      damageType: def.damageType || 'impact',
+      range: this.formatRange(def.range),
+      targetDefense: def.targetDefense,
+      actionCost: typeof talent.actionCost === 'number' ? talent.actionCost : 1,
+      resourceCost: def.resourceCost,
+      traits,
+      description: talent.description,
+    };
+  }
+
+  /**
+   * Format range for display
+   */
+  private formatRange(range: 'melee' | 'ranged' | 'special'): string {
+    if (range === 'melee') return 'Melee';
+    if (range === 'ranged') return 'Ranged';
+    return 'Special';
   }
 
   /**
@@ -222,7 +302,7 @@ export class AttackCalculator {
     if (desc.includes('melee')) range = 'Melee';
     if (desc.includes('ranged')) range = 'Ranged';
 
-    // Determine weapon skill and attack bonus
+    // Determine skill and attack bonus
     let attackBonus = 0;
     let weaponSkill = '';
     
@@ -245,14 +325,39 @@ export class AttackCalculator {
       }
     }
 
+    // If not a weapon attack, try surge skills (e.g., Cohesion, Tension, etc.)
+    if (attackBonus === 0) {
+      const surgeSkillMap: Array<{ key: string; type: SkillType }> = [
+        { key: 'adhesion', type: SkillType.ADHESION },
+        { key: 'gravitation', type: SkillType.GRAVITATION },
+        { key: 'division', type: SkillType.DIVISION },
+        { key: 'abrasion', type: SkillType.ABRASION },
+        { key: 'illumination', type: SkillType.ILLUMINATION },
+        { key: 'transformation', type: SkillType.TRANSFORMATION },
+        { key: 'transportation', type: SkillType.TRANSPORTATION },
+        { key: 'cohesion', type: SkillType.COHESION },
+        { key: 'tension', type: SkillType.TENSION },
+        { key: 'progression', type: SkillType.PROGRESSION }
+      ];
+
+      const descLower = desc.toLowerCase();
+      const matched = surgeSkillMap.find(s => descLower.includes(`${s.key} attack`) || descLower.includes(`using ${s.key}`));
+      if (matched) {
+        attackBonus = this.character.skills.calculateSkillTotal(matched.type, this.character.attributes);
+      }
+    }
+
     // Parse damage from description and tier scaling
     const damage = this.parseTalentDamage(talent);
 
-    // Parse focus cost
+    // Parse resource cost (focus or investiture)
     let resourceCost;
-    const focusMatch = desc.match(/spend (\d+) focus/i);
+    const focusMatch = desc.match(/spend\s+(\d+)\s+focus/i);
+    const investMatch = desc.match(/spend\s+(\d+)\s+investiture/i);
     if (focusMatch) {
       resourceCost = { type: 'focus' as const, amount: parseInt(focusMatch[1]) };
+    } else if (investMatch) {
+      resourceCost = { type: 'investiture' as const, amount: parseInt(investMatch[1]) };
     }
 
     return {
