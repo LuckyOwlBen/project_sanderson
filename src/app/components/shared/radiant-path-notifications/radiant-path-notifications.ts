@@ -88,6 +88,10 @@ export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
     
     // Speak the First Ideal - this unlocks surge skills and surge trees
     this.character.radiantPath.speakIdeal(this.character.skills);
+    
+    // Unlock investiture now that the character has both spren and spoken ideal
+    this.character.unlockInvestiture();
+    this.character.recalculateResources();
 
     this.idealSpoken.emit();
   }

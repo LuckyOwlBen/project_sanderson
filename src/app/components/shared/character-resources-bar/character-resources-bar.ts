@@ -47,6 +47,10 @@ export class CharacterResourcesBar {
     };
   }
 
+  get showInvestiture(): boolean {
+    return this.character?.resources.investiture.isActive() || false;
+  }
+
   onResourceChanged(resourceName: string, newValue: number): void {
     this.resourceChanged.emit({ resourceName, newValue });
   }

@@ -157,7 +157,8 @@ export class CharacterStorageService {
       },
       investiture: {
         current: character.resources.investiture.current,
-        max: character.resources.investiture.max
+        max: character.resources.investiture.max,
+        isActive: character.resources.investiture.isActive()
       },
       radiantPath: character.radiantPath.toJSON(),
       inventory: character.inventory.serialize(),
@@ -245,7 +246,25 @@ export class CharacterStorageService {
       }
     }
     
+    if (data.radiantPath) {
+      character.radiantPath.fromJSON(data.radiantPath);
+    }
+    
+    // Unlock investiture if character has spren and has spoken ideal
+    if (character.radiantPath.hasSpren() && character.radiantPath.hasSpokenIdeal()) {
+      character.unlockInvestiture();
+      character.recalculateResources();
+    }
+    
+    // Restore investiture state after unlocking (if needed)
     if (data.investiture) {
+      // If investiture was saved as active, ensure it's unlocked
+      if (data.investiture.isActive) {
+        character.resources.investiture.unlock();
+        character.recalculateResources();
+      }
+      
+      // Set current value
       const investDiff = data.investiture.current - character.resources.investiture.current;
       if (investDiff !== 0) {
         if (investDiff > 0) {
@@ -254,10 +273,6 @@ export class CharacterStorageService {
           character.resources.investiture.spend(Math.abs(investDiff));
         }
       }
-    }
-    
-    if (data.radiantPath) {
-      character.radiantPath.fromJSON(data.radiantPath);
     }
     
     if (data.inventory) {

@@ -8,6 +8,7 @@
     (valueChanged)="onResourceChanged('Focus', $event)">
   </app-resource-tracker>
   <app-resource-tracker 
+    *ngIf="showInvestiture"
     [resource]="investitureResource"
     (valueChanged)="onResourceChanged('Investiture', $event)">
   </app-resource-tracker>

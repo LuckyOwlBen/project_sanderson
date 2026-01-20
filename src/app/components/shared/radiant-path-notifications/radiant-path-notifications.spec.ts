@@ -134,6 +134,23 @@ describe('RadiantPathNotifications', () => {
       // If no skills are added, at least verify the ideal was spoken
       expect(newSkillCount).toBeGreaterThanOrEqual(initialSkillCount);
     });
+
+    it('should unlock investiture when first ideal is spoken', () => {
+      // Grant a spren first
+      mockCharacter.radiantPath.grantSpren('Windrunner');
+      component.character = mockCharacter;
+      fixture.detectChanges();
+      
+      // Investiture should not be active before speaking ideal
+      expect(mockCharacter.resources.investiture.isActive()).toBeFalsy();
+      
+      component.speakFirstIdeal();
+      
+      // Investiture should be active after speaking ideal
+      expect(mockCharacter.resources.investiture.isActive()).toBeTruthy();
+      // Max investiture should be calculated (2 + max(awareness, presence))
+      expect(mockCharacter.resources.investiture.max).toBeGreaterThan(0);
+    });
   });
 
   describe('Helper Methods', () => {

@@ -561,6 +561,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
   onIdealSpoken(): void {
     console.log('[Character Sheet] First Ideal spoken, saving character');
+    // Investiture is already unlocked in the notification component
+    // Just update state and save
     this.characterState.updateCharacter(this.character!);
     this.saveCharacter();
     this.cdr.detectChanges();

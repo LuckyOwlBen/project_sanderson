@@ -22,7 +22,11 @@ describe('CharacterResourcesBar', () => {
     mockCharacter.name = 'Test Character';
     mockCharacter.level = 5;
     
-    // Set up initial resource values
+    // Initialize investiture as active for most tests
+    mockCharacter.resources.investiture.unlock();
+    mockCharacter.recalculateResources();
+    
+    // Set up initial resource values AFTER recalculation
     (mockCharacter.resources.health as any).currentValue = 15;
     (mockCharacter.resources.health as any).maxValue = 20;
     (mockCharacter.resources.focus as any).currentValue = 8;
@@ -98,6 +102,26 @@ describe('CharacterResourcesBar', () => {
     });
   });
 
+  describe('showInvestiture getter', () => {
+    it('should return false when investiture is not active', () => {
+      // Create a new character with inactive investiture
+      const inactiveCharacter = new Character();
+      component.character = inactiveCharacter;
+      
+      expect(component.showInvestiture).toBe(false);
+    });
+
+    it('should return true when investiture is active', () => {
+      // mockCharacter already has investiture active from beforeEach
+      expect(component.showInvestiture).toBe(true);
+    });
+
+    it('should return false when character is not set', () => {
+      component.character = null as any;
+      expect(component.showInvestiture).toBe(false);
+    });
+  });
+
   describe('onResourceChanged', () => {
     it('should emit resourceChanged event with correct data for Health', () => {
       let emittedEvent: any = null;
@@ -140,7 +164,24 @@ describe('CharacterResourcesBar', () => {
   });
 
   describe('template rendering', () => {
-    it('should render three resource trackers', () => {
+    it('should render two resource trackers when investiture is inactive', () => {
+      // Create a completely fresh fixture for this test
+      const testFixture = TestBed.createComponent(CharacterResourcesBar);
+      const testComponent = testFixture.componentInstance;
+      
+      // Create a new character with inactive investiture
+      const inactiveCharacter = new Character();
+      testComponent.character = inactiveCharacter;
+      testFixture.detectChanges();
+      
+      const compiled = testFixture.nativeElement as HTMLElement;
+      const resourceTrackers = compiled.querySelectorAll('app-resource-tracker');
+      
+      expect(resourceTrackers.length).toBe(2);
+    });
+
+    it('should render three resource trackers when investiture is active', () => {
+      // mockCharacter already has investiture active from beforeEach
       const compiled = fixture.nativeElement as HTMLElement;
       const resourceTrackers = compiled.querySelectorAll('app-resource-tracker');
       

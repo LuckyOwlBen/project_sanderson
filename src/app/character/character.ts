@@ -110,6 +110,41 @@ export class Character {
   }
 
   /**
+   * Unlock investiture - called when character speaks first ideal and has bonded spren
+   * Investiture should only be unlocked after both conditions are met
+   */
+  unlockInvestiture(): void {
+    if (this.radiantPathManager.hasSpren() && this.radiantPathManager.hasSpokenIdeal()) {
+      this.resourceManager.investiture.unlock();
+    }
+  }
+
+  /**
+   * Recalculate all resource max values based on current attributes and bonuses
+   * Should be called after attribute changes or bonuses are added/removed
+   */
+  recalculateResources(): void {
+    // Get investiture bonus from bonus system (investiture-max target in RESOURCE type)
+    const investitureBonus = this.bonusManager.bonuses.getBonusesFor(BonusType.RESOURCE, 'investiture-max');
+    
+    // Recalculate base resources
+    this.resourceManager.recalculateMaxValues(this.attributes);
+    
+    // Apply investiture bonus separately if active
+    if (this.resourceManager.investiture.isActive()) {
+      this.resourceManager.investiture.recalculateMax(this.attributes, investitureBonus);
+    }
+  }
+
+  /**
+   * Restore investiture to full - called between encounters
+   * Players restore investiture between encounters
+   */
+  restoreInvestitureBetweenEncounters(): void {
+    this.resourceManager.investiture.restoreFully();
+  }
+
+  /**
    * Get all universal abilities available to this character
    * Includes Radiant abilities and any other special one-off abilities
    */
