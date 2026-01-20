@@ -93,8 +93,20 @@ export class TalentView implements OnInit, OnDestroy {
         
         // Set baseline on first initialization in level-up mode
         if (!this.isInitialized && this.isLevelUpMode) {
-          this.baselineUnlockedTalents = new Set(character.unlockedTalents);
+          // Use stored baseline if it exists, otherwise create from current state
+          if (character.baselineUnlockedTalents) {
+            this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
+          } else {
+            // First time entering level-up mode - store baseline in character
+            this.baselineUnlockedTalents = new Set(character.unlockedTalents);
+            character.baselineUnlockedTalents = new Set(character.unlockedTalents);
+            // Don't call updateCharacter here - it will trigger the subscription again
+            // The baseline will be saved when the user makes their first change
+          }
           this.isInitialized = true;
+        } else if (this.isLevelUpMode && character.baselineUnlockedTalents) {
+          // Sync baseline from character on subsequent subscription triggers
+          this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
         }
         
         this.loadCorePathOptions();
@@ -402,6 +414,17 @@ export class TalentView implements OnInit, OnDestroy {
         this.unlockedTalents.add(talent.id);
         // Apply the talent effects
         this.character!.bonuses.unlockTalent(talent.id, talent);
+        
+        // In level-up mode, auto-unlocked tier-0 talents should be added to baseline
+        // since they don't cost a talent point
+        if (this.isLevelUpMode) {
+          this.baselineUnlockedTalents.add(talent.id);
+          if (!this.character.baselineUnlockedTalents) {
+            this.character.baselineUnlockedTalents = new Set();
+          }
+          this.character.baselineUnlockedTalents.add(talent.id);
+        }
+        
         // Persist to character state
         this.characterState.unlockTalent(talent.id);
       }
@@ -616,6 +639,11 @@ export class TalentView implements OnInit, OnDestroy {
     // Apply special talent effects (e.g., grant Singer forms)
     applyTalentEffects(this.character, talent.id);
     
+    // In level-up mode, ensure baseline is persisted
+    if (this.isLevelUpMode && this.baselineUnlockedTalents.size > 0) {
+      this.character.baselineUnlockedTalents = new Set(this.baselineUnlockedTalents);
+    }
+    
     // Persist to character state service
     this.characterState.unlockTalent(talent.id);
     
@@ -650,6 +678,9 @@ export class TalentView implements OnInit, OnDestroy {
         baselineSize: this.baselineUnlockedTalents.size
       });
       
+      // Reload core path options to update selected state
+      this.loadCorePathOptions();
+      
       this.calculateAvailablePoints();
       
       // Remove talent bonuses using the source format that matches unlockTalent
@@ -657,6 +688,11 @@ export class TalentView implements OnInit, OnDestroy {
       
       // Remove expertises granted by this talent
       this.character.bonuses.removeExpertisesByTalent(talentId);
+      
+      // In level-up mode, ensure baseline is persisted
+      if (this.isLevelUpMode && this.baselineUnlockedTalents.size > 0) {
+        this.character.baselineUnlockedTalents = new Set(this.baselineUnlockedTalents);
+      }
       
       // Persist to character state service
       this.characterState.removeTalent(talentId);

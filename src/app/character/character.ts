@@ -27,6 +27,7 @@ export class Character {
   cultures: CulturalInterface[] = [];
   private _selectedExpertises: ExpertiseSource[] = [];
   unlockedTalents: Set<string> = new Set<string>();
+  baselineUnlockedTalents?: Set<string>; // Talents unlocked before current level-up session
   
   // Singer forms tracking - stores IDs of unlocked forms
   unlockedSingerForms: string[] = [];

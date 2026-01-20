@@ -198,6 +198,10 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     const character = this.characterState.getCharacter();
     if (character && character.pendingLevelPoints > 0) {
       character.pendingLevelPoints -= 1;
+      
+      // Clear baseline talents tracking now that level-up is complete
+      delete character.baselineUnlockedTalents;
+      
       this.characterState.updateCharacter(character);
       console.log('[Character Creator] Level-up completed, pending points:', character.pendingLevelPoints);
       
