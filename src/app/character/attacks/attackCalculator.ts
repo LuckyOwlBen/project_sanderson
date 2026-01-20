@@ -5,7 +5,7 @@
  * Calculates attack bonuses, damage, and combines weapon/talent effects.
  */
 
-import { Attack, AttackSource, DefenseType, Stance } from './attackInterfaces';
+import { Attack, AttackSource, DefenseType, Stance, AttackModifier } from './attackInterfaces';
 import { Character } from '../character';
 import { InventoryItem } from '../inventory/inventoryItem';
 import { TalentNode, ActionCostCode, TalentPath } from '../talents/talentInterface';
@@ -128,20 +128,27 @@ export class AttackCalculator {
     // Check for Mighty talent to add damage bonus
     const damageModifiers = this.getMightyDamageBonus();
 
-    return {
+    // Check for ranged bonuses (e.g., Steady Aim)
+    const rangedBonusResult = this.getRangedBonusesForWeapon(props.range);
+    const damageBonus = damageModifiers + rangedBonusResult.damageBonus;
+
+    const attack: Attack = {
       id: `weapon_${weapon.id}`,
       name: weapon.name,
       source: 'weapon',
       weaponId: weapon.id,
       attackBonus,
-      damage: this.formatDamage(props.damage, damageModifiers),
+      damage: this.formatDamage(props.damage, damageBonus),
       damageType: props.damageType,
       range: props.range,
       targetDefense: this.getWeaponDefenseType(props.skill),
       actionCost: 1, // Standard Strike action
       traits,
       description: `Strike with ${weapon.name}. ${weapon.description}`,
+      customModifiers: rangedBonusResult.modifiers,
     };
+
+    return attack;
   }
 
   /**
@@ -525,6 +532,44 @@ export class AttackCalculator {
       return bonus;
     }
     return 0;
+  }
+
+  /**
+   * Get ranged weapon bonuses from talents (e.g., Steady Aim)
+   * Returns both the damage bonus value and formatted modifier info
+   */
+  private getRangedBonusesForWeapon(range: string): { damageBonus: number; modifiers: AttackModifier[] } {
+    const modifiers: AttackModifier[] = [];
+    let damageBonus = 0;
+
+    // Only apply to ranged weapons
+    if (!range || !range.includes('Ranged')) {
+      return { damageBonus: 0, modifiers: [] };
+    }
+
+    // Check for Steady Aim bonus (perception.ranks)
+    if (this.character.unlockedTalents.has('steady_aim')) {
+      const context = {
+        tier: Math.ceil(this.character.level / 4),
+        skillRanks: this.buildSkillRanksMap()
+      };
+      const bonus = this.character.bonuses.bonuses.evaluateBonus(
+        { type: BonusType.SKILL, target: 'ranged_damage', formula: 'perception.ranks', condition: 'on ranged weapon hit' },
+        context
+      );
+      if (bonus > 0) {
+        damageBonus += bonus;
+        modifiers.push({
+          source: 'steady_aim',
+          type: 'damage',
+          value: bonus,
+          description: `Steady Aim: +${bonus} damage (Perception ranks)`,
+          condition: 'on ranged weapon hit'
+        });
+      }
+    }
+
+    return { damageBonus, modifiers };
   }
 
   /**

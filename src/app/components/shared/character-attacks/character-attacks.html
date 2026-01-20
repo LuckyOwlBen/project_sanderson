@@ -78,6 +78,15 @@
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
               </div>
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
+                <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
+                <ul class="modifiers-list">
+                  <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
+                    <span class="modifier-description">{{ modifier.description }}</span>
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </details>
         </div>
@@ -155,6 +164,15 @@
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
               </div>
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
+                <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
+                <ul class="modifiers-list">
+                  <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
+                    <span class="modifier-description">{{ modifier.description }}</span>
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </details>
         </div>
@@ -231,6 +249,15 @@
                 <div class="traits-list">
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
+              </div>
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
+                <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
+                <ul class="modifiers-list">
+                  <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
+                    <span class="modifier-description">{{ modifier.description }}</span>
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </details>
