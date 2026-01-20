@@ -127,8 +127,8 @@ export class StartingEquipment implements OnInit, OnDestroy {
       inventory.addItem(kitItem.itemId, kitItem.quantity);
     });
 
-    // Add starting currency (converted from marks to broams)
-    inventory.addCurrency(this.startingKit.currency * 5);
+    // Add starting currency
+    inventory.addCurrency(this.startingKit.currency);
     
     this.hasAppliedKit = true;
     this.characterState.updateCharacter(this.character);

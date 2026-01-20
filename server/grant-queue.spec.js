@@ -59,57 +59,31 @@ describe('Server Grant Queue System', () => {
   });
 
   describe('Spren Grant Queue', () => {
-    it('should prevent duplicate spren grants', () => {
+    it('should queue spren grants and dequeue on ack', () => {
       const characterId = 'test-char-123';
       const pendingSprenGrants = new Map();
       const confirmedSprenGrants = new Set();
-      
-      // First grant
-      if (!confirmedSprenGrants.has(characterId) && !pendingSprenGrants.has(characterId)) {
-        pendingSprenGrants.set(characterId, { characterId, order: 'Windrunner' });
-      }
-      
-      expect(pendingSprenGrants.has(characterId)).toBe(true);
-      
-      // Duplicate grant attempt
-      if (!confirmedSprenGrants.has(characterId) && !pendingSprenGrants.has(characterId)) {
-        pendingSprenGrants.set(characterId, { characterId, order: 'Windrunner' });
-      }
-      
-      // Should still have only one entry
-      expect(pendingSprenGrants.size).toBe(1);
-    });
 
-    it('should mark spren as confirmed on ack', () => {
-      const characterId = 'test-char-123';
-      const confirmedSprenGrants = new Set();
-      const pendingSprenGrants = new Map();
-      
-      pendingSprenGrants.set(characterId, { characterId, order: 'Windrunner' });
-      
-      // Simulate ack
-      confirmedSprenGrants.add(characterId);
-      pendingSprenGrants.delete(characterId);
-      
+      // Queue two spren grants (duplicates allowed; client handles idempotency)
+      const queue = pendingSprenGrants.get(characterId) || [];
+      queue.push({ characterId, order: 'Windrunner' });
+      queue.push({ characterId, order: 'Windrunner' });
+      pendingSprenGrants.set(characterId, queue);
+
+      expect((pendingSprenGrants.get(characterId) || []).length).toBe(2);
+
+      // Ack first grant: mark confirmed once and dequeue
+      if (!confirmedSprenGrants.has(characterId)) {
+        confirmedSprenGrants.add(characterId);
+      }
+      const currentQueue = pendingSprenGrants.get(characterId) || [];
+      if (currentQueue.length > 0) {
+        currentQueue.shift();
+      }
+      pendingSprenGrants.set(characterId, currentQueue);
+
       expect(confirmedSprenGrants.has(characterId)).toBe(true);
-      expect(pendingSprenGrants.has(characterId)).toBe(false);
-    });
-
-    it('should prevent grants after confirmation', () => {
-      const characterId = 'test-char-123';
-      const confirmedSprenGrants = new Set();
-      const pendingSprenGrants = new Map();
-      
-      // Mark as confirmed
-      confirmedSprenGrants.add(characterId);
-      
-      // Attempt to grant
-      if (!confirmedSprenGrants.has(characterId) && !pendingSprenGrants.has(characterId)) {
-        pendingSprenGrants.set(characterId, { characterId, order: 'Windrunner' });
-      }
-      
-      // Should not be added to pending
-      expect(pendingSprenGrants.has(characterId)).toBe(false);
+      expect((pendingSprenGrants.get(characterId) || []).length).toBe(1);
     });
   });
 
@@ -215,13 +189,13 @@ describe('Server Grant Queue System', () => {
       
       // Setup pending grants
       pendingLevelUps.set(characterId, [{ characterId, newLevel: 6, grantedBy: 'GM', timestamp: new Date().toISOString() }]);
-      pendingSprenGrants.set(characterId, { characterId, order: 'Windrunner' });
+      pendingSprenGrants.set(characterId, [{ characterId, order: 'Windrunner' }]);
       pendingExpertiseGrants.set(characterId, [{ characterId, expertiseName: 'Alchemy', grantedBy: 'GM', timestamp: new Date().toISOString() }]);
       pendingItemGrants.set(characterId, [{ characterId, itemId: 'iron-sword', quantity: 1, grantedBy: 'GM', timestamp: new Date().toISOString() }]);
       
       // Simulate reconnect check
       const hasLevelUp = (pendingLevelUps.get(characterId) || []).length > 0;
-      const hasSpren = pendingSprenGrants.has(characterId);
+      const hasSpren = ((pendingSprenGrants.get(characterId) || []).length > 0);
       const hasExpertise = (pendingExpertiseGrants.get(characterId) || []).length > 0;
       const hasItem = (pendingItemGrants.get(characterId) || []).length > 0;
       

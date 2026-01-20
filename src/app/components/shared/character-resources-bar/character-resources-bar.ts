@@ -38,12 +38,26 @@ export class CharacterResourcesBar {
   }
 
   get investitureResource(): Resource {
+    const current = this.character?.resources.investiture.current || 0;
+    const max = this.character?.resources.investiture.max || 0;
+    const wealth = this.character?.inventory.getCurrency() || 0;
+    const requiredWealth = max * 3;
+    const canRestore = current < max ? wealth >= requiredWealth : true;
+    
+    let restoreWarning: string | undefined;
+    if (current < max && !canRestore) {
+      const deficit = requiredWealth - wealth;
+      restoreWarning = `Need ${deficit} more marks in spheres to restore Investiture (requires ${requiredWealth} marks total)`;
+    }
+    
     return {
       name: 'Investiture',
-      current: this.character?.resources.investiture.current || 0,
-      max: this.character?.resources.investiture.max || 0,
+      current,
+      max,
       icon: 'auto_awesome',
-      color: '#9c27b0'
+      color: '#9c27b0',
+      canRestore,
+      restoreWarning
     };
   }
 

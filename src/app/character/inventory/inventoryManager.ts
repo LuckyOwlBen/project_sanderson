@@ -6,7 +6,7 @@ import type { Character } from '../character';
 export class InventoryManager {
   private items: Map<string, InventoryItem> = new Map();
   private equippedItems: Map<string, string> = new Map(); // slot -> itemId
-  private currency: number = 0; // stored in marks
+  private currencyInChips: number = 0; // stored in chips (5 chips = 1 mark)
   private bonusManager: BonusManager | null = null;
   private character: Character | null = null;
 
@@ -45,8 +45,8 @@ export class InventoryManager {
       this.addItem(itemId, quantity);
     });
 
-    // Set currency
-    this.currency = kit.currency;
+    // Set currency (convert marks to chips: 1 mark = 5 chips)
+    this.currencyInChips = Math.round(kit.currency * 5);
 
     return true;
   }
@@ -274,37 +274,69 @@ export class InventoryManager {
 
   // ===== CURRENCY =====
 
+  /**
+   * Get currency in marks (for display)
+   * Internally stored as chips to avoid floating-point errors
+   */
   getCurrency(): number {
-    return this.currency;
+    return this.currencyInChips / 5;
+  }
+
+  /**
+   * Get raw currency in chips (for calculations)
+   */
+  getCurrencyInChips(): number {
+    return this.currencyInChips;
   }
 
   setCurrency(amount: number): void {
-    this.currency = Math.max(0, amount);
+    // Input is in marks, convert to chips for internal storage
+    this.currencyInChips = Math.round(amount * 5);
   }
 
   addCurrency(amount: number): void {
-    this.currency += amount;
+    // Input is in marks, convert to chips
+    this.currencyInChips += Math.round(amount * 5);
   }
 
   removeCurrency(amount: number): boolean {
-    if (this.currency >= amount) {
-      this.currency -= amount;
+    // Input is in marks, convert to chips
+    const chipsNeeded = Math.round(amount * 5);
+    if (this.currencyInChips >= chipsNeeded) {
+      this.currencyInChips -= chipsNeeded;
+      return true;
+    }
+    return false;
+  }
+
+  removeCurrencyInChips(chipsAmount: number): boolean {
+    if (this.currencyInChips >= chipsAmount) {
+      this.currencyInChips -= chipsAmount;
       return true;
     }
     return false;
   }
 
   canAfford(price: number): boolean {
-    return this.currency >= price;
+    // Price is in marks, convert to chips for comparison
+    const priceInChips = Math.round(price * 5);
+    return this.currencyInChips >= priceInChips;
+  }
+
+  canAffordInChips(priceInChips: number): boolean {
+    return this.currencyInChips >= priceInChips;
   }
 
   // Currency conversion for display
   convertToMixedDenominations(marks: number): CurrencyConversion {
     // Convert marks to chips/marks/broams using diamond rates
     // Diamond: 1 mark = 5 chips, 4 marks = 1 broam
-    const broams = Math.floor(marks / 4);
-    const remainingMarks = marks % 4;
-    const chips = 0; // We'll keep it simple and not convert to chips automatically
+    // Work with chips internally to avoid floating-point issues
+    const totalChips = Math.round(marks * 5);
+    const broams = Math.floor(totalChips / 20); // 4 marks = 20 chips
+    const remainingChips = totalChips % 20;
+    const remainingMarks = Math.floor(remainingChips / 5);
+    const chips = remainingChips % 5;
 
     return {
       chips,
@@ -315,20 +347,21 @@ export class InventoryManager {
 
   convertFromMixedDenominations(conversion: CurrencyConversion): number {
     // Convert everything to marks
-    return (conversion.broams * 4) + conversion.marks + (conversion.chips * 0.2);
+    return (conversion.broams * 4) + conversion.marks + (conversion.chips / 5);
   }
 
   // ===== TRANSACTIONS =====
 
   purchaseItem(itemId: string, price: number, quantity: number = 1): boolean {
-    const totalCost = price * quantity;
+    const totalCostInMarks = price * quantity;
+    const totalCostInChips = Math.round(totalCostInMarks * 5);
     
-    if (!this.canAfford(totalCost)) {
+    if (!this.canAffordInChips(totalCostInChips)) {
       return false;
     }
 
     if (this.addItem(itemId, quantity)) {
-      this.removeCurrency(totalCost);
+      this.removeCurrencyInChips(totalCostInChips);
       return true;
     }
 
@@ -341,10 +374,11 @@ export class InventoryManager {
     }
 
     // Sell for half price
-    const sellPrice = Math.floor(price * 0.5);
+    const sellPriceInMarks = (price * 0.5);
+    const sellPriceInChips = Math.round(sellPriceInMarks * quantity * 5);
     
     if (this.removeItem(itemId, quantity)) {
-      this.addCurrency(sellPrice * quantity);
+      this.currencyInChips += sellPriceInChips;
       return true;
     }
 
@@ -383,13 +417,14 @@ export class InventoryManager {
         }
       })),
       equippedItems: Array.from(this.equippedItems.entries()),
-      currency: this.currency
+      currencyInChips: Number.isFinite(this.currencyInChips) ? this.currencyInChips : 0
     };
   }
 
   deserialize(data: any): void {
     this.items.clear();
     this.equippedItems.clear();
+    this.currencyInChips = 0; // Reset to default
 
     if (data.items) {
       data.items.forEach((itemData: any) => {
@@ -418,8 +453,12 @@ export class InventoryManager {
       });
     }
 
-    if (data.currency !== undefined) {
-      this.currency = data.currency;
+    // Handle both old (currency in marks) and new (currencyInChips) formats for migration
+    if (data.currencyInChips !== undefined && typeof data.currencyInChips === 'number') {
+      this.currencyInChips = Math.max(0, Math.round(data.currencyInChips));
+    } else if (data.currency !== undefined && typeof data.currency === 'number') {
+      // Migration: convert old marks to chips
+      this.currencyInChips = Math.max(0, Math.round(data.currency * 5));
     }
   }
 }

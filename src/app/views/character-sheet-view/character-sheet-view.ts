@@ -126,9 +126,16 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         } else if (character && !this.character) {
           // Initial load if no character ID in route
           this.character = character;
+          this.characterId = (character as any).id || this.characterId;
           this.portraitUrl = (character as any).portraitUrl || null;
           this.sessionNotes = (character as any).sessionNotes || '';
           setTimeout(() => this.cdr.detectChanges(), 0);
+          
+          // Emit player-join if WebSocket is already connected
+          if (this.websocketService.isConnected()) {
+            console.log('[Character Sheet] Character loaded via state, emitting player-join');
+            this.emitPlayerJoin();
+          }
         }
       });
 
@@ -321,6 +328,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
             ancestry: character.ancestry
           });
           this.character = character;
+          this.characterId = id; // Ensure characterId is set from route
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.sessionNotes = (character as any).sessionNotes || '';

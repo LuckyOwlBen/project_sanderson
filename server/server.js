@@ -46,7 +46,7 @@ const pendingLevelUps = new Map();
 const lastConfirmedLevels = new Map();
 
 // Track spren grant delivery state
-// pendingSprenGrants stores queued spren grants per characterId
+// pendingSprenGrants stores queued spren grants per characterId (array of grant objects)
 // confirmedSprenGrants tracks which characters have received spren (Set of characterIds)
 const pendingSprenGrants = new Map();
 const confirmedSprenGrants = new Set();
@@ -180,13 +180,14 @@ function sendPendingLevelUp(characterId) {
 }
 
 function sendPendingSprenGrant(characterId) {
-  const grant = pendingSprenGrants.get(characterId);
-  if (!grant) {
+  const queue = pendingSprenGrants.get(characterId);
+  if (!queue || queue.length === 0) {
     return;
   }
 
   const targetSocket = findSocketIdByCharacterId(characterId);
   if (targetSocket) {
+    const grant = queue[0];
     console.log(`[GM Action] ⭐ Sending pending spren grant to socket ${targetSocket}`);
     io.to(targetSocket).emit('spren-granted', grant);
   } else {
@@ -621,19 +622,7 @@ io.on('connection', (socket) => {
     const { characterId, order, sprenType, surgePair, philosophy } = data;
     console.log(`[GM Action] ⭐⭐⭐ RECEIVED GM-GRANT-SPREN REQUEST ⭐⭐⭐`);
     console.log(`[GM Action] Granting ${order} spren to character ${characterId}`);
-    
-    // Check if spren already confirmed
-    if (confirmedSprenGrants.has(characterId)) {
-      console.warn(`[GM Action] ⚠️ Character ${characterId} already has confirmed spren grant - ignoring duplicate`);
-      return;
-    }
-
-    // Check if already queued
-    if (pendingSprenGrants.has(characterId)) {
-      console.warn(`[GM Action] ⚠️ Spren grant already queued for ${characterId} - ignoring duplicate`);
-      return;
-    }
-    
+    // Always accept and queue spren grants; client handles idempotency.
     const targetSocket = findSocketIdByCharacterId(characterId);
     
     const payload = {
@@ -645,8 +634,10 @@ io.on('connection', (socket) => {
     };
 
     // Queue the grant
-    pendingSprenGrants.set(characterId, payload);
-    console.log(`[GM Action] ⭐ Spren grant queued for ${characterId}`);
+    const queue = pendingSprenGrants.get(characterId) || [];
+    queue.push(payload);
+    pendingSprenGrants.set(characterId, queue);
+    console.log(`[GM Action] ⭐ Spren grant queued for ${characterId}. Queue size: ${queue.length}`);
 
     // Send if player is online
     if (targetSocket) {
@@ -663,6 +654,16 @@ io.on('connection', (socket) => {
     
     // Broadcast to all GM clients for tracking
     io.emit('store-transaction', data);
+
+    // Immediately acknowledge acceptance back to sender
+    const ackId = `${Date.now()}-${Math.random()}`;
+    socket.emit('store-transaction-accepted', {
+      ackId,
+      storeId,
+      characterId,
+      totalCost,
+      timestamp: timestamp || new Date().toISOString()
+    });
   });
 
   // GM grants item to a player
@@ -812,9 +813,19 @@ io.on('connection', (socket) => {
 
     console.log(`[Spren] ✅ Ack received for ${characterId} spren: ${order}`);
     
-    // Mark as confirmed and remove from pending
-    confirmedSprenGrants.add(characterId);
-    pendingSprenGrants.delete(characterId);
+    // Mark first confirmation and dequeue current pending grant
+    if (!confirmedSprenGrants.has(characterId)) {
+      confirmedSprenGrants.add(characterId);
+    }
+
+    const queue = pendingSprenGrants.get(characterId) || [];
+    if (queue.length > 0) {
+      queue.shift();
+    }
+    pendingSprenGrants.set(characterId, queue);
+
+    // Send next queued spren grant if any
+    sendPendingSprenGrant(characterId);
   });
 
   socket.on('expertise-grant-ack', ({ characterId, expertiseName }) => {

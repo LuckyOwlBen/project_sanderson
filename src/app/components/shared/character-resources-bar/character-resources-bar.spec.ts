@@ -122,6 +122,60 @@ describe('CharacterResourcesBar', () => {
     });
   });
 
+  describe('investiture wealth requirement', () => {
+    it('should allow restoration when character has sufficient wealth', () => {
+      // Set investiture to not full
+      (mockCharacter.resources.investiture as any).currentValue = 3;
+      // Max is 5, so need 15 marks (5 * 3)
+      mockCharacter.inventory.setCurrency(15);
+      
+      const investitureResource = component.investitureResource;
+      
+      expect(investitureResource.canRestore).toBe(true);
+      expect(investitureResource.restoreWarning).toBeUndefined();
+    });
+
+    it('should block restoration when character lacks sufficient wealth', () => {
+      // Set investiture to not full
+      (mockCharacter.resources.investiture as any).currentValue = 3;
+      // Max is 5, so need 15 marks but only have 10
+      mockCharacter.inventory.setCurrency(10);
+      
+      const investitureResource = component.investitureResource;
+      
+      expect(investitureResource.canRestore).toBe(false);
+      expect(investitureResource.restoreWarning).toContain('Need 5 more marks');
+      expect(investitureResource.restoreWarning).toContain('requires 15 marks total');
+    });
+
+    it('should not show warning when investiture is already full', () => {
+      // Set investiture to full
+      (mockCharacter.resources.investiture as any).currentValue = 5;
+      (mockCharacter.resources.investiture as any).maxValue = 5;
+      // No wealth needed when already full
+      mockCharacter.inventory.setCurrency(0);
+      
+      const investitureResource = component.investitureResource;
+      
+      expect(investitureResource.canRestore).toBe(true);
+      expect(investitureResource.restoreWarning).toBeUndefined();
+    });
+
+    it('should calculate correct wealth requirement for different max values', () => {
+      // Higher max investiture
+      (mockCharacter.resources.investiture as any).currentValue = 2;
+      (mockCharacter.resources.investiture as any).maxValue = 10;
+      // Need 30 marks (10 * 3), have 20
+      mockCharacter.inventory.setCurrency(20);
+      
+      const investitureResource = component.investitureResource;
+      
+      expect(investitureResource.canRestore).toBe(false);
+      expect(investitureResource.restoreWarning).toContain('Need 10 more marks');
+      expect(investitureResource.restoreWarning).toContain('requires 30 marks total');
+    });
+  });
+
   describe('onResourceChanged', () => {
     it('should emit resourceChanged event with correct data for Health', () => {
       let emittedEvent: any = null;
