@@ -14,8 +14,13 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'education' }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: ["Gain utility expertise in Armor/Equipment/Weapon Crafting (choose one)", "Gain amplifying painrial, numbing painrial, or spanreeds+emotion bracelet", "Crafting/fabrial invention: Opportunity range +2, material costs halved"]
+            bonuses: [
+                { type: BonusType.SKILL, target: 'crafting', value: 2, condition: 'Opportunity range expansion' }
+            ],
+            expertiseGrants: [
+                { type: 'choice', expertises: ['Armor Crafting', 'Equipment Crafting', 'Weapon Crafting'] }
+            ],
+            otherEffects: ["Gain amplifying painrial, numbing painrial, or spanreeds+emotion bracelet", "Material costs halved"]
         },
         {
             id: "prized_acquisition",
@@ -28,7 +33,10 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Gain Fabrial Crafting specialist expertise", "Gain gemstone for unique fabrial (tier = character tier)", "First crafting with gem ignores time requirements", "Can salvage fabrial to recover gem", "Can replace lost gem after long rest"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Fabrial Crafting'] }
+            ],
+            otherEffects: ["Gain gemstone for unique fabrial (tier = character tier)", "Can salvage fabrial to recover gem", "Can replace lost gem after long rest"]
         },
         {
             id: "deep_study",
@@ -80,7 +88,10 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Raise stakes on fabrial attack", "Spend opportunity: Strike as free action (doesn't count against limit)", "GM spends opportunity: add drawback until DC 15 Crafting test resolves it"]
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Strike with fabrial', frequency: 'once-per-round' }
+            ],
+            otherEffects: ["Raise stakes on fabrial attack", "GM can add drawback until DC 15 Crafting test resolves it"]
         },
         {
             id: "experimental_tinkering",
@@ -92,8 +103,10 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'fine_handiwork' }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: ["Crafting/fabrial: Opportunity range +1, time halved", "Forgo long rest to reconfigure Prized Acquisition fabrial", "Reconfiguration: no materials needed, no time requirement, same tier or lower", "Failed spren trap: old fabrial intact, can't reconfigure until next long rest", "Success: old fabrial lost"]
+            bonuses: [
+                { type: BonusType.SKILL, target: 'crafting', value: 1, condition: 'Opportunity range expansion' }
+            ],
+            otherEffects: ["Crafting time halved", "Forgo long rest to reconfigure Prized Acquisition fabrial", "Reconfiguration: no materials needed, no time requirement, same tier or lower", "Failed spren trap: old fabrial intact, can't reconfigure until next long rest", "Success: old fabrial lost"]
         },
         {
             id: "overwhelm_with_detail",
@@ -107,7 +120,10 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Spend 2 focus to use Lore modifier for cognitive or spiritual test"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when making cognitive or spiritual test', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Use Lore modifier for cognitive or spiritual test instead of usual skill"]
         }
     ],
 }

@@ -16,7 +16,16 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Ally can raise stakes on command die test", "If Complication rolled, you recover 1 focus"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'recover',
+                    amount: 1,
+                    trigger: 'when ally rolls Complication on raised stakes test',
+                    condition: 'if ally chose to raise stakes on command die test'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "tactical_ploy",
@@ -28,7 +37,17 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Test Deception vs Cognitive", "Success: target loses 1 reaction and has disadvantage on next Cognitive/Spiritual test", "If resisted: gain advantage on next test vs them"]
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Cognitive',
+                range: 'special',
+                specialMechanics: [
+                    "Uses Deception test",
+                    "Success: target loses 1 reaction and has disadvantage on next Cognitive/Spiritual test",
+                    "If target resists: gain advantage on next test vs them until end of your next turn"
+                ]
+            },
+            otherEffects: []
         },
         {
             id: "rumormonger",
@@ -41,7 +60,22 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Spend 2 focus to add Opportunity to misinformation/rumor tests", "Gain Scandal utility expertise", "Requires having a patron"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'when making test to spread misinformation or gather rumors',
+                    condition: 'to add Opportunity to result'
+                }
+            ],
+            expertiseGrants: [
+                {
+                    type: 'fixed',
+                    expertises: ['Scandal']
+                }
+            ],
+            otherEffects: ["Requires having a patron"]
         },
         {
             id: "well_dressed",
@@ -53,9 +87,30 @@ export const POLITICO_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'rumormonger' }
             ],
             tier: 2,
-            bonuses: [],
-            grantsAdvantage: ["first_deception_per_scene", "first_leadership_per_scene", "first_persuasion_per_scene"],
-            otherEffects: ["While wearing Presentable armor/fashionable clothing: advantage on first Deception/Leadership/Persuasion test per scene", "Gain Fashion cultural expertise"]
+            bonuses: [
+                {
+                    type: BonusType.SKILL,
+                    target: 'Deception',
+                    value: 1
+                },
+                {
+                    type: BonusType.SKILL,
+                    target: 'Leadership',
+                    value: 1
+                },
+                {
+                    type: BonusType.SKILL,
+                    target: 'Persuasion',
+                    value: 1
+                }
+            ],
+            expertiseGrants: [
+                {
+                    type: 'fixed',
+                    expertises: ['Fashion']
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "baleful",
@@ -67,7 +122,16 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Characters resisting your influence must spend additional focus equal to your tier"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 'tier',
+                    trigger: 'when character resists your influence',
+                    frequency: 'unlimited'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "set_at_odds",
@@ -80,7 +144,32 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Choose 2+ targets, spend that many focus", "Test Leadership vs highest Spiritual defense", "Success: targets become hostile to each other", "Resisting costs additional focus equal to Leadership ranks"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 'number of chosen targets',
+                    trigger: 'when using Set at Odds',
+                    condition: 'to seed division'
+                },
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 'Leadership ranks',
+                    trigger: 'when target resists influence',
+                    condition: 'additional cost for resisting'
+                }
+            ],
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'Hostile',
+                    trigger: 'on successful Leadership test against highest Spiritual defense',
+                    target: 'all-enemies',
+                    duration: 'until they find way to resolve conflict'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "shrewd_command",
@@ -93,8 +182,24 @@ export const POLITICO_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'rumormonger' }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: ["Spend 1 focus to add command die to Deception/Insight/Leadership test", "Increase command die size by one (d4→d6, d6→d8, etc.)"]
+            bonuses: [
+                {
+                    type: BonusType.DEFENSE,
+                    target: 'command-die',
+                    value: 1,
+                    condition: 'increase by one die size (d4→d6, d6→d8, etc.)'
+                }
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'before Deception, Insight, or Leadership test',
+                    condition: 'to add command die result to roll'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "grand_deception",
@@ -107,7 +212,16 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Spend 3 focus, test Deception DC 15", "Success: reveal established detail was a ruse (must be plausible)", "GM determines validity of ruse"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 3,
+                    trigger: 'when using Grand Deception',
+                    condition: 'to make DC 15 Deception test'
+                }
+            ],
+            otherEffects: ["Must be plausible", "GM determines final validity of ruse"]
         }
     ],
 }

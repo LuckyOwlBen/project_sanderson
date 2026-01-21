@@ -14,7 +14,9 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Once per scene", "Target ally rolls recovery die and recovers focus equal to result"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 'recovery_die', trigger: 'when target uses this talent', frequency: 'once-per-scene' }
+            ]
         },
         {
             id: "applied_motivation",
@@ -27,7 +29,9 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["When causing focus recovery, add additional focus equal to half Lore ranks (rounded up)"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 'half_lore_ranks_rounded_up', trigger: 'when you cause focus recovery', frequency: 'unlimited' }
+            ]
         },
         {
             id: "composed",
@@ -39,7 +43,10 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Increase max and current focus by tier", "Increase focus by 1 when tier increases"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 'tier', trigger: 'on talent acquisition', frequency: 'once-per-scene', condition: 'max and current focus increase' },
+                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'when tier increases', frequency: 'unlimited', condition: 'max and current focus increase' }
+            ]
         },
         {
             id: "customary_garb",
@@ -50,8 +57,10 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'rousing_presence' }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: ["While wearing Presentable armor or appropriate clothing: +2 Physical and Spiritual defenses"]
+            bonuses: [
+                { type: BonusType.DEFENSE, target: 'physical', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' },
+                { type: BonusType.DEFENSE, target: 'spiritual', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' }
+            ]
         },
         {
             id: "devoted_presence",
@@ -79,6 +88,9 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'after allied Determined condition is used', frequency: 'unlimited', condition: 'up to Discipline rank allies' }
+            ]
         },
         {
             id: "sage_counsel",
@@ -105,6 +117,9 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using Rousing Presence', frequency: 'unlimited', condition: 'to increase a target defense by 2 until end of next round' }
+            ]
         }
     ],
 }

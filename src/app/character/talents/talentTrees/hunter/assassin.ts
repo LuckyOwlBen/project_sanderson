@@ -20,8 +20,7 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             traitGrants: [
                 { targetItems: ['knife', 'sling'], traits: ['Deadly', 'Quickdraw'], expert: true }
-            ],
-            otherEffects: ["Gain Knives weapon expertise", "Gain Slings weapon expertise", "Knives and slings gain Deadly and Quickdraw traits"]
+            ]
         },
         {
             id: "startling_blow",
@@ -44,7 +43,9 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
                     "Only works on targets of same size or smaller"
                 ]
             },
-            otherEffects: ["Attack unarmed/improvised weapon vs Cognitive defense", "On hit or graze, target becomes Surprised until end of next turn", "Only works on targets of same size or smaller"]
+            conditionEffects: [
+                { type: 'apply', condition: 'Surprised', trigger: 'on hit or graze', target: 'target', duration: 'end of your next turn', details: 'only works on targets of same size or smaller' }
+            ]
         },
         {
             id: "shadowing",
@@ -59,7 +60,11 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             tier: 2,
             bonuses: [],
             grantsAdvantage: ["avoid_being_sensed_by_quarry"],
-            otherEffects: ["Quarry has disadvantage on tests to sense you", "While in cover/obscured, can spend 3 focus after succeeding vs Spiritual to mark target as quarry"]
+            grantsDisadvantage: ["quarry_sensing_you"],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 3, trigger: 'when succeeding vs Spiritual defense while in cover', condition: 'to designate target as quarry' }
+            ],
+            otherEffects: ["While in cover/obscured, can mark target as quarry after test vs Spiritual"]
         },
         {
             id: "cold_eyes",
@@ -73,7 +78,10 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             bonuses: [
                 { type: BonusType.RESOURCE, target: 'focus_recovery', value: 1, condition: 'after killing/incapacitating quarry' }
             ],
-            otherEffects: ["After killing/incapacitating quarry, recover 1 focus and designate new quarry"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'after killing/incapacitating quarry' }
+            ],
+            otherEffects: ["Can designate new enemy as quarry after killing/incapacitating previous quarry"]
         },
         {
             id: "fatal_thrust",
@@ -103,8 +111,7 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
                     "Target must be Surprised, doesn't sense you, or doesn't view you as a threat",
                     "Each max die roll subtracts 2 from target's injury roll"
                 ]
-            },
-            otherEffects: ["Attack vs Cognitive defense with light weapon against Surprised/unaware target", "Discreet weapon grants two advantages", "Add 4d4 damage (6d4 at tier 3, 8d4 at tier 4, 10d4 at tier 5)", "Each max die roll subtracts 2 from target's injury roll"]
+            }
         },
         {
             id: "mighty",
@@ -116,9 +123,8 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [
-                { type: BonusType.SKILL, target: 'damage', formula: '1 + tier' }
-            ],
-            otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
+                { type: BonusType.DERIVED, target: 'damage_per_action', formula: '1 + tier', condition: 'per action spent on attack' }
+            ]
         },
         {
             id: "sidestep",
@@ -132,7 +138,11 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Gain 1 reaction for Dodge only at combat start and each turn start", "Cannot use while wearing armor with deflect 2+"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Dodge only', timing: 'start-of-combat', frequency: 'unlimited' },
+                { type: 'reaction', count: 1, restrictedTo: 'Dodge only', timing: 'start-of-turn', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Cannot use while wearing armor with deflect 2+"]
         },
         {
             id: "swift_strikes",
@@ -144,7 +154,15 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Spend 1 focus to Strike again with same hand"]
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'special',
+                resourceCost: { type: 'focus', amount: 1 },
+                specialMechanics: [
+                    "Make a second Strike with a hand already used for Strike this turn"
+                ]
+            }
         }
     ],
 }

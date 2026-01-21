@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const PROGRESSION_SURGE_TREE: TalentTree = {
     pathName: "Progression",
@@ -31,9 +32,13 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'Spend 2 Investiture to recover from temporary injury',
-                'Spend 3 Investiture to recover from permanent injury'
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'temporary-injury-recovery', frequency: 'unlimited' },
+              { resource: 'investiture', effect: 'spend', amount: 3, trigger: 'permanent-injury-recovery', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'temporary-injury-removed', trigger: 'on-spend-2-investiture', target: 'target', duration: 'instant', details: 'Affects self or touched willing target' },
+              { type: 'apply', condition: 'permanent-injury-removed', trigger: 'on-spend-3-investiture', target: 'target', duration: 'instant', details: 'Affects self or touched willing target' }
             ]
         },
         {
@@ -46,11 +51,18 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'PROGRESSION', value: 1 }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture for area attack',
-                'Damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.',
-                'Spend C to Immobilize targets until end of your next turn'
+            bonuses: [
+              { type: BonusType.DERIVED, target: 'explosive-growth-attack', formula: '2d4 base, +1 die size per rank', scaling: true, condition: 'Damage die scales with Progression ranks' }
+            ],
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'area-attack-activation', condition: 'per activation' },
+              { resource: 'focus', effect: 'spend', amount: 1, trigger: 'immobilize-enhancement', condition: 'per hit (optional)' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'Immobilized', trigger: 'attack-hit-with-focus-spent', target: 'target', duration: 'end-of-next-turn', details: 'Applies to targets hit by Explosive Growth when focus spent' }
+            ],
+            movementEffects: [
+              { type: 'special-movement', timing: 'always', condition: 'Immobilized targets cannot move' }
             ]
         },
         {
@@ -64,10 +76,15 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'PROGRESSION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'Recover 1d6 + Progression modifier health (1d8 at rank 3, etc.)',
-                'With 1+ Investiture, you and Regrowth targets add Progression modifier to injury rolls'
+            bonuses: [
+              { type: BonusType.DERIVED, target: 'regeneration-healing', formula: '1d6 base, +1 die size per rank', scaling: true, condition: 'Regenerate healing die scales with ranks' },
+              { type: BonusType.DERIVED, target: 'injury-rolls', formula: 'progression-modifier', scaling: false, condition: 'with 1+ Investiture' }
+            ],
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'recover', amount: '1d6+mod', trigger: 'regenerate-action', condition: '1+ investiture' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'enhanced-injury-resistance', trigger: 'investiture-active', target: 'all-allies', duration: 'while-invested', details: 'Applies to self and characters infused with Regrowth' }
             ]
         },
         {
@@ -80,10 +97,12 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'PROGRESSION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'DC 15 Progression test to grow plant beyond normal limits',
-                'Plant health increases: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.'
+            bonuses: [
+              { type: BonusType.DERIVED, target: 'plant-overgrowth', formula: '2d4 base, +1 die size per rank', scaling: true, condition: 'Plant health increase scales with ranks' }
+            ],
+            resourceTriggers: [],
+            conditionEffects: [
+              { type: 'apply', condition: 'overgrown', trigger: 'progression-test-success-dc-15', target: 'target', duration: 'permanent', details: 'Applies to plant target' }
             ]
         },
         {
@@ -97,7 +116,10 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ['Regrowth infusions expend 1 Investiture per X rounds (X = Progression ranks)']
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'reduce-cost', amount: '1 per X rounds', trigger: 'regrowth-maintenance', frequency: 'once-per-round', condition: 'X = progression-ranks' }
+            ],
+            conditionEffects: []
         },
         {
             id: 'progression_reliable_progression',
@@ -110,10 +132,11 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'PROGRESSION', value: 2 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Increase low die rolls to match Progression ranks',
-                'Applies to Explosive Growth, Overgrowth, Swift Regeneration, and Regrowth healing'
+            bonuses: [
+              { type: BonusType.DERIVED, target: 'progression-scaled-dice', formula: 'progression-ranks', scaling: false, condition: 'Minimum die result equals Progression ranks' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'reliable-rolls', trigger: 'low-roll-on-progression-die', target: 'self', duration: 'instant', details: 'Set low die results to Progression ranks minimum' }
             ]
         },
         {
@@ -127,9 +150,12 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Spend 3 Investiture to resurrect recently deceased (within 1 minute)',
-                'Target returns Unconscious with 0 health'
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 3, trigger: 'resurrection', frequency: 'unlimited', condition: 'target-died-within-1-minute' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'resurrection-complete', trigger: 'action-completion', target: 'target', duration: 'instant', details: 'Removes Dead from a recently deceased willing character' },
+              { type: 'apply', condition: 'Unconscious', trigger: 'resurrection-completion', target: 'target', duration: 'until-healed', details: 'Applies to resurrected character' }
             ]
         },
         {
@@ -141,8 +167,13 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'PROGRESSION', value: 4 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: ['Progression and its talents cost 1 fewer C']
+            bonuses: [
+              { type: BonusType.DERIVED, target: 'progression-talents', value: -1, scaling: false, condition: 'Progression talents cost 1 fewer focus' }
+            ],
+            resourceTriggers: [
+              { resource: 'focus', effect: 'reduce-cost', amount: 1, trigger: 'progression-talent-activation', frequency: 'unlimited' }
+            ],
+            conditionEffects: []
         }
     ]
 };

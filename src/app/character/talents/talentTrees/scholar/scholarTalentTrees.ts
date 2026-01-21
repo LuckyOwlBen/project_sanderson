@@ -14,13 +14,16 @@ export const SCHOLAR_TALENT_TREE: TalentPath = {
         {
             id: 'education',
             name: 'Education',
-            description: 'Temporarily gain a cultural or utility expertise and a rank in two non-surge cognative skills. Reassign these after a long rest with library access.',
+            description: 'Temporarily gain a cultural or utility expertise and a rank in two non-surge cognitive skills. Reassign these after a long rest with library access.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'After a long rest with library access, reassign expertise and skill ranks',
             prerequisites: [],
             tier: 0,
             bonuses: [],
-            otherEffects: ['Gain temporary cultural/utility expertise', 'Gain temporary rank in two non-surge cognative skills']
+            expertiseGrants: [
+                { type: 'choice', options: ['cultural', 'utility'] }
+            ],
+            otherEffects: ['Gain temporary rank in two non-surge cognitive skills']
         }
     ]
 }

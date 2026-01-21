@@ -34,7 +34,9 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ['Spend C on hit to inflict injury']
+            conditionEffects: [
+              { type: 'apply', condition: 'Injury', trigger: 'on hit with Division attack', target: 'target', details: 'Spend confidence to inflict an injury' }
+            ]
         },
         {
             id: 'division_eroding_escape',
@@ -47,11 +49,10 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'Spend X Investiture to end X effects on self or ally',
-                'Effects must be Immobilized, Restrained, or physical test disadvantages',
-                'Effect may reassert if source remains'
-            ]
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'remove immobilized/restrained or physical disadvantage', frequency: 'unlimited', condition: 'Spend 1+ per effect removed' }
+            ],
+            conditionEffects: []
         },
         {
             id: 'division_igniting_division',
@@ -65,11 +66,11 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Spend 1+ Investiture to ignite target for that many rounds',
-                'Target becomes Afflicted, 5-foot radius becomes dangerous terrain',
-                'Both deal energy damage equal to Division modifier',
-                'Can be extinguished with opposed Agility/Athletics test'
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'ignite target with Division', frequency: 'unlimited', condition: 'Spend 1+; duration equals Investiture spent' }
+            ],
+            conditionEffects: [
+              { type: 'apply', condition: 'Afflicted', trigger: 'on ignite', target: 'target', duration: 'investiture rounds', details: 'Area within 5 feet burns as dangerous terrain for Division modifier energy damage' }
             ]
         },
         {
@@ -82,10 +83,7 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Use Division and talents with 20 feet reach',
-                'Must have solid surface path to target'
-            ]
+            movementEffects: []
         },
         {
             id: 'division_gout_of_flame',
@@ -98,11 +96,10 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: [
-                'Spend 3 Investiture for area attack',
-                'Area: one size larger than normal (or 25 feet at rank 5)',
-                'Damage: 3d4 (rank 1), 3d6 (rank 2), 3d8 (rank 3), etc.'
-            ]
+            resourceTriggers: [
+              { resource: 'investiture', effect: 'spend', amount: 3, trigger: 'area Division attack', frequency: 'unlimited' }
+            ],
+            conditionEffects: []
         },
         {
             id: 'division_inescapable_spark',
@@ -115,11 +112,9 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: [
-                'Reach equals spren bond range',
-                'Don\'t need line of effect if you can sense target',
-                'Still need solid surface path',
-                'Targets can\'t Brace against Division attacks'
+            movementEffects: [],
+            conditionEffects: [
+              { type: 'prevent', condition: 'Brace', trigger: 'against your Division attacks', target: 'target', details: 'Brace cannot be used to resist your Division attacks' }
             ]
         },
         {
@@ -133,7 +128,7 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ['Roll one extra damage die for all Division damage']
+            conditionEffects: []
         },
         {
             id: 'division_unleashed_entropy',
@@ -146,10 +141,7 @@ export const DIVISION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Division costs 1 fewer C (not talents)',
-                'Division Under Pressure DCs reduced by 5'
-            ]
+            conditionEffects: []
         }
     ]
 };

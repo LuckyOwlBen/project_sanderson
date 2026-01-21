@@ -18,7 +18,8 @@ export const HUNTER_TALENT_TREES: TalentPath = {
         specialActivation: "Choose a character as your quarry. Gain advantage on tests to find, attack, and study them.",
         prerequisites: [],
         tier: 0,
-        bonuses: []
+        bonuses: [],
+        grantsAdvantage: ["tests_to_find_quarry", "tests_to_attack_quarry", "tests_to_study_quarry"]
     }
 ],
 }

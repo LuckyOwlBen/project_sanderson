@@ -32,11 +32,8 @@ export const COHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture to commune with stone for 1 round',
-                'Stone shares history and memories of nearby events',
-                'May require Cohesion test to interpret (GM discretion)',
-                'Use multiple times for longer communication'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'stone-communion', frequency: 'unlimited', condition: 'touching stone' }
             ]
         },
         {
@@ -50,10 +47,12 @@ export const COHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture for ranged Cohesion attack within 60 feet',
-                'Damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.',
-                'Spend C on hit to knock target Prone'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'ranged-attack', frequency: 'unlimited' },
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'prone-on-hit', frequency: 'unlimited', condition: 'optional' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Prone', trigger: 'on hit with focus spent', target: 'target', duration: 'end-of-next-turn' }
             ]
         },
         {
@@ -67,10 +66,11 @@ export const COHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture to soften stone ground area',
-                'Cohesion test vs Cognitive defense of characters in area',
-                'Success: targets sink and become Immobilized'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'sinkhole-activation', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Immobilized', trigger: 'test-success-vs-cognitive-defense', target: 'target', duration: 'until-escape', details: 'Targets sink into ground and resolidify' }
             ]
         },
         {
@@ -84,12 +84,12 @@ export const COHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture to infuse self with Cohesion',
-                'Move through stone as difficult terrain',
-                'Leave 5-foot-radius tunnel for others',
-                'Spend 1 Investiture as Free each turn to maintain',
-                'May be detected if tunneling near surface'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'self-infusion', frequency: 'unlimited' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round', condition: 'as-free-action' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', movementType: 'walk', timing: 'as-part-of-action', condition: 'Move through stone as difficult terrain while infused' }
             ]
         },
         {
@@ -102,11 +102,7 @@ export const COHESION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'COHESION', value: 3 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Use surges and talents with 20 feet reach through stone',
-                'Must touch stone surface between you and target'
-            ]
+            bonuses: []
         },
         {
             id: 'cohesion_true_stoneshaping',
@@ -118,8 +114,7 @@ export const COHESION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'COHESION', value: 2 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: ['Enhanced stoneshaping precision and control']
+            bonuses: []
         },
         {
             id: 'cohesion_flowing_earth',
@@ -133,10 +128,8 @@ export const COHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Shape stone beneath feet without spending Investiture',
-                'Stone pushes you up to (5 feet × Cohesion ranks) in any direction',
-                'Movement doesn\'t trigger Reactive Strikes'
+            movementEffects: [
+                { type: 'special-movement', amount: '5 * COHESION.ranks', timing: 'as-part-of-action', condition: 'After using Cohesion or spending confidence on its talents' }
             ]
         },
         {
@@ -149,12 +142,7 @@ export const COHESION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'COHESION', value: 4 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: [
-                'Use Cohesion on any solid non-living, non-Invested material',
-                'Reshape objects automatically without additional actions',
-                'Create complex shapes instantly: walls, pillars, terrain, intricate designs'
-            ]
+            bonuses: []
         }
     ]
 };

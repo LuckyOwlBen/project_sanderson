@@ -13,12 +13,20 @@ export const ABRASION_SURGE_TREE: TalentTree = {
             ],
             tier: 0,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'activation', frequency: 'once-per-round' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' },
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'skate-action', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Frictionless', trigger: 'activation', target: 'target', duration: 'investiture-maintained', details: 'Object or portion of surface becomes frictionless' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', timing: 'as-part-of-action', actionCost: 'free', condition: 'Spend 2 focus to Move in straight line (skate)' }
+            ],
+            grantsAdvantage: ['escape restraints via friction or pressure while sliding'],
             otherEffects: [
-                'Make objects/surfaces frictionless',
-                'Or infuse self for Skate and Slide abilities',
-                'Skate: Spend 2 focus to Move as free action in straight line',
-                'Slide: Count as one size smaller when squeezing, advantage on escape tests',
-                'Uses 1 Investiture per round',
+                'Count as one size smaller when squeezing while infused',
                 'Can\'t affect characters, Invested objects, or Stormlight-infused objects'
             ]
         },
@@ -33,10 +41,13 @@ export const ABRASION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                '+10 feet movement rate while infused with Abrasion',
-                'Ignore Slowed condition from difficult terrain, climbing, crawling, and swimming'
-            ]
+            movementEffects: [
+                { type: 'increase-rate', amount: 10, timing: 'always', condition: 'while infused with Abrasion' }
+            ],
+            conditionEffects: [
+                { type: 'prevent', condition: 'Slowed', trigger: 'difficult-terrain-or-movement', target: 'self', duration: 'permanent', details: 'Ignore Slowed from difficult terrain, climbing, crawling, swimming' }
+            ],
+            otherEffects: []
         },
         {
             id: 'abrasion_reverse_abrasion',

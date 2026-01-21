@@ -15,7 +15,24 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["After Strike, use Decisive Command as free action", "If Strike missed, don't spend focus for Decisive Command"]
+            actionGrants: [
+                {
+                    type: 'free-action',
+                    count: 1,
+                    restrictedTo: 'Decisive Command',
+                    frequency: 'unlimited'
+                }
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'reduce-cost',
+                    amount: 1,
+                    trigger: 'When using Decisive Command after a missed Strike',
+                    condition: 'Strike action did not hit'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "valiant_intervention",
@@ -28,6 +45,14 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            movementEffects: [
+                {
+                    type: 'special-movement',
+                    amount: 10,
+                    timing: 'before-attack',
+                    movementType: 'walk'
+                }
+            ],
             attackDefinition: {
                 weaponType: 'unarmed',
                 targetDefense: 'Spiritual',
@@ -41,7 +66,16 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                     "If target resists: gain advantage on next test vs them"
                 ]
             },
-            otherEffects: ["Spend 1 focus to move 10 feet and test Athletics vs Spiritual", "Success: target has disadvantage on tests vs allies until end of their next turn", "If resisted: gain advantage on next test vs them"]
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'disadvantage on tests against allies',
+                    trigger: 'on successful Athletics test',
+                    target: 'target',
+                    duration: 'until end of target next turn'
+                }
+            ],
+            otherEffects: ["If target resists influence: gain advantage on next test vs them until end of your next turn"]
         },
         {
             id: "hardy",
@@ -52,8 +86,14 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'valiant_intervention' }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: ["Increase max and current health by 1 per level (retroactive and future)"]
+            bonuses: [
+                {
+                    type: BonusType.RESOURCE,
+                    target: 'health',
+                    value: 1
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "imposing_posture",
@@ -66,7 +106,16 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Enemy who resists influence within weapon reach becomes Disoriented until end of next turn"]
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'Disoriented',
+                    trigger: 'when enemy resists your influence',
+                    target: 'target',
+                    duration: 'until end of their next turn'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "resolute_stand",
@@ -80,7 +129,25 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Can spend focus up to Leadership ranks to add targets to Valiant Intervention", "Targets of Valiant Intervention can't Reactive Strike allies until end of their next turn"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 'up to Leadership ranks',
+                    trigger: 'when using Valiant Intervention',
+                    condition: 'to add additional targets'
+                }
+            ],
+            conditionEffects: [
+                {
+                    type: 'prevent',
+                    condition: 'Reactive Strikes against allies',
+                    trigger: 'after using Valiant Intervention on target',
+                    target: 'target',
+                    duration: 'until end of their next turn'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "mighty",
@@ -92,7 +159,7 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
+            otherEffects: ['Damage increased by 1 + tier per action spent on attack']
         },
         {
             id: "demonstrative_command",
@@ -105,8 +172,23 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'resolute_stand' }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: ["Spend 1 focus to add command die to Athletics/Agility/Leadership test", "Increase command die size by one (d4→d6, d6→d8, etc.)"]
+            bonuses: [
+                {
+                    type: BonusType.DEFENSE,
+                    target: 'command-die',
+                    value: 1
+                }
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'before Athletics, Agility, or Leadership test',
+                    condition: 'to add command die result to roll'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "resilient_hero",
@@ -119,7 +201,15 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Once per scene, when reduced to 0 health, use reaction to set health to Athletics modifier instead"]
+            actionGrants: [
+                {
+                    type: 'reaction',
+                    count: 1,
+                    frequency: 'once-per-scene',
+                    restrictedTo: 'set health to Athletics modifier'
+                }
+            ],
+            otherEffects: []
         }
     ],
 }

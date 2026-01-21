@@ -88,27 +88,30 @@ export class TalentView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        // Sync local state with persisted state
-        this.unlockedTalents = new Set(character.unlockedTalents);
         
-        // Set baseline on first initialization in level-up mode
-        if (!this.isInitialized && this.isLevelUpMode) {
-          // Use stored baseline if it exists, otherwise create from current state
-          if (character.baselineUnlockedTalents) {
-            this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
-          } else {
-            // First time entering level-up mode - store baseline in character
-            this.baselineUnlockedTalents = new Set(character.unlockedTalents);
-            character.baselineUnlockedTalents = new Set(character.unlockedTalents);
-            // Don't call updateCharacter here - it will trigger the subscription again
-            // The baseline will be saved when the user makes their first change
+        // On first initialization, sync unlockedTalents from character
+        if (!this.isInitialized) {
+          this.unlockedTalents = new Set(character.unlockedTalents);
+          
+          // Set baseline on first initialization in level-up mode
+          if (this.isLevelUpMode) {
+            // Use stored baseline if it exists, otherwise create from current state
+            if (character.baselineUnlockedTalents) {
+              this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
+            } else {
+              // First time entering level-up mode - store baseline in character
+              this.baselineUnlockedTalents = new Set(character.unlockedTalents);
+              character.baselineUnlockedTalents = new Set(character.unlockedTalents);
+            }
           }
           this.isInitialized = true;
         } else if (this.isLevelUpMode && character.baselineUnlockedTalents) {
-          // Sync baseline from character on subsequent subscription triggers
+          // On subsequent character updates in level-up mode, keep baseline synced
+          // This ensures baseline persists across navigation
           this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
         }
         
+        // Always recalculate on character changes (this is needed for talents)
         this.loadCorePathOptions();
         this.loadAvailableTrees();
         this.calculateAvailablePoints();
@@ -417,7 +420,7 @@ export class TalentView implements OnInit, OnDestroy {
         
         // In level-up mode, auto-unlocked tier-0 talents should be added to baseline
         // since they don't cost a talent point
-        if (this.isLevelUpMode) {
+        if (this.isLevelUpMode && this.character) {
           this.baselineUnlockedTalents.add(talent.id);
           if (!this.character.baselineUnlockedTalents) {
             this.character.baselineUnlockedTalents = new Set();

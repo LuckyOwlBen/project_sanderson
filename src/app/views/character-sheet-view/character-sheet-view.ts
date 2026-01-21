@@ -263,20 +263,26 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
         console.log('[Character Sheet] 🆙 Level-up event:', event);
         if (this.characterId && event.characterId === this.characterId && this.character) {
-          // Only increment if we haven't already processed this specific level
-          if (event.newLevel > this.character.level) {
-            console.log('[Character Sheet] 🆙 Applying level increment from', this.character.level, 'to', event.newLevel);
-            this.character.level = event.newLevel;
-            this.character.pendingLevelPoints += 1;
-            this.saveCharacter();
-            this.cdr.detectChanges();
-
-            // Acknowledge receipt
-            console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
+          // Defensive guard: only accept level-up if newLevel is exactly current + 1
+          // This prevents burst grants from a mismatched queue state
+          const expectedNextLevel = this.character.level + 1;
+          if (event.newLevel !== expectedNextLevel) {
+            console.warn('[Character Sheet] 🆙 Rejecting level-up: expected level', expectedNextLevel, 'but got', event.newLevel);
             this.websocketService.ackLevelUp(this.characterId, event.newLevel);
-          } else {
-            console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character.level, 'event:', event.newLevel, ')');
+            return;
           }
+
+          console.log('[Character Sheet] 🆙 Applying level increment from', this.character.level, 'to', event.newLevel);
+          this.character.level = event.newLevel;
+          this.character.pendingLevelPoints += 1;
+          this.saveCharacter();
+          this.cdr.detectChanges();
+
+          // Acknowledge receipt
+          console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
+          this.websocketService.ackLevelUp(this.characterId, event.newLevel);
+        } else {
+          console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character?.level, 'event:', event.newLevel, ')');
         }
       });
     console.log('[Character Sheet] 🆙 Level-up listener subscription complete');

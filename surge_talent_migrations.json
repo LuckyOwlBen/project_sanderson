@@ -1,0 +1,947 @@
+[
+  {
+    "id": "progression_base",
+    "surge": "Progression",
+    "tier": 0,
+    "name": "Progression",
+    "context_before": "You infuse life into a living thing other than yourself within your reach; you must have a hand free and touch the target.",
+    "context_after": "Character Regrowth: If you target a living character with Regrowth, infuse 1 Investiture or more into them.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "growth-activation",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "regrowth-maintenance",
+        "frequency": "per-round",
+        "condition": "infusion-active"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Healing",
+        "trigger": "regrowth-activation",
+        "target": "target",
+        "duration": "investiture-maintained",
+        "details": "Recover 1d4 + Progression modifier health per round"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "healing-die",
+        "value": 4,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "progression_injury_regrowth",
+    "surge": "Progression",
+    "tier": 1,
+    "name": "Injury Regrowth",
+    "context_before": "You use Regrowth to rapidly recover injuries, including permanent ones and missing body parts.",
+    "context_after": "Spend 2 Investiture to cause yourself or a willing character you touch to instantly recover from a temporary injury",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 2,
+        "trigger": "temporary-injury-recovery",
+        "frequency": "unlimited"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 3,
+        "trigger": "permanent-injury-recovery",
+        "frequency": "unlimited"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "remove",
+        "condition": "Injury_Temporary",
+        "trigger": "action-completion",
+        "target": "self-or-target",
+        "duration": "instant"
+      },
+      {
+        "type": "remove",
+        "condition": "Injury_Permanent",
+        "trigger": "action-completion",
+        "target": "self-or-target",
+        "duration": "instant"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "progression_explosive_growth",
+    "surge": "Progression",
+    "tier": 1,
+    "name": "Explosive Growth",
+    "context_before": "You grow plants explosively, striking and ensnaring your enemies.",
+    "context_after": "Roll 2d4 damage, dealing either impact or keen damage (whichever is logical for the grown plants).",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "area-attack-activation",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "focus",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "immobilize-enhancement",
+        "frequency": "per-hit"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Immobilized",
+        "trigger": "attack-hit",
+        "target": "hit-targets",
+        "duration": "end-of-next-turn",
+        "details": "Optional effect for spending focus"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "restriction",
+        "amount": 0,
+        "timing": "immediate",
+        "condition": "immobilized"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "attack-damage",
+        "value": 4,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "progression_swift_regeneration",
+    "surge": "Progression",
+    "tier": 2,
+    "name": "Swift Regeneration",
+    "context_before": "You can heal yourself with greater efficiency and make those infused with your Regrowth more resistant to injury.",
+    "context_after": "Additionally, while you have 1 Investiture or more, you and any character infused with your Regrowth can add your Progression modifier to injury rolls.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "recover",
+        "amount": "1d6",
+        "trigger": "regenerate-action",
+        "frequency": "per-action",
+        "condition": "1+ investiture"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Enhanced_Recovery",
+        "trigger": "investiture-available",
+        "target": "self-and-regrowth-targets",
+        "duration": "while-invested"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "SKILL",
+        "target": "progression",
+        "value": 1,
+        "scaling": true,
+        "condition": "injury-recovery"
+      },
+      {
+        "type": "DERIVED",
+        "target": "healing-die",
+        "value": 6,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "progression_overgrowth",
+    "surge": "Progression",
+    "tier": 2,
+    "name": "Overgrowth",
+    "context_before": "You persuade plants to grow beyond their normal size and shape.",
+    "context_after": "On a success, you cause the plant to grow beyond its species' normal limits, up to the surge size for your ranks in Progression",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 0,
+        "trigger": "growth-activation",
+        "frequency": "per-action",
+        "condition": "no-additional-cost"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Overgrown",
+        "trigger": "progression-test-success",
+        "target": "plant",
+        "duration": "permanent"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "plant-health",
+        "value": 4,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "progression_extended_regrowth",
+    "surge": "Progression",
+    "tier": 3,
+    "name": "Extended Regrowth",
+    "context_before": "Your Regrowth infusions expend Stormlight far less quickly.",
+    "context_after": "For example, if you have 3 ranks in Progression, those infusions expend Investiture once every 3 rounds.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "regrowth-maintenance",
+        "frequency": "per-X-rounds",
+        "condition": "X = progression-ranks"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Extended_Regrowth",
+        "trigger": "regrowth-activation",
+        "target": "infused-target",
+        "duration": "investiture-maintained"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "progression_reliable_progression",
+    "surge": "Progression",
+    "tier": 3,
+    "name": "Reliable Progression",
+    "context_before": "Through adept control of your Stormlight, your Growth and Regrowth become even more dependable.",
+    "context_after": "You can change that result to instead equal your ranks in Progression (no action required).",
+    "resourceTriggers": [],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Reliable_Rolls",
+        "trigger": "low-die-roll",
+        "target": "self",
+        "duration": "instant",
+        "details": "Minimum die result equals Progression ranks"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "minimum-die-value",
+        "formula": "progression.ranks",
+        "scaling": false
+      }
+    ]
+  },
+  {
+    "id": "progression_from_the_brink",
+    "surge": "Progression",
+    "tier": 4,
+    "name": "From the Brink",
+    "context_before": "You use Regrowth to pull someone back from the very edge of death.",
+    "context_after": "If the target is willing, they return to life Unconscious with 0 health.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 3,
+        "trigger": "resurrection",
+        "frequency": "per-action",
+        "condition": "target-died-within-1-minute"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "remove",
+        "condition": "Dead",
+        "trigger": "action-completion",
+        "target": "recently-deceased",
+        "duration": "instant"
+      },
+      {
+        "type": "apply",
+        "condition": "Unconscious",
+        "trigger": "resurrection-completion",
+        "target": "resurrected-character",
+        "duration": "until-healed"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "progression_font_of_life",
+    "surge": "Progression",
+    "tier": 4,
+    "name": "Font of Life",
+    "context_before": "You've grown so powerful that growth and healing flow from you with incredible speed.",
+    "context_after": "It costs you one C fewer to use Progression and its talents.",
+    "resourceTriggers": [
+      {
+        "resource": "focus",
+        "effect": "reduce-cost",
+        "amount": 1,
+        "trigger": "progression-talent-activation",
+        "frequency": "per-action"
+      }
+    ],
+    "conditionEffects": [],
+    "bonuses": [
+      {
+        "type": "RESOURCE",
+        "target": "focus",
+        "value": -1,
+        "scaling": false,
+        "condition": "progression-talent-use"
+      }
+    ]
+  },
+  {
+    "id": "transformation_base",
+    "surge": "Transformation",
+    "tier": 0,
+    "name": "Transformation (Soulcasting)",
+    "context_before": "To Soulcast a material, choose a non-living object or portion of a surface within your reach and make a Transformation test.",
+    "context_after": "Successful Transformation: Spend Investiture equal to object size (1 for Small, 2 for Medium, 3 for Large, 4 for Huge, 5 for Gargantuan).",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "soulcast-small-object",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 2,
+        "trigger": "soulcast-medium-object",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 3,
+        "trigger": "soulcast-large-object",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 4,
+        "trigger": "soulcast-huge-object",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 5,
+        "trigger": "soulcast-gargantuan-object",
+        "frequency": "per-action"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Soulcast",
+        "trigger": "transformation-success",
+        "target": "object",
+        "duration": "permanent",
+        "details": "Object transforms to chosen material"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "SKILL",
+        "target": "transformation",
+        "value": 0,
+        "scaling": false
+      }
+    ]
+  },
+  {
+    "id": "transformation_soulcast_defense",
+    "surge": "Transformation",
+    "tier": 1,
+    "name": "Soulcast Defense",
+    "context_before": "You Soulcast near-instinctively, able to transform projectiles in flight.",
+    "context_after": "On a success, the attack instead misses and can't graze, and you transform the projectile into a material of your choice.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "reaction-defense",
+        "frequency": "per-attack"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "prevent",
+        "condition": "Hit",
+        "trigger": "successful-soulcast-defense",
+        "target": "self",
+        "duration": "instant"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transformation_living_soulcasting",
+    "surge": "Transformation",
+    "tier": 1,
+    "name": "Living Soulcasting",
+    "context_before": "You've mastered the subtleties of affecting living flesh with Soulcasting.",
+    "context_after": "Roll 3d4 spirit damage. The size of these damage dice increases with your ranks in Transformation; at 2 ranks, roll 3d6",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "living-soulcast-attack",
+        "frequency": "per-action"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Soulcast_Dead",
+        "trigger": "reduce-to-zero-health",
+        "target": "target",
+        "duration": "permanent",
+        "details": "Target dies and body transforms to chosen material"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "attack-damage",
+        "value": 4,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "transformation_soulcast_parry",
+    "surge": "Transformation",
+    "tier": 2,
+    "name": "Soulcast Parry",
+    "context_before": "You can use Soulcasting to defend against even more immediate threats.",
+    "context_after": "You can now use Soulcast Defense on melee weapon attacks as well as ranged ones.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "reaction-melee-defense",
+        "frequency": "per-attack"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "prevent",
+        "condition": "Melee_Hit",
+        "trigger": "successful-soulcast-parry",
+        "target": "self",
+        "duration": "instant"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transformation_bloodcasting",
+    "surge": "Transformation",
+    "tier": 2,
+    "name": "Bloodcasting",
+    "context_before": "You've practiced techniques for Soulcasting blood, allowing you to cleanse the body of poison and to speed recovery from injuries.",
+    "context_after": "On a success, the effects of any poison end for the target, and you can reduce the recovery time of one of their injuries by 5 days.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "bloodcasting-activation",
+        "frequency": "per-action"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "remove",
+        "condition": "Poisoned",
+        "trigger": "bloodcasting-success",
+        "target": "target",
+        "duration": "instant"
+      },
+      {
+        "type": "remove",
+        "condition": "Injury_Temporary",
+        "trigger": "bloodcasting-success",
+        "target": "target",
+        "duration": "instant",
+        "details": "Reduces recovery time by 5 days"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transformation_distant_surgebinding",
+    "surge": "Transformation",
+    "tier": 2,
+    "name": "Distant Surgebinding",
+    "context_before": "You can Soulcast from a greater distance.",
+    "context_after": "You can use your surges and their talents as though your reach is 20 feet, and you don't need to touch the target.",
+    "resourceTriggers": [],
+    "conditionEffects": [],
+    "movementEffects": [
+      {
+        "type": "range-extension",
+        "amount": 20,
+        "timing": "always",
+        "condition": "surge-usage"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "surge-reach",
+        "value": 20,
+        "scaling": false
+      }
+    ]
+  },
+  {
+    "id": "transformation_flamecasting",
+    "surge": "Transformation",
+    "tier": 3,
+    "name": "Flamecasting",
+    "context_before": "You've learned the difficult art of Soulcasting Essences directly into instantaneous bursts of flame.",
+    "context_after": "Additionally, when you Soulcast an object into flame, use the result of that Transformation test to make an attack as Free against the Physical defense of each character within 5 feet",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 0,
+        "trigger": "flamecasting-activation",
+        "frequency": "per-action",
+        "condition": "no-additional-cost"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "On_Fire",
+        "trigger": "flamecasting-success",
+        "target": "nearby-flammable",
+        "duration": "temporary"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "flamecasting-damage",
+        "value": 4,
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "transformation_persistent_transformation",
+    "surge": "Transformation",
+    "tier": 3,
+    "name": "Persistent Transformation",
+    "context_before": "Your force of will is so great that objects have a hard time denying you.",
+    "context_after": "When you succeed on this test, you must spend 1 additional Investiture per time you failed to Soulcast that object during this scene",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "soulcast-retry",
+        "frequency": "per-previous-failure"
+      }
+    ],
+    "conditionEffects": [],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "transformation-max-dc",
+        "value": 15,
+        "scaling": false,
+        "condition": "non-living-objects"
+      }
+    ]
+  },
+  {
+    "id": "transformation_expansive_transmuter",
+    "surge": "Transformation",
+    "tier": 4,
+    "name": "Expansive Transmuter",
+    "context_before": "You've become so powerful that you can Soulcast larger objects with much greater efficiency.",
+    "context_after": "For example, it now costs you only 1 Investiture to Soulcast either a Small, Medium, or Large object.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "reduce-cost",
+        "amount": 2,
+        "trigger": "non-living-soulcast",
+        "frequency": "per-action",
+        "condition": "minimum-1"
+      }
+    ],
+    "conditionEffects": [],
+    "bonuses": [
+      {
+        "type": "RESOURCE",
+        "target": "investiture",
+        "value": -2,
+        "scaling": false,
+        "condition": "soulcasting-non-living"
+      }
+    ]
+  },
+  {
+    "id": "transportation_base",
+    "surge": "Transportation",
+    "tier": 0,
+    "name": "Transportation",
+    "context_before": "Spend 1 Investiture or more to look into the Cognitive Realm where it corresponds to your current location.",
+    "context_after": "For each Investiture you spend, you can use one of these effects within your spren bond range",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "cognitive-realm-viewing",
+        "frequency": "per-effect"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Cognitive_Vision",
+        "trigger": "activation",
+        "target": "self",
+        "duration": "active",
+        "details": "Gain information about emotions, locations, or Investiture"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transportation_cognitive_farsight",
+    "surge": "Transportation",
+    "tier": 1,
+    "name": "Cognitive Farsight",
+    "context_before": "You can see greater distances into Shadesmar, and you can use it to orient yourself.",
+    "context_after": "Additionally, while you have 1 Investiture or more, you always know both which direction is north and which direction you must travel to reach the nearest settlement",
+    "resourceTriggers": [],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Direction_Sense",
+        "trigger": "investiture-available",
+        "target": "self",
+        "duration": "while-invested"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "navigation-enhancement",
+        "amount": 0,
+        "timing": "always",
+        "condition": "1+ investiture"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "cognitive-vision-range",
+        "formula": "3 * spren-bond-range",
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "transportation_realmic_evasion",
+    "surge": "Transportation",
+    "tier": 1,
+    "name": "Realmic Evasion",
+    "context_before": "You dodge danger, momentarily transporting yourself between the Physical and Cognitive Realms, then return after the danger has passed.",
+    "context_after": "On a success, the attack instead misses and can't graze.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "reaction-evasion",
+        "frequency": "per-attack"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "prevent",
+        "condition": "Hit",
+        "trigger": "successful-realmic-evasion",
+        "target": "self",
+        "duration": "instant"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "teleportation",
+        "amount": 0,
+        "timing": "reaction",
+        "condition": "evasion-trigger"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transportation_cognitive_vision",
+    "surge": "Transportation",
+    "tier": 2,
+    "name": "Cognitive Vision",
+    "context_before": "You can glean even greater knowledge and spot even more hidden information when you peer into the Cognitive Realm.",
+    "context_after": "That enemy gains a disadvantage on their next test against you or one of your allies.",
+    "resourceTriggers": [],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Intent_Revealed",
+        "trigger": "cognitive-vision-use",
+        "target": "enemies",
+        "duration": "next-action",
+        "details": "Enemies gain disadvantage on next test"
+      },
+      {
+        "type": "apply",
+        "condition": "Located",
+        "trigger": "object-location-sense",
+        "target": "nearby-objects",
+        "duration": "instantaneous"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "enemy-disadvantage",
+        "value": 1,
+        "scaling": false
+      }
+    ]
+  },
+  {
+    "id": "transportation_realmic_step",
+    "surge": "Transportation",
+    "tier": 2,
+    "name": "Realmic Step",
+    "context_before": "You briefly slip into the Cognitive Realm, run a short distance there, then reappear in the Physical Realm.",
+    "context_after": "This movement doesn't trigger Reactive Strikes. If you are on or above a large body of water, using this talent only costs 1 Investiture",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 2,
+        "trigger": "teleportation",
+        "frequency": "per-action",
+        "condition": "normal-terrain"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "teleportation",
+        "frequency": "per-action",
+        "condition": "over-water"
+      }
+    ],
+    "conditionEffects": [],
+    "movementEffects": [
+      {
+        "type": "teleportation",
+        "amount": 0,
+        "timing": "action",
+        "condition": "within-spren-bond-range"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "DERIVED",
+        "target": "teleport-range",
+        "formula": "spren-bond-range",
+        "scaling": true
+      }
+    ]
+  },
+  {
+    "id": "transportation_elsecalling",
+    "surge": "Transportation",
+    "tier": 3,
+    "name": "Elsecalling",
+    "context_before": "You temporarily open a miniature perpendicularity that allows you to travel between the Cognitive and Physical Realms.",
+    "context_after": "On a failure, you don't spend Investiture or transport yourself; on a later turn, you can attempt to Elsecall again.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "elsecall-to-cognitive",
+        "frequency": "per-action"
+      },
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 2,
+        "trigger": "elsecall-to-physical",
+        "frequency": "per-action",
+        "condition": "DC-20-success"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Between_Realms",
+        "trigger": "elsecalling-activation",
+        "target": "self-and-items",
+        "duration": "instant"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "realm-crossing",
+        "amount": 0,
+        "timing": "action",
+        "condition": "perpendicularity-opened"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transportation_shared_transportation",
+    "surge": "Transportation",
+    "tier": 4,
+    "name": "Shared Transportation",
+    "context_before": "You can keep your miniature perpendicularities open long enough to bring others along.",
+    "context_after": "Spend 1 Investiture per additional character you choose to transport.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 1,
+        "trigger": "transport-additional-character",
+        "frequency": "per-character"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Transported",
+        "trigger": "elsecalling-or-realmic-step",
+        "target": "willing-allies-within-reach",
+        "duration": "instant"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "group-teleportation",
+        "amount": 0,
+        "timing": "action",
+        "condition": "allies-in-reach"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transportation_elsegate",
+    "surge": "Transportation",
+    "tier": 4,
+    "name": "Elsegate",
+    "context_before": "You can create more stable perpendicularities that allow you to transport yourself and others to highly Invested locations, even across a significant distance.",
+    "context_after": "At the GM's discretion, you might be able to choose other destinations that are highly Invested locations you've visited before.",
+    "resourceTriggers": [
+      {
+        "resource": "investiture",
+        "effect": "spend",
+        "amount": 0,
+        "trigger": "elsegate-activation",
+        "frequency": "once-per-long-rest",
+        "condition": "infused-spheres-2x-marks"
+      }
+    ],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Transported_Long_Distance",
+        "trigger": "elsegate-activation",
+        "target": "self-and-up-to-10-allies",
+        "duration": "instant"
+      }
+    ],
+    "movementEffects": [
+      {
+        "type": "long-distance-teleportation",
+        "amount": 0,
+        "timing": "special-activation",
+        "condition": "known-oathgate-or-perpendicularity"
+      }
+    ],
+    "bonuses": []
+  },
+  {
+    "id": "transportation_realmwalker",
+    "surge": "Transportation",
+    "tier": 4,
+    "name": "Realmwalker",
+    "context_before": "You effortlessly step between the Cognitive and Physical Realms.",
+    "context_after": "When you make a Transportation test to use a Transportation talent, you automatically succeed.",
+    "resourceTriggers": [],
+    "conditionEffects": [
+      {
+        "type": "apply",
+        "condition": "Automatic_Success",
+        "trigger": "transportation-talent-test",
+        "target": "self",
+        "duration": "instantaneous"
+      }
+    ],
+    "bonuses": [
+      {
+        "type": "SKILL",
+        "target": "transportation",
+        "formula": "automatic-success",
+        "scaling": false
+      }
+    ]
+  }
+]

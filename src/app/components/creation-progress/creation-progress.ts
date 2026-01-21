@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterCreationFlowService } from '../../services/character-creation-flow-service';
 import { CharacterStateService } from '../../character/characterStateService';
+import { LevelUpManager } from '../../levelup/levelUpManager';
 
 export interface CreationStepStatus {
   label: string;
@@ -37,7 +38,8 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
     private router: Router,
     private flowService: CharacterCreationFlowService,
     private characterState: CharacterStateService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private levelUpManager: LevelUpManager
   ) {}
 
   ngOnInit(): void {
@@ -112,10 +114,21 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
     const hasPendingLevels = (this.character.pendingLevelPoints ?? 0) > 0;
     
     if (hasPendingLevels) {
-      // Highlight sections where points can be spent during level-up
-      this.steps[3].hasPending = true; // Attributes
-      this.steps[4].hasPending = true; // Skills
-      this.steps[7].hasPending = true; // Talents
+      const currentLevel = this.character.level;
+      
+      // Check each step to see if there are actually points to allocate at this level
+      // Attributes (step 3): only show pending if this level has attribute points
+      const attributePointsThisLevel = this.levelUpManager.getAttributePointsForLevel(currentLevel);
+      this.steps[3].hasPending = attributePointsThisLevel > 0;
+      
+      // Skills (step 4): always available (every level has skill points)
+      const skillPointsThisLevel = this.levelUpManager.getSkillPointsForLevel(currentLevel);
+      this.steps[4].hasPending = skillPointsThisLevel > 0;
+      
+      // Talents (step 7): always available (every level has at least 1 talent point)
+      const talentPointsThisLevel = this.levelUpManager.getTalentPointsForLevel(currentLevel);
+      this.steps[7].hasPending = talentPointsThisLevel > 0;
+      
       // Note: Expertises are only gained at specific levels, would need more complex logic
     } else {
       // Clear all pending flags

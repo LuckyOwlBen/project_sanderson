@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const ADHESION_SURGE_TREE: TalentTree = {
     pathName: "Adhesion",
@@ -13,6 +14,13 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 0,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'activation', frequency: 'once-per-round' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Adhesion', trigger: 'activation', target: 'target', duration: 'investiture-maintained', details: 'Two objects within 5 feet stuck together' }
+            ],
             otherEffects: [
                 'Stick two objects together',
                 'Objects must be within 5 feet of each other',
@@ -33,6 +41,13 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'melee-hit', frequency: 'unlimited' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Adhesion', trigger: 'melee-hit', target: 'target', duration: 'investiture-maintained', details: 'Applies to objects the target is holding or wearing; auto-succeed infusion test' }
+            ],
             otherEffects: [
                 'Use Adhesion after melee hit for 1-2 focus without spending an action',
                 'Auto-succeed on infusion test for objects target is holding/wearing',
@@ -50,6 +65,12 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'recover', amount: 0, trigger: 'end-infusion', frequency: 'unlimited', condition: 'remaining' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'adhesion-ended', trigger: 'free-action', target: 'target', duration: 'instant', details: 'Recover remaining Investiture within reach' }
+            ],
             otherEffects: ['Recover Investiture from infusions within reach']
         },
         {
@@ -63,7 +84,16 @@ export const ADHESION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'ADHESION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'adhesion-range', condition: 'Can apply Adhesion at any distance' }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'ranged-hit', frequency: 'unlimited' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Adhesion', trigger: 'ranged-hit', target: 'target', duration: 'investiture-maintained', details: 'Applies to possessions at any distance' }
+            ],
             otherEffects: [
                 'Use Binding Strike benefits on ranged attacks at any distance',
                 'Don\'t need to touch targets or have hand free'
@@ -79,7 +109,12 @@ export const ADHESION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'ADHESION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'reach', value: 20 }
+            ],
+            conditionEffects: [
+                { type: 'prevent', condition: 'touch-requirement', trigger: 'activation', target: 'self', duration: 'permanent', details: 'No touch required for infusion' }
+            ],
             otherEffects: [
                 'Use surges and talents with 20 feet reach',
                 'No touch required for infusion',
@@ -98,6 +133,12 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Adhesion Trap', trigger: 'contact', target: 'all-enemies', duration: 'investiture-maintained', details: 'Auto-succeed on lash test, triggers on contact or forced movement' }
+            ],
             otherEffects: [
                 'Infuse surface area instead of objects',
                 'Characters touching infused surface become Lashed to it automatically',
@@ -115,6 +156,9 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: 0, trigger: 'maintenance', frequency: 'once-per-round', condition: 'Expends per X rounds; X = adhesion-skill-ranks' }
+            ],
             otherEffects: ['Full Lashings expend 1 Investiture per X rounds (where X = Adhesion ranks)']
         },
         {
@@ -128,6 +172,12 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'maintenance', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Restrained', trigger: 'lashed-to-larger-surface', target: 'target', duration: 'investiture-maintained', details: 'Character becomes Restrained' }
+            ],
             otherEffects: [
                 'Can target characters directly with Adhesion',
                 'Character Lashed to larger surface becomes Restrained',
@@ -145,6 +195,9 @@ export const ADHESION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
+            conditionEffects: [
+                { type: 'immune', condition: 'break-adhesion', trigger: 'opponent-break-attempt', target: 'self', duration: 'permanent', details: 'Auto-succeed if opponent Strength ≤ Adhesion ranks' }
+            ],
             otherEffects: [
                 'Auto-succeed on opposed tests to break Full Lashings if target Strength ≤ your Adhesion ranks',
                 'No roll needed when this applies'

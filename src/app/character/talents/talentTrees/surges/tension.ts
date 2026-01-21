@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const TENSION_SURGE_TREE: TalentTree = {
     pathName: "Tension",
@@ -32,10 +33,8 @@ export const TENSION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'React before hit/graze to infuse target\'s clothing',
-                'Target gains Hardened Defense: +2 Physical defense',
-                'Can turn hit into miss or negate graze'
+            conditionEffects: [
+                { type: 'apply', condition: 'Hardened Defense', trigger: 'before being hit or grazed', target: 'all-allies', duration: 'until end of trigger', details: 'Tension infused: +2 Physical defense, can turn hit to miss or negate graze' }
             ]
         },
         {
@@ -49,7 +48,9 @@ export const TENSION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ['Recover Investiture from infusions within reach']
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'recover', amount: 'all-remaining', trigger: 'start-of-turn after infusion expends', frequency: 'unlimited', condition: 'infusions within reach' }
+            ]
         },
         {
             id: 'tension_rigged_weaponry',
@@ -62,11 +63,15 @@ export const TENSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TENSION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture as Free to increase weapon reach by 10 feet',
-                'After melee hit, spend C or 2 focus to use Tension without action',
-                'Auto-succeed on infusion test'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'weapon-reach', value: 10, scaling: false, condition: 'While holding 10+ foot cloth/rope via Tension' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'to increase weapon reach', frequency: 'unlimited', condition: 'as Free action' },
+                { resource: 'focus', effect: 'spend', amount: '2 or C', trigger: 'after melee hit to use Tension', frequency: 'unlimited' }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 1, timing: 'always', restrictedTo: 'use Tension after melee hit without action', frequency: 'unlimited' }
             ]
         },
         {
@@ -80,9 +85,9 @@ export const TENSION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Tension infusions expend 1 Investiture per X rounds (X = Tension ranks)',
-                'With 1+ Investiture, maintain infusions on held/worn objects without cost'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: '1 per X rounds', trigger: 'Tension infusion maintenance', frequency: 'unlimited', condition: 'X = Tension ranks' },
+                { resource: 'investiture', effect: 'reduce-cost', amount: 'all', trigger: 'maintain infusions on held/worn objects', frequency: 'unlimited', condition: 'with 1+ Investiture held' }
             ]
         },
         {
@@ -95,10 +100,8 @@ export const TENSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TENSION', value: 2 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Automatically reshape objects when infusing without extra actions',
-                'Create elaborate, intricate, complex shapes instantly'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'tension-shaping', value: 1, scaling: false, condition: 'Automatically reshape Tension objects into elaborate, intricate shapes without extra actions' }
             ]
         },
         {
@@ -111,10 +114,11 @@ export const TENSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TENSION', value: 3 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Use Tension on liquid (2× normal size)',
-                'Characters can walk on liquid surface'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'tension-liquid-area', value: 2, scaling: false, condition: 'Affects 2× normal size' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', condition: 'while Tension surface active; characters can walk on liquid surface like solid ground' }
             ]
         },
         {
@@ -127,13 +131,13 @@ export const TENSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TENSION', value: 3 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: [
-                'Infused object gains health: 5 × Tension ranks',
-                'Object defenses: 10 + Tension modifier',
-                'Move object 25 feet while touching it',
-                'Spend C for simple tasks or tests using Tension',
-                'Attack damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'infused-object-health', formula: '5 * ranks', scaling: true, condition: 'Object current/max health = 5 × Tension ranks' },
+                { type: BonusType.DEFENSE, target: 'infused-object-all-defenses', value: 0, scaling: false, condition: 'Defenses = 10 + Tension modifier' },
+                { type: BonusType.DERIVED, target: 'controlled-object-attack', formula: '2d4 base, +1 die size per rank', scaling: true, condition: '2d4 (rank1), 2d6 (rank2), 2d8 (rank3)' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', amount: 25, condition: 'while touching infused object; move along surfaces (including ceilings)', actionCost: 'part-of-action' }
             ]
         },
         {
@@ -145,10 +149,9 @@ export const TENSION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TENSION', value: 4 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: [
-                'Hardened Defense grants +4 Physical defense (instead of +2)',
-                'Created weapons gain extra damage die: 1d4 (rank 1), 1d6 (rank 2), etc.'
+            bonuses: [
+                { type: BonusType.DEFENSE, target: 'Hardened Defense', value: 4, scaling: false, condition: 'Physical defense increases by 4 instead of 2' },
+                { type: BonusType.DERIVED, target: 'created-weapons-damage', formula: 'extra die (1d4 base, +1 die size per rank)', scaling: true, condition: 'Extra die: 1d4 (rank1), 1d6 (rank2), etc.' }
             ]
         }
     ]

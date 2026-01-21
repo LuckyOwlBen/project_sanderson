@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const TRANSPORTATION_SURGE_TREE: TalentTree = {
     pathName: "Transportation",
@@ -29,10 +30,12 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSPORTATION', value: 1 }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: [
-                'See into Cognitive Realm up to 3 × spren bond range',
-                'With 1+ Investiture, always know north and direction to nearest settlement'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'cognitive-realm-sight', formula: '3 * spren-bond-range', scaling: false, condition: 'See into Cognitive Realm extended distance' }
+            ],
+            resourceTriggers: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'direction-sense', trigger: 'investiture-active', target: 'self', duration: 'while-invested', details: 'Always know north and direction to nearest settlement' }
             ]
         },
         {
@@ -46,11 +49,14 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'React before hit to spend 1 Investiture',
-                'Transportation test vs attack result',
-                'Failure: attack grazes instead of hitting',
-                'Success: attack misses and can\'t graze'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'evasion-reaction', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'prevent', condition: 'hit', trigger: 'transportation-test-success', target: 'self', duration: 'immediate' }
+            ],
+            movementEffects: [
+                { type: 'teleport', amount: 0, timing: 'before-attack', condition: 'Reaction before being hit; momentarily shift to Cognitive Realm and back' }
             ]
         },
         {
@@ -63,10 +69,13 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSPORTATION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'Learn Intent: Transportation test as Free vs Cognitive defense for enemy disadvantage',
-                'Locate Objects: Examine soul beads to reveal nearby objects'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'learn-intent', value: 0, scaling: false, condition: 'Enemy gains disadvantage on next test against you/allies' }
+            ],
+            resourceTriggers: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'intent-revealed', trigger: 'transportation-test-success', target: 'target', duration: 'until-next-action', details: 'Extrapolate enemy intentions based on spren' },
+                { type: 'apply', condition: 'objects-located', trigger: 'cognitive-vision-use', target: 'self', duration: 'instantaneous', details: 'Reveal locations of nearby objects' }
             ]
         },
         {
@@ -79,11 +88,16 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSPORTATION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'DC 15 Transportation test to teleport within spren bond range',
-                'Costs 2 Investiture (1 if on/above large body of water)',
-                'Movement doesn\'t trigger Reactive Strikes'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'teleportation-range', formula: 'spren-bond-range', scaling: false, condition: 'Teleport within spren bond range' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'teleportation', frequency: 'once-per-round', condition: 'normal-terrain' },
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'teleportation', frequency: 'once-per-round', condition: 'over-large-water' }
+            ],
+            conditionEffects: [],
+            movementEffects: [
+                { type: 'teleport', amount: 0, timing: 'as-part-of-action', condition: 'within-spren-bond-range; move through Shadesmar without triggering Reactive Strikes' }
             ]
         },
         {
@@ -98,10 +112,15 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: [
-                'Physical → Cognitive: spend 1 Investiture (no test)',
-                'Cognitive → Physical: DC 20 test, spend 2 Investiture',
-                'Movement doesn\'t trigger Reactive Strikes'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'physical-to-cognitive', frequency: 'once-per-round', condition: 'no-test-required' },
+                { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'cognitive-to-physical', frequency: 'once-per-round', condition: 'dc-20-test-success' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'realm-crossed', trigger: 'elsecalling-activation', target: 'self', duration: 'instant', details: 'Transport self and equipment to same location in opposite realm' }
+            ],
+            movementEffects: [
+                { type: 'teleport', amount: 0, timing: 'as-part-of-action', condition: 'perpendicularity-opened; movement does not trigger Reactive Strikes' }
             ]
         },
         {
@@ -116,9 +135,14 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Transport willing allies within reach with Elsecalling or Realmic Step',
-                'Costs +1 Investiture per additional character'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'transport-additional-character', frequency: 'once-per-round', condition: 'within-reach-willing' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'transported-with-group', trigger: 'elsecalling-or-realmic-step-use', target: 'all-allies', duration: 'instant', details: 'Transport allies within reach along with self and equipment' }
+            ],
+            movementEffects: [
+                { type: 'teleport', amount: 0, timing: 'as-part-of-action', condition: 'allies-in-reach; transport willing characters' }
             ]
         },
         {
@@ -134,10 +158,14 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Transport up to 10 willing characters to visited Oathgate/perpendicularity',
-                'Requires spheres worth 2× marks per character (become dun on arrival)',
-                'Can only use after long rest'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 0, trigger: 'elsegate-activation', frequency: 'once-per-scene', condition: 'requires-infused-spheres-2x-character-count' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'long-distance-transported', trigger: 'elsegate-activation', target: 'all-allies', duration: 'instant', details: 'Transport up to 10 willing allies to known Oathgate/perpendicularity' }
+            ],
+            movementEffects: [
+                { type: 'teleport', amount: 0, timing: 'as-part-of-action', condition: 'after-long-rest-known-destination; transport with equipment to visited location' }
             ]
         },
         {
@@ -150,8 +178,13 @@ export const TRANSPORTATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSPORTATION', value: 4 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: ['Automatically succeed on Transportation tests for Transportation talents']
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'transportation-talent-tests', value: 0, scaling: false, condition: 'Automatically succeed on Transportation tests for talents' }
+            ],
+            resourceTriggers: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'realms-effortless', trigger: 'transportation-talent-use', target: 'self', duration: 'permanent', details: 'No need to roll Transportation tests' }
+            ]
         }
     ]
 };

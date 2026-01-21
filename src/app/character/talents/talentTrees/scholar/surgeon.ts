@@ -14,7 +14,10 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Erudition grants +1 skill", "Erudition can select spiritual skills (non-surge)", "Gain Diagnosis utility expertise"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Diagnosis'] }
+            ],
+            otherEffects: ["Erudition grants +1 skill", "Erudition can select spiritual skills (non-surge)"]
         },
         {
             id: "field_medicine",
@@ -27,7 +30,13 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Spend 1 focus, test Medicine DC 15", "Roll target's recovery die", "Disadvantage when treating self", "Success: recover recovery die + Medicine ranks", "Failure: recover recovery die only"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using this action', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Disadvantage', trigger: 'when treating self', target: 'self', duration: 'until Medicine test completes' }
+            ],
+            otherEffects: ["Test Medicine DC 15", "Roll target's recovery die", "Success: recover recovery die + Medicine ranks", "Failure: recover recovery die only"]
         },
         {
             id: "anatomical_insight",
@@ -40,7 +49,13 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["When hitting with unarmed attack on size-equal/smaller target, spend 1 focus to apply Exhausted", "Exhausted penalty = half Medicine ranks (rounded up)"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when hitting with unarmed attack', frequency: 'unlimited', condition: 'target is your size or smaller' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Exhausted', trigger: 'on hit with unarmed attack', target: 'target', duration: 'until end of scene', details: 'Penalty equals half Medicine ranks (round up)' }
+            ],
+            otherEffects: []
         },
         {
             id: "collected",
@@ -67,7 +82,10 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Use Field Medicine as free action", "When restoring health to others, they recover additional health equal to Medicine ranks"]
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Field Medicine', timing: 'always' }
+            ],
+            otherEffects: ["When restoring health to others, they recover additional health equal to Medicine ranks"]
         },
         {
             id: "applied_medicine",
@@ -79,8 +97,10 @@ export const SURGEON_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'collected' }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: ["When causing health recovery, add Lore ranks to amount recovered"]
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'health-restored', formula: 'lore.ranks', condition: 'when restoring health' }
+            ],
+            otherEffects: []
         },
         {
             id: "ongoing_care",
@@ -94,7 +114,13 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Forgo short/long rest to treat ally", "Test Medicine DC 10 (+5 per injury beyond first)", "Success: remove 1 condition from injury", "Target can benefit once per 24 hours", "Gain Mental Health Care utility expertise"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Mental Health Care'] }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'injury-condition-removed', trigger: 'when using this talent', target: 'target', duration: 'permanent', details: 'Once per 24 hours remove a condition caused by an injury' }
+            ],
+            otherEffects: ["Forgo short/long rest to treat ally", "Test Medicine DC 10 (+5 per injury beyond first)"]
         },
         {
             id: "resuscitation",
@@ -108,7 +134,13 @@ export const SURGEON_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Use Field Medicine to resuscitate", "Spend 3 focus instead of 1", "Target Unconscious or died within Medicine rank rounds", "DC +5 per injury beyond first", "Success: recover health, return to life if dead, optionally remove Unconscious"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 3, trigger: 'when using resuscitation', frequency: 'unlimited', condition: 'target is Unconscious or died within Medicine rank rounds' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Unconscious-removed', trigger: 'on successful resuscitation', target: 'target', duration: 'permanent', details: 'Optional; also returns target to life if recently dead' }
+            ],
+            otherEffects: ["Success: recover health, return to life if dead"]
         }
     ],
 }

@@ -20,7 +20,7 @@ export const ARCHER_TALENT_TREE: TalentTree = {
                 { type: 'category', choiceCount: 1, category: 'armor' },
                 { type: 'fixed', expertises: ['Military Life'] }
             ],
-            otherEffects: ["Once per round, can graze on miss without spending focus", "Gain weapon expertise", "Gain armor expertise", "Gain Military Life cultural expertise"]
+            otherEffects: ["Once per round, can graze on miss without spending focus"]
         },
         {
             id: "steady_aim",
@@ -35,7 +35,7 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             bonuses: [
                 { type: BonusType.SKILL, target: 'ranged_damage', formula: 'perception.ranks', condition: 'on ranged weapon hit' }
             ],
-            otherEffects: ["Ranged weapon ranges increase by 50%", "Deal extra damage equal to Perception ranks on ranged weapon hits"]
+            otherEffects: ["Ranged weapon ranges increase by 50%"]
         },
         {
             id: "tagging_shot",
@@ -57,7 +57,10 @@ export const ARCHER_TALENT_TREE: TalentTree = {
                     "On hit or graze: target becomes your quarry"
                 ]
             },
-            otherEffects: ["Move up to 5 feet and make ranged attack", "On hit or graze, target becomes your quarry"]
+            movementEffects: [
+                { type: 'special-movement', amount: 5, timing: 'before-attack', actionCost: 'part-of-action' }
+            ],
+            otherEffects: ["On hit or graze, target becomes your quarry"]
         },
         {
             id: "backstep",
@@ -70,7 +73,13 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["After ranged attack, spend 2 focus to Disengage as free action", "If ending turn in cover/obscured area, gain Brace action benefit"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'after making ranged attack' }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Disengage', frequency: 'unlimited' }
+            ],
+            otherEffects: ["If ending turn in cover/obscured area, gain Brace action benefit"]
         },
         {
             id: "hardy",
@@ -82,9 +91,8 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [
-                { type: BonusType.RESOURCE, target: 'health', value: 1, condition: 'per character level' }
-            ],
-            otherEffects: ["Increase max and current health by 1 per level (retroactive and future)"]
+                { type: BonusType.RESOURCE, target: 'health', value: 1, scaling: true, condition: 'per character level' }
+            ]
         },
         {
             id: "sharp_eye",
@@ -110,7 +118,9 @@ export const ARCHER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Use Gain Advantage as free action against quarry only"]
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Gain Advantage against quarry only', timing: 'always' }
+            ]
         },
         {
             id: "unrelenting_salvo",

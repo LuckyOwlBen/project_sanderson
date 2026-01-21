@@ -14,7 +14,10 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Erudition grants +1 skill", "Erudition can select physical skills (non-surge)", "Gain weapon expertise of choice"]
+            expertiseGrants: [
+                { type: 'choice', options: ['weapon'] }
+            ],
+            otherEffects: ["Erudition grants +1 skill", "Erudition can select physical skills (non-surge)"]
         },
         {
             id: "strategize",
@@ -28,7 +31,10 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["After Gain Advantage with Erudition skill, ally gains benefit instead of you", "Can spend 2 focus to prevent target's reactions against chosen ally until end of next turn"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this talent', frequency: 'unlimited', condition: 'prevent target reactions against chosen ally' }
+            ],
+            otherEffects: ["After Gain Advantage with Erudition skill, ally gains benefit instead of you"]
         },
         {
             id: "composed",
@@ -40,7 +46,10 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Increase max and current focus by tier", "Increase focus by 1 when tier increases"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'recover', amount: 'tier', trigger: 'on talent acquisition', frequency: 'once-per-scene', condition: 'max and current focus increase' },
+                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'when tier increases', frequency: 'unlimited', condition: 'max and current focus increase' }
+            ]
         },
         {
             id: "know_your_moment",
@@ -52,8 +61,12 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'mind_and_body' }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: ["After beginning of each round: +2 to all defenses until start of your turn"]
+            bonuses: [
+                { type: BonusType.DEFENSE, target: 'physical', value: 2, condition: 'after round beginning until start of your turn' },
+                { type: BonusType.DEFENSE, target: 'cognitive', value: 2, condition: 'after round beginning until start of your turn' },
+                { type: BonusType.DEFENSE, target: 'spiritual', value: 2, condition: 'after round beginning until start of your turn' }
+            ],
+            otherEffects: []
         },
         {
             id: "deep_contemplation",
@@ -78,7 +91,9 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["After successful Gain Advantage, target has disadvantage on next test (unless resisted)"]
+            conditionEffects: [
+                { type: 'apply', condition: 'disadvantage', trigger: 'after successful Gain Advantage', target: 'target', duration: 'until end of encounter', details: 'on next test unless resisted' }
+            ]
         },
         {
             id: "contingency",
@@ -91,7 +106,13 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Reaction when ally within 20 feet rolls Complication", "Spend 2 focus to remove Complication from their test"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'after ally rolls Complication' }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this reaction', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Remove Complication from ally's test"]
         },
         {
             id: "turning_point",
@@ -104,7 +125,13 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Once per scene, spend 2 focus", "Test Deduction vs enemy leader's Cognitive defense", "Advantage if took slow turn", "Success: you and allies gain +1 action next turn"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this talent', frequency: 'once-per-scene' }
+            ],
+            actionGrants: [
+                { type: 'action', count: 1, restrictedTo: 'you and influenced allies', frequency: 'once-per-scene' }
+            ],
+            otherEffects: ["Test Deduction vs enemy leader's Cognitive defense", "Advantage if took slow turn"]
         }
     ],
 }

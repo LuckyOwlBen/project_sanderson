@@ -15,7 +15,12 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Move half movement rate (ignore difficult terrain)", "Gain 1 action for Brace or Gain Advantage only"]
+            movementEffects: [
+                { type: 'special-movement', amount: '0.5 * movementRate', timing: 'as-part-of-action', condition: 'ignore difficult terrain', actionCost: 'part-of-action' }
+            ],
+            actionGrants: [
+                { type: 'action', count: 1, restrictedTo: 'Brace or Gain Advantage only', timing: 'always' }
+            ]
         },
         {
             id: "combat_training",
@@ -33,7 +38,7 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
                 { type: 'category', choiceCount: 1, category: 'armor' },
                 { type: 'fixed', expertises: ['Military Life'] }
             ],
-            otherEffects: ["Once per round: can graze on miss without spending focus", "Gain weapon expertise", "Gain armor expertise", "Gain Military Life cultural expertise"]
+            otherEffects: ["Once per round: can graze on miss without spending focus"]
         },
         {
             id: "defensive_position",
@@ -69,8 +74,7 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
                     { tier: 4, damage: '4d8' },
                     { tier: 5, damage: '5d8' }
                 ]
-            },
-            otherEffects: ["Melee attack vs Physical with extra damage", "Extra damage: 2d8 (3d8 at T3, 4d8 at T4, 5d8 at T5)"]
+            }
         },
         {
             id: "formation_drills",
@@ -94,8 +98,9 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'combat_training' }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: ["Increase max and current health by 1 per level (retroactive and future)"]
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'health', value: 1, scaling: true, condition: 'per level (retroactive)' }
+            ]
         },
         {
             id: "swift_strikes",
@@ -115,8 +120,7 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
                 specialMechanics: [
                     "Make a second Strike with a hand already used for Strike this turn"
                 ]
-            },
-            otherEffects: ["Spend 1 focus to Strike again with same hand"]
+            }
         },
         {
             id: "wary",
@@ -129,7 +133,12 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Cannot be Surprised while at 1+ focus", "When resisting influence or losing focus involuntarily: reduce loss by Discipline ranks (min 1)"]
+            conditionEffects: [
+                { type: 'immune', condition: 'Surprised', target: 'self', details: 'while at 1+ focus' }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'reduce-cost', amount: 'discipline.ranks', trigger: 'when resisting influence or losing focus involuntarily', condition: 'minimum 1 focus lost' }
+            ]
         }
     ],
 }

@@ -54,11 +54,6 @@ export class CharacterStorageService {
   saveCharacter(character: Character): Observable<{ success: boolean; id: string }> {
     const characterData = this.serializeCharacter(character);
     
-    // If server check hasn't completed yet, default to localStorage
-    if (this.serverAvailable === null || !this.useServer) {
-      return this.saveToLocalStorage(character);
-    }
-    
     // Try server first, fallback to localStorage on error
     return this.http.post<{ success: boolean; id: string }>(
       `${this.apiUrl}/save`,
@@ -73,11 +68,7 @@ export class CharacterStorageService {
   }
 
   loadCharacter(characterId: string): Observable<Character | null> {
-    // If server check hasn't completed yet or server not available, use localStorage
-    if (this.serverAvailable === null || !this.useServer) {
-      return this.loadFromLocalStorage(characterId);
-    }
-    
+    // Prefer server load; fallback to localStorage on error
     return this.http.get<any>(`${this.apiUrl}/load/${characterId}`).pipe(
       map((data) => this.deserializeCharacter(data)),
       catchError((error: HttpErrorResponse) => {
@@ -88,10 +79,7 @@ export class CharacterStorageService {
   }
 
   listCharacters(): Observable<SavedCharacter[]> {
-    if (this.serverAvailable === null || !this.useServer) {
-      return this.listFromLocalStorage();
-    }
-    
+    // Prefer server list; fallback to localStorage on error
     return this.http.get<SavedCharacter[]>(`${this.apiUrl}/list`).pipe(
       catchError((error: HttpErrorResponse) => {
         console.warn('Failed to list from server, using localStorage', error);
@@ -101,10 +89,7 @@ export class CharacterStorageService {
   }
 
   deleteCharacter(characterId: string): Observable<{ success: boolean }> {
-    if (this.serverAvailable === null || !this.useServer) {
-      return this.deleteFromLocalStorage(characterId);
-    }
-    
+    // Prefer server delete; fallback to localStorage on error
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/delete/${characterId}`).pipe(
       catchError((error: HttpErrorResponse) => {
         console.warn('Failed to delete from server, using localStorage', error);

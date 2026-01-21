@@ -1,4 +1,4 @@
-import { TalentPath } from "../../talentInterface";
+import { TalentPath, ActionCostCode } from "../../talentInterface";
 import { CHAMPION_TALENT_TREE } from "./champion";
 import { OFFICER_TALENT_TREE } from "./officer";
 import { POLITICO_TALENT_TREE } from "./politico";
@@ -19,7 +19,24 @@ export const LEADER_TALENT_TREE: TalentPath = {
             prerequisites: [],
             tier: 0,
             bonuses: [],
-            otherEffects: ["Spend 1 focus to give ally within 20 feet a d4 command die for next test"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'when using Decisive Command',
+                    condition: 'to give ally command die'
+                }
+            ],
+            actionGrants: [
+                {
+                    type: 'action',
+                    count: 1,
+                    timing: 'always',
+                    restrictedTo: 'add d4 command die to one die roll'
+                }
+            ],
+            otherEffects: ["Target ally must be within 20 feet"]
         }
     ]
 }

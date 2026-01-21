@@ -19,7 +19,9 @@ export const ENVOY_HEROIC_PATH: TalentPath = {
             prerequisites: [],
             tier: 0,
             bonuses: [],
-            otherEffects: ['An ally becomes Determined until end of scene'],
+            conditionEffects: [
+                { type: 'apply', condition: 'Determined', trigger: 'when using this talent', target: 'target', duration: 'end of scene' }
+            ]
         }
     ],
 }

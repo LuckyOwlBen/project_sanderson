@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const TRANSFORMATION_SURGE_TREE: TalentTree = {
     pathName: "Transformation",
@@ -32,11 +33,11 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'React before projectile hits to spend 1 Investiture',
-                'Transformation test vs attack result',
-                'Failure: attack grazes instead of hitting',
-                'Success: attack misses and projectile transforms'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'projectile-defense', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'prevent', condition: 'projectile-hit', trigger: 'transformation-test-success', target: 'self', duration: 'immediate', details: 'May apply to ally within reach' }
             ]
         },
         {
@@ -49,11 +50,14 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSFORMATION', value: 1 }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture for melee Transformation attack vs Spiritual defense',
-                'Damage: 3d4 (rank 1), 3d6 (rank 2), 3d8 (rank 3), etc.',
-                'Target dies at 0 health and transforms to chosen material'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'living-soulcasting-attack', formula: '3d4 base, +1 die size per rank', scaling: true, condition: '3d4 (rank1), 3d6 (rank2), 3d8 (rank3)' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'living-soulcast-attack', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'transformation-on-death', trigger: 'attack-reduces-to-zero-health', target: 'target', duration: 'permanent', details: 'Applies to defeated target' }
             ]
         },
         {
@@ -67,7 +71,9 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ['Can use Soulcast Defense on melee attacks']
+            conditionEffects: [
+                { type: 'apply', condition: 'soulcast-defense-capability', trigger: 'melee-attack', target: 'self', details: 'Can use Soulcast Defense on melee weapon attacks; may protect ally within reach' }
+            ]
         },
         {
             id: 'transformation_bloodcasting',
@@ -80,10 +86,12 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture, DC 15 Transformation test',
-                'Success: cleanse all poison and reduce one injury recovery by 5 days',
-                'GM can spend C to reduce max health by 2× target level until next long rest'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'bloodcast-cleanse', frequency: 'once-per-round' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'poison-removed', trigger: 'transformation-test-success-dc-15', target: 'target', duration: 'instant', details: 'Remove poison on success' },
+                { type: 'apply', condition: 'injury-recovery-reduced', trigger: 'transformation-test-success', target: 'target', duration: 'scene', details: 'Reduce recovery time of one injury by 5 days' }
             ]
         },
         {
@@ -96,10 +104,11 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSFORMATION', value: 2 }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: [
-                'Use surges and talents with 20 feet reach',
-                'No touch required'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'all-surge-talents-reach', value: 20, scaling: false, condition: 'Use surges at 20-foot reach without touch' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', amount: 20, timing: 'always', condition: 'Use surges/talents with 20 ft reach without touch' }
             ]
         },
         {
@@ -112,12 +121,16 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSFORMATION', value: 3 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Gain "Flame" as sixth Soulcasting category (DC 30 for 5-space transformations)',
-                'Flames can ignite flammable objects',
-                'Attack as Free vs Physical defense within 5 feet',
-                'Damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'flame-area-attack', formula: '2d4 base, +1 die size per rank', scaling: true, condition: '2d4 (rank1), 2d6 (rank2), 2d8 (rank3)' }
+            ],
+            resourceTriggers: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'flame-category-gain', trigger: 'passive', target: 'self', duration: 'permanent', details: 'Gain sixth Soulcasting category: Flame (DC 30 for 5-step transformation)' },
+                { type: 'apply', condition: 'ignitable', trigger: 'soulcast-to-flame', target: 'target', duration: 'until-burned', details: 'Affects flammable objects near the Soulcast area' }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 1, timing: 'always', restrictedTo: 'area-attack-within-5-feet after soulcast-to-flame', frequency: 'once-per-round' }
             ]
         },
         {
@@ -130,11 +143,14 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'TRANSFORMATION', value: 2 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Non-living transformations have max DC 15',
-                'Can reattempt failed Soulcasting in same scene',
-                'Success costs +1 Investiture per previous failure'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'non-living-transformations', value: 15, scaling: false, condition: 'Maximum DC reduced to 15' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: '1-per-previous-failure', trigger: 'reattempt-soulcast', frequency: 'once-per-round', condition: 'after-failed-attempt-same-scene' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'reattempt-soulcast', trigger: 'failed-previous-attempt', target: 'self', duration: 'scene', details: 'Can reattempt failed Soulcasting in same scene; target object same as failure' }
             ]
         },
         {
@@ -148,10 +164,10 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Non-living Soulcasting costs 2 fewer Investiture (minimum 1)',
-                'Small/Medium/Large objects cost only 1 Investiture'
-            ]
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: 2, trigger: 'non-living-soulcasting', frequency: 'once-per-round', condition: 'minimum-1-investiture' }
+            ],
+            conditionEffects: []
         }
     ]
 };

@@ -16,7 +16,10 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             tier: 1,
             bonuses: [],
             grantsAdvantage: ["intimidation_in_flamestance"],
-            otherEffects: ["Learn Flamestance (enter as 1 action)", "In stance: advantage on Intimidation", "When alone with 1 enemy: reaction to gain action (use for Gain Advantage or attack vs that enemy)"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Gain Advantage or attack targeting solo enemy', timing: 'always', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Learn Flamestance (enter as 1 action)", "Reaction requires exactly 1 enemy in reach with no allies in enemy's or your reach"]
         },
         {
             id: "practiced_kata",
@@ -29,7 +32,13 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Use fighting stances in conversation and endeavor scenes", "Activating stance in non-combat costs 1 focus", "Enter Vigilant Stance at scene start if not Surprised"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when activating stance in non-combat scene' }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Enter Vigilant Stance', timing: 'start-of-combat', frequency: 'once-per-scene' }
+            ],
+            otherEffects: ["Use fighting stances in conversation and endeavor scenes", "Activating stance in non-combat counts as contribution for round"]
         },
         {
             id: "ironstance",
@@ -43,7 +52,10 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             tier: 2,
             bonuses: [],
             grantsAdvantage: ["insight_in_ironstance"],
-            otherEffects: ["Learn Ironstance (enter as 1 action)", "In stance: advantage on Insight", "When missed/grazed by attacker in reach: can Reactive Strike"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Reactive Strike when missed/grazed in stance', timing: 'always', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Learn Ironstance (enter as 1 action)"]
         },
         {
             id: "signature_weapon",
@@ -55,7 +67,10 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Gain weapon expertise", "Choose signature weapon type", "Opportunity range +1 with signature weapon (+2 at tier 3)"]
+            expertiseGrants: [
+                { type: 'category', choiceCount: 1, category: 'weapon' }
+            ],
+            otherEffects: ["Choose signature weapon type (must have expertise)", "Opportunity range +1 with signature weapon (+2 at tier 3)"]
         },
         {
             id: "feinting_strike",
@@ -68,7 +83,23 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Spend 2 focus, attack vs Cognitive", "Hit: target loses 1 reaction and Intimidation rank focus", "Graze: loses half focus (rounded up), keeps reaction", "Spend opportunity: gain 2 actions (Strike or activate stance only)"]
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Cognitive',
+                range: 'melee',
+                resourceCost: { type: 'focus', amount: 2 },
+                specialMechanics: [
+                    "Hit: target loses 1 reaction and focus equal to Intimidation ranks",
+                    "Graze: target loses half focus (rounded up), keeps reaction",
+                    "Spend opportunity: gain 2 actions (Strike or activate stance only)"
+                ]
+            },
+            conditionEffects: [
+                { type: 'apply', condition: 'Loses 1 reaction', trigger: 'on hit', target: 'target' }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 'intimidation.ranks', trigger: 'on hit', condition: 'target loses this focus' }
+            ]
         },
         {
             id: "surefooted",
@@ -82,8 +113,7 @@ export const DUELIST_TALENT_TREE: TalentTree = {
             bonuses: [
                 { type: BonusType.DERIVED, target: 'movement', value: 10 },
                 { type: BonusType.DEFENSE, target: 'terrain_damage_reduction', formula: '2 * tier' }
-            ],
-            otherEffects: ["Reduce terrain/falling damage by 2×tier"]
+            ]
         },
         {
             id: "vinestance",
@@ -99,7 +129,10 @@ export const DUELIST_TALENT_TREE: TalentTree = {
                 { type: BonusType.DEFENSE, target: 'physical', value: 1, condition: "while in vinestance" },
                 { type: BonusType.DEFENSE, target: 'cognitive', value: 1, condition: "while in vinestance" }
             ],
-            otherEffects: ["Learn Vinestance (enter as 1 action)", "In stance: +1 Physical and Cognitive defense", "After hit/graze by melee: reaction to test Athletics vs Cognitive", "Success: target loses 1d4 focus, push 5×Athletics feet"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Athletics test vs attacker after hit/graze', timing: 'always', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Learn Vinestance (enter as 1 action)", "Reaction: Athletics test vs Cognitive", "Success: target loses 1d4 focus, push 5×Athletics feet"]
         },
         {
             id: "wits_end",
@@ -130,7 +163,9 @@ export const DUELIST_TALENT_TREE: TalentTree = {
                     "Cannot graze, only miss or hit"
                 ]
             },
-            otherEffects: ["Spend 1 focus, move half movement rate", "Attack vs Cognitive defense of 0-focus target", "Ignores deflect, deals +4d6 damage (no graze)", "Scales: 6d6 at T3, 8d6 at T4, 10d6 at T5"]
+            movementEffects: [
+                { type: 'special-movement', amount: '0.5 * movementRate', timing: 'before-attack', actionCost: 'part-of-action' }
+            ]
         }
     ],
 }

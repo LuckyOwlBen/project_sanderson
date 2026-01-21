@@ -70,9 +70,11 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         this.isLevelUpMode = params['levelUp'] === 'true';
         this.character = character;
         if (this.character) {
+          // Only initialize once when component is first created
+          // Do NOT reinitialize on subsequent character updates
           this.initializeSkills();
-          this.checkPendingStatus();
-          // Always update validation when character changes, even if already initialized
+          
+          // Always update validation when character changes
           this.updateValidation();
         }
       });
@@ -105,14 +107,25 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
     const currentLevel = this.character.level || 1;
     
-    // In level-up mode: use incremental points for the current level only
-    // In character creation mode: use cumulative total from levels 1 to current
+    // In level-up mode: only show points for THIS level (don't count previous levels)
+    // In character creation mode: show cumulative total from levels 1 to current
     const useBaseline = this.isLevelUpMode && currentLevel > 1;
     const totalPoints = useBaseline 
       ? this.levelUpManager.getSkillPointsForLevel(currentLevel)
       : this.levelUpManager.getTotalSkillPointsUpToLevel(currentLevel);
     
-    this.initialize(skills, totalPoints, useBaseline);
+    // Initialize without baseline first
+    this.initialize(skills, totalPoints, false);
+    
+    // If in level-up mode, set baseline to current values (these are pre-levelup allocations)
+    if (useBaseline) {
+      skills.forEach(skill => {
+        this.baselineValues.set(skill.name, skill.currentValue);
+      });
+      // Recalculate points with new baseline
+      this.calculatePoints();
+    }
+    
     this.isInitialized = true;
   }
 

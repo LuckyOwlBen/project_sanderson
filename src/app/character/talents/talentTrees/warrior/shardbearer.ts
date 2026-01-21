@@ -14,12 +14,14 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'vigilant_stance' }
             ],
             tier: 1,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'shardplate_charges', value: 2, condition: 'while wearing Shardplate' }
+            ],
             expertiseGrants: [
                 { type: 'fixed', expertises: ['Shardplate'] },
                 { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] }
             ],
-            otherEffects: ["Once per round: Strike with Shardblade can graze additional targets (up to skill ranks) if Physical defense ≤ test result", "Gain Shardplate specialist expertise", "Gain Grandbows, Shardblades, or Warhammers specialist expertise", "Shardplate has +2 charges for you", "Requires access to Shardblade and Shardplate for training"]
+            otherEffects: ["Once per round: Strike with Shardblade can graze additional targets (up to skill ranks) if Physical defense ≤ test result", "Requires access to Shardblade and Shardplate for training"]
         },
         {
             id: "stonestance",
@@ -33,7 +35,7 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             bonuses: [
                 { type: BonusType.DEFLECT, target: 'all', value: 1, condition: "while in stonestance" }
             ],
-            otherEffects: ["Learn Stonestance (enter as 1 action)", "In stance: +1 deflect", "Enemies in reach must spend +1 action to attack non-Stonestance allies"]
+            otherEffects: ["Learn Stonestance (enter as 1 action)", "Enemies in reach must spend +1 action to attack non-Stonestance allies"]
         },
         {
             id: "windstance",
@@ -47,7 +49,10 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             tier: 2,
             bonuses: [],
             grantsAdvantage: ["agility_in_windstance"],
-            otherEffects: ["Learn Windstance (enter as 1 action)", "In stance: advantage on Agility", "With 2+ enemies in reach: reaction to gain action (Disengage or attack only)"]
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Disengage or attack when 2+ enemies in reach', timing: 'always', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Learn Windstance (enter as 1 action)"]
         },
         {
             id: "mighty",
@@ -58,8 +63,9 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'stonestance' }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'damage_per_action', formula: '1 + tier', condition: 'per action spent on attack' }
+            ]
         },
         {
             id: "bloodstance",
@@ -72,8 +78,12 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'shard_training', operator: 'OR' }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: ["Learn Bloodstance (enter as 1 action)", "In stance: Opportunity range +2 for attack/physical tests", "In stance: -2 to all three defenses"]
+            bonuses: [
+                { type: BonusType.DEFENSE, target: 'physical', value: -2, condition: "while in bloodstance" },
+                { type: BonusType.DEFENSE, target: 'cognitive', value: -2, condition: "while in bloodstance" },
+                { type: BonusType.DEFENSE, target: 'spiritual', value: -2, condition: "while in bloodstance" }
+            ],
+            otherEffects: ["Learn Bloodstance (enter as 1 action)", "In stance: Opportunity range +2 for attack/physical tests"]
         },
         {
             id: "shattering_blow",
@@ -87,7 +97,10 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["When hitting with two-handed/hand free, spend 2 focus", "Before damage: armor loses 1 charge", "After damage: push target 5 feet (+5 per Strength above 5)", "If pushed into object: 1d6 impact per 10 feet pushed"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when hitting with melee attack (two-handed or hand free)' }
+            ],
+            otherEffects: ["Before damage: armor loses 1 charge", "After damage: push target 5 feet (+5 per Strength above 5)", "If pushed into object: 1d6 impact per 10 feet pushed"]
         },
         {
             id: "meteoric_leap",
@@ -115,7 +128,12 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
                     "On hit: targets with lower Strength knocked Prone"
                 ]
             },
-            otherEffects: ["Spend 2 focus, leap quarter movement rate", "Unarmed attack vs Physical of all chosen targets in reach", "Advantage when wearing Shardplate", "Roll double damage dice", "Hit: targets with lower Strength knocked Prone"]
+            movementEffects: [
+                { type: 'special-movement', movementType: 'leap', amount: '0.25 * movementRate', timing: 'before-attack', actionCost: 'part-of-action' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Prone', trigger: 'on hit', target: 'target', details: 'if target Strength < yours' }
+            ]
         },
         {
             id: "precise_parry",
@@ -128,7 +146,11 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Reaction before being hit, spend 1 focus", "Unarmed: Athletics test (disadvantage unless vs Shardblade), spend opportunity to disarm", "Weapon: Light/Heavy Weaponry test, spend action to destroy non-Invested weapon with Shardblade", "DC = attack result, success turns hit to graze"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using Precise Parry reaction' }
+            ],
+            grantsDisadvantage: ["athletics_parry_unarmed_vs_non_shardblade"],
+            otherEffects: ["Reaction before being hit", "Unarmed: Athletics test, spend opportunity to disarm", "Weapon: Light/Heavy Weaponry test, spend action to destroy non-Invested weapon with Shardblade", "DC = attack result, success turns hit to graze"]
         }
     ],
 }

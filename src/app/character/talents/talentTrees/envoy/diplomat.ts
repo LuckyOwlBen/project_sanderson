@@ -14,7 +14,13 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Costs 1 focus", "Test Discipline vs enemy Spiritual defense", "On success: target is Disoriented and has disadvantage on tests against you"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using this talent', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Disoriented', trigger: 'on success vs Spiritual defense', target: 'target', duration: 'end of target\'s next turn' }
+            ],
+            grantsDisadvantage: ['disoriented_target']
         },
         {
             id: "withering_retort",
@@ -27,7 +33,9 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["When using Steadfast Challenge before an attack, gain deflect equal to Discipline ranks against that attack"]
+            actionGrants: [
+                { type: 'reaction', count: 1, timing: 'always', restrictedTo: 'Use Steadfast Challenge before an attack', frequency: 'unlimited' }
+            ]
         },
         {
             id: "calm_appeal",
@@ -53,7 +61,9 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["End combat if all non-minion enemies are pacified"]
+            conditionEffects: [
+                { type: 'apply', condition: 'Combat Ended', trigger: 'when all non-minion enemies pacified', target: 'self', duration: 'immediate' }
+            ]
         },
         {
             id: "collected",
@@ -79,7 +89,9 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             tier: 2,
             bonuses: [],
             grantsAdvantage: ["deception_first", "leadership_first", "persuasion_first"],
-            otherEffects: ["Gain Fashion expertise"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Fashion'] }
+            ]
         },
         {
             id: "high_society_contacts",
@@ -91,7 +103,12 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Gain High Society expertise", "Spend 2 focus for additional effects in high society interactions"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['High Society'] }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'to add additional effects in high society interactions', frequency: 'unlimited' }
+            ]
         },
         {
             id: "practiced_oratory",
@@ -105,7 +122,9 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Spend focus up to Persuasion ranks to add additional targets to Rousing Presence or Steadfast Challenge"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 'persuasion_ranks', trigger: 'when using Rousing Presence or Steadfast Challenge', frequency: 'unlimited', condition: 'to add additional targets (max = Persuasion ranks)' }
+            ]
         }
     ],
 }

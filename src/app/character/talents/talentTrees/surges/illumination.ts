@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const ILLUMINATION_SURGE_TREE: TalentTree = {
     pathName: "Illumination",
@@ -32,10 +33,12 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture to create illusory duplicate of self or ally',
-                'Attacks against target gain disadvantage and can\'t graze',
-                'Ends after attack misses or at end of scene'
+            conditionEffects: [
+                { type: 'apply', condition: 'distracting-illusion-active', trigger: 'create-duplicate', target: 'all-enemies', details: 'Attacks against target have disadvantage and cannot graze' },
+                { type: 'apply', condition: 'illusion-ends', trigger: 'attack-misses-or-end-of-scene', target: 'target' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'create-duplicate', frequency: 'unlimited' }
             ]
         },
         {
@@ -49,11 +52,14 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'ILLUMINATION', value: 1 }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: [
-                'Infuse illusion into sphere/gem within 5 feet',
-                'Illusion moves with the gem',
-                'Expends 1 Investiture per X rounds (X = Illumination ranks)'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'infusion-range', value: 5, scaling: false, condition: 'Sphere or unencased gem within 5 feet' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: '1 per X rounds', trigger: 'maintain-illusion', frequency: 'unlimited', condition: 'X = Illumination ranks' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', condition: 'Illusion anchored to infused gem moves with it' }
             ]
         },
         {
@@ -67,10 +73,11 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Spend 1 Investiture for burst of light in area',
-                'Illumination test vs Cognitive defense',
-                'Success: targets become Disoriented until end of their next turn'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'project-burst', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'illumination-test-success', trigger: 'apply-condition', target: 'all-enemies', details: 'Targets become Disoriented until end of their next turn' }
             ]
         },
         {
@@ -84,7 +91,9 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ['Recover Investiture from infusions within reach']
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'recover', amount: 'all-remaining', trigger: 'end-infusion', frequency: 'unlimited', condition: 'infusion within reach' }
+            ]
         },
         {
             id: 'illumination_spiritual_illumination',
@@ -97,9 +106,11 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: [
-                'Spend 2 Investiture to inspire ally within spren bond range',
-                'Ally becomes Determined and Focused until end of their next turn'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'create-lightweaving', frequency: 'unlimited', condition: 'ally within spren bond range' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'lightweaving-created', trigger: 'apply-conditions', target: 'target', details: 'Ally becomes Determined and Focused until end of their next turn' }
             ]
         },
         {
@@ -112,10 +123,11 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'ILLUMINATION', value: 3 }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: [
-                'Create up to X additional illusions (X = Illumination ranks)',
-                'No additional Investiture to create or maintain'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'additional-illusions', formula: 'illumination-ranks', scaling: true, condition: 'Create up to ranks additional illusions' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: 0, trigger: 'create-additional-illusions', frequency: 'unlimited', condition: 'included in original infusion' }
             ]
         },
         {
@@ -129,10 +141,15 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Spend 2 Investiture, test vs Spiritual defense',
-                'Success: target becomes Slowed until end of their next turn',
-                'Target must spend X focus as Free or Move away (X = Illumination ranks)'
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'create-haunting-image', frequency: 'unlimited', condition: 'target within spren bond range' },
+                { resource: 'focus', effect: 'spend', amount: 'X', trigger: 'end-effect', frequency: 'once-per-round', condition: 'X = Illumination ranks, optional action' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'illumination-test-success', trigger: 'apply-condition', target: 'target', details: 'Target becomes Slowed until end of their next turn' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', timing: 'as-part-of-action', condition: 'If focus not spent, forced to move away from caster' }
             ]
         },
         {
@@ -144,9 +161,11 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'ILLUMINATION', value: 4 }
             ],
             tier: 4,
-            bonuses: [],
-            otherEffects: [
-                'With 1+ Investiture, illusions within spren bond range don\'t expend Investiture'
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'illusion-maintenance', value: 0, scaling: false, condition: 'No Investiture expended within spren bond range while at 1+ Investiture' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: 0, trigger: 'maintain-illusions', frequency: 'once-per-round', condition: 'with 1+ Investiture, within spren bond range' }
             ]
         }
     ]

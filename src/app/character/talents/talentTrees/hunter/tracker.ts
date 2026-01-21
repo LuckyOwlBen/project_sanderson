@@ -19,7 +19,10 @@ export const TRACKER_TALENT_TREE: TalentTree = {
                 { type: BonusType.DEFENSE, target: 'cognitive', value: 1, condition: "while animal companion within 10 feet" },
                 { type: BonusType.DEFENSE, target: 'spiritual', value: 1, condition: "while animal companion within 10 feet" }
             ],
-            otherEffects: ["Requires animal companion reward", "Communicate simple concepts with companion", "Companion moves with you automatically", "Free action to give companion 1-2 actions (borrowed from next turn)", "Companion can Track (2 actions) to mark quarry", "Companion retreats at 0 health instead of becoming Unconscious"]
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Command companion to use 1-2 actions', timing: 'always', frequency: 'unlimited' }
+            ],
+            otherEffects: ["Requires animal companion reward", "Communicate simple concepts with companion", "Companion moves with you automatically", "Actions given to companion borrowed from next turn", "Companion can Track (2 actions) to mark quarry", "Companion retreats at 0 health instead of becoming Unconscious"]
         },
         {
             id: "deadly_trap",
@@ -32,7 +35,8 @@ export const TRACKER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Create entangling or impaling trap", "Entangling: 2d4 impact, Immobilized 1 round, difficult terrain", "Impaling: 2d4 keen, Afflicted [vital 3+Survival], opportunity for injury", "5-foot diameter area", "Max active traps = Survival ranks", "Advantage against quarry", "Disarm DC = your Spiritual defense"]
+            grantsAdvantage: ["setting_trap_vs_quarry"],
+            otherEffects: ["Create entangling or impaling trap", "Entangling: 2d4 impact, Immobilized 1 round, difficult terrain", "Impaling: 2d4 keen, Afflicted [vital 3+Survival], opportunity for injury", "5-foot diameter area", "Max active traps = Survival ranks", "Disarm DC = your Spiritual defense"]
         },
         {
             id: "protective_bond",
@@ -71,7 +75,10 @@ export const TRACKER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Companion gains 5×tier max health (scales with tier)", "Companion gains +2 to all three defenses", "Companion adds Survival ranks to tests", "Gain Animal Care utility expertise"]
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Animal Care'] }
+            ],
+            otherEffects: ["Companion gains 5×tier max health (scales with tier)", "Companion gains +2 to all three defenses", "Companion adds Survival ranks to tests"]
         },
         {
             id: "hunter_edge",
@@ -84,7 +91,8 @@ export const TRACKER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Companion has advantage on tests against quarry", "Deadly Trap: 2d6→2d8 damage, 2→3 round conditions"]
+            grantsAdvantage: ["companion_tests_vs_quarry"],
+            otherEffects: ["Deadly Trap: 2d6→2d8 damage, 2→3 round conditions"]
         },
         {
             id: "pack_hunting",
@@ -97,7 +105,10 @@ export const TRACKER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Reaction when ally attacks your quarry", "Spend 1 focus to add Survival ranks to attack roll or damage"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when ally attacks your quarry' }
+            ],
+            otherEffects: ["Add Survival ranks to ally's attack roll or damage (your choice)"]
         },
         {
             id: "surefooted",
@@ -109,9 +120,9 @@ export const TRACKER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [
-                { type: BonusType.DERIVED, target: 'movement', value: 10 }
-            ],
-            otherEffects: ["Reduce terrain/falling damage by 2×tier"]
+                { type: BonusType.DERIVED, target: 'movement', value: 10 },
+                { type: BonusType.DEFENSE, target: 'terrain_damage_reduction', formula: '2 * tier' }
+            ]
         }
     ],
 }

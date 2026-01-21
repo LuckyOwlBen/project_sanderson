@@ -88,13 +88,12 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Gain an advantage on cognitive tests against characters whose motivation you know. You know when those characters lie to you."
-            ],
+            otherEffects: ["Gain an advantage on cognitive tests against characters whose motivation you know. You know when those characters lie to you."]
         },
         {
             id: "closeTheCase",
             name: "Close the Case",
-            description: " Spend 3 focus to test Deduction vs. Cognitive, gaining an advantage if you know the target's motivation. On failure, the target gains an advantage against you. On success, they back donwn.",
+            description: " Spend 3 focus to test Deduction vs. Cognitive, gaining an advantage if you know the target's motivation. On failure, the target gains an advantage against you. On success, they back down.",
             actionCost: 3, // 3 actions
             prerequisites: [
                 { type: 'talent', target: 'sleuthsInstincts' },

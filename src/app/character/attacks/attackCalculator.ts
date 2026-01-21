@@ -223,7 +223,7 @@ export class AttackCalculator {
    */
   private generateAttackFromDefinition(talent: TalentNode): Attack | null {
     const def = talent.attackDefinition!;
-    const tier = Math.floor((this.character.level - 1) / 5) + 1; // Calculate tier: 1-5, 6-10, 11-15, 16-20, 21+
+    const tier = this.character.getTier();
 
     // Calculate attack bonus based on weapon type
     let attackBonus = 0;
@@ -384,7 +384,7 @@ export class AttackCalculator {
    */
   private parseTalentDamage(talent: TalentNode): string {
     const desc = talent.description;
-    const tier = this.character.level; // Approximate tier from level
+    const tier = this.character.getTier();
     
     // Common patterns:
     // "add an extra 2d8 damage" with tier scaling
@@ -522,7 +522,7 @@ export class AttackCalculator {
     if (this.character.unlockedTalents.has('mighty')) {
       // Use the bonus manager with formula evaluation
       const context = {
-        tier: Math.ceil(this.character.level / 4),
+        tier: this.character.getTier(),
         skillRanks: this.buildSkillRanksMap()
       };
       const bonus = this.character.bonuses.bonuses.evaluateBonus(
@@ -550,7 +550,7 @@ export class AttackCalculator {
     // Check for Steady Aim bonus (perception.ranks)
     if (this.character.unlockedTalents.has('steady_aim')) {
       const context = {
-        tier: Math.ceil(this.character.level / 4),
+        tier: this.character.getTier(),
         skillRanks: this.buildSkillRanksMap()
       };
       const bonus = this.character.bonuses.bonuses.evaluateBonus(

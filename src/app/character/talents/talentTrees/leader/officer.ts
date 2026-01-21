@@ -13,8 +13,14 @@ export const OFFICER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'decisive_command' }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: ["Increase max and current focus by tier", "Increase focus by 1 when tier increases"]
+            bonuses: [
+                {
+                    type: BonusType.RESOURCE,
+                    target: 'focus',
+                    value: 1
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "through_the_fray",
@@ -27,7 +33,15 @@ export const OFFICER_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Target ally within 20 feet can use Disengage or Gain Advantage as reaction before end of your turn"]
+            actionGrants: [
+                {
+                    type: 'reaction',
+                    count: 1,
+                    timing: 'always',
+                    restrictedTo: 'Disengage or Gain Advantage action'
+                }
+            ],
+            otherEffects: ["Target ally must be within 20 feet and under your influence"]
         },
         {
             id: "customary_garb",
@@ -38,8 +52,21 @@ export const OFFICER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'through_the_fray' }
             ],
             tier: 2,
-            bonuses: [],
-            otherEffects: ["While wearing Presentable armor or appropriate clothing: +2 Physical and Spiritual defenses"]
+            bonuses: [
+                {
+                    type: BonusType.DEFENSE,
+                    value: 2,
+                    target: 'Physical',
+                    condition: 'While wearing Presentable armor or appropriate clothing'
+                },
+                {
+                    type: BonusType.DEFENSE,
+                    value: 2,
+                    target: 'Spiritual',
+                    condition: 'While wearing Presentable armor or appropriate clothing'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "well_supplied",
@@ -53,7 +80,22 @@ export const OFFICER_TALENT_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Spend 2 focus to add Opportunity to requisition/allocation tests", "Gain Military Logistics utility expertise"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'when making test to requisition or allocate resources',
+                    condition: 'to add Opportunity to result'
+                }
+            ],
+            expertiseGrants: [
+                {
+                    type: 'fixed',
+                    expertises: ['Military Logistics']
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "confident_command",
@@ -66,8 +108,23 @@ export const OFFICER_TALENT_TREE: TalentTree = {
                 { type: 'talent', target: 'customary_garb' }
             ],
             tier: 3,
-            bonuses: [],
-            otherEffects: ["Spend 1 focus to add command die to Intimidation/Leadership/Persuasion test", "Increase command die size by one (d4→d6, d6→d8, etc.)"]
+            bonuses: [
+                {
+                    type: BonusType.DEFENSE,
+                    target: 'command-die',
+                    value: 1
+                }
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'before Intimidation, Leadership, or Persuasion test',
+                    condition: 'to add command die result to roll'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "relentless_march",
@@ -80,7 +137,38 @@ export const OFFICER_TALENT_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["After using Decisive Command on ally: +10 movement and ignore Exhausted/Slowed/Surprised until end of next turn"]
+            movementEffects: [
+                {
+                    type: 'increase-rate',
+                    amount: 10,
+                    timing: 'always',
+                    movementType: 'walk'
+                }
+            ],
+            conditionEffects: [
+                {
+                    type: 'prevent',
+                    condition: 'Exhausted',
+                    trigger: 'after using Decisive Command on ally',
+                    target: 'all-allies',
+                    duration: 'until end of their next turn'
+                },
+                {
+                    type: 'prevent',
+                    condition: 'Slowed',
+                    trigger: 'after using Decisive Command on ally',
+                    target: 'all-allies',
+                    duration: 'until end of their next turn'
+                },
+                {
+                    type: 'prevent',
+                    condition: 'Surprised',
+                    trigger: 'after using Decisive Command on ally',
+                    target: 'all-allies',
+                    duration: 'until end of their next turn'
+                }
+            ],
+            otherEffects: []
         },
         {
             id: "authority",
@@ -92,7 +180,7 @@ export const OFFICER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Double range of Leader talents affecting allies", "Double number of allies affected by Leader talents"],
+            otherEffects: ["Requires title granting command over at least 5 people"],
             specialActivation: "Requires title granting command over at least 5 people"
         },
         {
@@ -106,7 +194,24 @@ export const OFFICER_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Spend 2 focus, test Leadership vs Cognitive", "Success: choose Leadership rank allies; Failure: choose 1 ally", "Chosen allies gain 1 action next turn for Strike only (doesn't count against Strike limit)"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'when using Synchronized Assault',
+                    condition: 'to make Leadership test'
+                }
+            ],
+            actionGrants: [
+                {
+                    type: 'action',
+                    count: 1,
+                    timing: 'start-of-turn',
+                    restrictedTo: 'Strike against target enemy only (does not count against Strike action limit)'
+                }
+            ],
+            otherEffects: ["Test Leadership vs Cognitive defense", "Success: choose up to Leadership rank allies", "Failure: choose 1 ally"]
         }
     ],
 }

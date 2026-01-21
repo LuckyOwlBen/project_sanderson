@@ -15,7 +15,9 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["After successful attack or Gain Advantage test, can use Rousing Presence as free action"]
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Rousing Presence', frequency: 'unlimited' }
+            ]
         },
         {
             id: "sound_advice",
@@ -27,7 +29,12 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["After ally fails skill test, spend 1 focus to use Rousing Presence as free action"]
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'after allied skill test failure', frequency: 'unlimited' }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Rousing Presence', frequency: 'unlimited' }
+            ]
         },
         {
             id: "lessons_in_patience",
@@ -93,7 +100,10 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ["Gain 1 additional reaction at beginning of combat and start of each turn"]
+            actionGrants: [
+                { type: 'reaction', count: 1, timing: 'start-of-combat', frequency: 'unlimited' },
+                { type: 'reaction', count: 1, timing: 'start-of-turn', frequency: 'unlimited' }
+            ]
         },
         {
             id: "rallying_shout",

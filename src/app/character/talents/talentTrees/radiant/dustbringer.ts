@@ -1,4 +1,5 @@
 import { TalentPath, TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 const ASHSPREN_BOND_TREE: TalentTree = {
     pathName: "Ashspren Bond",
@@ -12,12 +13,29 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             prerequisites: [{ type: 'level', target: 'character', value: 2 }],
             tier: 0,
             bonuses: [],
+            resourceTriggers: [
+                {
+                    resource: 'investiture',
+                    effect: 'recover',
+                    amount: 0,
+                    trigger: 'activation',
+                    frequency: 'unlimited',
+                    condition: 'bonded to ashspren'
+                }
+            ],
+            actionGrants: [
+                { type: 'free-action', count: 3, restrictedTo: 'Breathe Stormlight, Enhance, Regenerate', frequency: 'unlimited' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Empowered', trigger: 'goal-complete', target: 'self', duration: 'end-of-scene' },
+                { type: 'apply', condition: 'Abrasion Surge', trigger: 'goal-complete', target: 'self', duration: 'permanent' },
+                { type: 'apply', condition: 'Division Surge', trigger: 'goal-complete', target: 'self', duration: 'permanent' }
+            ],
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Abrasion', 'Division'] }
+            ],
             otherEffects: [
-                'Grants Investiture resource (max = 2 + higher of Awareness or Presence)',
-                'Unlocks Breathe Stormlight, Enhance, and Regenerate actions',
                 'Grants goal: Speak the First Ideal',
-                'Reward: Become Empowered until end of scene',
-                'Reward: Gain Abrasion and Division surge skills at rank 1',
                 'Reward: Grants access to Abrasion and Division surge trees'
             ]
         },
@@ -43,8 +61,10 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             actionCost: ActionCostCode.Passive,
             prerequisites: [{ type: 'talent', target: 'dustbringer_searing_dust_storm' }],
             tier: 2,
-            bonuses: [],
-            otherEffects: ['Increases max Investiture by tier value permanently']
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'max-investiture', formula: 'tier', scaling: true }
+            ],
+            otherEffects: []
         },
         {
             id: 'dustbringer_second_ideal',
@@ -58,11 +78,17 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
+            actionGrants: [
+                { type: 'free-action', count: 1, restrictedTo: 'Enhance', frequency: 'unlimited' }
+            ],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 0, trigger: 'enhance-action', condition: 'goal-complete' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Empowered', trigger: 'goal-complete', target: 'self', duration: 'end-of-scene' }
+            ],
             otherEffects: [
-                'Grants goal: Speak the Second Ideal',
-                'Reward: Become Empowered until end of scene',
-                'Reward: Enhance becomes free action while having 1+ Investiture',
-                'Reward: Enhance no longer costs Investiture to use or maintain'
+                'Grants goal: Speak the Second Ideal'
             ]
         },
         {
@@ -74,10 +100,11 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             prerequisites: [{ type: 'talent', target: 'dustbringer_invested' }],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Can heal temporary injury for 2 Investiture',
-                'Can heal permanent injury for 3 Investiture'
-            ]
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 2, trigger: 'regenerate-action', frequency: 'unlimited', condition: 'heal temporary injury' },
+                { resource: 'investiture', effect: 'spend', amount: 3, trigger: 'regenerate-action', frequency: 'unlimited', condition: 'heal permanent injury' }
+            ],
+            otherEffects: []
         },
         {
             id: 'dustbringer_third_ideal',
@@ -91,9 +118,11 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             ],
             tier: 5,
             bonuses: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'Empowered', trigger: 'goal-complete', target: 'self', duration: 'end-of-scene' }
+            ],
             otherEffects: [
                 'Grants goal: Speak the Third Ideal',
-                'Reward: Become Empowered until end of scene',
                 'Reward: Can summon Radiant Shardblade'
             ]
         },
@@ -104,7 +133,10 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             actionCost: ActionCostCode.Passive,
             prerequisites: [{ type: 'ideal', target: 'third', value: 3 }],
             tier: 6,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'spren-bond-range', value: 100 },
+                { type: BonusType.DEFENSE, target: 'focus-cost-reduction', value: 1 }
+            ],
             otherEffects: [
                 'Spren bond range increases to 100 feet',
                 'Spren tasks cost 1 fewer focus (minimum 1)'
@@ -118,12 +150,13 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             specialActivation: 'After a long rest',
             prerequisites: [{ type: 'ideal', target: 'third', value: 3 }],
             tier: 6,
-            bonuses: [],
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'max-squires', formula: 'tier' }
+            ],
             otherEffects: [
                 'Can choose willing, sapient, non-Radiant character as squire',
                 'Must have known them for at least 1 session',
-                'Grant 0, 1, or both surges to squire',
-                'Max squires equals current Ideal level'
+                'Grant 0, 1, or both surges to squire'
             ]
         },
         {
@@ -137,9 +170,11 @@ const ASHSPREN_BOND_TREE: TalentTree = {
             ],
             tier: 7,
             bonuses: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'Empowered', trigger: 'goal-complete', target: 'self', duration: 'end-of-scene' }
+            ],
             otherEffects: [
                 'Grants goal: Speak the Fourth Ideal',
-                'Reward: Become Empowered until end of scene',
                 'Reward: Can summon Radiant Shardplate'
             ]
         }

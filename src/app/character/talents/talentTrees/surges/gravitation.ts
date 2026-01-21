@@ -1,4 +1,5 @@
 import { TalentTree, ActionCostCode } from "../../talentInterface";
+import { BonusType } from "../../../bonuses/bonusModule";
 
 export const GRAVITATION_SURGE_TREE: TalentTree = {
     pathName: "Gravitation",
@@ -31,12 +32,16 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
                 { type: 'skill', target: 'GRAVITATION', value: 1 }
             ],
             tier: 1,
-            bonuses: [],
-            otherEffects: [
-                'Fly up to gravitation rate while maintaining Basic Lashing',
-                'Spend 1 focus to make melee attack during movement',
-                'Gravitation rate increases to 40 feet'
-            ]
+            bonuses: [
+                { type: BonusType.DERIVED, target: 'gravitation-rate', value: 40 }
+            ],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'melee-attack-during-flight', frequency: 'unlimited' }
+            ],
+            movementEffects: [
+                { type: 'special-movement', movementType: 'fly', timing: 'as-part-of-action', condition: 'Can interrupt flight to make melee attack, then continue' }
+            ],
+            otherEffects: []
         },
         {
             id: 'gravitation_gravitational_slam',
@@ -50,9 +55,8 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             tier: 1,
             bonuses: [],
             otherEffects: [
-                'Lashed targets take damage on collision: 1d4 per 10 feet moved',
-                'Damage dice scale with ranks: 1d6 at rank 2, 1d8 at rank 3, etc.',
-                'Target can halve damage with Agility test (Avoid Danger reaction)'
+                'Lashed targets take impact damage on collision: 1d4 per 10 feet moved (scales: rank 2 = 1d6, rank 3 = 1d8, etc.)',
+                'Target can use Avoid Danger reaction for Agility test to halve damage'
             ]
         },
         {
@@ -66,7 +70,8 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ['No disadvantage on ranged attacks while flying']
+            grantsAdvantage: ['ranged attacks while flying or on unstable footing'],
+            otherEffects: []
         },
         {
             id: 'gravitation_multiple_lashings',
@@ -80,10 +85,13 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: [
-                'Infuse unwilling target with up to X Investiture (X = Gravitation ranks)',
-                'Effect lasts until infusion ends (not just until your next turn)'
-            ]
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'gravitation-success', frequency: 'unlimited', condition: 'Spend up to Gravitation ranks on unwilling target' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Multiple Lashings', trigger: 'gravitation-success', target: 'target', duration: 'until-infusion-ends', details: 'Effect extends beyond start of next turn' }
+            ],
+            otherEffects: []
         },
         {
             id: 'gravitation_lashing_shot',
@@ -96,9 +104,11 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 2,
             bonuses: [],
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'spend', amount: 1, trigger: 'activation', frequency: 'unlimited', condition: 'Spend distance divided by gravitation rate (rounded up)' }
+            ],
             otherEffects: [
                 'Launch object at target within line of effect',
-                'Investiture cost: distance ÷ gravitation rate (rounded up)',
                 'Damage: 2d4 (rank 1), 2d6 (rank 2), 2d8 (rank 3), etc.'
             ]
         },
@@ -113,10 +123,12 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 3,
             bonuses: [],
+            conditionEffects: [
+                { type: 'apply', condition: 'Basic Lashing', trigger: 'group-infusion', target: 'all-allies', duration: 'original-infusion-duration', details: 'A number of willing allies up to your Gravitation ranks within reach' }
+            ],
             otherEffects: [
-                'While not in combat, infuse up to X allies (X = Gravitation ranks)',
-                'Allies must be within reach',
-                'No additional Investiture cost to create or maintain'
+                'Only usable while not in combat',
+                'Each target must be within reach'
             ]
         },
         {
@@ -130,7 +142,10 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: ['Can use Group Flight in combat']
+            conditionEffects: [
+                { type: 'prevent', condition: 'combat-restriction', trigger: 'group-flight', target: 'self', duration: 'permanent', details: 'Can use Group Flight in combat' }
+            ],
+            otherEffects: []
         },
         {
             id: 'gravitation_master_of_the_skies',
@@ -142,9 +157,13 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
             ],
             tier: 4,
             bonuses: [],
-            otherEffects: [
-                'Gain Gravitation infusion benefits with 1+ Investiture without spending it'
-            ]
+            resourceTriggers: [
+                { resource: 'investiture', effect: 'reduce-cost', amount: 0, trigger: 'maintenance', frequency: 'once-per-round', condition: 'Gain infusion benefits with 1+ Investiture without spending' }
+            ],
+            conditionEffects: [
+                { type: 'apply', condition: 'Gravitation infusion', trigger: 'passive', target: 'self', duration: 'permanent', details: 'Gain benefits without spending Investiture while holding 1+' }
+            ],
+            otherEffects: []
         }
     ]
 };

@@ -19,7 +19,13 @@ export const WARRIOR_TALENT_TREE: TalentPath = {
             prerequisites: [],
             tier: 0,
             bonuses: [],
-            otherEffects: ['Reduce focus cost of Dodge and Reactive Strike by 1; can enter other stances as a reaction.']
+            resourceTriggers: [
+                { resource: 'focus', effect: 'reduce-cost', amount: 1, trigger: 'when using Dodge action', condition: 'while in vigilant stance' },
+                { resource: 'focus', effect: 'reduce-cost', amount: 1, trigger: 'when using Reactive Strike action', condition: 'while in vigilant stance' }
+            ],
+            actionGrants: [
+                { type: 'reaction', count: 1, restrictedTo: 'Enter stance', frequency: 'unlimited' }
+            ]
         }
     ]
 }

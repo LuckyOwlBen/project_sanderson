@@ -61,9 +61,11 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
         this.isLevelUpMode = params['levelUp'] === 'true';
         this.character = character;
         if (this.character) {
+          // Only initialize once when component is first created
+          // Do NOT reinitialize on subsequent character updates
           this.initializeAttributes();
-          this.checkPendingStatus();
-          // Always update validation when character changes, even if already initialized
+          
+          // Always update validation when character changes
           this.updateValidation();
         }
       });
@@ -88,14 +90,28 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
     const currentLevel = this.character.level || 1;
     
-    // In level-up mode: use incremental points for the current level only
-    // In character creation mode: use cumulative total from levels 1 to current
+    // In level-up mode: only show points for THIS level (don't count previous levels)
+    // In character creation mode: show cumulative total from levels 1 to current
     const useBaseline = this.isLevelUpMode && currentLevel > 1;
     const totalPoints = useBaseline 
       ? this.levelUpManager.getAttributePointsForLevel(currentLevel)
       : this.levelUpManager.getTotalAttributePointsUpToLevel(currentLevel);
     
-    this.initialize(attributes, totalPoints, useBaseline);
+    // Initialize without baseline first
+    this.initialize(attributes, totalPoints, false);
+    
+    // If in level-up mode, set baseline to current values (these are pre-levelup allocations)
+    if (useBaseline) {
+      this.baselineValues.set('Strength', this.character.attributes.strength);
+      this.baselineValues.set('Speed', this.character.attributes.speed);
+      this.baselineValues.set('Awareness', this.character.attributes.awareness);
+      this.baselineValues.set('Intellect', this.character.attributes.intellect);
+      this.baselineValues.set('Willpower', this.character.attributes.willpower);
+      this.baselineValues.set('Presence', this.character.attributes.presence);
+      // Recalculate points with new baseline
+      this.calculatePoints();
+    }
+    
     this.updateDerivedAttributes();
     this.isInitialized = true;
   }
