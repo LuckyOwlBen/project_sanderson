@@ -22,6 +22,17 @@ const CHARACTERS_DIR = path.join(__dirname, 'characters');
 const IMAGES_DIR = path.join(__dirname, 'images');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+// Level-up tables (server is source of truth)
+const LEVEL_TABLES = {
+  attributePointsPerLevel: [12, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+  skillPointsPerLevel: [4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+  healthPerLevel: [10, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1],
+  healthStrengthBonusLevels: [1, 6, 11, 16, 21],
+  maxSkillRanksPerLevel: [2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5],
+  skillRanksPerLevel: [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+  talentPointsPerLevel: [2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1]
+};
+
 // Track active players
 const activePlayers = new Map(); // socketId -> {characterId, name, level, ancestry, joinedAt}
 
@@ -154,6 +165,40 @@ async function ensureDirectories() {
   }
 }
 
+function getCharacterFilepath(id) {
+  return path.join(CHARACTERS_DIR, `${id}.json`);
+}
+
+async function loadCharacterData(id, retries = 3) {
+  const filepath = getCharacterFilepath(id);
+  
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const data = await fs.readFile(filepath, 'utf8');
+      
+      // Check if data is empty
+      if (!data || data.trim().length === 0) {
+        throw new Error('Character file is empty');
+      }
+      
+      return JSON.parse(data);
+    } catch (error) {
+      // If it's a JSON parse error and we have retries left, wait and try again
+      if (error instanceof SyntaxError && attempt < retries - 1) {
+        console.warn(`JSON parse error on attempt ${attempt + 1} for ${id}, retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        continue;
+      }
+      // Otherwise throw the error
+      throw error;
+    }
+  }
+}
+
+function getLevelTableValue(table, level) {
+  return table[level - 1] || 0;
+}
+
 function findSocketIdByCharacterId(characterId) {
   for (const [socketId, player] of activePlayers.entries()) {
     if (player.characterId === characterId) {
@@ -246,8 +291,11 @@ app.post('/api/characters/save', async (req, res) => {
 
     const filename = `${character.id}.json`;
     const filepath = path.join(CHARACTERS_DIR, filename);
+    const tempPath = `${filepath}.tmp`;
     
-    await fs.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+    // Write to temp file first, then rename for atomic operation
+    await fs.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
+    await fs.rename(tempPath, filepath);
     
     console.log(`Saved character: ${character.name} (${character.id})`);
     
@@ -333,6 +381,195 @@ app.get('/api/characters/list', async (req, res) => {
       success: false, 
       error: error.message 
     });
+  }
+});
+
+// Level-up: expose server-owned tables
+app.get('/api/levelup/tables', (req, res) => {
+  res.json(LEVEL_TABLES);
+});
+
+// Level-up: lightweight character summary
+app.get('/api/characters/:id/level/summary', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const character = await loadCharacterData(id);
+    res.json({
+      id: character.id,
+      name: character.name,
+      level: character.level || 1,
+      ancestry: character.ancestry || null,
+      pendingLevelPoints: character.pendingLevelPoints || 0,
+      lastModified: character.lastModified
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error loading level summary:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: attribute slice
+app.get('/api/characters/:id/level/attributes', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const character = await loadCharacterData(id);
+    const level = character.level || 1;
+    res.json({
+      id: character.id,
+      level,
+      attributes: character.attributes || {},
+      pointsForLevel: getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level)
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error loading attribute slice:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: skill slice
+app.get('/api/characters/:id/level/skills', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const character = await loadCharacterData(id);
+    const level = character.level || 1;
+    res.json({
+      id: character.id,
+      level,
+      skills: character.skills || {},
+      pointsForLevel: getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level),
+      maxRank: getLevelTableValue(LEVEL_TABLES.maxSkillRanksPerLevel, level),
+      ranksPerLevel: getLevelTableValue(LEVEL_TABLES.skillRanksPerLevel, level)
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error loading skill slice:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: talent slice
+app.get('/api/characters/:id/level/talents', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const character = await loadCharacterData(id);
+    const level = character.level || 1;
+    res.json({
+      id: character.id,
+      level,
+      unlockedTalents: character.unlockedTalents || [],
+      baselineUnlockedTalents: character.baselineUnlockedTalents || [],
+      pointsForLevel: getLevelTableValue(LEVEL_TABLES.talentPointsPerLevel, level)
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error loading talent slice:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: patch attribute slice
+app.patch('/api/characters/:id/level/attributes', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { attributes } = req.body || {};
+    if (!attributes || typeof attributes !== 'object') {
+      return res.status(400).json({ success: false, error: 'attributes payload required' });
+    }
+
+    const character = await loadCharacterData(id);
+    character.attributes = { ...(character.attributes || {}), ...attributes };
+    character.lastModified = new Date().toISOString();
+
+    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+
+    res.json({
+      success: true,
+      id: character.id,
+      attributes: character.attributes,
+      lastModified: character.lastModified
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error saving attribute slice:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: patch skill slice
+app.patch('/api/characters/:id/level/skills', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { skills } = req.body || {};
+    if (!skills || typeof skills !== 'object') {
+      return res.status(400).json({ success: false, error: 'skills payload required' });
+    }
+
+    const character = await loadCharacterData(id);
+    character.skills = { ...(character.skills || {}), ...skills };
+    character.lastModified = new Date().toISOString();
+
+    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+
+    res.json({
+      success: true,
+      id: character.id,
+      skills: character.skills,
+      lastModified: character.lastModified
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error saving skill slice:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Level-up: patch talent slice
+app.patch('/api/characters/:id/level/talents', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { unlockedTalents, baselineUnlockedTalents } = req.body || {};
+    if (!Array.isArray(unlockedTalents) && !Array.isArray(baselineUnlockedTalents)) {
+      return res.status(400).json({ success: false, error: 'unlockedTalents or baselineUnlockedTalents payload required' });
+    }
+
+    const character = await loadCharacterData(id);
+    if (Array.isArray(unlockedTalents)) {
+      character.unlockedTalents = unlockedTalents;
+    }
+    if (Array.isArray(baselineUnlockedTalents)) {
+      character.baselineUnlockedTalents = baselineUnlockedTalents;
+    }
+    character.lastModified = new Date().toISOString();
+
+    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+
+    res.json({
+      success: true,
+      id: character.id,
+      unlockedTalents: character.unlockedTalents,
+      baselineUnlockedTalents: character.baselineUnlockedTalents || [],
+      lastModified: character.lastModified
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error saving talent slice:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

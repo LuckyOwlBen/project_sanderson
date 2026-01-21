@@ -18,7 +18,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
                 { type: BonusType.SKILL, target: 'crafting', value: 2, condition: 'Opportunity range expansion' }
             ],
             expertiseGrants: [
-                { type: 'choice', expertises: ['Armor Crafting', 'Equipment Crafting', 'Weapon Crafting'] }
+                { type: 'choice', options: ['Armor Crafting', 'Equipment Crafting', 'Weapon Crafting'] }
             ],
             otherEffects: ["Gain amplifying painrial, numbing painrial, or spanreeds+emotion bracelet", "Material costs halved"]
         },

@@ -19,8 +19,13 @@ export class CharacterStateService {
     this.character$ = this.characterSubject.asObservable();
   }
 
-  updateCharacter(updates: Partial<Character>): void {
-    Object.assign(this.character, updates);
+  updateCharacter(updates: Partial<Character> | Character): void {
+    // If updates is a full Character instance, replace entirely
+    if (updates instanceof Character) {
+      this.character = updates;
+    } else {
+      Object.assign(this.character, updates);
+    }
     this.characterSubject.next(this.character);
   }
 

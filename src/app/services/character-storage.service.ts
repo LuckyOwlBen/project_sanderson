@@ -116,6 +116,7 @@ export class CharacterStorageService {
       id: existingId || this.generateId(character),
       name: character.name,
       level: character.level,
+      pendingLevelPoints: character.pendingLevelPoints ?? 0,
       ancestry: character.ancestry,
       cultures: character.cultures,
       paths: character.paths,
@@ -130,6 +131,7 @@ export class CharacterStorageService {
       },
       skills: character.skills.getAllSkillRanks(),
       unlockedTalents: Array.from(character.unlockedTalents),
+      baselineUnlockedTalents: Array.from(character.baselineUnlockedTalents || []),
       unlockedSingerForms: character.unlockedSingerForms || [],
       activeForm: character.activeForm,
       health: {
@@ -157,6 +159,7 @@ export class CharacterStorageService {
     // Store the ID on the character object for future saves
     (character as any).id = data.id;
     character.level = data.level || 1;
+    character.pendingLevelPoints = data.pendingLevelPoints || 0;
     character.name = data.name || '';
     character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];
@@ -195,6 +198,10 @@ export class CharacterStorageService {
       data.unlockedTalents.forEach((talentId: string) => {
         character.unlockedTalents.add(talentId);
       });
+    }
+
+    if (data.baselineUnlockedTalents) {
+      character.baselineUnlockedTalents = new Set(data.baselineUnlockedTalents);
     }
     
     if (data.unlockedSingerForms) {

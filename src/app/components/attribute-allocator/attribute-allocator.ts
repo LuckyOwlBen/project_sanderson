@@ -6,6 +6,7 @@ import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
+import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
 
@@ -33,18 +34,34 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   movementSpeed: number = 0;
   recoveryDie: string = '';
   isLevelUpMode: boolean = false;
+  private characterId: string | null = null;
+  private levelTables?: LevelTables;
+  private serverAttributePoints?: number;
   private isInitialized: boolean = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
     private levelUpManager: LevelUpManager,
+    private levelUpApi: LevelUpApiService,
     private validationService: StepValidationService
   ) {
     super();
   }
 
   ngOnInit(): void {
+    this.levelUpApi.getTables()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tables) => {
+          this.levelTables = tables;
+          this.levelUpManager.notifyPointsChanged();
+        },
+        error: () => {
+          // Fallback silently to LevelUpManager tables
+        }
+      });
+
     // Listen to points changed events from LevelUpManager
     this.levelUpManager.pointsChanged$
       .pipe(takeUntil(this.destroy$))
@@ -60,13 +77,16 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       .subscribe(([params, character]) => {
         this.isLevelUpMode = params['levelUp'] === 'true';
         this.character = character;
+        this.characterId = (character as any)?.id || null;
+
         if (this.character) {
-          // Only initialize once when component is first created
-          // Do NOT reinitialize on subsequent character updates
-          this.initializeAttributes();
-          
-          // Always update validation when character changes
-          this.updateValidation();
+          this.isInitialized = false;
+          if (this.characterId) {
+            this.fetchAttributeSlice(this.characterId);
+          } else {
+            this.initializeAttributes();
+            this.updateValidation();
+          }
         }
       });
   }
@@ -74,6 +94,76 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private fetchAttributeSlice(characterId: string): void {
+    this.levelUpApi.getAttributeSlice(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (slice) => {
+          this.serverAttributePoints = slice.pointsForLevel;
+          if (this.character && slice.attributes) {
+            this.mapAttributesFromSlice(slice.attributes);
+            this.characterStateService.updateCharacter(this.character);
+          }
+          this.initializeAttributes();
+          this.updateValidation();
+        },
+        error: () => {
+          // Fall back to local character state
+          this.isInitialized = false;
+          this.initializeAttributes();
+          this.updateValidation();
+        }
+      });
+  }
+
+  private mapAttributesFromSlice(attributes: Record<string, number>): void {
+    if (!this.character) return;
+    this.character.attributes.strength = attributes['strength'] ?? this.character.attributes.strength;
+    this.character.attributes.speed = attributes['speed'] ?? this.character.attributes.speed;
+    this.character.attributes.awareness = attributes['awareness'] ?? this.character.attributes.awareness;
+    this.character.attributes.intellect = attributes['intellect'] ?? this.character.attributes.intellect;
+    this.character.attributes['willpower'] = attributes['willpower'] ?? this.character.attributes['willpower'];
+    this.character.attributes['presence'] = attributes['presence'] ?? this.character.attributes['presence'];
+  }
+
+  private getAttributePointsForLevel(level: number): number {
+    if (this.levelTables?.attributePointsPerLevel?.length) {
+      return this.levelTables.attributePointsPerLevel[level - 1] || 0;
+    }
+    return this.levelUpManager.getAttributePointsForLevel(level);
+  }
+
+  private getTotalAttributePointsUpToLevel(level: number): number {
+    if (this.levelTables?.attributePointsPerLevel?.length) {
+      return this.levelTables.attributePointsPerLevel
+        .slice(0, level)
+        .reduce((total, val) => total + (val || 0), 0);
+    }
+    return this.levelUpManager.getTotalAttributePointsUpToLevel(level);
+  }
+
+  private persistAttributes(): void {
+    if (!this.character || !this.characterId) {
+      return;
+    }
+
+    const payload = {
+      strength: this.character.attributes.strength,
+      speed: this.character.attributes.speed,
+      awareness: this.character.attributes.awareness,
+      intellect: this.character.attributes.intellect,
+      willpower: this.character.attributes.willpower,
+      presence: this.character.attributes.presence
+    };
+
+    this.levelUpApi.updateAttributeSlice(this.characterId, payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {},
+        error: () => {}
+      });
   }
 
   private initializeAttributes(): void {
@@ -94,8 +184,8 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     // In character creation mode: show cumulative total from levels 1 to current
     const useBaseline = this.isLevelUpMode && currentLevel > 1;
     const totalPoints = useBaseline 
-      ? this.levelUpManager.getAttributePointsForLevel(currentLevel)
-      : this.levelUpManager.getTotalAttributePointsUpToLevel(currentLevel);
+      ? (this.serverAttributePoints ?? this.getAttributePointsForLevel(currentLevel))
+      : this.getTotalAttributePointsUpToLevel(currentLevel);
     
     // Initialize without baseline first
     this.initialize(attributes, totalPoints, false);
@@ -140,17 +230,29 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   protected onItemChanged(item: AttributeConfig, newValue: number): void {
     if (this.character) {
-      this.characterStateService.updateCharacter(this.character);
+      // Skip broadcasting during level-up to avoid resetting input bindings
+      if (!this.isLevelUpMode) {
+        this.characterStateService.updateCharacter(this.character);
+      }
       this.updateDerivedAttributes();
       this.updateValidation();
+      if (this.characterId && this.isLevelUpMode) {
+        this.persistAttributes();
+      }
     }
   }
 
   protected onResetComplete(): void {
     if (this.character) {
-      this.characterStateService.updateCharacter(this.character);
+      // Skip broadcasting during level-up to avoid resetting input bindings
+      if (!this.isLevelUpMode) {
+        this.characterStateService.updateCharacter(this.character);
+      }
       this.updateDerivedAttributes();
       this.updateValidation();
+      if (this.characterId && this.isLevelUpMode) {
+        this.persistAttributes();
+      }
     }
   }
 

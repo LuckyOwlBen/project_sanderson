@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { TalentPrerequisiteChecker } from '../../character/talents/talentPrerequ
 import { getTalentTree, getTalentPath } from '../../character/talents/talentTrees/talentTrees';
 import { StepValidationService } from '../../services/step-validation.service';
 import { WebsocketService, SprenGrantEvent } from '../../services/websocket.service';
+import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
 import { SkillType } from '../../character/skills/skillTypes';
 import { TalentEffectParser } from '../../character/talents/talentEffectParser';
 import { applyTalentEffects } from '../../character/talents/talentEffects';
@@ -58,6 +59,9 @@ export class TalentView implements OnInit, OnDestroy {
   pendingSprenGrant: SprenGrantEvent | null = null;
   isLevelUpMode: boolean = false;
   private baselineUnlockedTalents = new Set<string>();
+  private characterId: string | null = null;
+  private levelTables?: LevelTables;
+  private serverTalentPoints?: number;
   private isInitialized: boolean = false;
 
   constructor(
@@ -66,10 +70,24 @@ export class TalentView implements OnInit, OnDestroy {
     private validationService: StepValidationService,
     private websocketService: WebsocketService,
     private dialog: MatDialog,
-    private levelUpManager: LevelUpManager
+    private levelUpManager: LevelUpManager,
+    private levelUpApi: LevelUpApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.levelUpApi.getTables()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (tables) => {
+          this.levelTables = tables;
+          this.levelUpManager.notifyPointsChanged();
+        },
+        error: () => {
+          // Fallback silently to LevelUpManager tables
+        }
+      });
+
     // Listen to points changed events from LevelUpManager
     this.levelUpManager.pointsChanged$
       .pipe(takeUntil(this.destroy$))
@@ -88,7 +106,8 @@ export class TalentView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(character => {
         this.character = character;
-        
+        this.characterId = (character as any)?.id || null;
+
         // On first initialization, sync unlockedTalents from character
         if (!this.isInitialized) {
           this.unlockedTalents = new Set(character.unlockedTalents);
@@ -105,17 +124,34 @@ export class TalentView implements OnInit, OnDestroy {
             }
           }
           this.isInitialized = true;
-        } else if (this.isLevelUpMode && character.baselineUnlockedTalents) {
-          // On subsequent character updates in level-up mode, keep baseline synced
-          // This ensures baseline persists across navigation
-          this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
+          
+          // Fetch talent slice if we have a character ID
+          if (this.characterId && this.isLevelUpMode) {
+            this.fetchTalentSlice(this.characterId);
+          } else {
+            this.loadCorePathOptions();
+            this.loadAvailableTrees();
+            this.calculateAvailablePoints();
+            this.updateValidation();
+          }
+        } else if (this.isLevelUpMode) {
+          // In level-up mode, always ensure baseline is synced (even if just retrieved from server)
+          if (character.baselineUnlockedTalents) {
+            this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
+          }
+          // Sync current talents too
+          this.unlockedTalents = new Set(character.unlockedTalents);
+          
+          this.loadCorePathOptions();
+          this.loadAvailableTrees();
+          this.calculateAvailablePoints();
+          this.updateValidation();
+        } else {
+          this.loadCorePathOptions();
+          this.loadAvailableTrees();
+          this.calculateAvailablePoints();
+          this.updateValidation();
         }
-        
-        // Always recalculate on character changes (this is needed for talents)
-        this.loadCorePathOptions();
-        this.loadAvailableTrees();
-        this.calculateAvailablePoints();
-        this.updateValidation();
       });
 
     // Listen for spren grants
@@ -193,6 +229,67 @@ export class TalentView implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private fetchTalentSlice(characterId: string): void {
+    this.levelUpApi.getTalentSlice(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (slice) => {
+          this.serverTalentPoints = slice.pointsForLevel;
+          if (slice.unlockedTalents && slice.unlockedTalents.length > 0) {
+            this.unlockedTalents = new Set(slice.unlockedTalents);
+            this.character!.unlockedTalents = new Set(slice.unlockedTalents);
+          }
+          if (slice.baselineUnlockedTalents && slice.baselineUnlockedTalents.length > 0) {
+            this.baselineUnlockedTalents = new Set(slice.baselineUnlockedTalents);
+            this.character!.baselineUnlockedTalents = new Set(slice.baselineUnlockedTalents);
+          } else if (this.isLevelUpMode && this.unlockedTalents.size > 0 && this.baselineUnlockedTalents.size === 0) {
+            // In level-up mode, if server didn't provide baseline but we have unlocked talents,
+            // assume all current talents are the baseline (they existed before this level-up)
+            this.baselineUnlockedTalents = new Set(this.unlockedTalents);
+            this.character!.baselineUnlockedTalents = new Set(this.unlockedTalents);
+          }
+          this.loadCorePathOptions();
+          this.loadAvailableTrees();
+          this.calculateAvailablePoints();
+          this.cdr.detectChanges(); // Trigger change detection to update view
+          this.updateValidation();
+        },
+        error: () => {
+          // Fall back to local character state
+          this.loadCorePathOptions();
+          this.loadAvailableTrees();
+          this.calculateAvailablePoints();
+          this.updateValidation();
+          this.cdr.detectChanges(); // Trigger change detection to update view
+        }
+      });
+  }
+
+  private persistTalents(): void {
+    if (!this.character || !this.characterId) {
+      return;
+    }
+
+    const payload = {
+      unlockedTalents: Array.from(this.unlockedTalents),
+      baselineUnlockedTalents: Array.from(this.baselineUnlockedTalents)
+    };
+
+    this.levelUpApi.updateTalentSlice(this.characterId, payload.unlockedTalents, payload.baselineUnlockedTalents)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {},
+        error: () => {}
+      });
+  }
+
+  private getTalentPointsForLevel(level: number): number {
+    if (this.levelTables?.talentPointsPerLevel?.length) {
+      return this.levelTables.talentPointsPerLevel[level - 1] || 0;
+    }
+    return this.levelUpManager.getTalentPointsForLevel(level);
+  }
+
   private loadAvailableTrees(): void {
     if (!this.character) return;
 
@@ -204,7 +301,7 @@ export class TalentView implements OnInit, OnDestroy {
     const specializationName = this.character.paths[1];
     
     // For humans and singers at level 1 or during level-up, load their chosen path, all sub trees, and bonus path logic
-    if ((this.character.ancestry != null && ['human','singer'].includes(this.character.ancestry)) && 
+    if ((this.character.ancestry != null && ['human','singer'].includes(this.character.ancestry)) &&
         (this.character.level === 1 || this.isLevelUpMode)) {
       // Helper to check if a path's key talent is unlocked
       const hasPathKeyTalent = (pathId: string): boolean => {
@@ -446,8 +543,12 @@ export class TalentView implements OnInit, OnDestroy {
     // In level-up mode, only give 1 point for the new level (no bonuses)
     // In character creation mode, give points based on level and bonuses
     if (this.isLevelUpMode && currentLevel > 1) {
-      // Level-up: always give exactly 1 talent point per level
-      totalPoints = 1;
+      // Use server data if available, else fallback to server tables, else hardcoded
+      if (this.serverTalentPoints !== undefined) {
+        totalPoints = this.serverTalentPoints;
+      } else {
+        totalPoints = this.getTalentPointsForLevel(currentLevel);
+      }
     } else {
       // Character creation: base points equal to level
       totalPoints = currentLevel;
@@ -598,6 +699,10 @@ export class TalentView implements OnInit, OnDestroy {
       grant.expertises.forEach((expertiseName: string) => {
         this.character!.bonuses.grantExpertise(talent.id, expertiseName);
       });
+      // Notify character state of changes (skip broadcasting during level-up)
+      if (!this.isLevelUpMode) {
+        this.characterState.updateCharacter(this.character!);
+      }
       // Process next grant
       this.handleExpertiseGrants(talent, grants, grantIndex + 1);
     } else if (grant.type === 'choice') {
@@ -619,6 +724,10 @@ export class TalentView implements OnInit, OnDestroy {
           result.selected.forEach((expertiseName: string) => {
             this.character!.bonuses.grantExpertise(talent.id, expertiseName);
           });
+          // Notify character state of changes (skip broadcasting during level-up)
+          if (!this.isLevelUpMode) {
+            this.characterState.updateCharacter(this.character!);
+          }
           // Process next grant
           this.handleExpertiseGrants(talent, grants, grantIndex + 1);
         } else {
@@ -649,6 +758,11 @@ export class TalentView implements OnInit, OnDestroy {
     
     // Persist to character state service
     this.characterState.unlockTalent(talent.id);
+    
+    // Persist to server in level-up mode
+    if (this.characterId && this.isLevelUpMode) {
+      this.persistTalents();
+    }
     
     // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
     if (talent.tier === 0 && (this.character.ancestry === 'human' || this.character.ancestry === 'singer') && 
@@ -699,6 +813,11 @@ export class TalentView implements OnInit, OnDestroy {
       
       // Persist to character state service
       this.characterState.removeTalent(talentId);
+      
+      // Persist to server in level-up mode
+      if (this.characterId && this.isLevelUpMode) {
+        this.persistTalents();
+      }
       
       this.updateValidation();
     }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-value-stepper',
@@ -6,7 +6,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   templateUrl: './value-stepper.html',
   styleUrl: './value-stepper.scss',
 })
-export class ValueStepper {
+export class ValueStepper implements OnInit, OnChanges {
   @Input() label: string = '';
   @Input() currentValue: number = 0;
   @Input() minValue: number = 0;
@@ -15,25 +15,42 @@ export class ValueStepper {
   
   @Output() valueChanged = new EventEmitter<{label: string, value: number}>();
 
+  private displayValue: number = 0;
+
+  ngOnInit(): void {
+    // Initialize display value on component creation
+    this.displayValue = this.currentValue;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['currentValue']) {
+      this.displayValue = changes['currentValue'].currentValue;
+    }
+  }
+
   increment(): void {
-    if (this.currentValue < this.maxValue && this.pointsRemaining > 0) {
-      this.currentValue++;
-      this.valueChanged.emit({label: this.label, value: this.currentValue});
+    if (this.displayValue < this.maxValue && this.pointsRemaining > 0) {
+      this.displayValue++;
+      this.valueChanged.emit({label: this.label, value: this.displayValue});
     }
   }
 
   decrement(): void {
-    if (this.currentValue > this.minValue) {
-      this.currentValue--;
-      this.valueChanged.emit({label: this.label, value: this.currentValue});
+    if (this.displayValue > this.minValue) {
+      this.displayValue--;
+      this.valueChanged.emit({label: this.label, value: this.displayValue});
     }
   }
 
   get canIncrement(): boolean {
-    return this.currentValue < this.maxValue && this.pointsRemaining > 0;
+    return this.displayValue < this.maxValue && this.pointsRemaining > 0;
   }
 
   get canDecrement(): boolean {
-    return this.currentValue > this.minValue;
+    return this.displayValue > this.minValue;
+  }
+
+  get display(): number {
+    return this.displayValue;
   }
 }

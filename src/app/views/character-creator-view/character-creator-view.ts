@@ -99,6 +99,18 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // If we're exiting level-up mode without completing through nextStep(),
+    // still complete the level-up to decrement pendingLevelPoints
+    if (this.isLevelUpMode) {
+      const character = this.characterState.getCharacter();
+      if (character && character.pendingLevelPoints > 0) {
+        character.pendingLevelPoints -= 1;
+        delete character.baselineUnlockedTalents;
+        this.characterState.updateCharacter(character);
+        console.log('[Character Creator] Level-up auto-completed on view exit, pending points:', character.pendingLevelPoints);
+      }
+    }
+    
     this.destroy$.next();
     this.destroy$.complete();
   }
