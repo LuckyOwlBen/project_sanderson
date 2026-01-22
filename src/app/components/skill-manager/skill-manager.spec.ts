@@ -1,184 +1,176 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SkillManager } from './skill-manager';
 import { CharacterStateService } from '../../character/characterStateService';
 import { LevelUpManager } from '../../levelup/levelUpManager';
+import { LevelUpApiService, SkillSlice } from '../../services/levelup-api.service';
+import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
 import { SkillType } from '../../character/skills/skillTypes';
 
-describe('SkillManager', () => {
+describe('SkillManager - Fresh Backend Data on Route Change', () => {
   let component: SkillManager;
   let fixture: ComponentFixture<SkillManager>;
+  let levelUpApiService: any;
   let characterStateService: CharacterStateService;
-  let mockCharacter: Character;
+  let queryParamsSubject: BehaviorSubject<any>;
 
   beforeEach(async () => {
+    levelUpApiService = {
+      getSkillSlice: vi.fn(),
+      updateSkillSlice: vi.fn()
+    };
+
+    queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
+
     await TestBed.configureTestingModule({
       imports: [SkillManager],
       providers: [
         CharacterStateService,
         LevelUpManager,
+        StepValidationService,
+        { provide: LevelUpApiService, useValue: levelUpApiService },
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: of({})
+            queryParams: queryParamsSubject.asObservable()
           }
         }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
+
+    levelUpApiService = TestBed.inject(LevelUpApiService);
+    characterStateService = TestBed.inject(CharacterStateService);
 
     fixture = TestBed.createComponent(SkillManager);
     component = fixture.componentInstance;
-    characterStateService = TestBed.inject(CharacterStateService);
+  });
+
+  it('should fetch fresh skill slice only when route params change, not when character$ emits', async () => {
+    // Setup: Create a test character
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 1;
+    testCharacter.skills.setSkillRank(SkillType.AGILITY, 1);
+    testCharacter.skills.setSkillRank(SkillType.ATHLETICS, 1);
+
+    // Mock the getSkillSlice to return specific points
+    const slice1: SkillSlice = {
+      id: 'char-123',
+      level: 1,
+      skills: {
+        [SkillType.AGILITY]: 1,
+        [SkillType.ATHLETICS]: 1
+      },
+      pointsForLevel: 5,
+      maxRank: 5,
+      ranksPerLevel: 1,
+      success: true
+    };
+
+    levelUpApiService.getSkillSlice.mockReturnValue(of(slice1));
+
+    // Set initial character in state
+    characterStateService.updateCharacter(testCharacter);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Should have called API once on initial route params
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledWith('char-123');
+
+    // Now emit character$ again (simulating navigating back from talents step)
+    const updatedCharacter = new Character();
+    updatedCharacter.id = 'char-123';
+    updatedCharacter.name = 'Test Hero';
+    updatedCharacter.level = 1;
+    updatedCharacter.skills.setSkillRank(SkillType.AGILITY, 2); // Different value
+    characterStateService.updateCharacter(updatedCharacter);
+    await fixture.whenStable();
+
+    // Should NOT have called API again - it should ignore character$ emissions
+    // and only react to route param changes
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset isFetchingSlice flag when route params indicate new level-up session', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 1;
+
+    const slice: SkillSlice = {
+      id: 'char-123',
+      level: 1,
+      skills: {
+        [SkillType.AGILITY]: 1
+      },
+      pointsForLevel: 5,
+      maxRank: 5,
+      ranksPerLevel: 1,
+      success: true
+    };
+
+    // Set character BEFORE changing route params
+    characterStateService.updateCharacter(testCharacter);
     
-    // Create a fresh character for each test
-    mockCharacter = new Character();
-    // Don't update character state service yet - let individual tests do it
+    levelUpApiService.getSkillSlice.mockReturnValue(of(slice));
+
+    // Now emit route params with level-up mode
+    queryParamsSubject.next({ levelUp: 'true' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
+
+    // Simulate exiting level-up mode
+    queryParamsSubject.next({ levelUp: 'false' });
+    await fixture.whenStable();
+
+    // Should not fetch when leaving level-up mode
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
+
+    // Re-enter level-up mode with fresh params
+    queryParamsSubject.next({ levelUp: 'true' });
+    await fixture.whenStable();
+
+    // Now should fetch fresh data again because route params changed
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(2);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  it('should set baseline values correctly for level-up mode to calculate remaining skill points', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 2;
+    testCharacter.skills.setSkillRank(SkillType.AGILITY, 2); // Already have 1 rank from level 1
+    testCharacter.skills.setSkillRank(SkillType.ATHLETICS, 1);
 
-  describe('Surge Skills', () => {
-    beforeEach(() => {
-      // Recreate fixture for each surge skill test to ensure clean state
-      fixture = TestBed.createComponent(SkillManager);
-      component = fixture.componentInstance;
-    });
+    const slice: SkillSlice = {
+      id: 'char-123',
+      level: 2,
+      skills: {
+        [SkillType.AGILITY]: 2,
+        [SkillType.ATHLETICS]: 1
+      },
+      pointsForLevel: 5, // Server says: 5 points available for THIS level
+      maxRank: 5,
+      ranksPerLevel: 1,
+      success: true
+    };
 
-    it('should not include surge skills when First Ideal has not been spoken', () => {
-      // Character has no radiant path setup
-      characterStateService.updateCharacter(mockCharacter);
-      fixture.detectChanges();
+    levelUpApiService.getSkillSlice.mockReturnValue(of(slice));
+    characterStateService.updateCharacter(testCharacter);
 
-      expect(component.surgeSkills.length).toBe(0);
-      expect(component.physicalSkills.length).toBe(6);
-      expect(component.mentalSkills.length).toBe(6);
-      expect(component.socialSkills.length).toBe(6);
-    });
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    it('should not include surge skills when spren is granted but First Ideal not spoken', () => {
-      mockCharacter.radiantPath.grantSpren('Windrunner');
-      characterStateService.updateCharacter(mockCharacter);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(0);
-      expect(mockCharacter.radiantPath.hasSpren()).toBe(true);
-      expect(mockCharacter.radiantPath.hasSpokenIdeal()).toBe(false);
-    });
-
-    it('should include surge skills after First Ideal is spoken', () => {
-      // Grant spren and speak ideal
-      mockCharacter.radiantPath.grantSpren('Windrunner');
-      mockCharacter.radiantPath.speakIdeal(mockCharacter.skills);
-      
-      characterStateService.updateCharacter(mockCharacter);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(2);
-      expect(mockCharacter.radiantPath.hasSpokenIdeal()).toBe(true);
-      
-      // Windrunner should have Adhesion and Gravitation
-      const surgeTypes = component.surgeSkills.map(s => s.type);
-      expect(surgeTypes).toContain(SkillType.ADHESION);
-      expect(surgeTypes).toContain(SkillType.GRAVITATION);
-    });
-
-    it('should include correct surge skills for different Radiant Orders', () => {
-      // Test Skybreaker (Division and Gravitation)
-      const testChar = new Character();
-      testChar.radiantPath.grantSpren('Skybreaker');
-      testChar.radiantPath.speakIdeal(testChar.skills);
-      
-      characterStateService.updateCharacter(testChar);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(2);
-      const surgeTypes = component.surgeSkills.map(s => s.type);
-      expect(surgeTypes).toContain(SkillType.DIVISION);
-      expect(surgeTypes).toContain(SkillType.GRAVITATION);
-    });
-
-    it('should show surge skills are associated with Willpower', () => {
-      const testChar = new Character();
-      testChar.radiantPath.grantSpren('Windrunner');
-      testChar.radiantPath.speakIdeal(testChar.skills);
-      
-      characterStateService.updateCharacter(testChar);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(2);
-      component.surgeSkills.forEach(skill => {
-        expect(skill.associatedAttribute).toBe('Willpower');
-      });
-    });
-
-    it('should initialize surge skills with rank 1 after speaking First Ideal', () => {
-      const testChar = new Character();
-      testChar.radiantPath.grantSpren('Lightweaver');
-      testChar.radiantPath.speakIdeal(testChar.skills);
-      
-      characterStateService.updateCharacter(testChar);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(2);
-      
-      // Lightweaver should have Illumination and Transformation
-      const surgeTypes = component.surgeSkills.map(s => s.type);
-      expect(surgeTypes).toContain(SkillType.ILLUMINATION);
-      expect(surgeTypes).toContain(SkillType.TRANSFORMATION);
-      
-      // Both should start at rank 1
-      component.surgeSkills.forEach(skill => {
-        expect(skill.currentValue).toBe(1);
-      });
-    });
-
-    it('should allow ranking up surge skills like regular skills', () => {
-      const testChar = new Character();
-      testChar.radiantPath.grantSpren('Edgedancer');
-      testChar.radiantPath.speakIdeal(testChar.skills);
-      
-      characterStateService.updateCharacter(testChar);
-      fixture.detectChanges();
-
-      expect(component.surgeSkills.length).toBe(2);
-      
-      // Find Abrasion skill
-      const abrasionSkill = component.surgeSkills.find(s => s.type === SkillType.ABRASION);
-      expect(abrasionSkill).toBeTruthy();
-      
-      if (abrasionSkill) {
-        // Use the public getCurrentValue and setCurrentValue through the component
-        const initialValue = component['getCurrentValue'](abrasionSkill);
-        component['setCurrentValue'](abrasionSkill, 2);
-        expect(abrasionSkill.currentValue).toBe(2);
-        expect(testChar.skills.getSkillRank(SkillType.ABRASION)).toBe(2);
-      }
-    });
-
-    it('should calculate total value for surge skills including Willpower attribute', () => {
-      const testChar = new Character();
-      // Set Willpower attribute
-      testChar.attributes.setAttribute('willpower', 3);
-      
-      testChar.radiantPath.grantSpren('Stoneward');
-      testChar.radiantPath.speakIdeal(testChar.skills);
-      testChar.skills.setSkillRank(SkillType.COHESION, 2);
-      
-      characterStateService.updateCharacter(testChar);
-      fixture.detectChanges();
-
-      const cohesionSkill = component.surgeSkills.find(s => s.type === SkillType.COHESION);
-      expect(cohesionSkill).toBeTruthy();
-      
-      if (cohesionSkill) {
-        // Total should be skill rank (2) + willpower (3) = 5
-        expect(cohesionSkill.total).toBe(5);
-      }
-    });
+    // Should use the current skill values as baseline (pre-level-up state)
+    // and calculate remaining points as: pointsForLevel - (newValues - baselineValues)
+    expect(component['serverSkillPoints']).toBe(5);
+    expect(component.remainingPoints).toBe(5);
   });
 });

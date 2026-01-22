@@ -58,10 +58,8 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).subscribe(params => {
       this.isLevelUpMode = params['levelUp'] === 'true';
       console.log('[Character Creator] Level-up mode:', this.isLevelUpMode);
-    });
-
-    // If not in level-up mode, ensure character has an ID for API calls
-    if (!this.isLevelUpMode) {
+      
+      // Ensure character has an ID for API calls (both creation and level-up modes)
       const character = this.characterState.getCharacter();
       const existingId = (character as any)?.id;
       
@@ -83,7 +81,7 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       } else {
         console.log('[Character Creator] Using existing character ID:', existingId);
       }
-    }
+    });
 
     // Subscribe to flow service changes and update local property
     this.flowService.currentStep$.pipe(

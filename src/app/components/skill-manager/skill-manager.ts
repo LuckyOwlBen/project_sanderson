@@ -1,6 +1,30 @@
+/**
+ * SkillManager Component - PHASE 2.2 REFACTOR
+ * 
+ * MIGRATION: Removed subscription to character$ Observable
+ * 
+ * PROBLEM FIXED:
+ * - Previously subscribed to combineLatest([queryParams, character$])
+ * - When navigating back from talents, character$ would re-emit
+ * - Component would reuse stale serverSkillPoints from first visit
+ * - This caused incorrect remaining points calculation
+ * 
+ * SOLUTION:
+ * - Now subscribes ONLY to queryParams changes
+ * - Gets current character state directly via getCharacter() snapshot
+ * - Resets isFetchingSlice flag on each param change to force fresh API fetch
+ * - Only fetches during level-up mode to avoid unnecessary calls
+ * - Prevents stale cache from being reused when revisiting step
+ * 
+ * ARCHITECTURE:
+ * - Level-up components are now independent of character$ emissions
+ * - Backend slice APIs remain the source of truth for point allocation
+ * - Each visit to a level-up step triggers fresh data fetch
+ */
+
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
@@ -61,31 +85,35 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   ngOnInit(): void {
-    // Offline mode eliminated: rely on server slices only
-
-    // Combine queryParams and character$ to avoid race conditions
-    combineLatest([
-      this.activatedRoute.queryParams,
-      this.characterStateService.character$
-    ]).pipe(takeUntil(this.destroy$))
-      .subscribe(([params, character]) => {
+    // Subscribe only to route params changes - do NOT subscribe to character$
+    // during level-up mode. This prevents stale cache reuse when navigating
+    // between level-up steps.
+    this.activatedRoute.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
         this.isLevelUpMode = params['levelUp'] === 'true';
-        this.character = character;
-        const newCharacterId = (character as any)?.id || null;
+        // Reset isFetchingSlice when route params change - this forces fresh fetch
+        // if we re-enter level-up mode
+        this.isFetchingSlice = false;
         
-        // Reset initialization if character ID changed
-        if (newCharacterId !== this.characterId) {
-          this.isInitialized = false;
-          this.characterId = newCharacterId;
-        }
+        // Get current character from service (not from subscription)
+        this.character = this.characterStateService.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
 
-        if (this.character) {
-          if (this.characterId && !this.isFetchingSlice && !this.isInitialized) {
+        if (this.character && this.isLevelUpMode) {
+          this.isInitialized = false;
+          if (this.characterId) {
             this.fetchSkillSlice(this.characterId);
-          } else if (!this.characterId && !this.isInitialized) {
-            this.initializeSkills();
-            this.updateValidation();
           }
+        } else if (this.character && !this.isLevelUpMode) {
+          // In non-level-up mode (creation), still initialize from current character state
+          console.log('[SkillManager] Character creation mode - using local state (no API call)');
+          this.isInitialized = false;
+          // Get skill points from local level manager for character creation
+          this.serverSkillPoints = this.levelUpManager.getSkillPointsForLevel(this.character.level || 1);
+          console.log('[SkillManager] Calculated local skill points:', this.serverSkillPoints);
+          this.initializeSkills();
+          this.updateValidation();
         }
       });
   }
@@ -101,6 +129,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (slice) => {
+          this.isFetchingSlice = false;
           this.serverSkillPoints = slice.pointsForLevel;
           if (this.character && slice.skills) {
             this.mapSkillsFromSlice(slice.skills);
@@ -109,7 +138,6 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
           this.isInitialized = false; // Allow re-init
           this.initializeSkills();
           this.cdr.detectChanges(); // Trigger change detection
-          this.isFetchingSlice = false;
         },
         error: () => {
           // Server health service will handle navigation to error page

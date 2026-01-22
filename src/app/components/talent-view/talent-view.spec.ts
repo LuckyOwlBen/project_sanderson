@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TalentView } from './talent-view';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
+import { LevelUpApiService, TalentSlice } from '../../services/levelup-api.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { StepValidationService } from '../../services/step-validation.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -116,5 +118,141 @@ describe('TalentView', () => {
       const idealPrompt = fixture.debugElement.query(By.css('.ideal-prompt'));
       expect(idealPrompt).toBeFalsy();
     });
+  });
+});
+
+// =========================================
+// PHASE 2.3 REFACTOR TESTS
+// =========================================
+describe('TalentView - Fresh Backend Data on Route Change', () => {
+  let component: TalentView;
+  let fixture: ComponentFixture<TalentView>;
+  let levelUpApiService: any;
+  let characterStateService: CharacterStateService;
+  let queryParamsSubject: BehaviorSubject<any>;
+
+  beforeEach(async () => {
+    levelUpApiService = {
+      getTalentSlice: vi.fn(),
+      getTalentForLevel: vi.fn(),
+      getTables: vi.fn().mockReturnValue(of({
+        attributePointsPerLevel: [12],
+        skillPointsPerLevel: [5],
+        healthPerLevel: [10],
+        healthStrengthBonusLevels: [],
+        maxSkillRanksPerLevel: [5],
+        skillRanksPerLevel: [1],
+        talentPointsPerLevel: [1]
+      }))
+    };
+
+    queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
+
+    await TestBed.configureTestingModule({
+      imports: [TalentView, MatDialogModule, BrowserAnimationsModule],
+      providers: [
+        CharacterStateService,
+        WebsocketService,
+        StepValidationService,
+        LevelUpManager,
+        { provide: LevelUpApiService, useValue: levelUpApiService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParamsSubject.asObservable()
+          }
+        }
+      ]
+    }).compileComponents();
+
+    levelUpApiService = TestBed.inject(LevelUpApiService);
+    characterStateService = TestBed.inject(CharacterStateService);
+
+    fixture = TestBed.createComponent(TalentView);
+    component = fixture.componentInstance;
+  });
+
+  it('should fetch fresh talent data only when route params change, not when character$ emits', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 1;
+    testCharacter.paths = ['Windrunner'];
+
+    const talentForLevelData = {
+      talentPoints: 1,
+      previouslySelectedTalents: [],
+      requiresSingerSelection: false,
+      ancestry: null,
+      level: 1,
+      mainPath: 'Windrunner'
+    };
+
+    levelUpApiService.getTalentForLevel.mockReturnValue(of(talentForLevelData));
+    
+    // Set initial character in state
+    characterStateService.updateCharacter(testCharacter);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Should have called API once on initial load
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(1);
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledWith('char-123');
+
+    // Now emit character$ again (simulating navigating back from another step)
+    const updatedCharacter = new Character();
+    updatedCharacter.id = 'char-123';
+    updatedCharacter.name = 'Test Hero';
+    updatedCharacter.level = 1;
+    updatedCharacter.paths = ['Windrunner'];
+    updatedCharacter.unlockedTalents.add('some-talent');
+    characterStateService.updateCharacter(updatedCharacter);
+    await fixture.whenStable();
+
+    // Should NOT have called API again - it should ignore character$ emissions
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset sliceLoaded flag when entering level-up mode', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 1;
+    testCharacter.paths = ['Skybreaker'];
+
+    const talentData = {
+      talentPoints: 1,
+      previouslySelectedTalents: [],
+      requiresSingerSelection: false,
+      ancestry: null,
+      level: 1,
+      mainPath: 'Skybreaker'
+    };
+
+    // Set character BEFORE changing route params
+    characterStateService.updateCharacter(testCharacter);
+    
+    levelUpApiService.getTalentForLevel.mockReturnValue(of(talentData));
+
+    // Now emit route params with level-up mode
+    queryParamsSubject.next({ levelUp: 'true' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(1);
+
+    // Simulate exiting level-up mode
+    queryParamsSubject.next({ levelUp: 'false' });
+    await fixture.whenStable();
+
+    // Should not fetch when leaving level-up mode
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(1);
+
+    // Re-enter level-up mode with fresh params
+    queryParamsSubject.next({ levelUp: 'true' });
+    await fixture.whenStable();
+
+    // Now should fetch fresh data again because route params changed
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(2);
   });
 });

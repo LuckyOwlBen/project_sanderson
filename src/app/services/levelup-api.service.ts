@@ -80,7 +80,9 @@ export class LevelUpApiService {
   }
 
   getAttributeSlice(id: string): Observable<AttributeSlice> {
-    return this.http.get<AttributeSlice>(`${this.charactersUrl}/${id}/level/attributes`);
+    const url = `${this.charactersUrl}/${id}/level/attributes`;
+    console.log('[LevelUpApiService] getAttributeSlice - Making HTTP GET to:', url);
+    return this.http.get<AttributeSlice>(url);
   }
 
   getSkillSlice(id: string): Observable<SkillSlice> {

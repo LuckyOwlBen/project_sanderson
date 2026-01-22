@@ -1,3 +1,27 @@
+/**
+ * TalentView Component - PHASE 2.3 REFACTOR
+ * 
+ * MIGRATION: Removed subscription to character$ Observable
+ * 
+ * PROBLEM FIXED:
+ * - Previously had separate subscriptions to queryParams AND character$
+ * - When navigating back from other steps, character$ would re-emit
+ * - Component would reuse stale sliceLoaded flag from first visit
+ * - This prevented fresh talent data from being fetched
+ * 
+ * SOLUTION:
+ * - Now subscribes ONLY to queryParams changes
+ * - Gets current character state directly via getCharacter() snapshot
+ * - Resets sliceLoaded flag on each param change to force fresh API fetch
+ * - Only fetches during level-up mode to avoid unnecessary calls
+ * - Prevents stale cache from being reused when revisiting step
+ * 
+ * ARCHITECTURE:
+ * - Level-up components are now independent of character$ emissions
+ * - Backend slice APIs remain the source of truth for talent point allocation
+ * - Each visit to a level-up step triggers fresh data fetch
+ */
+
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -99,71 +123,83 @@ export class TalentView implements OnInit, OnDestroy {
         this.checkPendingStatus();
       });
 
-    // Check if we're in level-up mode
+    // Subscribe only to route params changes - do NOT subscribe to character$
+    // during level-up mode. This prevents stale cache reuse when navigating
+    // between level-up steps.
     this.activatedRoute.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
       this.isLevelUpMode = params['levelUp'] === 'true';
+      
+      // Reset sliceLoaded when route params change - this forces fresh fetch
+      // if we re-enter level-up mode
+      this.sliceLoaded = false;
+      
+      // Get current character from service (not from subscription)
+      const character = this.characterState.getCharacter();
+      this.character = character;
+      this.characterId = (character as any)?.id || null;
+
+      if (!this.character) return;
+
+      // Track when paths are populated from server
+      const pathsNowLoaded = character.paths && character.paths.length > 0 && character.paths[0];
+      if (pathsNowLoaded && !this.pathsLoaded) {
+        console.log('[TalentView] Paths loaded from server:', character.paths);
+        this.pathsLoaded = true;
+        // Trigger lazy loading of trees now that paths are available
+        this.lazyLoadTrees();
+      }
+
+      // On first initialization, sync unlockedTalents from character
+      if (!this.isInitialized) {
+        this.unlockedTalents = new Set(character.unlockedTalents);
+        this.isInitialized = true;
+        
+        // Render the page first with loading state, then fetch talent data
+        this.loadCorePathOptions();
+        // Don't load trees here - wait for lazy load trigger when paths are ready
+        this.calculateAvailablePoints();
+        this.updateValidation();
+        
+        // Add a timeout safeguard to force tree loading if paths don't update in time
+        setTimeout(() => {
+          if (!this.pathsLoaded && this.character?.paths?.[0]) {
+            console.log('[TalentView] Timeout: forcing tree load for paths:', this.character.paths);
+            this.pathsLoaded = true;
+            this.lazyLoadTrees();
+          }
+        }, 1000); // 1 second timeout
+        
+        // Lazy load talent data from API if we have a character ID
+        if (this.characterId && this.isLevelUpMode) {
+          this.fetchTalentForLevel(this.characterId);
+        } else if (!this.isLevelUpMode) {
+          // In character creation mode, calculate talent points locally
+          console.log('[TalentView] Character creation mode - calculating local talent points');
+          this.baseTalentPoints = this.levelUpManager.getTalentPointsForLevel(this.character.level || 1);
+          this.availableTalentPoints = this.baseTalentPoints;
+          console.log('[TalentView] Calculated local talent points:', this.baseTalentPoints);
+        }
+      } else {
+        // Sync current talents
+        this.unlockedTalents = new Set(character.unlockedTalents);
+
+        // Always render immediately
+        this.loadCorePathOptions();
+        // Reload trees if paths are loaded
+        if (this.pathsLoaded) {
+          this.loadAvailableTrees();
+        }
+        this.calculateAvailablePoints();
+        this.updateValidation();
+
+        // Lazy load talent data if needed and in level-up mode
+        if (this.characterId && this.isLevelUpMode) {
+          this.fetchTalentForLevel(this.characterId);
+        }
+      }
     });
-
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        this.character = character;
-        this.characterId = (character as any)?.id || null;
-
-        // Track when paths are populated from server
-        const pathsNowLoaded = character.paths && character.paths.length > 0 && character.paths[0];
-        if (pathsNowLoaded && !this.pathsLoaded) {
-          console.log('[TalentView] Paths loaded from server:', character.paths);
-          this.pathsLoaded = true;
-          // Trigger lazy loading of trees now that paths are available
-          this.lazyLoadTrees();
-        }
-
-        // On first initialization, sync unlockedTalents from character
-        if (!this.isInitialized) {
-          this.unlockedTalents = new Set(character.unlockedTalents);
-          this.isInitialized = true;
-          
-          // Render the page first with loading state, then fetch talent data
-          this.loadCorePathOptions();
-          // Don't load trees here - wait for lazy load trigger when paths are ready
-          this.calculateAvailablePoints();
-          this.updateValidation();
-          
-          // Add a timeout safeguard to force tree loading if paths don't update in time
-          setTimeout(() => {
-            if (!this.pathsLoaded && this.character?.paths?.[0]) {
-              console.log('[TalentView] Timeout: forcing tree load for paths:', this.character.paths);
-              this.pathsLoaded = true;
-              this.lazyLoadTrees();
-            }
-          }, 1000); // 1 second timeout
-          
-          // Lazy load talent data from API if we have a character ID (only once)
-          if (this.characterId && !this.sliceLoaded) {
-            this.fetchTalentForLevel(this.characterId);
-          }
-        } else {
-          // Sync current talents
-          this.unlockedTalents = new Set(character.unlockedTalents);
-
-          // Always render immediately
-          this.loadCorePathOptions();
-          // Reload trees if paths are loaded
-          if (this.pathsLoaded) {
-            this.loadAvailableTrees();
-          }
-          this.calculateAvailablePoints();
-          this.updateValidation();
-
-          // Lazy load talent data if needed
-          if (this.characterId && !this.sliceLoaded) {
-            this.fetchTalentForLevel(this.characterId);
-          }
-        }
-      });
 
     // Listen for spren grants
     this.websocketService.sprenGrant$

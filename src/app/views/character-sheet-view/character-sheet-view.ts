@@ -103,39 +103,13 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         }
       });
 
-    // Check if we have a character ID in the route
+    // Subscribe to route params - load character from route only
     this.route.params
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         if (params['id']) {
           this.characterId = params['id'];
           this.loadCharacter(this.characterId);
-        }
-      });
-
-    // Always subscribe to character state updates (for portrait changes, etc.)
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        if (character && this.character) {
-          // Update existing character reference to pick up changes like portrait
-          this.character = character;
-          this.portraitUrl = (character as any).portraitUrl || null;
-          // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
-          setTimeout(() => this.cdr.detectChanges(), 0);
-        } else if (character && !this.character) {
-          // Initial load if no character ID in route
-          this.character = character;
-          this.characterId = (character as any).id || this.characterId;
-          this.portraitUrl = (character as any).portraitUrl || null;
-          this.sessionNotes = (character as any).sessionNotes || '';
-          setTimeout(() => this.cdr.detectChanges(), 0);
-          
-          // Emit player-join if WebSocket is already connected
-          if (this.websocketService.isConnected()) {
-            console.log('[Character Sheet] Character loaded via state, emitting player-join');
-            this.emitPlayerJoin();
-          }
         }
       });
 
@@ -160,7 +134,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     this.websocketService.itemGrant$
       .pipe(takeUntil(this.destroy$))
       .subscribe(event => {
-        if (this.character && event.characterId === this.characterId) {
+        if (event && this.character && event.characterId === this.characterId) {
           console.log('[Character Sheet] 🎁 Item granted:', event.itemId, 'x', event.quantity);
           
           // Add item (inventory.addItem is already idempotent - it stacks or adds new instance)
@@ -186,7 +160,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] ⭐⭐⭐ SPREN GRANT RECEIVED IN CHARACTER SHEET ⭐⭐⭐');
         console.log('[Character Sheet] ⭐ Spren grant received:', grant);
         console.log('[Character Sheet] ⭐ Current character ID:', this.characterId);
-        if (this.characterId && grant.characterId === this.characterId && this.character) {
+        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
           // Check if already has spren (idempotency)
           if (this.character.radiantPath.hasSpren()) {
             console.log('[Character Sheet] ⭐ Character already has spren - ignoring duplicate grant');
@@ -219,8 +193,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] 📚📚📚 EXPERTISE GRANT RECEIVED IN SUBSCRIBE 📚📚📚');
         console.log('[Character Sheet] 📚 Expertise grant received:', grant);
         console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
-        console.log('[Character Sheet] 📚 Grant character ID:', grant.characterId);
-        if (this.characterId && grant.characterId === this.characterId && this.character) {
+        console.log('[Character Sheet] 📚 Grant character ID:', grant?.characterId);
+        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
           // Check if already has expertise (idempotency)
           const existingExpertises = this.characterState.getSelectedExpertises();
           if (existingExpertises.includes(grant.expertiseName)) {
@@ -262,7 +236,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .subscribe(event => {
         console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
         console.log('[Character Sheet] 🆙 Level-up event:', event);
-        if (this.characterId && event.characterId === this.characterId && this.character) {
+        if (event && this.characterId && event.characterId === this.characterId && this.character) {
           // Defensive guard: only accept level-up if newLevel is exactly current + 1
           // This prevents burst grants from a mismatched queue state
           const expectedNextLevel = this.character.level + 1;
@@ -282,7 +256,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
           this.websocketService.ackLevelUp(this.characterId, event.newLevel);
         } else {
-          console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character?.level, 'event:', event.newLevel, ')');
+          console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character?.level, 'event:', event?.newLevel, ')');
         }
       });
     console.log('[Character Sheet] 🆙 Level-up listener subscription complete');
@@ -293,8 +267,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(event => {
         console.log('[Character Sheet] ⚡ Highstorm event:', event);
-        this.isHighstormActive = event.active;
-        setTimeout(() => this.cdr.detectChanges(), 0);
+        if (event) {
+          this.isHighstormActive = event.active;
+          setTimeout(() => this.cdr.detectChanges(), 0);
+        }
       });
     console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
   }

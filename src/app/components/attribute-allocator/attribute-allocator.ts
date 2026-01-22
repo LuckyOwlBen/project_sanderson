@@ -1,6 +1,30 @@
+/**
+ * AttributeAllocator Component - PHASE 2.1 REFACTOR
+ * 
+ * MIGRATION: Removed subscription to character$ Observable
+ * 
+ * PROBLEM FIXED:
+ * - Previously subscribed to combineLatest([queryParams, character$])
+ * - When navigating back from skills, character$ would re-emit
+ * - Component would reuse stale serverAttributePoints from first visit
+ * - This caused 24 points instead of 0 remaining (12 + 12)
+ * 
+ * SOLUTION:
+ * - Now subscribes ONLY to queryParams changes
+ * - Gets current character state directly via getCharacter() snapshot
+ * - Resets sliceFetched flag on each param change to force fresh API fetch
+ * - Only fetches during level-up mode to avoid unnecessary calls
+ * - Prevents stale cache from being reused when revisiting step
+ * 
+ * ARCHITECTURE:
+ * - Level-up components are now independent of character$ emissions
+ * - Backend slice APIs remain the source of truth for point allocation
+ * - Each visit to a level-up step triggers fresh data fetch
+ */
+
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
@@ -51,28 +75,45 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   ngOnInit(): void {
-    // Offline mode eliminated: rely on server slices only
-
-    // Combine queryParams and character$ to avoid race conditions
-    combineLatest([
-      this.activatedRoute.queryParams,
-      this.characterStateService.character$
-    ]).pipe(takeUntil(this.destroy$))
-      .subscribe(([params, character]) => {
+    // Subscribe only to route params changes - do NOT subscribe to character$
+    // during level-up mode. This prevents stale cache reuse when navigating
+    // between level-up steps.
+    this.activatedRoute.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
         this.isLevelUpMode = params['levelUp'] === 'true';
-        this.character = character;
-        this.characterId = (character as any)?.id || null;
+        // Reset sliceFetched when route params change - this forces fresh fetch
+        // if we re-enter level-up mode
+        this.sliceFetched = false;
+        
+        // Get current character from service (not from subscription)
+        this.character = this.characterStateService.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
 
-        if (this.character) {
+        console.log('[AttributeAllocator] ngOnInit - params:', params);
+        console.log('[AttributeAllocator] character:', this.character);
+        console.log('[AttributeAllocator] characterId:', this.characterId);
+        console.log('[AttributeAllocator] isLevelUpMode:', this.isLevelUpMode);
+
+        if (this.character && this.isLevelUpMode) {
           this.isInitialized = false;
-          if (this.characterId && !this.sliceFetched) {
-            this.sliceFetched = true;
+          if (this.characterId) {
+            console.log('[AttributeAllocator] Fetching attribute slice for character:', this.characterId);
             this.fetchAttributeSlice(this.characterId);
-          } else if (!this.characterId) {
-            // Without a characterId, default to zero points; server authority preferred
-            this.initializeAttributes();
-            this.updateValidation();
+          } else {
+            console.warn('[AttributeAllocator] Level-up mode but no characterId found!');
           }
+        } else if (this.character && !this.isLevelUpMode) {
+          // In non-level-up mode (creation), still initialize from current character state
+          console.log('[AttributeAllocator] Character creation mode - using local state (no API call)');
+          this.isInitialized = false;
+          // Get attribute points from local level manager for character creation
+          this.serverAttributePoints = this.levelUpManager.getAttributePointsForLevel(this.character.level || 1);
+          console.log('[AttributeAllocator] Calculated local attribute points:', this.serverAttributePoints);
+          this.initializeAttributes();
+          this.updateValidation();
+        } else {
+          console.warn('[AttributeAllocator] No character available or invalid state');
         }
       });
   }
@@ -83,21 +124,28 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   private fetchAttributeSlice(characterId: string): void {
+    console.log('[AttributeAllocator] fetchAttributeSlice called with ID:', characterId);
     this.levelUpApi.getAttributeSlice(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (slice) => {
+          console.log('[AttributeAllocator] Attribute slice received:', slice);
+          this.sliceFetched = true;
           this.serverAttributePoints = slice.pointsForLevel;
           if (this.character && slice.attributes) {
             this.mapAttributesFromSlice(slice.attributes);
-            this.characterStateService.updateCharacter(this.character);
+            // Don't broadcast during level-up - component handles its own state
+            if (!this.isLevelUpMode) {
+              this.characterStateService.updateCharacter(this.character);
+            }
           }
           this.initializeAttributes();
           this.updateValidation();
         },
-        error: () => {
+        error: (err) => {
           // Server health service will handle navigation to error page
-          console.error('Failed to load attribute slice, server may be down');
+          console.error('[AttributeAllocator] Failed to load attribute slice:', err);
+          console.error('[AttributeAllocator] Character ID was:', characterId);
         }
       });
   }
