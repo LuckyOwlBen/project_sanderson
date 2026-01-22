@@ -58,11 +58,15 @@ export class TalentView implements OnInit, OnDestroy {
   showCorePathSelector: boolean = false;
   pendingSprenGrant: SprenGrantEvent | null = null;
   isLevelUpMode: boolean = false;
-  private baselineUnlockedTalents = new Set<string>();
+  isLoadingTalentData: boolean = false; // Add loading state
   private characterId: string | null = null;
   private levelTables?: LevelTables;
-  private serverTalentPoints?: number;
   private isInitialized: boolean = false;
+  private sliceLoaded: boolean = false;
+  private pathsLoaded: boolean = false;
+  private lockedTalents = new Set<string>();
+  private requiresSingerSelection = false;
+  private baseTalentPoints = 0;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -108,49 +112,56 @@ export class TalentView implements OnInit, OnDestroy {
         this.character = character;
         this.characterId = (character as any)?.id || null;
 
+        // Track when paths are populated from server
+        const pathsNowLoaded = character.paths && character.paths.length > 0 && character.paths[0];
+        if (pathsNowLoaded && !this.pathsLoaded) {
+          console.log('[TalentView] Paths loaded from server:', character.paths);
+          this.pathsLoaded = true;
+          // Trigger lazy loading of trees now that paths are available
+          this.lazyLoadTrees();
+        }
+
         // On first initialization, sync unlockedTalents from character
         if (!this.isInitialized) {
           this.unlockedTalents = new Set(character.unlockedTalents);
-          
-          // Set baseline on first initialization in level-up mode
-          if (this.isLevelUpMode) {
-            // Use stored baseline if it exists, otherwise create from current state
-            if (character.baselineUnlockedTalents) {
-              this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
-            } else {
-              // First time entering level-up mode - store baseline in character
-              this.baselineUnlockedTalents = new Set(character.unlockedTalents);
-              character.baselineUnlockedTalents = new Set(character.unlockedTalents);
-            }
-          }
           this.isInitialized = true;
           
-          // Fetch talent slice if we have a character ID
-          if (this.characterId && this.isLevelUpMode) {
-            this.fetchTalentSlice(this.characterId);
-          } else {
-            this.loadCorePathOptions();
-            this.loadAvailableTrees();
-            this.calculateAvailablePoints();
-            this.updateValidation();
-          }
-        } else if (this.isLevelUpMode) {
-          // In level-up mode, always ensure baseline is synced (even if just retrieved from server)
-          if (character.baselineUnlockedTalents) {
-            this.baselineUnlockedTalents = new Set(character.baselineUnlockedTalents);
-          }
-          // Sync current talents too
-          this.unlockedTalents = new Set(character.unlockedTalents);
+          // Render the page first with loading state, then fetch talent data
+          this.loadCorePathOptions();
+          // Don't load trees here - wait for lazy load trigger when paths are ready
+          this.calculateAvailablePoints();
+          this.updateValidation();
           
-          this.loadCorePathOptions();
-          this.loadAvailableTrees();
-          this.calculateAvailablePoints();
-          this.updateValidation();
+          // Add a timeout safeguard to force tree loading if paths don't update in time
+          setTimeout(() => {
+            if (!this.pathsLoaded && this.character?.paths?.[0]) {
+              console.log('[TalentView] Timeout: forcing tree load for paths:', this.character.paths);
+              this.pathsLoaded = true;
+              this.lazyLoadTrees();
+            }
+          }, 1000); // 1 second timeout
+          
+          // Lazy load talent data from API if we have a character ID (only once)
+          if (this.characterId && !this.sliceLoaded) {
+            this.fetchTalentForLevel(this.characterId);
+          }
         } else {
+          // Sync current talents
+          this.unlockedTalents = new Set(character.unlockedTalents);
+
+          // Always render immediately
           this.loadCorePathOptions();
-          this.loadAvailableTrees();
+          // Reload trees if paths are loaded
+          if (this.pathsLoaded) {
+            this.loadAvailableTrees();
+          }
           this.calculateAvailablePoints();
           this.updateValidation();
+
+          // Lazy load talent data if needed
+          if (this.characterId && !this.sliceLoaded) {
+            this.fetchTalentForLevel(this.characterId);
+          }
         }
       });
 
@@ -180,8 +191,8 @@ export class TalentView implements OnInit, OnDestroy {
 
     // Show core path selector for humans and singers at level 1 or during level-up
     this.showCorePathSelector = (this.character.ancestry != null && 
-                                  ['human', 'singer'].includes(this.character.ancestry)) && 
-                                  (this.character.level === 1 || this.isLevelUpMode);
+                    ['human', 'singer'].includes(this.character.ancestry)) && 
+                    (this.character.level === 1 || this.isInLevelUpMode());
     
     if (!this.showCorePathSelector) {
       this.availableCorePaths = [];
@@ -229,40 +240,72 @@ export class TalentView implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private fetchTalentSlice(characterId: string): void {
-    this.levelUpApi.getTalentSlice(characterId)
+  private fetchTalentForLevel(characterId: string): void {
+    console.log('[TalentView] Starting lazy load of talent data from API...');
+    this.isLoadingTalentData = true;
+    
+    this.levelUpApi.getTalentForLevel(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (slice) => {
-          this.serverTalentPoints = slice.pointsForLevel;
-          if (slice.unlockedTalents && slice.unlockedTalents.length > 0) {
-            this.unlockedTalents = new Set(slice.unlockedTalents);
-            this.character!.unlockedTalents = new Set(slice.unlockedTalents);
+        next: (resp) => {
+          console.log('[TalentView] Talent data received from API:', resp);
+          this.isLoadingTalentData = false;
+          
+          if ((resp as any).requiresPathSelection) {
+            this.availableTalentPoints = 0;
+            this.baseTalentPoints = 0;
+            this.lockedTalents = new Set();
+            this.requiresSingerSelection = false;
+            this.validationMessage = 'Select a main path and specialization first.';
+            this.validationService.setStepValid(this.STEP_INDEX, false);
+            this.checkPendingStatus();
+            return;
           }
-          if (slice.baselineUnlockedTalents && slice.baselineUnlockedTalents.length > 0) {
-            this.baselineUnlockedTalents = new Set(slice.baselineUnlockedTalents);
-            this.character!.baselineUnlockedTalents = new Set(slice.baselineUnlockedTalents);
-          } else if (this.isLevelUpMode && this.unlockedTalents.size > 0 && this.baselineUnlockedTalents.size === 0) {
-            // In level-up mode, if server didn't provide baseline but we have unlocked talents,
-            // assume all current talents are the baseline (they existed before this level-up)
-            this.baselineUnlockedTalents = new Set(this.unlockedTalents);
-            this.character!.baselineUnlockedTalents = new Set(this.unlockedTalents);
+
+          this.availableTalentPoints = resp.talentPoints;
+          this.baseTalentPoints = resp.talentPoints;
+          const locked = resp.previouslySelectedTalents || (resp as any).lockedPowers || [];
+          this.lockedTalents = new Set(locked);
+          this.requiresSingerSelection = resp.requiresSingerSelection;
+
+          if (this.character) {
+            this.character.level = resp.level ?? this.character.level;
+            // Don't overwrite ancestry - it should already be set from character state
           }
+
+          // Mark as loaded and update UI with the fetched data
+          this.sliceLoaded = true;
           this.loadCorePathOptions();
           this.loadAvailableTrees();
           this.calculateAvailablePoints();
-          this.cdr.detectChanges(); // Trigger change detection to update view
           this.updateValidation();
+          
+          // Defer change detection to next cycle to avoid ExpressionChangedAfterItHasBeenCheckedError
+          setTimeout(() => {
+            this.cdr.markForCheck();
+          }, 0);
+          
+          console.log('[TalentView] Talent data loaded and view updated');
         },
-        error: () => {
-          // Fall back to local character state
-          this.loadCorePathOptions();
-          this.loadAvailableTrees();
-          this.calculateAvailablePoints();
-          this.updateValidation();
-          this.cdr.detectChanges(); // Trigger change detection to update view
+        error: (err) => {
+          console.error('[TalentView] Failed to load talent data for level:', err);
+          this.isLoadingTalentData = false;
+          
+          // Defer change detection to next cycle
+          setTimeout(() => {
+            this.cdr.markForCheck();
+          }, 0);
         }
       });
+  }
+
+  private lazyLoadTrees(): void {
+    console.log('[TalentView] Lazy loading trees now that paths are ready');
+    this.loadCorePathOptions();
+    this.loadAvailableTrees();
+    this.calculateAvailablePoints();
+    this.updateValidation();
+    this.cdr.markForCheck();
   }
 
   private persistTalents(): void {
@@ -271,16 +314,22 @@ export class TalentView implements OnInit, OnDestroy {
     }
 
     const payload = {
-      unlockedTalents: Array.from(this.unlockedTalents),
-      baselineUnlockedTalents: Array.from(this.baselineUnlockedTalents)
+      unlockedTalents: Array.from(this.unlockedTalents)
     };
 
-    this.levelUpApi.updateTalentSlice(this.characterId, payload.unlockedTalents, payload.baselineUnlockedTalents)
+    this.levelUpApi.updateTalentSlice(this.characterId, payload.unlockedTalents)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {},
         error: () => {}
       });
+  }
+
+  // Persist hook called by CharacterCreatorView before navigating to next step
+  public persistStep(): void {
+    if (this.characterId) {
+      this.persistTalents();
+    }
   }
 
   private getTalentPointsForLevel(level: number): number {
@@ -290,8 +339,21 @@ export class TalentView implements OnInit, OnDestroy {
     return this.levelUpManager.getTalentPointsForLevel(level);
   }
 
+  // Effective level-up mode: either explicit query param or pending level points present
+  private isInLevelUpMode(): boolean {
+    const pending = this.character?.pendingLevelPoints ?? 0;
+    // If the server provided points, we are definitively in level-up logic
+    return this.baseTalentPoints !== 0 || this.isLevelUpMode || pending > 0;
+  }
+
   private loadAvailableTrees(): void {
     if (!this.character) return;
+
+    // Guard: defer if paths not yet loaded from server
+    if (!this.pathsLoaded && !this.character.paths?.[0]) {
+      console.log('[TalentView] Deferring loadAvailableTrees - paths not yet loaded');
+      return;
+    }
 
     const tempTrees: TalentTree[] = [];
     const addedTreeNames = new Set<string>(); // Track to prevent duplicates
@@ -300,9 +362,12 @@ export class TalentView implements OnInit, OnDestroy {
     const mainPathName = this.character.paths[0];
     const specializationName = this.character.paths[1];
     
+    console.log('[TalentView] loadAvailableTrees - mainPath:', mainPathName, 'spec:', specializationName, 'ancestry:', this.character.ancestry, 'level:', this.character.level);
+    
     // For humans and singers at level 1 or during level-up, load their chosen path, all sub trees, and bonus path logic
     if ((this.character.ancestry != null && ['human','singer'].includes(this.character.ancestry)) &&
-        (this.character.level === 1 || this.isLevelUpMode)) {
+      (this.character.level === 1 || this.isInLevelUpMode())) {
+      console.log('[TalentView] Taking human/singer branch');
       // Helper to check if a path's key talent is unlocked
       const hasPathKeyTalent = (pathId: string): boolean => {
         const talentPath = getTalentPath(pathId);
@@ -366,8 +431,11 @@ export class TalentView implements OnInit, OnDestroy {
       });
     } else {
       // For non-humans or higher levels, load only the character's chosen path
+      console.log('[TalentView] Taking non-human/higher-level branch');
       if (mainPathName) {
+        console.log('[TalentView] Getting talent path for:', mainPathName);
         const talentPath = getTalentPath(mainPathName);
+        console.log('[TalentView] getTalentPath result:', talentPath);
         if (talentPath) {
           // Add the core/shared talent nodes as a tree
           if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
@@ -449,6 +517,7 @@ export class TalentView implements OnInit, OnDestroy {
 
     // If no trees loaded, try to load based on cultures
     if (tempTrees.length === 0 && this.character.cultures.length > 0) {
+      console.log('[TalentView] No trees loaded, trying cultures fallback');
       this.character.cultures.forEach(culture => {
         const cultureTree = getTalentTree(culture.name);
         if (cultureTree && !addedTreeNames.has(cultureTree.pathName.toLowerCase())) {
@@ -458,6 +527,8 @@ export class TalentView implements OnInit, OnDestroy {
         }
       });
     }
+
+    console.log('[TalentView] tempTrees before filtering:', tempTrees.length, tempTrees.map(t => t.pathName));
 
     // For singers, do not filter out core trees, and ensure all sub trees and core tree are present
     // For both humans and singers, filter out core trees from the chip selector, but keep them for display if needed
@@ -471,6 +542,9 @@ export class TalentView implements OnInit, OnDestroy {
       const visibleTalents = tree.nodes.filter(talent => talent.tier > 0);
       return visibleTalents.length > 0;
     });
+    
+    console.log('[TalentView] availableTrees after filtering:', this.availableTrees.length, this.availableTrees.map(t => t.pathName));
+    
     // Strip " - Core" from any remaining tree names for display (shouldn't be needed now)
     this.availableTrees = this.availableTrees.map(tree => ({
       ...tree,
@@ -515,16 +589,6 @@ export class TalentView implements OnInit, OnDestroy {
         // Apply the talent effects
         this.character!.bonuses.unlockTalent(talent.id, talent);
         
-        // In level-up mode, auto-unlocked tier-0 talents should be added to baseline
-        // since they don't cost a talent point
-        if (this.isLevelUpMode && this.character) {
-          this.baselineUnlockedTalents.add(talent.id);
-          if (!this.character.baselineUnlockedTalents) {
-            this.character.baselineUnlockedTalents = new Set();
-          }
-          this.character.baselineUnlockedTalents.add(talent.id);
-        }
-        
         // Persist to character state
         this.characterState.unlockTalent(talent.id);
       }
@@ -537,88 +601,44 @@ export class TalentView implements OnInit, OnDestroy {
       return;
     }
 
-    const currentLevel = this.character.level ?? 1;
-    let totalPoints: number;
+    // Base points provided by server for this level
+    const totalPoints = this.baseTalentPoints ?? 0;
+    
+    // Build a set of tier 0 talent IDs (they don't cost points)
+    const tier0Talents = new Set<string>();
+    this.availableTrees.forEach(tree => {
+      tree.nodes.forEach(talent => {
+        if (talent.tier === 0) {
+          tier0Talents.add(talent.id);
+        }
+      });
+    });
 
-    // In level-up mode, only give 1 point for the new level (no bonuses)
-    // In character creation mode, give points based on level and bonuses
-    if (this.isLevelUpMode && currentLevel > 1) {
-      // Use server data if available, else fallback to server tables, else hardcoded
-      if (this.serverTalentPoints !== undefined) {
-        totalPoints = this.serverTalentPoints;
-      } else {
-        totalPoints = this.getTalentPointsForLevel(currentLevel);
-      }
-    } else {
-      // Character creation: base points equal to level
-      totalPoints = currentLevel;
-      
-      // Humans get +1 bonus talent point at level 1
-      if (this.character.ancestry === 'human' && currentLevel === 1) {
-        totalPoints += 1;
-      }
-      
-      // Singers get +1 bonus talent point at level 1 (for starting form)
-      if (this.character.ancestry === 'singer' && currentLevel === 1) {
-        totalPoints += 1;
+    // Ensure main path tier 0 is treated as free even if core tree is hidden
+    const mainPath = this.character.paths?.[0];
+    if (mainPath) {
+      const mainPathDef = getTalentPath(mainPath);
+      const coreTier0 = mainPathDef?.talentNodes?.find(node => node.tier === 0);
+      if (coreTier0) {
+        tier0Talents.add(coreTier0.id);
       }
     }
-    
-    // Get the main path to determine which tier 0 talent is auto-unlocked
-    const mainPathName = this.character.paths[0];
-    let autoUnlockedKeyTalentId: string | null = null;
-    
-    if (mainPathName && this.character.level === 1) {
-      const mainPath = getTalentPath(mainPathName);
-      if (mainPath?.talentNodes) {
-        const keyTalent = mainPath.talentNodes.find(t => t.tier === 0);
-        if (keyTalent) {
-          autoUnlockedKeyTalentId = keyTalent.id;
-        }
+
+    // Also mark any core-path bonus tier 0 talents as free if shown in the core selector
+    this.availableCorePaths.forEach(corePath => {
+      if (corePath?.keyTalent?.tier === 0) {
+        tier0Talents.add(corePath.keyTalent.id);
       }
-    }
+    });
     
-    // Count talents that cost points
-    // Check core path options for tier 0 talents
-    let spentPoints = 0;
-    
-    // In level-up mode, only count talents unlocked AFTER the baseline
-    if (this.isLevelUpMode && currentLevel > 1) {
-      // Count tier 0 talents from bonus paths (not the auto-unlocked main path)
-      this.availableCorePaths.forEach(pathOption => {
-        if (pathOption.isSelected && !this.baselineUnlockedTalents.has(pathOption.keyTalent.id)) {
-          spentPoints++;
-        }
-      });
-      
-      // Count tier 1+ talents from specialty trees
-      this.availableTrees.forEach(tree => {
-        tree.nodes.forEach(talent => {
-          if (this.unlockedTalents.has(talent.id) && talent.tier > 0 && !this.baselineUnlockedTalents.has(talent.id)) {
-            spentPoints++;
-          }
-        });
-      });
-    } else {
-      // Character creation mode - count all unlocked talents
-      // Count tier 0 talents from bonus paths (not the auto-unlocked main path)
-      this.availableCorePaths.forEach(pathOption => {
-        if (pathOption.isSelected) {
-          spentPoints++;
-        }
-      });
-      
-      // Count tier 1+ talents from specialty trees
-      this.availableTrees.forEach(tree => {
-        tree.nodes.forEach(talent => {
-          if (this.unlockedTalents.has(talent.id) && talent.tier > 0) {
-            spentPoints++;
-          }
-        });
-      });
-    }
-    
-    this.availableTalentPoints = totalPoints - spentPoints;
+    let newTalents = 0;
+    this.unlockedTalents.forEach(talentId => {
+      if (!this.lockedTalents.has(talentId) && !tier0Talents.has(talentId)) {
+        newTalents++;
+      }
+    });
+
+    this.availableTalentPoints = Math.max(0, totalPoints - newTalents);
   }
 
   selectTree(tree: TalentTree): void {
@@ -647,8 +667,8 @@ export class TalentView implements OnInit, OnDestroy {
       return false;
     }
 
-    // Singers must select at least 1 singer talent (starting form) before other talents at level 1 only
-    if (this.character.ancestry === 'singer' && this.character.level === 1 && !this.isLevelUpMode) {
+    // Enforce singer-first selection when server requires it
+    if (this.requiresSingerSelection) {
       const isSingerTalent = this.selectedTree?.pathName.toLowerCase().includes('singer');
       
       if (!isSingerTalent) {
@@ -750,19 +770,11 @@ export class TalentView implements OnInit, OnDestroy {
     
     // Apply special talent effects (e.g., grant Singer forms)
     applyTalentEffects(this.character, talent.id);
-    
-    // In level-up mode, ensure baseline is persisted
-    if (this.isLevelUpMode && this.baselineUnlockedTalents.size > 0) {
-      this.character.baselineUnlockedTalents = new Set(this.baselineUnlockedTalents);
-    }
-    
+
     // Persist to character state service
     this.characterState.unlockTalent(talent.id);
     
-    // Persist to server in level-up mode
-    if (this.characterId && this.isLevelUpMode) {
-      this.persistTalents();
-    }
+    // Don't auto-persist on every change - only persist when Next is clicked
     
     // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
     if (talent.tier === 0 && (this.character.ancestry === 'human' || this.character.ancestry === 'singer') && 
@@ -774,6 +786,11 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   removeTalent(talentId: string): void {
+    // Locked talents (previously selected powers) cannot be removed
+    if (this.lockedTalents.has(talentId)) {
+      return;
+    }
+
     // Check if any other talents depend on this one
     const hasDependents = this.selectedTree?.nodes.some(t => 
       this.unlockedTalents.has(t.id) && 
@@ -790,9 +807,7 @@ export class TalentView implements OnInit, OnDestroy {
       console.log('[Talent View] Removed talent:', {
         talentId,
         isLevelUpMode: this.isLevelUpMode,
-        wasInBaseline: this.baselineUnlockedTalents.has(talentId),
-        remainingUnlocked: this.unlockedTalents.size,
-        baselineSize: this.baselineUnlockedTalents.size
+        remainingUnlocked: this.unlockedTalents.size
       });
       
       // Reload core path options to update selected state
@@ -806,18 +821,10 @@ export class TalentView implements OnInit, OnDestroy {
       // Remove expertises granted by this talent
       this.character.bonuses.removeExpertisesByTalent(talentId);
       
-      // In level-up mode, ensure baseline is persisted
-      if (this.isLevelUpMode && this.baselineUnlockedTalents.size > 0) {
-        this.character.baselineUnlockedTalents = new Set(this.baselineUnlockedTalents);
-      }
-      
       // Persist to character state service
       this.characterState.removeTalent(talentId);
       
-      // Persist to server in level-up mode
-      if (this.characterId && this.isLevelUpMode) {
-        this.persistTalents();
-      }
+      // Don't auto-persist on every change - only persist when Next is clicked
       
       this.updateValidation();
     }
@@ -828,12 +835,8 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   canRemoveTalent(talentId: string): boolean {
-    // In level-up mode, can only remove talents not in baseline (i.e., newly added)
-    if (this.isLevelUpMode) {
-      return !this.baselineUnlockedTalents.has(talentId);
-    }
-    // In character creation, can remove any talent
-    return true;
+    // Locked talents (previously selected powers) cannot be removed
+    return !this.lockedTalents.has(talentId);
   }
 
   shouldDisplayTalent(talent: TalentNode): boolean {
@@ -1004,24 +1007,15 @@ export class TalentView implements OnInit, OnDestroy {
     // Calculate required talents based on level and ancestry
     let requiredTalents: number;
     
-    if (this.isLevelUpMode && (this.character.level || 1) > 1) {
-      // In level-up mode, just need to spend all available points
-      requiredTalents = this.character.level || 1; // Total talents needed by this level
-      // Count only newly unlocked talents
-      unlockedPaidTalents = 0;
-      this.availableCorePaths.forEach(pathOption => {
-        if (pathOption.isSelected && !this.baselineUnlockedTalents.has(pathOption.keyTalent.id)) {
-          unlockedPaidTalents++;
-        }
-      });
-      this.availableTrees.forEach(tree => {
-        tree.nodes.forEach(talent => {
-          if (this.unlockedTalents.has(talent.id) && talent.tier > 0 && !this.baselineUnlockedTalents.has(talent.id)) {
-            unlockedPaidTalents++;
-          }
-        });
-      });
-      // For level-up, we just need availableTalentPoints to be 0
+    if (this.isInLevelUpMode()) {
+      // If the level-up slice isn't loaded yet, don't show mismatched messages
+      if (!this.sliceLoaded) {
+        this.validationMessage = '';
+        this.validationService.setStepValid(this.STEP_INDEX, false);
+        this.checkPendingStatus();
+        return;
+      }
+      // In level-up mode, we just need available points to be fully spent
       const isValid = this.availableTalentPoints === 0;
       
       // Set validation message

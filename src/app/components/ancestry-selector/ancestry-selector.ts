@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
+import { CharacterStorageService } from '../../services/character-storage.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -67,7 +68,8 @@ export class AncestrySelector implements OnInit, OnDestroy {
   constructor(
     private characterState: CharacterStateService,
     private router: Router,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
@@ -98,4 +100,12 @@ export class AncestrySelector implements OnInit, OnDestroy {
     this.router.navigate(['/character-creator-view/culture']);
   }
 
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
+  }
 }
+

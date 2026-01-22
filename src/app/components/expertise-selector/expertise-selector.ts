@@ -11,6 +11,7 @@ import { StepValidationService } from '../../services/step-validation.service';
 import { ALL_EXPERTISES, CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { LevelUpManager } from '../../levelup/levelUpManager';
+import { CharacterStorageService } from '../../services/character-storage.service';
 
 @Component({
   selector: 'app-expertise-selector',
@@ -42,7 +43,8 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   constructor(
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
-    private levelUpManager: LevelUpManager
+    private levelUpManager: LevelUpManager,
+    private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
@@ -229,5 +231,13 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
 
   get categories(): string[] {
     return ['cultural', 'weapon', 'armor', 'utility', 'specialist'];
+  }
+
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 }

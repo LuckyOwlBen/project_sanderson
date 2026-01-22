@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
+import { CharacterStorageService } from '../../services/character-storage.service';
 
 interface CultureInfo {
   culture: CulturalInterface;
@@ -42,7 +43,8 @@ export class CultureSelector implements OnInit, OnDestroy {
   
   constructor(
     private characterState: CharacterStateService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private storageService: CharacterStorageService
   ) {
     this.initializeCultureInfos();
   }
@@ -187,5 +189,13 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   removeCulture(cultureInfo: CultureInfo): void {
     this.characterState.removeCulture(cultureInfo.culture);
+  }
+
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 }

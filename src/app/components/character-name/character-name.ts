@@ -10,6 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
+import { CharacterStorageService } from '../../services/character-storage.service';
 
 @Component({
   selector: 'app-character-name',
@@ -37,7 +38,8 @@ export class CharacterName implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
@@ -159,5 +161,13 @@ export class CharacterName implements OnInit, OnDestroy {
     // Re-validate to ensure we have current state
     this.validateName();
     return this.nameError === '' && this.characterName.trim().length >= 2;
+  }
+
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 }

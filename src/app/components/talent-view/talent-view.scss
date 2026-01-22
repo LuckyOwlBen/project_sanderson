@@ -1,5 +1,41 @@
 .talent-view-container {
   margin: 0 auto;
+  position: relative; // For loading overlay positioning
+}
+
+// Loading overlay styles
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  border-radius: 8px;
+  
+  .loading-spinner {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #ffd700;
+    animation: spin 2s linear infinite;
+  }
+  
+  p {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .talent-header {

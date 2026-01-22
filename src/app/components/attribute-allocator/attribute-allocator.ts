@@ -20,7 +20,7 @@ interface AttributeConfig {
   selector: 'app-attribute-allocator',
   standalone: true,
   imports: [CommonModule, ValueStepper],
-  providers: [LevelUpManager],
+  providers: [],
   templateUrl: './attribute-allocator.html',
   styleUrls: ['./attribute-allocator.scss']
 })
@@ -38,6 +38,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   private levelTables?: LevelTables;
   private serverAttributePoints?: number;
   private isInitialized: boolean = false;
+  private sliceFetched: boolean = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -50,24 +51,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   ngOnInit(): void {
-    this.levelUpApi.getTables()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tables) => {
-          this.levelTables = tables;
-          this.levelUpManager.notifyPointsChanged();
-        },
-        error: () => {
-          // Fallback silently to LevelUpManager tables
-        }
-      });
-
-    // Listen to points changed events from LevelUpManager
-    this.levelUpManager.pointsChanged$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.checkPendingStatus();
-      });
+    // Offline mode eliminated: rely on server slices only
 
     // Combine queryParams and character$ to avoid race conditions
     combineLatest([
@@ -81,9 +65,11 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
         if (this.character) {
           this.isInitialized = false;
-          if (this.characterId) {
+          if (this.characterId && !this.sliceFetched) {
+            this.sliceFetched = true;
             this.fetchAttributeSlice(this.characterId);
-          } else {
+          } else if (!this.characterId) {
+            // Without a characterId, default to zero points; server authority preferred
             this.initializeAttributes();
             this.updateValidation();
           }
@@ -110,10 +96,8 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
           this.updateValidation();
         },
         error: () => {
-          // Fall back to local character state
-          this.isInitialized = false;
-          this.initializeAttributes();
-          this.updateValidation();
+          // Server health service will handle navigation to error page
+          console.error('Failed to load attribute slice, server may be down');
         }
       });
   }
@@ -128,21 +112,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     this.character.attributes['presence'] = attributes['presence'] ?? this.character.attributes['presence'];
   }
 
-  private getAttributePointsForLevel(level: number): number {
-    if (this.levelTables?.attributePointsPerLevel?.length) {
-      return this.levelTables.attributePointsPerLevel[level - 1] || 0;
-    }
-    return this.levelUpManager.getAttributePointsForLevel(level);
-  }
-
-  private getTotalAttributePointsUpToLevel(level: number): number {
-    if (this.levelTables?.attributePointsPerLevel?.length) {
-      return this.levelTables.attributePointsPerLevel
-        .slice(0, level)
-        .reduce((total, val) => total + (val || 0), 0);
-    }
-    return this.levelUpManager.getTotalAttributePointsUpToLevel(level);
-  }
+  // Offline mode removed: no local points tables
 
   private persistAttributes(): void {
     if (!this.character || !this.characterId) {
@@ -166,6 +136,13 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       });
   }
 
+  // Persist hook called by CharacterCreatorView before navigating to next step
+  public persistStep(): void {
+    if (this.characterId) {
+      this.persistAttributes();
+    }
+  }
+
   private initializeAttributes(): void {
     if (!this.character || this.isInitialized) return;
 
@@ -178,14 +155,9 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       { name: 'Presence', key: 'presence', currentValue: this.character.attributes.presence }
     ];
 
-    const currentLevel = this.character.level || 1;
-    
-    // In level-up mode: only show points for THIS level (don't count previous levels)
-    // In character creation mode: show cumulative total from levels 1 to current
-    const useBaseline = this.isLevelUpMode && currentLevel > 1;
-    const totalPoints = useBaseline 
-      ? (this.serverAttributePoints ?? this.getAttributePointsForLevel(currentLevel))
-      : this.getTotalAttributePointsUpToLevel(currentLevel);
+    // Always use server points (character always has ID from creation)
+    const totalPoints = this.serverAttributePoints ?? 0;
+    const useBaseline = this.serverAttributePoints !== undefined;
     
     // Initialize without baseline first
     this.initialize(attributes, totalPoints, false);
@@ -236,9 +208,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       }
       this.updateDerivedAttributes();
       this.updateValidation();
-      if (this.characterId && this.isLevelUpMode) {
-        this.persistAttributes();
-      }
+      // Don't auto-persist on every change - only persist when Next is clicked
     }
   }
 
@@ -250,9 +220,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       }
       this.updateDerivedAttributes();
       this.updateValidation();
-      if (this.characterId && this.isLevelUpMode) {
-        this.persistAttributes();
-      }
+      // Don't auto-persist on every change - only persist when Next is clicked
     }
   }
 

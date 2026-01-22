@@ -43,18 +43,28 @@ export interface SkillSlice {
 
 export interface TalentSlice {
   id: string;
-  level: number;
-  unlockedTalents: string[];
-  baselineUnlockedTalents: string[];
-  pointsForLevel: number;
+  level?: number;
+  ancestry?: string | null;
+  unlockedTalents?: string[];
+  pointsForLevel?: number;
+  talentPointsAllocation?: number;
   lastModified?: string;
   success?: boolean;
+}
+
+export interface TalentForLevelResponse {
+  talentPoints: number;
+  previouslySelectedTalents: string[];
+  requiresSingerSelection: boolean;
+  ancestry: string | null;
+  level: number;
+  mainPath: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class LevelUpApiService {
   private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:80/api'
+    ? 'http://localhost:3000/api'
     : '/api';
   private levelUpUrl = `${this.apiBase}/levelup`;
   private charactersUrl = `${this.apiBase}/characters`;
@@ -81,6 +91,10 @@ export class LevelUpApiService {
     return this.http.get<TalentSlice>(`${this.charactersUrl}/${id}/level/talents`);
   }
 
+  getTalentForLevel(id: string): Observable<TalentForLevelResponse> {
+    return this.http.get<TalentForLevelResponse>(`${this.charactersUrl}/${id}/talents/forLevel`);
+  }
+
   updateAttributeSlice(id: string, attributes: Record<string, number>): Observable<AttributeSlice> {
     return this.http.patch<AttributeSlice>(`${this.charactersUrl}/${id}/level/attributes`, { attributes });
   }
@@ -91,12 +105,17 @@ export class LevelUpApiService {
 
   updateTalentSlice(
     id: string,
-    unlockedTalents?: string[],
-    baselineUnlockedTalents?: string[]
+    unlockedTalents: string[]
   ): Observable<TalentSlice> {
     return this.http.patch<TalentSlice>(`${this.charactersUrl}/${id}/level/talents`, {
-      unlockedTalents,
-      baselineUnlockedTalents
+      unlockedTalents
+    });
+  }
+
+  submitPaths(id: string, mainPath: string, specialization: string): Observable<{ success: boolean; unlockedTalent?: string; paths?: string[]; }> {
+    return this.http.post<{ success: boolean; unlockedTalent?: string; paths?: string[]; }>(`${this.charactersUrl}/${id}/paths`, {
+      mainPath,
+      specialization
     });
   }
 }

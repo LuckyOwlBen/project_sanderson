@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LandingView } from './views/landing-view/landing-view';
 import { CharacterCreatorView } from './views/character-creator-view/character-creator-view';
+import { Error404View } from './views/error-404-view/error-404-view';
 import { CharacterName } from './components/character-name/character-name';
 import { AncestrySelector } from './components/ancestry-selector/ancestry-selector';
 import { CultureSelector } from './components/culture-selector/culture-selector';
@@ -20,6 +21,7 @@ import { LogsView } from './views/logs-view/logs-view';
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
   { path: 'landing', component: LandingView },
+  { path: 'error', component: Error404View },
   { path: 'gm-control-center', component: GmDashboardView },
   { path: 'store', component: StoreView, title: 'General Store' },
   { 

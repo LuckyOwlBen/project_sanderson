@@ -17,7 +17,7 @@ import { Attack, Stance } from './attacks/attackInterfaces';
 
 
 export class Character {
-
+  id: string = '';
   name: string = '';
   level: number = 1;
   pendingLevelPoints: number = 0; // Track levels that haven't been spent yet

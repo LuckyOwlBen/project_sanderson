@@ -1,0 +1,41 @@
+<div class="error-container">
+  <div class="error-content">
+    <h1>Uh oh... The server went down!</h1>
+    <div class="whumpus-image">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Whumpus body -->
+        <circle cx="100" cy="120" r="60" fill="#8B7355" stroke="#6B5344" stroke-width="2"/>
+        
+        <!-- Whumpus head -->
+        <circle cx="100" cy="60" r="40" fill="#8B7355" stroke="#6B5344" stroke-width="2"/>
+        
+        <!-- Eyes -->
+        <circle cx="85" cy="50" r="6" fill="#2C2C2C"/>
+        <circle cx="115" cy="50" r="6" fill="#2C2C2C"/>
+        <circle cx="86" cy="48" r="2" fill="#FFFFFF"/>
+        <circle cx="116" cy="48" r="2" fill="#FFFFFF"/>
+        
+        <!-- Sad eyebrows -->
+        <path d="M 75 40 Q 85 38 95 42" stroke="#6B5344" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M 105 42 Q 115 38 125 40" stroke="#6B5344" stroke-width="2" fill="none" stroke-linecap="round"/>
+        
+        <!-- Mouth (sad) -->
+        <path d="M 90 65 Q 100 70 110 65" stroke="#6B5344" stroke-width="2" fill="none" stroke-linecap="round"/>
+        
+        <!-- Horns -->
+        <path d="M 70 25 L 60 10" stroke="#6B5344" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M 130 25 L 140 10" stroke="#6B5344" stroke-width="3" fill="none" stroke-linecap="round"/>
+        
+        <!-- Spikes on back -->
+        <path d="M 80 70 L 75 50" stroke="#6B5344" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 100 70 L 100 50" stroke="#6B5344" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M 120 70 L 125 50" stroke="#6B5344" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="error-message">The backend server is not responding. Please try again in a moment.</p>
+    <button mat-raised-button color="primary" (click)="navigateHome()" class="action-button">
+      Return to Home
+    </button>
+    <p class="auto-redirect">You'll be automatically redirected in 5 seconds...</p>
+  </div>
+</div>

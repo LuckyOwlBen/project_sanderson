@@ -15,6 +15,7 @@ import { Character } from '../../character/character';
 import { ALL_ITEMS, STARTING_KITS } from '../../character/inventory/itemDefinitions';
 import { InventoryItem, ItemType, StartingKit } from '../../character/inventory/inventoryItem';
 import { getItemById } from '../../character/inventory/itemDefinitions';
+import { CharacterStorageService } from '../../services/character-storage.service';
 
 @Component({
   selector: 'app-starting-equipment',
@@ -56,7 +57,8 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private router: Router
+    private router: Router,
+    private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
@@ -288,5 +290,13 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   previousStep(): void {
     this.router.navigate(['/character-creator-view/talents']);
+  }
+
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 }

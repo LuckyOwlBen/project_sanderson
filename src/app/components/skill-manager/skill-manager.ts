@@ -24,7 +24,7 @@ interface SkillConfig {
   selector: 'app-skill-manager',
   standalone: true,
   imports: [CommonModule, ValueStepper],
-  providers: [LevelUpManager],
+  providers: [],
   templateUrl: './skill-manager.html',
   styleUrls: ['./skill-manager.scss']
 })
@@ -61,24 +61,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   ngOnInit(): void {
-    this.levelUpApi.getTables()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (tables) => {
-          this.levelTables = tables;
-          this.levelUpManager.notifyPointsChanged();
-        },
-        error: () => {
-          // Fallback silently to LevelUpManager tables
-        }
-      });
-
-    // Listen to points changed events from LevelUpManager
-    this.levelUpManager.pointsChanged$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.checkPendingStatus();
-      });
+    // Offline mode eliminated: rely on server slices only
 
     // Combine queryParams and character$ to avoid race conditions
     combineLatest([
@@ -129,12 +112,8 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
           this.isFetchingSlice = false;
         },
         error: () => {
-          // Fall back to local character state
-          this.isInitialized = false; // Allow re-init
-          this.initializeSkills();
-          this.updateValidation();
-          this.cdr.detectChanges(); // Trigger change detection
-          this.updateValidation();
+          // Server health service will handle navigation to error page
+          console.error('Failed to load skill slice, server may be down');
           this.isFetchingSlice = false;
         }
       });
@@ -147,21 +126,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     });
   }
 
-  private getSkillPointsForLevel(level: number): number {
-    if (this.levelTables?.skillPointsPerLevel?.length) {
-      return this.levelTables.skillPointsPerLevel[level - 1] || 0;
-    }
-    return this.levelUpManager.getSkillPointsForLevel(level);
-  }
-
-  private getTotalSkillPointsUpToLevel(level: number): number {
-    if (this.levelTables?.skillPointsPerLevel?.length) {
-      return this.levelTables.skillPointsPerLevel
-        .slice(0, level)
-        .reduce((total, val) => total + (val || 0), 0);
-    }
-    return this.levelUpManager.getTotalSkillPointsUpToLevel(level);
-  }
+  // Offline mode removed: no local points tables
 
   private persistSkills(): void {
     if (!this.character || !this.characterId) {
@@ -175,6 +140,13 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         next: () => {},
         error: () => {}
       });
+  }
+
+  // Persist hook called by CharacterCreatorView before navigating to next step
+  public persistStep(): void {
+    if (this.characterId) {
+      this.persistSkills();
+    }
   }
 
   private initializeSkills(): void {
@@ -198,14 +170,9 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     // Group skills by category
     this.categorizeSkills(skills);
 
-    const currentLevel = this.character.level || 1;
-    
-    // In level-up mode: only show points for THIS level (don't count previous levels)
-    // In character creation mode: show cumulative total from levels 1 to current
-    const useBaseline = this.isLevelUpMode && currentLevel > 1;
-    const totalPoints = useBaseline 
-      ? (this.serverSkillPoints ?? this.getSkillPointsForLevel(currentLevel))
-      : this.getTotalSkillPointsUpToLevel(currentLevel);
+    // Always use server points (character always has ID from creation)
+    const totalPoints = this.serverSkillPoints ?? 0;
+    const useBaseline = this.serverSkillPoints !== undefined;
     
     // Initialize without baseline first
     this.initialize(skills, totalPoints, false);
@@ -301,9 +268,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
       }
       this.updateSkillTotals();
       this.updateValidation();
-      if (this.characterId && this.isLevelUpMode) {
-        this.persistSkills();
-      }
+      // Don't auto-persist on every change - only persist when Next is clicked
     }
   }
 
@@ -315,9 +280,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
       }
       this.updateSkillTotals();
       this.updateValidation();
-      if (this.characterId && this.isLevelUpMode) {
-        this.persistSkills();
-      }
+      // Don't auto-persist on every change - only persist when Next is clicked
     }
   }
 

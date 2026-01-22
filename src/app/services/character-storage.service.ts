@@ -21,10 +21,10 @@ export interface SavedCharacter {
 })
 export class CharacterStorageService {
   // In production, API is served from same origin (no CORS needed)
-  // In dev mode, backend runs on port 80, frontend on 4200
+  // In dev mode, backend runs on port 3000, frontend on 4200
   private apiUrl = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:80/api/characters'  // Dev mode
-    : '/api/characters';                       // Production mode
+    ? 'http://localhost:3000/api/characters'  // Dev mode
+    : '/api/characters';                        // Production mode
   private useServer = false; // Will auto-detect
   private serverAvailable: boolean | null = null;
 
@@ -49,6 +49,22 @@ export class CharacterStorageService {
           console.log('Backend server detected, using API');
         }
       });
+  }
+
+  createCharacter(): Observable<{ success: boolean; id: string; character: any }> {
+    // Call server to create a new character with generated ID
+    return this.http.post<{ success: boolean; id: string; character: any }>(
+      `${this.apiUrl}/create`,
+      {}
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to create character on server, falling back to local generation', error);
+        // Fallback: generate ID locally
+        const timestamp = Date.now();
+        const id = `character_${timestamp}`;
+        return of({ success: true, id, character: null });
+      })
+    );
   }
 
   saveCharacter(character: Character): Observable<{ success: boolean; id: string }> {
@@ -150,6 +166,7 @@ export class CharacterStorageService {
       radiantPath: character.radiantPath.toJSON(),
       inventory: character.inventory.serialize(),
       sessionNotes: (character as any).sessionNotes || '',
+      // spentPoints is server-side tracking only, don't serialize from client
       lastModified: new Date().toISOString()
     };
   }
@@ -279,6 +296,11 @@ export class CharacterStorageService {
     }
     
     (character as any).sessionNotes = data.sessionNotes || '';
+    
+    // Restore spent points tracking
+    if (data.spentPoints) {
+      (character as any).spentPoints = data.spentPoints;
+    }
     
     return character;
   }

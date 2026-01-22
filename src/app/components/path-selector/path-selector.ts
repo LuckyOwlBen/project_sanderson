@@ -10,6 +10,8 @@ import { Character } from '../../character/character';
 import { getTalentPath } from '../../character/talents/talentTrees/talentTrees';
 import { TalentPath, TalentTree } from '../../character/talents/talentInterface';
 import { StepValidationService } from '../../services/step-validation.service';
+import { LevelUpApiService } from '../../services/levelup-api.service';
+import { CharacterStorageService } from '../../services/character-storage.service';
 
 export interface PathOption {
   id: string;
@@ -82,7 +84,9 @@ export class PathSelector implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private levelUpApi: LevelUpApiService,
+    private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
@@ -129,6 +133,7 @@ export class PathSelector implements OnInit, OnDestroy {
   selectSpecialization(spec: TalentTree): void {
     this.selectedSpecialization = spec.pathName;
     this.updateCharacterPaths();
+    this.submitPathsToServer();
   }
 
   isMainPathSelected(pathId: string): boolean {
@@ -155,6 +160,30 @@ export class PathSelector implements OnInit, OnDestroy {
     }
   }
 
+  private submitPathsToServer(): void {
+    if (!this.character || !this.character.id || !this.selectedMainPath || !this.selectedSpecialization) {
+      return;
+    }
+
+    this.levelUpApi.submitPaths(this.character.id, this.selectedMainPath, this.selectedSpecialization)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (resp) => {
+          if (resp.unlockedTalent) {
+            this.character!.unlockedTalents.add(resp.unlockedTalent);
+          }
+          // Update paths from server response
+          if (resp.paths) {
+            this.character!.paths = resp.paths;
+          }
+          this.characterState.updateCharacter(this.character!);
+        },
+        error: (err) => {
+          console.error('Failed to submit path selection', err);
+        }
+      });
+  }
+
   private updateValidation(): void {
     const isValid = this.selectedSpecialization !== null;
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
@@ -167,5 +196,13 @@ export class PathSelector implements OnInit, OnDestroy {
   getPathName(pathId: string): string {
     const path = this.availablePaths.find(p => p.id === pathId);
     return path?.name || pathId;
+  }
+
+  // Persist hook for CharacterCreatorView
+  public persistStep(): void {
+    const character = this.characterState.getCharacter();
+    if ((character as any)?.id) {
+      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    }
   }
 }

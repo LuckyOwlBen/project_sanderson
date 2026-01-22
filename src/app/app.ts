@@ -10,6 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { CreationProgressComponent } from './components/creation-progress/creation-progress';
 import { CharacterStateService } from './character/characterStateService';
+import { ServerHealthService } from './services/server-health.service';
 import { Character } from './character/character';
 import { ActivatedRoute } from '@angular/router';
 //import { clearLocalStorage } from './ngrx';     For when I finally get around to making persistent state
@@ -39,13 +40,15 @@ export class App implements OnInit, OnDestroy {
   isLevelUpMode = false;
   isInCharacterSheetView = false;
   isInLandingView = false;
+  private wasServerDown = false;
 
   @ViewChild('drawer') drawer!: MatSidenav;
 
   constructor(
     private router: Router,
     private characterState: CharacterStateService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private serverHealth: ServerHealthService
   ) {
     this.checkMobile();
     
@@ -91,6 +94,27 @@ export class App implements OnInit, OnDestroy {
         // Check if current route has levelUp query param
         const urlTree = this.router.parseUrl(this.router.url);
         this.isLevelUpMode = urlTree.queryParams['levelUp'] === 'true';
+      });
+
+    // Monitor server health
+    this.serverHealth.serverHealth$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isHealthy => {
+        const currentUrl = this.router.url.split('?')[0];
+        
+        if (!isHealthy && !this.wasServerDown) {
+          // Server just went down - navigate to error page
+          this.wasServerDown = true;
+          console.log('[App] Server is down, navigating to error page');
+          if (!currentUrl.includes('/error')) {
+            this.router.navigate(['/error']);
+          }
+        } else if (isHealthy && this.wasServerDown) {
+          // Server just came back up - navigate to landing page
+          this.wasServerDown = false;
+          console.log('[App] Server is back up, navigating to landing page');
+          this.router.navigate(['/']);
+        }
       });
   }
 

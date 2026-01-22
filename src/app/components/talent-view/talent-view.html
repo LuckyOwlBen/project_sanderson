@@ -1,4 +1,10 @@
 <div class="talent-view-container">
+  <!-- Loading Indicator -->
+  <div class="loading-overlay" *ngIf="isLoadingTalentData">
+    <mat-icon class="loading-spinner">hourglass_empty</mat-icon>
+    <p>Loading talent data...</p>
+  </div>
+
   <div class="talent-header">
     <h2>Talent Selection</h2>
     <div class="talent-points">
