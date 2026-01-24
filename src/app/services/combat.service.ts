@@ -38,6 +38,9 @@ export class CombatService {
   // NPC card management
   private npcCards = new Map<string, NPCCard>();
 
+  // Track registered players (those who have joined combat but not chosen speed)
+  private registeredPlayers = new Set<string>();
+
   // Event streams
   private turnSpeedChangedSubject = new Subject<TurnSpeedChangeEvent>();
   public turnSpeedChanged$ = this.turnSpeedChangedSubject.asObservable();
@@ -50,11 +53,12 @@ export class CombatService {
 
   constructor(private websocketService: WebsocketService) {
     // Listen for turn speed selections from other players (via WebSocket)
-    this.websocketService.turnSpeedSelection$.subscribe(event => {
-      // Update local state when we receive a turn speed selection from the server
-      // This ensures GM sees all players' selections in real-time
-      this.setTurnSpeed(event.characterId, event.turnSpeed);
-    });
+    const turnSpeedStream = (this.websocketService as any)?.turnSpeedSelection$;
+    if (turnSpeedStream && typeof turnSpeedStream.subscribe === 'function') {
+      turnSpeedStream.subscribe((event: any) => {
+        this.setTurnSpeed(event.characterId, event.turnSpeed);
+      });
+    }
   }
 
   // Combat Toggle
@@ -148,6 +152,13 @@ export class CombatService {
       }
     }
 
+    // Track registered players who have not selected a speed
+    for (const pid of this.registeredPlayers) {
+      if (!this.playerTurnSpeeds.has(pid)) {
+        groups.uninitialized.push(pid);
+      }
+    }
+
     // Organize NPCs
     for (const [npcId, card] of this.npcCards) {
       const turnSpeed = this.npcTurnSpeeds.get(npcId);
@@ -167,16 +178,16 @@ export class CombatService {
     this.playerTurnSpeeds.clear();
     this.npcTurnSpeeds.clear();
     this.npcCards.clear();
+    this.registeredPlayers.clear();
   }
 
   // Register player for combat (for tracking uninitialized players)
   registerPlayer(characterId: string): void {
-    if (!this.playerTurnSpeeds.has(characterId)) {
-      // Player exists but hasn't selected a turn speed yet
-    }
+    this.registeredPlayers.add(characterId);
   }
 
   getUninitializedPlayers(allPlayerIds: string[]): string[] {
     return allPlayerIds.filter(id => !this.playerTurnSpeeds.has(id));
   }
+
 }

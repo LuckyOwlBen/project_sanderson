@@ -48,6 +48,9 @@ describe('CombatPanelComponent', () => {
     component = fixture.componentInstance;
     combatService = TestBed.inject(CombatService);
     matDialog = TestBed.inject(MatDialog);
+
+    // Trigger component lifecycle (ngOnInit subscription to combatActive$)
+    fixture.detectChanges();
   });
 
   it('should create', () => {

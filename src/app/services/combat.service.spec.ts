@@ -25,14 +25,16 @@ describe('CombatService', () => {
       expect(service.isCombatActive()).toBe(false);
     });
 
-    it('should emit combat state change on toggle', (done) => {
-      service.combatActive$.subscribe(isActive => {
-        if (isActive) {
-          expect(isActive).toBe(true);
-          done();
-        }
+    it('should emit combat state change on toggle', () => {
+      return new Promise<void>(resolve => {
+        service.combatActive$.subscribe(isActive => {
+          if (isActive) {
+            expect(isActive).toBe(true);
+            resolve();
+          }
+        });
+        service.toggleCombat(true);
       });
-      service.toggleCombat(true);
     });
   });
 
@@ -52,25 +54,30 @@ describe('CombatService', () => {
       expect(service.getTurnSpeed('char123')).toBe('slow');
     });
 
-    it('should emit turn speed change only when changed', (done) => {
-      let emitCount = 0;
-      service.turnSpeedChanged$.subscribe(event => {
-        emitCount++;
-        expect(event.characterId).toBe('char123');
-        expect(event.turnSpeed).toBe('fast');
-        expect(emitCount).toBe(1);
-        done();
-      });
+    it('should emit turn speed change only when changed', () => {
+      return new Promise<void>((resolve, reject) => {
+        let emitCount = 0;
+        service.turnSpeedChanged$.subscribe(event => {
+          emitCount++;
+          try {
+            expect(event.characterId).toBe('char123');
+            expect(event.turnSpeed).toBe('fast');
+            expect(emitCount).toBe(1);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
 
-      // Set initial speed
-      service.setTurnSpeed('char123', 'fast');
-
-      // Set same speed again - should not emit
-      setTimeout(() => {
+        // Set initial speed
         service.setTurnSpeed('char123', 'fast');
-        // If we got here without a second emit, test passes
-        if (emitCount === 1) done();
-      }, 100);
+
+        // Set same speed again - should not emit
+        setTimeout(() => {
+          service.setTurnSpeed('char123', 'fast');
+          if (emitCount === 1) resolve();
+        }, 100);
+      });
     });
 
     it('should clear turn speed for a character', () => {
@@ -117,21 +124,33 @@ describe('CombatService', () => {
       expect(service.getNPCTurnSpeed('goblin1')).toBe('fast');
     });
 
-    it('should emit NPC card added event', (done) => {
-      service.npcCardAdded$.subscribe(card => {
-        expect(card.name).toBe('Goblin Scout');
-        done();
+    it('should emit NPC card added event', () => {
+      return new Promise<void>((resolve, reject) => {
+        service.npcCardAdded$.subscribe(card => {
+          try {
+            expect(card.name).toBe('Goblin Scout');
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+        service.addNPCCard('goblin1', 'Goblin Scout', 3);
       });
-      service.addNPCCard('goblin1', 'Goblin Scout', 3);
     });
 
-    it('should emit NPC card removed event', (done) => {
-      service.addNPCCard('goblin1', 'Goblin Scout', 3);
-      service.npcCardRemoved$.subscribe(id => {
-        expect(id).toBe('goblin1');
-        done();
+    it('should emit NPC card removed event', () => {
+      return new Promise<void>((resolve, reject) => {
+        service.addNPCCard('goblin1', 'Goblin Scout', 3);
+        service.npcCardRemoved$.subscribe(id => {
+          try {
+            expect(id).toBe('goblin1');
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+        service.removeNPCCard('goblin1');
       });
-      service.removeNPCCard('goblin1');
     });
 
     it('should not allow duplicate NPC card IDs', () => {
@@ -167,6 +186,8 @@ describe('CombatService', () => {
     });
 
     it('should show uninitialized players in separate group', () => {
+      service.registerPlayer('player1');
+      service.registerPlayer('player2');
       service.setTurnSpeed('player1', 'fast');
       // player2 has no speed set
 

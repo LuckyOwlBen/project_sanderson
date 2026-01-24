@@ -396,8 +396,11 @@ export class CombatPanelComponent implements OnInit, OnDestroy {
     this.combatService.removeNPCCard(npcId);
   }
 
-  updateNPCCardCount(npcId: string, event: any): void {
-    const newCount = parseInt(event.target.value, 10);
+  updateNPCCardCount(npcId: string, eventOrCount: any): void {
+    const rawValue = typeof eventOrCount === 'number'
+      ? eventOrCount
+      : eventOrCount?.target?.value ?? eventOrCount;
+    const newCount = parseInt(rawValue, 10);
     if (newCount > 0) {
       this.combatService.updateNPCCardCount(npcId, newCount);
     }

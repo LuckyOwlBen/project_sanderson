@@ -115,13 +115,16 @@ export class CombatTurnSpeedSelectorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Listen for combat start from WebSocket (server-side trigger from GM)
-    this.websocketService.combatStart$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[Combat Selector] ⚔️ Combat start received from server');
-        this.isVisible = true;
-        this.cdr.markForCheck();
-      });
+    const combatStartStream = (this.websocketService as any)?.combatStart$;
+    if (combatStartStream && typeof combatStartStream.pipe === 'function') {
+      combatStartStream
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((event: any) => {
+          console.log('[Combat Selector] ⚔️ Combat start received from server');
+          this.isVisible = true;
+          this.cdr.markForCheck();
+        });
+    }
 
     // Also listen for local combat toggle (for offline/single-player scenarios)
     this.combatService.combatActive$

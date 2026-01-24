@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CharacterSheetView } from './character-sheet-view';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
+import { CombatService } from '../../services/combat.service';
 import { Character } from '../../character/character';
 
 describe('CharacterSheetView - No character$ Subscription', () => {
@@ -40,7 +41,8 @@ describe('CharacterSheetView - No character$ Subscription', () => {
       expertiseGrant$: of(null),
       sprenGrant$: of(null),
       levelUp$: of(null),
-      highstorm$: of({ active: false })
+      highstorm$: of({ active: false }),
+      combatStart$: new Subject<any>()
     };
 
     paramsSubject = new BehaviorSubject({ id: 'char-123' });
@@ -49,6 +51,7 @@ describe('CharacterSheetView - No character$ Subscription', () => {
       imports: [CharacterSheetView],
       providers: [
         CharacterStateService,
+        CombatService,
         { provide: CharacterStorageService, useValue: characterStorageService },
         { provide: WebsocketService, useValue: websocketServiceMock },
         {

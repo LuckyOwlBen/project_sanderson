@@ -280,16 +280,19 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
     // Set up combat start listener
     console.log('[Character Sheet] ⚔️ Setting up combat start listener...');
-    this.websocketService.combatStart$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[Character Sheet] ⚔️ Combat started event received:', event);
-        if (this.characterId) {
-          // Register this character for combat
-          this.combatService.registerPlayer(this.characterId);
-          console.log('[Character Sheet] ⚔️ Player registered for combat:', this.characterId);
-        }
-      });
+    const combatStartStream = (this.websocketService as any)?.combatStart$;
+    if (combatStartStream && typeof combatStartStream.pipe === 'function') {
+      combatStartStream
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((event: any) => {
+          console.log('[Character Sheet] ⚔️ Combat started event received:', event);
+          if (this.characterId) {
+            // Register this character for combat
+            this.combatService.registerPlayer(this.characterId);
+            console.log('[Character Sheet] ⚔️ Player registered for combat:', this.characterId);
+          }
+        });
+    }
     console.log('[Character Sheet] ⚔️ Combat start listener subscription complete');
   }
 

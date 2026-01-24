@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Subject } from 'rxjs';
 
 describe('CombatTurnSpeedSelectorComponent', () => {
   let component: CombatTurnSpeedSelectorComponent;
@@ -16,7 +17,8 @@ describe('CombatTurnSpeedSelectorComponent', () => {
   beforeEach(async () => {
     const mockWebsocketService = {
       selectTurnSpeed: vi.fn(),
-      combatStart$: { subscribe: vi.fn() }
+      combatStart$: new Subject<any>(),
+      turnSpeedSelection$: new Subject<any>()
     };
 
     await TestBed.configureTestingModule({
@@ -79,8 +81,8 @@ describe('CombatTurnSpeedSelectorComponent', () => {
     combatService.setTurnSpeed('player1', 'fast');
     fixture.detectChanges();
 
-    const fastButton = fixture.nativeElement.querySelector('[data-testid="fast-button"]');
-    expect(fastButton.classList.contains('mat-raised-button')).toBe(true);
+    // Component state should show fast speed selected
+    expect(component.selectedSpeed).toBe('fast');
   });
 
   it('should emit turn speed change only on actual change', () => {

@@ -22,6 +22,8 @@ describe('GmDashboardView - Store Toggle', () => {
   let playerCriticalSubject: Subject<any>;
   let levelUpSubject: Subject<any>;
   let highstormSubject: Subject<any>;
+  let turnSpeedSelectionSubject: Subject<any>;
+  let combatStartSubject: Subject<any>;
 
   beforeEach(() => {
     storeToggleSubject = new Subject<StoreToggleEvent>();
@@ -33,6 +35,8 @@ describe('GmDashboardView - Store Toggle', () => {
     playerCriticalSubject = new Subject<any>();
     levelUpSubject = new Subject<any>();
     highstormSubject = new Subject<any>();
+    turnSpeedSelectionSubject = new Subject<any>();
+    combatStartSubject = new Subject<any>();
 
     mockWebsocketService = {
       storeToggle$: storeToggleSubject.asObservable(),
@@ -44,6 +48,8 @@ describe('GmDashboardView - Store Toggle', () => {
       playerCritical$: playerCriticalSubject.asObservable(),
       levelUp$: levelUpSubject.asObservable(),
       highstorm$: highstormSubject.asObservable(),
+      turnSpeedSelection$: turnSpeedSelectionSubject.asObservable(),
+      combatStart$: combatStartSubject.asObservable(),
       toggleStore: vi.fn(),
       toggleHighstorm: vi.fn(),
       connect: vi.fn(),
