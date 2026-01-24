@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsPromises = require('fs').promises;
 const util = require('util');
 const path = require('path');
 const multer = require('multer');
@@ -156,16 +157,16 @@ if (IS_PRODUCTION) {
 // Ensure directories exist
 async function ensureDirectories() {
   try {
-    await fs.access(CHARACTERS_DIR);
+    await fsPromises.access(CHARACTERS_DIR);
   } catch {
-    await fs.mkdir(CHARACTERS_DIR, { recursive: true });
+    await fsPromises.mkdir(CHARACTERS_DIR, { recursive: true });
     console.log('Created characters directory:', CHARACTERS_DIR);
   }
   
   try {
-    await fs.access(IMAGES_DIR);
+    await fsPromises.access(IMAGES_DIR);
   } catch {
-    await fs.mkdir(IMAGES_DIR, { recursive: true });
+    await fsPromises.mkdir(IMAGES_DIR, { recursive: true });
     console.log('Created images directory:', IMAGES_DIR);
   }
 }
@@ -179,7 +180,7 @@ async function loadCharacterData(id, retries = 3) {
   
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      const data = await fs.readFile(filepath, 'utf8');
+      const data = await fsPromises.readFile(filepath, 'utf8');
       
       // Check if data is empty
       if (!data || data.trim().length === 0) {
@@ -209,7 +210,7 @@ async function loadCharacterData(id, retries = 3) {
 
 async function saveCharacterData(character) {
   const filepath = getCharacterFilepath(character.id);
-  await fs.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
 }
 
 function getLevelTableValue(table, level) {
@@ -335,7 +336,7 @@ app.post('/api/characters/create', async (req, res) => {
     const filename = `${id}.json`;
     const filepath = path.join(CHARACTERS_DIR, filename);
     
-    await fs.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+    await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
     
     console.log(`Created new character: ${id}`);
     
@@ -383,8 +384,8 @@ app.post('/api/characters/save', async (req, res) => {
     const tempPath = `${filepath}.tmp`;
     
     // Write to temp file first, then rename for atomic operation
-    await fs.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
-    await fs.rename(tempPath, filepath);
+    await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
+    await fsPromises.rename(tempPath, filepath);
     
     console.log(`Saved character: ${character.name} (${character.id})`);
     
@@ -903,7 +904,7 @@ app.get('/api/store/items', (req, res) => {
 app.post('/api/characters/:id/paths', async (req, res) => {
   try {
     const { id } = req.params;
-    const { mainPath } = req.body;
+    const { mainPath, specialization } = req.body;
 
     if (!mainPath || typeof mainPath !== 'string') {
       return res.status(400).json({
@@ -937,7 +938,12 @@ app.post('/api/characters/:id/paths', async (req, res) => {
       character.paths.unshift(mainPath);
     }
     
-    fs.writeFileSync(
+    // Add specialization if provided
+    if (specialization && !character.paths.includes(specialization)) {
+      character.paths.push(specialization);
+    }
+    
+    await fsPromises.writeFile(
       path.join(CHARACTERS_DIR, `character_${id}.json`),
       JSON.stringify(character, null, 2)
     );
@@ -946,6 +952,8 @@ app.post('/api/characters/:id/paths', async (req, res) => {
       success: true,
       id,
       mainPath,
+      unlockedTalent: tier0Result.talentId || undefined,
+      paths: character.paths,
       tier0Unlocked: tier0Result.unlocked,
       tier0TalentId: tier0Result.talentId,
       message: tier0Result.unlocked ? 'Path selected and tier-0 talent unlocked' : 'Path selected'
@@ -965,7 +973,7 @@ app.get('/api/characters/load/:id', async (req, res) => {
     const { id } = req.params;
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
     
-    const data = await fs.readFile(filepath, 'utf8');
+    const data = await fsPromises.readFile(filepath, 'utf8');
     const character = JSON.parse(data);
     
     console.log(`Loaded character: ${character.name} (${id})`);
@@ -990,14 +998,14 @@ app.get('/api/characters/load/:id', async (req, res) => {
 // List all characters
 app.get('/api/characters/list', async (req, res) => {
   try {
-    const files = await fs.readdir(CHARACTERS_DIR);
+    const files = await fsPromises.readdir(CHARACTERS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json'));
     
     const characters = await Promise.all(
       jsonFiles.map(async (file) => {
         try {
           const filepath = path.join(CHARACTERS_DIR, file);
-          const data = await fs.readFile(filepath, 'utf8');
+          const data = await fsPromises.readFile(filepath, 'utf8');
           const character = JSON.parse(data);
           
           return {
@@ -1073,7 +1081,7 @@ app.post('/api/characters/:id/creation-init', async (req, res) => {
     }
     
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    const data = await fs.readFile(filepath, 'utf8');
+    const data = await fsPromises.readFile(filepath, 'utf8');
     const character = JSON.parse(data);
     
     // Set level and clear spent points for fresh creation at this level
@@ -1082,8 +1090,8 @@ app.post('/api/characters/:id/creation-init', async (req, res) => {
     
     // Save character
     const tempPath = `${filepath}.tmp`;
-    await fs.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
-    await fs.rename(tempPath, filepath);
+    await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
+    await fsPromises.rename(tempPath, filepath);
     
     console.log(`[Character Creation] Initialized character ${character.name} (${id}) at level ${targetLevel}`);
     res.json({
@@ -1307,7 +1315,7 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
     if (!character.spentPoints.attributes) character.spentPoints.attributes = {};
     character.spentPoints.attributes[level] = increaseTotal;
 
-    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
 
     res.json({
       success: true,
@@ -1370,7 +1378,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 
     console.log(`[Skills] Saved skills for ${character.name} (${character.id}):`, character.skills);
 
-    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
 
     res.json({
       success: true,
@@ -1395,7 +1403,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 app.patch('/api/characters/:id/level/talents', async (req, res) => {
   try {
     const { id } = req.params;
-    const { unlockedTalents, level } = req.body;
+    const { unlockedTalents } = req.body;
 
     if (!Array.isArray(unlockedTalents)) {
       return res.status(400).json({
@@ -1405,6 +1413,7 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
     }
 
     const character = await loadCharacterData(id);
+    const level = character.level || 1;
     const mainPath = character.mainPath || character.paths?.[0] || null;
 
     // Validate selection (pass character object)
@@ -1428,7 +1437,7 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
 
     // Actually save to file/database (this is where server.js would call DB layer)
     character.unlockedTalents = unlockedTalents;
-    fs.writeFileSync(
+    await fsPromises.writeFile(
       path.join(CHARACTERS_DIR, `character_${id}.json`),
       JSON.stringify(character, null, 2)
     );
@@ -1458,7 +1467,7 @@ app.delete('/api/characters/delete/:id', async (req, res) => {
     const { id } = req.params;
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
     
-    await fs.unlink(filepath);
+    await fsPromises.unlink(filepath);
     
     console.log(`Deleted character: ${id}`);
     
@@ -1543,7 +1552,7 @@ app.delete('/api/images/delete/:filename', async (req, res) => {
     
     const filepath = path.join(IMAGES_DIR, filename);
     
-    await fs.unlink(filepath);
+    await fsPromises.unlink(filepath);
     
     console.log(`Deleted image: ${filename}`);
     
@@ -1566,7 +1575,7 @@ app.delete('/api/images/delete/:filename', async (req, res) => {
 // List all images (optional - for gallery)
 app.get('/api/images/list', async (req, res) => {
   try {
-    const files = await fs.readdir(IMAGES_DIR);
+    const files = await fsPromises.readdir(IMAGES_DIR);
     const imageFiles = files.filter(f => f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png'));
     
     const images = imageFiles.map(filename => ({
