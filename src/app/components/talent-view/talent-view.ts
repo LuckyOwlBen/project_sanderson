@@ -129,11 +129,16 @@ export class TalentView implements OnInit, OnDestroy {
     this.activatedRoute.queryParams.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {
-      this.isLevelUpMode = params['levelUp'] === 'true';
+      const newIsLevelUpMode = params['levelUp'] === 'true';
+      const enteringLevelUpMode = newIsLevelUpMode && !this.isLevelUpMode;
       
-      // Reset sliceLoaded when route params change - this forces fresh fetch
-      // if we re-enter level-up mode
-      this.sliceLoaded = false;
+      this.isLevelUpMode = newIsLevelUpMode;
+      
+      // Reset sliceLoaded when entering level-up mode - this forces fresh fetch
+      // when re-entering level-up mode
+      if (enteringLevelUpMode) {
+        this.sliceLoaded = false;
+      }
       
       // Get current character from service (not from subscription)
       const character = this.characterState.getCharacter();
@@ -189,8 +194,8 @@ export class TalentView implements OnInit, OnDestroy {
         this.calculateAvailablePoints();
         this.updateValidation();
 
-        // Lazy load talent data from API in both creation and level-up modes
-        if (this.characterId) {
+        // Only fetch when entering level-up mode (transition from false to true) or when not yet loaded
+        if (this.characterId && (enteringLevelUpMode || !this.sliceLoaded)) {
           this.fetchTalentForLevel(this.characterId);
         }
       }

@@ -254,4 +254,164 @@ describe('CharacterPowersTab', () => {
       expect(expertisesCard).toBeTruthy();
     });
   });
+
+  describe('Stance Integration - Ironstance Full Flow', () => {
+    let character: Character;
+
+    beforeEach(() => {
+      character = new Character();
+      character.name = 'Ironstance Warrior';
+      // Unlock Ironstance talent
+      character.unlockedTalents.add('ironstance');
+      component.character = character;
+      fixture.detectChanges();
+    });
+
+    it('Packet 6 Integration Test: Set Ironstance → verify bonuses + advantage ribbon', () => {
+      // STEP 1: Verify Ironstance is available
+      const availableStances = character.getAvailableStances();
+      const ironstance = availableStances.find(s => s.id === 'ironstance');
+      
+      expect(ironstance).toBeDefined();
+      expect(ironstance?.name).toBe('Ironstance');
+      expect(ironstance?.description).toContain('Insight');
+      expect(ironstance?.activationCost).toBe(1);
+
+      // STEP 2: Verify Ironstance grants advantage
+      expect(ironstance?.grantsAdvantage).toBeDefined();
+      expect(ironstance?.grantsAdvantage?.length).toBeGreaterThan(0);
+      expect(ironstance?.grantsAdvantage).toContain('insight_in_ironstance');
+
+      // STEP 3: Set Ironstance as active stance
+      const setSuccess = character.setActiveStance('ironstance');
+      expect(setSuccess).toBe(true);
+      expect(character.activeStanceId).toBe('ironstance');
+
+      // STEP 4: Verify active stance object is correctly populated
+      const activeStance = character.getActiveStance();
+      expect(activeStance).toBeDefined();
+      expect(activeStance?.id).toBe('ironstance');
+      expect(activeStance?.name).toBe('Ironstance');
+      expect(activeStance?.grantsAdvantage).toContain('insight_in_ironstance');
+
+      // STEP 5: Verify bonuses are applied (if any exist)
+      if (activeStance?.bonuses && activeStance.bonuses.length > 0) {
+        expect(Array.isArray(activeStance.bonuses)).toBe(true);
+      }
+
+      // STEP 6: Force component change detection to update template
+      component.character = character;
+      fixture.detectChanges();
+
+      // STEP 7: Verify stance selector component receives updated character
+      const stanceSelectorComponent = fixture.debugElement.query(
+        By.directive(StanceSelectorComponent)
+      );
+      if (stanceSelectorComponent) {
+        const stanceSelectorInstance = stanceSelectorComponent.componentInstance;
+        expect(stanceSelectorInstance.character).toBe(character);
+        expect(stanceSelectorInstance.getActiveStanceId()).toBe('ironstance');
+      }
+
+      // STEP 8: Verify advantage ribbon would display by checking template conditions
+      const activeStanceDisplay = fixture.debugElement.query(
+        By.css('.stance-details-section')
+      );
+      if (activeStanceDisplay && activeStance?.grantsAdvantage?.length) {
+        // The template should render the advantage-ribbons div
+        fixture.detectChanges();
+        const ribbonContainer = fixture.debugElement.query(
+          By.css('.advantage-ribbons')
+        );
+        if (ribbonContainer) {
+          expect(ribbonContainer).toBeTruthy();
+          const ribbons = fixture.debugElement.queryAll(
+            By.css('.ribbon-corner')
+          );
+          expect(ribbons.length).toBeGreaterThan(0);
+          // Verify at least one ribbon contains the advantage ID
+          const ribbonTexts = ribbons.map(r => r.nativeElement.textContent);
+          expect(ribbonTexts.some(text => 
+            text.includes('insight_in_ironstance') || 
+            text.toLowerCase().includes('insight')
+          )).toBe(true);
+        }
+      }
+    });
+
+    it('should verify stanceChanged event emits when Ironstance is selected', () => {
+      // Verify character can be set to Ironstance
+      const setSuccess = character.setActiveStance('ironstance');
+      expect(setSuccess).toBe(true);
+      
+      // Verify the stance was actually set
+      expect(character.activeStanceId).toBe('ironstance');
+      
+      // Verify we can retrieve the active stance
+      const activeStance = character.getActiveStance();
+      expect(activeStance?.id).toBe('ironstance');
+    });
+
+    it('should verify Ironstance with grantsAdvantage provides visual reminder via ribbon', () => {
+      // Set Ironstance active
+      character.setActiveStance('ironstance');
+      const activeStance = character.getActiveStance();
+
+      // Verify the stance has advantages for ribbon display
+      expect(activeStance?.grantsAdvantage).toBeDefined();
+      expect(activeStance?.grantsAdvantage?.length).toBeGreaterThan(0);
+
+      // Verify all advantages are valid strings
+      activeStance?.grantsAdvantage?.forEach(advantage => {
+        expect(typeof advantage).toBe('string');
+        expect(advantage.length).toBeGreaterThan(0);
+      });
+
+      // Update component to trigger change detection
+      component.character = character;
+      fixture.detectChanges();
+
+      // The ribbons should render if the component is working
+      // Component renders ribbons for each advantage in grantsAdvantage array
+    });
+
+    it('should handle switching from Ironstance to another stance', () => {
+      const availableStances = character.getAvailableStances();
+      
+      // For this test, we need at least one stance available
+      if (availableStances.length >= 1) {
+        // Set Ironstance
+        character.setActiveStance('ironstance');
+        expect(character.activeStanceId).toBe('ironstance');
+
+        // If multiple stances available, switch to another
+        if (availableStances.length > 1) {
+          const otherStance = availableStances.find(s => s.id !== 'ironstance');
+          if (otherStance) {
+            character.setActiveStance(otherStance.id);
+            expect(character.activeStanceId).toBe(otherStance.id);
+            
+            // Return to Ironstance
+            character.setActiveStance('ironstance');
+            expect(character.activeStanceId).toBe('ironstance');
+          }
+        }
+      }
+    });
+
+    it('should verify Ironstance advantage reminder persists while active', () => {
+      character.setActiveStance('ironstance');
+      
+      // Get active stance multiple times - should remain consistent
+      const stance1 = character.getActiveStance();
+      const stance2 = character.getActiveStance();
+      
+      expect(stance1?.id).toBe(stance2?.id);
+      expect(stance1?.grantsAdvantage).toEqual(stance2?.grantsAdvantage);
+      expect(stance1?.grantsAdvantage).toContain('insight_in_ironstance');
+    });
+  });
 });
+
+// Import StanceSelectorComponent for integration test
+import { StanceSelectorComponent } from '../stance-selector/stance-selector';

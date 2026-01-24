@@ -270,36 +270,4 @@
       </p>
     </div>
   </div>
-
-  <!-- Stances Card -->
-  <div class="stances-card" *ngIf="getStances().length > 0">
-    <div class="card-header">
-      <span class="section-icon">🧘</span>
-      <h3 class="card-title">Combat Stances</h3>
-    </div>
-    <div class="card-content">
-      <div class="stances-list">
-        <details *ngFor="let stance of getStances()" class="stance-panel">
-          <summary class="stance-header">
-            <div class="stance-title">
-              <span class="stance-icon">🛡️</span>
-              <span class="stance-name">{{ stance.name }}</span>
-            </div>
-            <span class="stance-cost">{{ stance.activationCost }} action{{ stance.activationCost > 1 ? 's' : '' }}</span>
-          </summary>
-          <div class="stance-details">
-            <div class="stance-description">
-              <p>{{ stance.description }}</p>
-            </div>
-            <div class="stance-effects" *ngIf="stance.effects.length > 0">
-              <h5><span class="effect-icon">✨</span> Effects</h5>
-              <ul>
-                <li *ngFor="let effect of stance.effects">{{ effect }}</li>
-              </ul>
-            </div>
-          </div>
-        </details>
-      </div>
-    </div>
-  </div>
 </div>

@@ -625,11 +625,21 @@ export class AttackCalculator {
 
   /**
    * Generate stance from talent
+   * Populates stance with all bonuses and advantage grants from the talent node
    */
   private generateStance(talent: TalentNode): Stance | null {
     const effects = talent.otherEffects || [];
     
-    return {
+    // Convert talent bonuses to AttackModifiers for display
+    const bonuses: AttackModifier[] = talent.bonuses.map(bonus => ({
+      source: `stance:${talent.id}`,
+      type: 'other',
+      value: bonus.value,
+      description: `${bonus.type}: ${bonus.target}${bonus.value ? ' +' + bonus.value : ''}`,
+      condition: bonus.condition,
+    }));
+    
+    const stance: Stance = {
       id: talent.id,
       name: talent.name,
       description: talent.description,
@@ -637,5 +647,17 @@ export class AttackCalculator {
       activationCost: 1, // Stances typically cost 1 action to enter
       effects,
     };
+    
+    // Add bonuses if any exist
+    if (bonuses.length > 0) {
+      stance.bonuses = bonuses;
+    }
+    
+    // Add advantage grants if any exist
+    if (talent.grantsAdvantage && talent.grantsAdvantage.length > 0) {
+      stance.grantsAdvantage = talent.grantsAdvantage;
+    }
+    
+    return stance;
   }
 }

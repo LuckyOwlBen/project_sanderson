@@ -1,0 +1,357 @@
+.stance-selector-container {
+  width: 100%;
+}
+
+.stance-selector-card {
+  background: var(--card-background, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.selector-header {
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selector-icon {
+  font-size: 1.5rem;
+}
+
+.selector-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.selector-content {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stance-dropdown-field {
+  width: 100%;
+  margin: 0;
+}
+
+/* Dropdown styling */
+::ng-deep .stance-dropdown-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+::ng-deep .stance-dropdown-field .mat-mdc-select {
+  font-size: 1rem;
+}
+
+.option-label {
+  padding: 0.5rem 0;
+  display: block;
+}
+
+/* Active Stance Details Section */
+.stance-details-section {
+  padding: 1rem;
+}
+
+.active-stance-card {
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  padding: 1rem;
+  background: #f8f9ff;
+}
+
+.active-stance-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.active-stance-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.active-stance-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.active-stance-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.active-stance-cost {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cost-label {
+  font-weight: 600;
+}
+
+.cost-value {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Details/Summary Styling */
+details {
+  margin: 1rem 0;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.stance-description-details,
+.effects-details,
+.bonuses-details,
+.advantages-details {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+}
+
+summary {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: #333;
+  transition: background-color 0.2s ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.description-summary,
+.effects-summary,
+.bonuses-summary,
+.advantages-summary {
+  font-weight: 600;
+  color: #333;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.summary-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.effects-icon,
+.bonuses-icon,
+.advantages-icon {
+  font-size: 1rem;
+}
+
+.toggle-icon {
+  font-size: 0.8rem;
+  color: #999;
+  transition: transform 0.2s ease;
+  margin-left: auto;
+}
+
+details[open] .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.description-content,
+.effects-content,
+.bonuses-content,
+.advantages-content {
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stance-description {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Lists */
+.effects-list,
+.bonuses-list,
+.advantages-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.effect-item,
+.bonus-item,
+.advantage-item {
+  padding: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+
+.bonus-description {
+  font-weight: 500;
+  color: #667eea;
+}
+
+.bonus-condition {
+  margin-left: 0.5rem;
+  color: #999;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Advantage Ribbons */
+.advantage-ribbons {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 0.5rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.ribbon-corner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 80px 80px 0;
+    border-color: transparent #667eea transparent transparent;
+    box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.ribbon-text {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  max-width: 60px;
+  text-align: center;
+  transform: rotate(45deg);
+  transform-origin: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: ribbonPulse 2s ease-in-out infinite;
+}
+
+@keyframes ribbonPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+}
+
+/* Adjust active stance card positioning for ribbons */
+.active-stance-card {
+  position: relative;
+}
+
+/* No Stance Selected */
+.no-stance-selected {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.no-stance-text {
+  margin: 0;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .active-stance-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .active-stance-info {
+    width: 100%;
+  }
+
+  .active-stance-cost {
+    justify-content: center;
+  }
+
+  summary {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .summary-label {
+    flex: 1;
+    text-align: left;
+  }
+
+  .toggle-icon {
+    margin-left: auto;
+  }
+}

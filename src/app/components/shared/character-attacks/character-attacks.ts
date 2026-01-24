@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Character } from '../../../character/character';
-import { Attack, Stance } from '../../../character/attacks/attackInterfaces';
+import { Attack } from '../../../character/attacks/attackInterfaces';
 
 @Component({
   selector: 'app-character-attacks',
@@ -28,13 +28,6 @@ export class CharacterAttacksComponent {
       ranged: attacks.filter(a => a.range.includes('Ranged')),
       special: attacks.filter(a => a.range !== 'Melee' && !a.range.includes('Ranged'))
     };
-  }
-
-  /**
-   * Get available stances
-   */
-  getStances(): Stance[] {
-    return this.character?.getAvailableStances() || [];
   }
 
   /**

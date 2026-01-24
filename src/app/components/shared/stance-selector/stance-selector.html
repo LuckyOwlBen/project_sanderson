@@ -1,0 +1,133 @@
+<div class="stance-selector-container" *ngIf="getAvailableStances() as availableStances; else noStances">
+  <div class="stance-selector-card" *ngIf="availableStances.length > 0">
+    <!-- Header -->
+    <div class="selector-header">
+      <span class="selector-icon">🧘</span>
+      <h3 class="selector-title">Active Stance</h3>
+    </div>
+
+    <!-- Dropdown Container -->
+    <div class="selector-content">
+      <mat-form-field class="stance-dropdown-field">
+        <mat-label>Select Stance</mat-label>
+        <mat-select [value]="getActiveStanceId()" (selectionChange)="onStanceSelected($event.value)">
+          <!-- None Option -->
+          <mat-option [value]="null">
+            <span class="option-label">None</span>
+          </mat-option>
+
+          <!-- Stance Options -->
+          <mat-optgroup label="Available Stances" [disabled]="false">
+            <mat-option *ngFor="let stance of availableStances" [value]="stance.id">
+              <span class="option-label">{{ formatStanceLabel(stance) }}</span>
+            </mat-option>
+          </mat-optgroup>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Active Stance Details -->
+    <div class="stance-details-section" *ngIf="getActiveStance() as activeStance">
+      <div class="active-stance-card">
+        <div class="active-stance-header">
+          <span class="active-stance-icon">🛡️</span>
+          <div class="active-stance-info">
+            <h4 class="active-stance-name">{{ activeStance.name }}</h4>
+            <p class="active-stance-cost">
+              <span class="cost-label">Activation Cost:</span>
+              <span class="cost-value">{{ activeStance.activationCost }} action{{ activeStance.activationCost > 1 ? 's' : '' }}</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Advantage Ribbons -->
+        <div class="advantage-ribbons" *ngIf="hasStanceAdvantages(activeStance)">
+          <div *ngFor="let advantage of activeStance.grantsAdvantage" class="ribbon-corner">
+            <span class="ribbon-text">{{ advantage }}</span>
+          </div>
+        </div>
+
+        <!-- Collapsible Description -->
+        <details class="stance-description-details">
+          <summary class="description-summary">
+            <span class="summary-label">Description</span>
+            <span class="toggle-icon">▼</span>
+          </summary>
+          <div class="description-content">
+            <p class="stance-description">{{ activeStance.description }}</p>
+          </div>
+        </details>
+
+        <!-- Effects -->
+        <div class="stance-effects" *ngIf="activeStance.effects && activeStance.effects.length > 0">
+          <details class="effects-details">
+            <summary class="effects-summary">
+              <span class="summary-label">
+                <span class="effects-icon">✨</span>
+                Effects
+              </span>
+              <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="effects-content">
+              <ul class="effects-list">
+                <li *ngFor="let effect of activeStance.effects" class="effect-item">
+                  {{ effect }}
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+
+        <!-- Bonuses -->
+        <div class="stance-bonuses" *ngIf="hasStanceBonuses(activeStance)">
+          <details class="bonuses-details">
+            <summary class="bonuses-summary">
+              <span class="summary-label">
+                <span class="bonuses-icon">⚡</span>
+                Bonuses
+              </span>
+              <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="bonuses-content">
+              <ul class="bonuses-list">
+                <li *ngFor="let bonus of activeStance.bonuses" class="bonus-item">
+                  <span class="bonus-description">{{ formatBonusDescription(bonus.description) }}</span>
+                  <span class="bonus-condition" *ngIf="bonus.condition">({{ bonus.condition }})</span>
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+
+        <!-- Advantages -->
+        <div class="stance-advantages" *ngIf="hasStanceAdvantages(activeStance)">
+          <details class="advantages-details">
+            <summary class="advantages-summary">
+              <span class="summary-label">
+                <span class="advantages-icon">👁️</span>
+                Advantages
+              </span>
+              <span class="toggle-icon">▼</span>
+            </summary>
+            <div class="advantages-content">
+              <ul class="advantages-list">
+                <li *ngFor="let advantage of activeStance.grantsAdvantage" class="advantage-item">
+                  {{ advantage }}
+                </li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Stance Selected -->
+    <div class="no-stance-selected" *ngIf="!getActiveStance()">
+      <p class="no-stance-text">No stance currently selected</p>
+    </div>
+  </div>
+</div>
+
+<ng-template #noStances>
+  <!-- No stances available -->
+</ng-template>

@@ -270,6 +270,6 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
       intellect: 7,
       willpower: 6,
       presence: 5
-    });
+    }, false);
   });
 });

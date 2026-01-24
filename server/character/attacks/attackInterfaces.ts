@@ -113,6 +113,9 @@ export interface Stance {
   /** Effects while stance is active */
   effects: string[];
   
-  /** Bonuses applied by this stance */
+  /** Bonuses applied by this stance (converted from talent node bonuses) */
   bonuses?: AttackModifier[];
+  
+  /** Situations/skills that grant advantage while in this stance */
+  grantsAdvantage?: string[];
 }

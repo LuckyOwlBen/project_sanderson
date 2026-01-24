@@ -146,7 +146,7 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
       }))
     };
 
-    queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
+    queryParamsSubject = new BehaviorSubject({});
 
     await TestBed.configureTestingModule({
       imports: [TalentView, MatDialogModule, BrowserAnimationsModule],
@@ -192,6 +192,9 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
     
     // Set initial character in state
     characterStateService.updateCharacter(testCharacter);
+    
+    // Emit route params to trigger the component's queryParams subscription
+    queryParamsSubject.next({ levelUp: 'true' });
     fixture.detectChanges();
     await fixture.whenStable();
 

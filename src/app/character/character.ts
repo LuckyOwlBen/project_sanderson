@@ -35,6 +35,9 @@ export class Character {
   // Active Singer form - the form currently granting bonuses
   activeForm?: string;
 
+  // Combat stance tracking - stores the ID of the currently active stance
+  activeStanceId: string | null = null;
+
   private skillManager = new SkillManager();
   private derivedAttributesManager = new DerivedAttributesManager();
   private defenseManager = new DefenseManager();
@@ -475,6 +478,72 @@ export class Character {
   getAvailableStances(): Stance[] {
     const calculator = new AttackCalculator(this);
     return calculator.getAvailableStances();
+  }
+
+  /**
+   * Set the active combat stance
+   * @param stanceId - The ID of the stance to activate, or null to deactivate
+   * @returns true if the stance was successfully set, false otherwise
+   */
+  setActiveStance(stanceId: string | null): boolean {
+    if (stanceId === null) {
+      this.activeStanceId = null;
+      return true;
+    }
+
+    // Verify the stance exists and is available
+    const availableStances = this.getAvailableStances();
+    const stanceExists = availableStances.some(s => s.id === stanceId);
+
+    if (!stanceExists) {
+      console.warn(`Stance with ID "${stanceId}" is not available for this character`);
+      return false;
+    }
+
+    this.activeStanceId = stanceId;
+    return true;
+  }
+
+  /**
+   * Get the currently active stance, if any
+   * @returns The active Stance object, or null if no stance is active
+   */
+  getActiveStance(): Stance | null {
+    if (!this.activeStanceId) {
+      return null;
+    }
+
+    const availableStances = this.getAvailableStances();
+    return availableStances.find(s => s.id === this.activeStanceId) || null;
+  }
+
+  /**
+   * Apply bonuses from a stance
+   * Extracts the bonus array from the talent node and applies to bonus module with source "stance:{stanceId}"
+   * @param stanceId - The ID of the stance
+   * @param talentNode - The talent node containing the stance bonuses
+   */
+  applyStanceBonuses(stanceId: string, talentNode: any): void {
+    // Build source identifier for stance bonuses
+    const source = `stance:${stanceId}`;
+
+    // Apply all bonuses from the talent node
+    if (talentNode.bonuses && talentNode.bonuses.length > 0) {
+      talentNode.bonuses.forEach((bonus: any) => {
+        this.bonusManager.bonuses.addBonus(source, bonus);
+      });
+    }
+  }
+
+  /**
+   * Clear all bonuses from the current active stance
+   * Removes bonuses with source pattern "stance:{activeStanceId}"
+   */
+  clearStanceBonuses(): void {
+    if (this.activeStanceId) {
+      const source = `stance:${this.activeStanceId}`;
+      this.bonusManager.bonuses.removeBonus(source);
+    }
   }
 
 }

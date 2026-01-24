@@ -9,6 +9,7 @@ import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/tale
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
 import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
+import { StanceSelectorComponent } from '../stance-selector/stance-selector';
 
 @Component({
   selector: 'app-character-powers-tab',
@@ -18,7 +19,8 @@ import { CharacterAttacksComponent } from '../character-attacks/character-attack
     MatCardModule,
     MatIconModule,
     MatExpansionModule,
-    CharacterAttacksComponent
+    CharacterAttacksComponent,
+    StanceSelectorComponent
   ],
   templateUrl: './character-powers-tab.html',
   styleUrl: './character-powers-tab.scss',
@@ -154,5 +156,14 @@ export class CharacterPowersTab {
     }
     
     return effects;
+  }
+
+  /**
+   * Handle stance change event from the stance selector
+   */
+  onStanceChanged(stanceId: string | null): void {
+    // Stance change is already handled in the Character class via setActiveStance()
+    // This callback is available for future expansion (e.g., logging, analytics)
+    console.log(`Stance changed to: ${stanceId || 'None'}`);
   }
 }

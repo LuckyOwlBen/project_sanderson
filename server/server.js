@@ -216,6 +216,11 @@ async function loadCharacterData(id, retries = 3) {
   }
 }
 
+async function saveCharacterData(character) {
+  const filepath = getCharacterFilepath(character.id);
+  await fs.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+}
+
 function getLevelTableValue(table, level) {
   return table[level - 1] || 0;
 }
@@ -1241,9 +1246,8 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
     let talentPoints;
     if (isCreationMode) {
       // For creation mode, give cumulative talent points
+      // Tier 0 talent is already free (doesn't cost points), so no subtraction needed
       talentPoints = getCumulativePoints(LEVEL_TABLES.talentPointsPerLevel, level);
-      // Subtract tier 0 talent (it's free)
-      talentPoints -= 1;
     } else {
       // For level-up mode, use normal rules
       const currentUnlockedTalents = character.unlockedTalents || [];

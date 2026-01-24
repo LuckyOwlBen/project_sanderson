@@ -269,4 +269,168 @@ describe('AttackCalculator', () => {
       expect(devastatingBlow?.attackBonus).toBe(5);
     });
   });
+
+  describe('Stance Data with Bonuses and Advantages', () => {
+    it('should include bonuses from stance talent in Stance object', () => {
+      // Stonestance has a +1 Deflect bonus
+      character.unlockedTalents.add('stonestance');
+      
+      const stances = calculator.getAvailableStances();
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      
+      expect(stonestance).toBeDefined();
+      expect(stonestance?.bonuses).toBeDefined();
+      expect(stonestance?.bonuses?.length).toBeGreaterThan(0);
+      
+      // Verify the bonus details
+      const deflectBonus = stonestance?.bonuses?.[0];
+      expect(deflectBonus?.source).toBe('stance:stonestance');
+      expect(deflectBonus?.description).toContain('deflect');
+      expect(deflectBonus?.description).toContain('all');
+      expect(deflectBonus?.value).toBe(1);
+      expect(deflectBonus?.condition).toContain('stonestance');
+    });
+
+    it('should include grantsAdvantage from stance talent in Stance object', () => {
+      // Flamestance grants advantage on intimidation tests
+      character.unlockedTalents.add('flamestance');
+      
+      const stances = calculator.getAvailableStances();
+      const flamestance = stances.find(s => s.id === 'flamestance');
+      
+      expect(flamestance).toBeDefined();
+      expect(flamestance?.grantsAdvantage).toBeDefined();
+      expect(flamestance?.grantsAdvantage?.length).toBeGreaterThan(0);
+      expect(flamestance?.grantsAdvantage).toContain('intimidation_in_flamestance');
+    });
+
+    it('should handle stances with both bonuses and advantages', () => {
+      // Stonestance has bonuses
+      character.unlockedTalents.add('stonestance');
+      // Flamestance has advantages
+      character.unlockedTalents.add('flamestance');
+      
+      const stances = calculator.getAvailableStances();
+      
+      expect(stances.length).toBe(2);
+      
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      const flamestance = stances.find(s => s.id === 'flamestance');
+      
+      // Stonestance: has bonuses, no advantages
+      expect(stonestance?.bonuses?.length).toBeGreaterThan(0);
+      expect(stonestance?.grantsAdvantage?.length || 0).toBe(0);
+      
+      // Flamestance: has advantages, no bonuses (flamestance has no bonuses in definition)
+      expect(flamestance?.grantsAdvantage?.length || 0).toBeGreaterThan(0);
+    });
+
+    it('should not include bonuses property if stance has no bonuses', () => {
+      // Flamestance has no bonuses in its definition
+      character.unlockedTalents.add('flamestance');
+      
+      const stances = calculator.getAvailableStances();
+      const flamestance = stances.find(s => s.id === 'flamestance');
+      
+      expect(flamestance).toBeDefined();
+      // Bonuses should either not exist or be an empty array
+      expect(flamestance?.bonuses?.length || 0).toBe(0);
+    });
+
+    it('should not include grantsAdvantage property if stance grants no advantages', () => {
+      // Stonestance does not grant advantages
+      character.unlockedTalents.add('stonestance');
+      
+      const stances = calculator.getAvailableStances();
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      
+      expect(stonestance).toBeDefined();
+      // grantsAdvantage should either not exist or be an empty array
+      expect(stonestance?.grantsAdvantage?.length || 0).toBe(0);
+    });
+
+    it('should format bonus descriptions for UI display', () => {
+      character.unlockedTalents.add('stonestance');
+      
+      const stances = calculator.getAvailableStances();
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      
+      expect(stonestance?.bonuses?.length).toBeGreaterThan(0);
+      const bonus = stonestance?.bonuses?.[0];
+      
+      // Description should be human-readable and include the bonus type
+      expect(bonus?.description).toBeDefined();
+      expect(typeof bonus?.description).toBe('string');
+      expect(bonus?.description?.length).toBeGreaterThan(0);
+      // Should have format like "deflect: all +1"
+      expect(bonus?.description).toMatch(/[a-z]+:/);
+    });
+
+    it('should preserve all stance metadata alongside bonuses and advantages', () => {
+      character.unlockedTalents.add('stonestance');
+      
+      const stances = calculator.getAvailableStances();
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      
+      // Verify all required Stance properties are present
+      expect(stonestance?.id).toBe('stonestance');
+      expect(stonestance?.name).toBe('Stonestance');
+      expect(stonestance?.talentId).toBe('stonestance');
+      expect(stonestance?.activationCost).toBe(1);
+      expect(stonestance?.description).toBeDefined();
+      expect(stonestance?.effects?.length).toBeGreaterThan(0);
+      expect(stonestance?.bonuses).toBeDefined();
+    });
+
+    it('should include multiple bonuses if stance talent has multiple', () => {
+      // Note: This test is prepared for future stances with multiple bonuses
+      // Currently checking that the structure supports multiple bonuses
+      character.unlockedTalents.add('stonestance');
+      
+      const stances = calculator.getAvailableStances();
+      const stonestance = stances.find(s => s.id === 'stonestance');
+      
+      // Even single-bonus stances should be arrays for extensibility
+      expect(Array.isArray(stonestance?.bonuses)).toBe(true);
+      expect(stonestance?.bonuses).toBeDefined();
+    });
+
+    it('Stance object should carry all needed data for UI display', () => {
+      // Comprehensive validation that Stance objects have all UI-required data
+      character.unlockedTalents.add('stonestance');
+      character.unlockedTalents.add('flamestance');
+      
+      const stances = calculator.getAvailableStances();
+      
+      for (const stance of stances) {
+        // Core identity
+        expect(stance.id).toBeTruthy();
+        expect(stance.name).toBeTruthy();
+        expect(stance.talentId).toBeTruthy();
+        
+        // Display information
+        expect(stance.description).toBeTruthy();
+        expect(typeof stance.description).toBe('string');
+        
+        // Mechanics
+        expect(typeof stance.activationCost).toBe('number');
+        expect(stance.activationCost).toBeGreaterThan(0);
+        expect(Array.isArray(stance.effects)).toBe(true);
+        
+        // Optional but important: bonuses and advantages
+        if (stance.bonuses) {
+          expect(Array.isArray(stance.bonuses)).toBe(true);
+          for (const bonus of stance.bonuses) {
+            expect(bonus.source).toBeDefined();
+            expect(bonus.description).toBeDefined();
+          }
+        }
+        
+        if (stance.grantsAdvantage) {
+          expect(Array.isArray(stance.grantsAdvantage)).toBe(true);
+          expect(stance.grantsAdvantage.every(a => typeof a === 'string')).toBe(true);
+        }
+      }
+    });
+  });
 });
