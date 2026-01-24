@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
 const talentRules = require('./talent-rules');
+const talentService = require('./talent-service');
 const attributeAllocator = require('./services/attribute-allocator');
 const InventoryManager = require('./inventory-manager');
 const itemDefinitions = require('./item-definitions');
@@ -74,16 +75,6 @@ const confirmedExpertiseGrants = new Map(); // characterId -> Set of expertiseNa
 // Track item grant delivery state
 // pendingItemGrants stores queued item grants per characterId (array of grant objects)
 const pendingItemGrants = new Map();
-
-// Path tier 0 talent mappings (key talents for each heroic path)
-const PATH_TIER0_TALENTS = {
-  'warrior': 'vigilant_stance',
-  'scholar': 'education',
-  'hunter': 'seek_quarry',
-  'leader': 'decisive_command',
-  'envoy': 'rousing_presence',
-  'agent': 'opportunist'
-};
 
 // Track recent server logs for transparency/ops
 const LOG_BUFFER_SIZE = 100;
@@ -385,25 +376,6 @@ app.post('/api/characters/save', async (req, res) => {
     // Always preserve spentPoints from existing character (server-side only, client never sends)
     if (existingCharacter && existingCharacter.spentPoints) {
       character.spentPoints = existingCharacter.spentPoints;
-    }
-
-    // Auto-unlock tier 0 talent for the main path if paths are set
-    if (character.paths && character.paths.length > 0) {
-      const mainPath = character.paths[0];
-      const tier0TalentId = PATH_TIER0_TALENTS[mainPath];
-      
-      if (tier0TalentId) {
-        // Initialize unlockedTalents if needed
-        if (!character.unlockedTalents) {
-          character.unlockedTalents = [];
-        }
-        
-        // Add tier 0 talent if not already unlocked
-        if (!character.unlockedTalents.includes(tier0TalentId)) {
-          character.unlockedTalents.push(tier0TalentId);
-          console.log(`Auto-unlocked tier 0 talent ${tier0TalentId} for path ${mainPath}`);
-        }
-      }
     }
 
     const filename = `${character.id}.json`;
@@ -931,51 +903,59 @@ app.get('/api/store/items', (req, res) => {
 app.post('/api/characters/:id/paths', async (req, res) => {
   try {
     const { id } = req.params;
-    const { mainPath, specialization } = req.body;
-    
-    if (!mainPath || !specialization) {
+    const { mainPath } = req.body;
+
+    if (!mainPath || typeof mainPath !== 'string') {
       return res.status(400).json({
         success: false,
-        error: 'Both mainPath and specialization are required'
+        error: 'mainPath is required and must be a string'
       });
     }
-    
-    const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    const data = await fs.readFile(filepath, 'utf8');
-    const character = JSON.parse(data);
-    
-    // Update paths
-    character.paths = [mainPath, specialization];
-    
-    // Auto-unlock tier 0 talent for the main path
-    const tier0TalentId = talentRules.getTier0TalentForPath(mainPath);
-    if (tier0TalentId) {
+
+    const character = await loadCharacterData(id);
+    const currentTalents = character.unlockedTalents || [];
+
+    // Ensure tier-0 talent is unlocked (SINGLE LOCATION FOR THIS)
+    const tier0Result = talentService.ensureTier0Unlocked(id, mainPath, currentTalents);
+
+    // If tier 0 needs to be unlocked, add it
+    if (tier0Result.needsUnlock && tier0Result.talentId) {
       if (!character.unlockedTalents) {
         character.unlockedTalents = [];
       }
-      
-      if (!character.unlockedTalents.includes(tier0TalentId)) {
-        character.unlockedTalents.push(tier0TalentId);
-        console.log(`[Path Selection] Auto-unlocked tier 0 talent ${tier0TalentId} for path ${mainPath}`);
+      if (!character.unlockedTalents.includes(tier0Result.talentId)) {
+        character.unlockedTalents.push(tier0Result.talentId);
       }
     }
+
+    // Update main path
+    character.mainPath = mainPath;
+    if (!character.paths) {
+      character.paths = [];
+    }
+    if (!character.paths.includes(mainPath)) {
+      character.paths.unshift(mainPath);
+    }
     
-    // Save character
-    const tempPath = `${filepath}.tmp`;
-    await fs.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
-    await fs.rename(tempPath, filepath);
-    
+    fs.writeFileSync(
+      path.join(CHARACTERS_DIR, `character_${id}.json`),
+      JSON.stringify(character, null, 2)
+    );
+
     res.json({
       success: true,
-      unlockedTalent: tier0TalentId,
-      paths: character.paths
+      id,
+      mainPath,
+      tier0Unlocked: tier0Result.unlocked,
+      tier0TalentId: tier0Result.talentId,
+      message: tier0Result.unlocked ? 'Path selected and tier-0 talent unlocked' : 'Path selected'
     });
   } catch (error) {
-    console.error('Error submitting path selection:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('[Paths] Error selecting path:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -1213,6 +1193,7 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
   try {
     const { id } = req.params;
     const isCreationMode = req.query.isCreationMode === 'true';
+    
     const character = await loadCharacterData(id);
     const level = character.level || 1;
     const mainPath = character.paths && character.paths.length > 0 ? character.paths[0] : null;
@@ -1231,48 +1212,18 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
         isCreationMode
       });
     }
-    
-    // Determine if this is character creation or level-up
-    const isLevelUp = !isCreationMode && (level > 1 || (character.unlockedTalents && character.unlockedTalents.length > 1));
-    
-    // Get previously selected talents (for locking in level-up mode)
-    // For character creation, this is empty. For level-up, it's all talents from before this level
-    const tier0TalentId = talentRules.getTier0TalentForPath(mainPath);
-    const previouslySelectedTalents = isLevelUp 
-      ? (character.unlockedTalents || []).filter(id => id !== tier0TalentId)
-      : [];
-    
-    // Calculate available talent points
-    let talentPoints;
-    if (isCreationMode) {
-      // For creation mode, give cumulative talent points
-      // Tier 0 talent is already free (doesn't cost points), so no subtraction needed
-      talentPoints = getCumulativePoints(LEVEL_TABLES.talentPointsPerLevel, level);
-    } else {
-      // For level-up mode, use normal rules
-      const currentUnlockedTalents = character.unlockedTalents || [];
-      talentPoints = talentRules.calculateAvailableTalentPoints(
-        level,
-        currentUnlockedTalents,
-        mainPath,
-        previouslySelectedTalents
-      );
-    }
-    
-    // Determine if Singer tree selection is required
-    const requiresSingerSelection = talentRules.requiresSingerSelection(
-      character.ancestry,
-      level
-    );
-    
-    const mode = isCreationMode ? 'creation' : 'level-up';
-    console.log(`[${mode.toUpperCase()}] ${character.name} (L${level}): ${talentPoints} points available, ${previouslySelectedTalents.length} previously selected, Singer required: ${requiresSingerSelection}`);
-    
+
+    // Get talent selection state from service (pass character object)
+    const state = talentService.getTalentSelectionState(character, level, isCreationMode);
+
     res.json({
-      talentPoints,
-      previouslySelectedTalents,
-      lockedPowers: previouslySelectedTalents,
-      requiresSingerSelection,
+      talentPoints: state.talentPoints,
+      previouslySelectedTalents: state.previouslySelectedTalents,
+      lockedPowers: state.previouslySelectedTalents,
+      unlockedTalents: state.unlockedTalents,
+      spentPoints: state.spentPoints,
+      requiresSingerSelection: state.requiresSingerSelection,
+      tier0TalentId: state.tier0TalentId,
       ancestry: character.ancestry || null,
       level,
       mainPath,
@@ -1282,7 +1233,7 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
     if (error.code === 'ENOENT') {
       return res.status(404).json({ success: false, error: 'Character not found' });
     }
-    console.error('Error in getTalentForLevel:', error);
+    console.error('[Talents] Error in getTalentForLevel:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -1293,64 +1244,25 @@ app.get('/api/characters/:id/level/talents', async (req, res) => {
     const { id } = req.params;
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    
-    // Compute talent points fresh from the character's current state
-    // This is the authoritative source for how many points the character gets
-    const totalPointsForThisLevel = getLevelTableValue(LEVEL_TABLES.talentPointsPerLevel, level);
-    
-    // Track spent points per level to prevent re-adding on revisits
-    if (!character.spentPoints) character.spentPoints = {};
-    if (!character.spentPoints.talents) character.spentPoints.talents = {};
-    const spentForThisLevel = character.spentPoints.talents[level] || 0;
-    const pointsForThisLevel = Math.max(0, totalPointsForThisLevel - spentForThisLevel);
-    
-    console.log(`[LevelUp] Provided talent points for ${character.name} (${character.id}): ${pointsForThisLevel} (${spentForThisLevel} already spent)`);
-    
-    // Auto-unlock tier 0 talent for the main path if not already unlocked
-    if (character.paths && character.paths.length > 0) {
-      const mainPath = character.paths[0];
-      const tier0TalentId = PATH_TIER0_TALENTS[mainPath];
-      
-      if (tier0TalentId) {
-        // Initialize unlockedTalents if needed
-        if (!character.unlockedTalents) {
-          character.unlockedTalents = [];
-        }
-        
-        // Add tier 0 talent if not already unlocked
-        if (!character.unlockedTalents.includes(tier0TalentId)) {
-          character.unlockedTalents.push(tier0TalentId);
-          // Save the character with the auto-unlocked talent
-          await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-          console.log(`Auto-unlocked tier 0 talent ${tier0TalentId} for path ${mainPath} (talent slice GET)`);
-        }
-      }
-    }
-    
-    // Build baseline: all unlocked talents except tier 0 talent
-    const tier0TalentId = character.paths && character.paths.length > 0 
-      ? PATH_TIER0_TALENTS[character.paths[0]] 
-      : null;
-    
-    const baselineTalents = (character.unlockedTalents || [])
-      .filter(talentId => talentId !== tier0TalentId);
-    
-    const unlockedTalents = character.unlockedTalents || [];
-    
+
+    // Get talent state from service (READ-ONLY, no side effects)
+    const state = talentService.getTalentSelectionState(character, level, false);
+
     res.json({
       id: character.id,
       level,
       ancestry: character.ancestry || null,
-      unlockedTalents: unlockedTalents,
-      baselineUnlockedTalents: baselineTalents,
-      pointsForLevel: pointsForThisLevel,
-      talentPointsAllocation: pointsForThisLevel
+      unlockedTalents: state.unlockedTalents,
+      baselineUnlockedTalents: state.previouslySelectedTalents,
+      pointsForLevel: state.talentPoints,
+      talentPointsAllocation: state.talentPoints,
+      spentPoints: state.spentPoints
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
       return res.status(404).json({ success: false, error: 'Character not found' });
     }
-    console.error('Error loading talent slice:', error);
+    console.error('[Talents] Error loading talent slice:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -1483,80 +1395,59 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 app.patch('/api/characters/:id/level/talents', async (req, res) => {
   try {
     const { id } = req.params;
-    const { unlockedTalents } = req.body || {};
+    const { unlockedTalents, level } = req.body;
+
     if (!Array.isArray(unlockedTalents)) {
-      return res.status(400).json({ success: false, error: 'unlockedTalents array required' });
+      return res.status(400).json({
+        success: false,
+        error: 'unlockedTalents must be an array'
+      });
     }
 
     const character = await loadCharacterData(id);
-    const level = character.level || 1;
-    const mainPath = character.paths && character.paths.length > 0 ? character.paths[0] : null;
-    
-    if (!mainPath) {
+    const mainPath = character.mainPath || character.paths?.[0] || null;
+
+    // Validate selection (pass character object)
+    const validation = talentService.validateTalentSelection(character, unlockedTalents, level, mainPath);
+    if (!validation.isValid) {
       return res.status(400).json({
         success: false,
-        error: 'Character must have a path selected'
+        error: validation.error,
+        validation
       });
     }
-    
-    // Determine previously selected talents (for level-up validation)
-    const tier0TalentId = talentRules.getTier0TalentForPath(mainPath);
-    const isLevelUp = level > 1 || (character.unlockedTalents && character.unlockedTalents.length > 1);
-    const previouslySelectedTalents = isLevelUp
-      ? (character.unlockedTalents || []).filter(id => id !== tier0TalentId)
-      : [];
-    
-    // Server-side validation using consolidated rules
-    const validation = talentRules.validateTalentPoints(
-      level,
-      unlockedTalents,
-      mainPath,
-      previouslySelectedTalents
-    );
-    
-    if (!validation.valid) {
-      return res.status(400).json({ 
-        success: false, 
-        error: validation.message
+
+    // Prepare for save
+    const saveResult = talentService.saveTalentSelections(character, unlockedTalents, level, mainPath);
+    if (!saveResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: saveResult.error
       });
     }
-    
-    // Update character
+
+    // Actually save to file/database (this is where server.js would call DB layer)
     character.unlockedTalents = unlockedTalents;
-    character.lastModified = new Date().toISOString();
-    
-    // Track spent points for this level to prevent re-adding on revisits
-    // Count new talents excluding tier 0 and previously selected
-    const tier0Set = new Set([tier0TalentId].filter(Boolean));
-    const previousSet = new Set(previouslySelectedTalents);
-    const newTalents = unlockedTalents.filter(id => !tier0Set.has(id) && !previousSet.has(id));
-    
-    if (!character.spentPoints) character.spentPoints = {};
-    if (!character.spentPoints.talents) character.spentPoints.talents = {};
-    character.spentPoints.talents[level] = newTalents.length;
-
-    await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-    
-    const availablePoints = talentRules.calculateAvailableTalentPoints(
-      level,
-      unlockedTalents,
-      mainPath,
-      previouslySelectedTalents
+    fs.writeFileSync(
+      path.join(CHARACTERS_DIR, `character_${id}.json`),
+      JSON.stringify(character, null, 2)
     );
 
-    console.log(`[Talents] Saved ${character.name} (L${level}): ${unlockedTalents.length} talents, ${availablePoints} points remaining`);
-
+    // Return updated state (pass character object)
+    const updatedState = talentService.getTalentSelectionState(character, level, false);
     res.json({
       success: true,
-      id: character.id,
-      unlockedTalents: character.unlockedTalents,
-      lastModified: character.lastModified
+      id,
+      level,
+      unlockedTalents: updatedState.unlockedTalents,
+      spentPoints: updatedState.spentPoints,
+      pointsForLevel: updatedState.talentPoints
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
       return res.status(404).json({ success: false, error: 'Character not found' });
     }
-    console.error('Error saving talent slice:', error);
+    console.error('[Talents] Error saving talent selections:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

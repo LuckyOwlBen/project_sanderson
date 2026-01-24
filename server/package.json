@@ -2,10 +2,11 @@
   "name": "project-sanderson-server",
   "version": "1.0.0",
   "description": "Minimal backend API for Sanderson RPG character storage",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts",
+    "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -18,10 +19,16 @@
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.33.0",
     "socket.io": "^4.7.2",
-    "@prisma/client": "^7.3.0"
+    "@prisma/client": "^7.3.0",
+    "better-sqlite3": "^9.2.2"
   },
   "devDependencies": {
     "vitest": "^4.0.8",
-    "prisma": "^7.3.0"
+    "prisma": "^7.3.0",
+    "typescript": "^5.3.3",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.6",
+    "@types/better-sqlite3": "^7.6.8",
+    "tsx": "^4.7.0"
   }
 }
