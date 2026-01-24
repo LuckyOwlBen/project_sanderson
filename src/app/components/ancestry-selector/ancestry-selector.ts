@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -28,8 +27,7 @@ interface AncestryInfo {
   templateUrl: './ancestry-selector.html',
   styleUrl: './ancestry-selector.scss',
 })
-export class AncestrySelector implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class AncestrySelector implements OnInit {
   private readonly STEP_INDEX = 0; // Ancestry is step 0
   
   selectedAncestry: Ancestry | null = null;
@@ -73,22 +71,15 @@ export class AncestrySelector implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(char => {
-        this.selectedAncestry = char.ancestry;
-        this.updateValidation();
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    const currentCharacter = this.characterState.getCharacter();
+    this.selectedAncestry = currentCharacter.ancestry;
+    this.updateValidation();
   }
 
   selectAncestry(ancestry: Ancestry): void {
     this.selectedAncestry = ancestry;
     this.characterState.setAncestry(ancestry);
+    this.updateValidation();
   }
 
   private updateValidation(): void {

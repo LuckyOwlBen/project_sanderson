@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
 import { ALL_CULTURES } from '../../character/culture/allCultures';
 import { CommonModule } from '@angular/common';
@@ -32,8 +31,7 @@ interface CultureInfo {
   templateUrl: './culture-selector.html',
   styleUrls: ['./culture-selector.scss']
 })
-export class CultureSelector implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+export class CultureSelector implements OnInit {
   private readonly STEP_INDEX = 1; // Culture is step 1
   
   allCultureInfos: CultureInfo[] = [];
@@ -70,28 +68,11 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(char => {
-        this.confirmedCultures = char.cultures || [];
-        this.updateValidation();
-        // Show validation if we're on this page and have no cultures
-        if (this.confirmedCultures.length === 0) {
-          // Delay to avoid ExpressionChangedAfterItHasBeenCheckedError
-          setTimeout(() => {
-            this.showValidation = true;
-          }, 0);
-        } else {
-          this.showValidation = false;
-        }
-        // Re-initialize culture infos when character changes (e.g., ancestry changes)
-        this.initializeCultureInfos();
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    const current = this.characterState.getCharacter();
+    this.confirmedCultures = current.cultures || [];
+    this.initializeCultureInfos();
+    this.updateValidation();
+    this.showValidation = this.confirmedCultures.length === 0;
   }
 
   private updateValidation(): void {
@@ -170,6 +151,9 @@ export class CultureSelector implements OnInit, OnDestroy {
   confirmCulture(): void {
     if (this.selectedCulture) {
       this.characterState.addCulture(this.selectedCulture.culture);
+      this.confirmedCultures = this.characterState.getCharacter().cultures || [];
+      this.initializeCultureInfos();
+      this.updateValidation();
       this.selectedCulture = null;
       this.showValidation = false;
       
@@ -189,6 +173,9 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   removeCulture(cultureInfo: CultureInfo): void {
     this.characterState.removeCulture(cultureInfo.culture);
+    this.confirmedCultures = this.characterState.getCharacter().cultures || [];
+    this.initializeCultureInfos();
+    this.updateValidation();
   }
 
   // Persist hook for CharacterCreatorView
