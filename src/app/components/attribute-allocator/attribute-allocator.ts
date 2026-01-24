@@ -29,7 +29,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
-import { LevelUpManager } from '../../levelup/levelUpManager';
 import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
@@ -67,7 +66,6 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   constructor(
     private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
-    private levelUpManager: LevelUpManager,
     private levelUpApi: LevelUpApiService,
     private validationService: StepValidationService
   ) {
@@ -104,14 +102,12 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
             console.warn('[AttributeAllocator] Level-up mode but no characterId found!');
           }
         } else if (this.character && !this.isLevelUpMode) {
-          // In non-level-up mode (creation), still initialize from current character state
-          console.log('[AttributeAllocator] Character creation mode - using local state (no API call)');
+          // Always fetch slice from API even in creation mode to keep server as source of truth
+          console.log('[AttributeAllocator] Character creation mode - fetching slice from API');
           this.isInitialized = false;
-          // Get attribute points from local level manager for character creation
-          this.serverAttributePoints = this.levelUpManager.getAttributePointsForLevel(this.character.level || 1);
-          console.log('[AttributeAllocator] Calculated local attribute points:', this.serverAttributePoints);
-          this.initializeAttributes();
-          this.updateValidation();
+          if (this.characterId) {
+            this.fetchAttributeSlice(this.characterId);
+          }
         } else {
           console.warn('[AttributeAllocator] No character available or invalid state');
         }
@@ -250,10 +246,6 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   protected onItemChanged(item: AttributeConfig, newValue: number): void {
     if (this.character) {
-      // Skip broadcasting during level-up to avoid resetting input bindings
-      if (!this.isLevelUpMode) {
-        this.characterStateService.updateCharacter(this.character);
-      }
       this.updateDerivedAttributes();
       this.updateValidation();
       // Don't auto-persist on every change - only persist when Next is clicked
@@ -262,10 +254,6 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   protected onResetComplete(): void {
     if (this.character) {
-      // Skip broadcasting during level-up to avoid resetting input bindings
-      if (!this.isLevelUpMode) {
-        this.characterStateService.updateCharacter(this.character);
-      }
       this.updateDerivedAttributes();
       this.updateValidation();
       // Don't auto-persist on every change - only persist when Next is clicked

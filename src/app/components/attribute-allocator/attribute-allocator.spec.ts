@@ -15,6 +15,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
   let levelUpApiService: any;
   let characterStateService: CharacterStateService;
   let queryParamsSubject: BehaviorSubject<any>;
+  let updateCharacterSpy: any;
 
   beforeEach(async () => {
     levelUpApiService = {
@@ -42,6 +43,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
 
     levelUpApiService = TestBed.inject(LevelUpApiService);
     characterStateService = TestBed.inject(CharacterStateService);
+    updateCharacterSpy = vi.spyOn(characterStateService, 'updateCharacter');
 
     fixture = TestBed.createComponent(AttributeAllocator);
     component = fixture.componentInstance;
@@ -134,15 +136,15 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     queryParamsSubject.next({ levelUp: 'false' });
     await fixture.whenStable();
 
-    // Should not fetch when leaving level-up mode (no characterId or different route)
-    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(1);
+    // In creation mode we now also fetch from API to keep server as source of truth
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(2);
 
     // Re-enter level-up mode with fresh params
     queryParamsSubject.next({ levelUp: 'true' });
     await fixture.whenStable();
 
     // Now should fetch fresh data again because route params changed
-    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(2);
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(3);
   });
 
   it('should set baseline values correctly for level-up mode to calculate remaining points', async () => {
@@ -182,5 +184,92 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     // and calculate remaining points as: pointsForLevel - (newValues - baselineValues)
     expect(component['serverAttributePoints']).toBe(12);
     expect(component.remainingPoints).toBe(12);
+  });
+
+  it('should fetch attribute slice in creation mode and sync mapped attributes to state service', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.name = 'Test Hero';
+    testCharacter.level = 1;
+
+    const slice: AttributeSlice = {
+      id: 'char-123',
+      level: 1,
+      attributes: {
+        strength: 9,
+        speed: 8,
+        awareness: 7,
+        intellect: 6,
+        willpower: 5,
+        presence: 4
+      },
+      pointsForLevel: 12,
+      success: true
+    };
+
+    levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
+    characterStateService.updateCharacter(testCharacter);
+
+    // Enter creation mode
+    queryParamsSubject.next({ levelUp: 'false' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(1);
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledWith('char-123');
+    // One call from test setup, one from component syncing mapped attributes
+    expect(updateCharacterSpy).toHaveBeenCalledTimes(2);
+    const mappedCharacter = characterStateService.getCharacter();
+    expect(mappedCharacter.attributes.strength).toBe(9);
+    expect(mappedCharacter.attributes.presence).toBe(4);
+    expect(component.remainingPoints).toBe(12);
+  });
+
+  it('should persist attributes to API when persistStep is invoked', async () => {
+    const testCharacter = new Character();
+    testCharacter.id = 'char-999';
+    testCharacter.name = 'Persist Hero';
+    testCharacter.level = 1;
+    testCharacter.attributes.strength = 12;
+    testCharacter.attributes.speed = 10;
+    testCharacter.attributes.awareness = 8;
+    testCharacter.attributes.intellect = 7;
+    testCharacter.attributes.willpower = 6;
+    testCharacter.attributes.presence = 5;
+
+    const slice: AttributeSlice = {
+      id: 'char-999',
+      level: 1,
+      attributes: {
+        strength: 12,
+        speed: 10,
+        awareness: 8,
+        intellect: 7,
+        willpower: 6,
+        presence: 5
+      },
+      pointsForLevel: 12,
+      success: true
+    };
+
+    levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
+    levelUpApiService.updateAttributeSlice.mockReturnValue(of(slice));
+
+    characterStateService.updateCharacter(testCharacter);
+    queryParamsSubject.next({ levelUp: 'false' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.persistStep();
+
+    expect(levelUpApiService.updateAttributeSlice).toHaveBeenCalledTimes(1);
+    expect(levelUpApiService.updateAttributeSlice).toHaveBeenCalledWith('char-999', {
+      strength: 12,
+      speed: 10,
+      awareness: 8,
+      intellect: 7,
+      willpower: 6,
+      presence: 5
+    });
   });
 });
