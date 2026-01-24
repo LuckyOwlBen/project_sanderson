@@ -149,7 +149,10 @@
           </div>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-raised-button [color]="pathOption.isSelected ? 'warn' : 'primary'">
+          <button 
+            mat-raised-button 
+            [color]="pathOption.isSelected ? 'warn' : 'primary'"
+            (click)="selectCorePath(pathOption)">
             <mat-icon>{{ pathOption.isSelected ? 'remove_circle' : 'add_circle' }}</mat-icon>
             {{ pathOption.isSelected ? 'Remove' : 'Select' }}
           </button>

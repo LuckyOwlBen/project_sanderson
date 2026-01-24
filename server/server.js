@@ -477,6 +477,7 @@ app.get('/api/characters/load/:id', async (req, res) => {
     const character = JSON.parse(data);
     
     console.log(`Loaded character: ${character.name} (${id})`);
+    console.log(`Character skills:`, character.skills || {});
     
     res.json(character);
   } catch (error) {
@@ -611,13 +612,15 @@ app.get('/api/characters/:id/level/skills', async (req, res) => {
     const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
     
     console.log(`[LevelUp] Provided skill points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent)`);
+    console.log(`[LevelUp] Current skills for ${character.name}:`, character.skills || {});
     res.json({
       id: character.id,
       level,
       skills: character.skills || {},
       pointsForLevel,
       maxRank: getLevelTableValue(LEVEL_TABLES.maxSkillRanksPerLevel, level),
-      ranksPerLevel: getLevelTableValue(LEVEL_TABLES.skillRanksPerLevel, level)
+      ranksPerLevel: getLevelTableValue(LEVEL_TABLES.skillRanksPerLevel, level),
+      success: true
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -825,6 +828,8 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
       return res.status(400).json({ success: false, error: 'skills payload required' });
     }
 
+    console.log(`[Skills] Updating skills for character ${id}:`, skills);
+
     const character = await loadCharacterData(id);
     const level = character.level || 1;
     const pointsForLevel = getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
@@ -853,6 +858,8 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
     if (!character.spentPoints) character.spentPoints = {};
     if (!character.spentPoints.skills) character.spentPoints.skills = {};
     character.spentPoints.skills[level] = increaseTotal;
+
+    console.log(`[Skills] Saved skills for ${character.name} (${character.id}):`, character.skills);
 
     await fs.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
 

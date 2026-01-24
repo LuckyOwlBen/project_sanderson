@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { ExpertiseSelector } from './expertise-selector';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
+import { CharacterStorageService } from '../../services/character-storage.service';
 import { Character } from '../../character/character';
-import { BehaviorSubject, Subject } from 'rxjs';
 import { ALL_EXPERTISES, CULTURAL_EXPERTISES } from '../../character/expertises/allExpertises';
 import { ExpertiseSource } from '../../character/expertises/expertiseSource';
 
@@ -14,21 +16,24 @@ describe('ExpertiseSelector', () => {
   let mockCharacterState: Partial<CharacterStateService>;
   let mockValidationService: Partial<StepValidationService>;
   let mockLevelUpManager: Partial<LevelUpManager>;
-  let characterSubject: BehaviorSubject<Character>;
+  let mockStorageService: Partial<CharacterStorageService>;
+  let queryParamsSubject: BehaviorSubject<any>;
   let pointsChangedSubject: Subject<void>;
   let addExpertiseCalls: any[];
   let removeExpertiseCalls: any[];
   let setStepValidCalls: any[];
+  let testCharacter: Character;
 
   beforeEach(async () => {
-    const character = new Character();
-    character.attributes.intellect = 3;
-    character.cultures = [
+    testCharacter = new Character();
+    testCharacter.id = 'char-123';
+    testCharacter.attributes.intellect = 3;
+    testCharacter.cultures = [
       { name: 'Alethi', id: 'alethi' } as any,
       { name: 'Thaylen', id: 'thaylen' } as any
     ];
     
-    characterSubject = new BehaviorSubject<Character>(character);
+    queryParamsSubject = new BehaviorSubject<any>({});
     pointsChangedSubject = new Subject<void>();
 
     addExpertiseCalls = [];
@@ -36,7 +41,8 @@ describe('ExpertiseSelector', () => {
     setStepValidCalls = [];
 
     mockCharacterState = {
-      character$: characterSubject,
+      getCharacter: () => testCharacter,
+      updateCharacter: () => {},
       addExpertise: (...args: any[]) => {
         addExpertiseCalls.push(args);
       },
@@ -55,12 +61,24 @@ describe('ExpertiseSelector', () => {
       pointsChanged$: pointsChangedSubject
     };
 
+    mockStorageService = {
+      loadCharacter: () => of(testCharacter),
+      saveCharacter: () => of({ success: true, id: 'char-123' })
+    };
+
     await TestBed.configureTestingModule({
       imports: [ExpertiseSelector],
       providers: [
         { provide: CharacterStateService, useValue: mockCharacterState },
         { provide: StepValidationService, useValue: mockValidationService },
-        { provide: LevelUpManager, useValue: mockLevelUpManager }
+        { provide: LevelUpManager, useValue: mockLevelUpManager },
+        { provide: CharacterStorageService, useValue: mockStorageService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParamsSubject.asObservable()
+          }
+        }
       ]
     }).compileComponents();
 
@@ -69,7 +87,7 @@ describe('ExpertiseSelector', () => {
   });
 
   afterEach(() => {
-    characterSubject.complete();
+    queryParamsSubject.complete();
     pointsChangedSubject.complete();
   });
 

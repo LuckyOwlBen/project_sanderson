@@ -126,19 +126,19 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
 
     expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
 
-    // Simulate exiting level-up mode
+    // Simulate exiting level-up mode (entering creation mode)
     queryParamsSubject.next({ levelUp: 'false' });
     await fixture.whenStable();
 
-    // Should not fetch when leaving level-up mode
-    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
+    // Should fetch again in creation mode (now uses API as source of truth)
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(2);
 
     // Re-enter level-up mode with fresh params
     queryParamsSubject.next({ levelUp: 'true' });
     await fixture.whenStable();
 
     // Now should fetch fresh data again because route params changed
-    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(2);
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(3);
   });
 
   it('should set baseline values correctly for level-up mode to calculate remaining skill points', async () => {

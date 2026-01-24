@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -39,8 +40,11 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   availablePoints: number = 0;
   totalPoints: number = 0;
   validationMessage: string = '';
+  isLevelUpMode: boolean = false;
+  private characterId: string | null = null;
 
   constructor(
+    private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
     private levelUpManager: LevelUpManager,
@@ -63,15 +67,63 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       }
     }, 0);
 
-    this.characterState.character$
+    // Subscribe to route params to detect level-up mode and always
+    // fetch a fresh character snapshot from the backend by ID.
+    this.activatedRoute.queryParams
       .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        this.character = character;
-        this.selectedExpertises = [...character.selectedExpertises];
-        this.extractCulturalExpertises();
-        this.calculateAvailablePoints();
-        this.updateValidation();
+      .subscribe((params) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
+
+        // Read the current character snapshot to get the ID, but do not
+        // subscribe to character$ (avoids stale state re-emits).
+        this.character = this.characterState.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
+
+        if (this.characterId) {
+          this.fetchCharacterFromApi(this.characterId);
+        } else {
+          console.warn('[ExpertiseSelector] No character ID found; cannot load from API');
+          this.syncLocalCharacterState();
+        }
       });
+  }
+
+  private fetchCharacterFromApi(characterId: string): void {
+    this.storageService.loadCharacter(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (loaded) => {
+          if (!loaded) {
+            console.warn('[ExpertiseSelector] API returned no character for ID:', characterId);
+            this.syncLocalCharacterState();
+            return;
+          }
+          this.character = loaded;
+          this.characterState.updateCharacter(loaded);
+          this.selectedExpertises = [...loaded.selectedExpertises];
+          this.extractCulturalExpertises();
+          this.calculateAvailablePoints();
+          this.updateValidation();
+        },
+        error: (err) => {
+          console.error('[ExpertiseSelector] Failed to load character from API:', err);
+          this.syncLocalCharacterState();
+        }
+      });
+  }
+
+  private syncLocalCharacterState(): void {
+    // Fallback to whatever is currently in memory; still validate so the UI
+    // remains usable even if the API call fails or the ID is missing.
+    if (!this.character) {
+      this.character = this.characterState.getCharacter();
+    }
+    if (this.character) {
+      this.selectedExpertises = [...this.character.selectedExpertises];
+      this.extractCulturalExpertises();
+      this.calculateAvailablePoints();
+      this.updateValidation();
+    }
   }
 
   ngOnDestroy(): void {
@@ -92,6 +144,12 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       this.culturalExpertises.forEach(expertise => {
         if (!this.selectedExpertises.some(e => e.name === expertise)) {
           this.characterState.addExpertise(expertise, 'culture', `culture:${expertise}`);
+          // Ensure the expertise is in selectedExpertises so it's counted
+          this.selectedExpertises.push({
+            name: expertise,
+            source: 'culture',
+            sourceId: `culture:${expertise}`
+          });
         }
       });
       this.isInitialized = true;
@@ -235,9 +293,8 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    const character = this.characterState.getCharacter();
-    if ((character as any)?.id) {
-      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    if (this.character && this.characterId) {
+      this.storageService.saveCharacter(this.character).subscribe({ next: () => {}, error: () => {} });
     }
   }
 }

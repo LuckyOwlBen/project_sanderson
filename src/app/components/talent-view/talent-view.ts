@@ -179,6 +179,7 @@ export class TalentView implements OnInit, OnDestroy {
           console.log('[TalentView] Character creation mode - calculating local talent points');
           this.baseTalentPoints = this.levelUpManager.getTalentPointsForLevel(this.character.level || 1);
           this.availableTalentPoints = this.baseTalentPoints;
+          this.sliceLoaded = true; // Mark as loaded since we're not fetching from API
           console.log('[TalentView] Calculated local talent points:', this.baseTalentPoints);
         }
       } else {
@@ -197,6 +198,9 @@ export class TalentView implements OnInit, OnDestroy {
         // Lazy load talent data if needed and in level-up mode
         if (this.characterId && this.isLevelUpMode) {
           this.fetchTalentForLevel(this.characterId);
+        } else if (!this.isLevelUpMode) {
+          // In creation mode, mark as loaded since we're not fetching from API
+          this.sliceLoaded = true;
         }
       }
     });

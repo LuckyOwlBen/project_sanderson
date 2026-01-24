@@ -1,4 +1,18 @@
-<div class="character-review-container" *ngIf="character">
+<div class="character-review-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoadingCharacter">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading character details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="characterLoadError && !isLoadingCharacter">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p class="error-message">{{ characterLoadError }}</p>
+  </div>
+
+  <!-- Character Review Content -->
+  <div *ngIf="character && !isLoadingCharacter && !characterLoadError">
   <div class="review-header">
     <h1>Character Complete!</h1>
     <p class="subtitle">Review your character before finalizing</p>
@@ -258,12 +272,9 @@
         mat-raised-button 
         color="primary" 
         class="finalize-button"
+        [disabled]="isLoadingCharacter"
         (click)="finalizeCharacter()">
-        <mat-icon>done_all</mat-icon>
-        Finalize Character
-      </button>
-    </div>
-  </div>
-</div>
-
+        <mat-icon *ngIf="!isLoadingCharacter">done_all</mat-icon>
+        <mat-spinner *ngIf="isLoadingCharacter" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+        {{ isLoadingCharacter ? 'Finalizing...' : 'Finalize Character' }}
 

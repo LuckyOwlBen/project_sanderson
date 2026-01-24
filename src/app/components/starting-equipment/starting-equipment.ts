@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -46,6 +46,8 @@ export class StartingEquipment implements OnInit, OnDestroy {
   availableItems: InventoryItem[] = [];
   filteredItems: InventoryItem[] = [];
   paginatedItems: InventoryItem[] = [];
+  isLevelUpMode: boolean = false;
+  private characterId: string | null = null;
   
   selectedCategory: ItemType | 'all' = 'all';
   pageSize = 12;
@@ -56,21 +58,66 @@ export class StartingEquipment implements OnInit, OnDestroy {
   hasAppliedKit = false;
 
   constructor(
+    private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private router: Router,
     private storageService: CharacterStorageService
   ) {}
 
   ngOnInit(): void {
-    this.characterState.character$
+    // Subscribe to route params to detect level-up mode and always
+    // fetch a fresh character snapshot from the backend by ID.
+    this.activatedRoute.queryParams
       .pipe(takeUntil(this.destroy$))
-      .subscribe((character: Character | null) => {
-        this.character = character;
-        if (character) {
-          this.loadStartingKit();
-          this.loadAvailableItems();
+      .subscribe((params) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
+
+        // Read the current character snapshot to get the ID, but do not
+        // subscribe to character$ (avoids stale state re-emits).
+        this.character = this.characterState.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
+
+        if (this.characterId) {
+          this.fetchCharacterFromApi(this.characterId);
+        } else {
+          console.warn('[StartingEquipment] No character ID found; cannot load from API');
+          this.syncLocalCharacterState();
         }
       });
+  }
+
+  private fetchCharacterFromApi(characterId: string): void {
+    this.storageService.loadCharacter(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (loaded) => {
+          if (!loaded) {
+            console.warn('[StartingEquipment] API returned no character for ID:', characterId);
+            this.syncLocalCharacterState();
+            return;
+          }
+          this.character = loaded;
+          this.characterState.updateCharacter(loaded);
+          this.loadStartingKit();
+          this.loadAvailableItems();
+        },
+        error: (err) => {
+          console.error('[StartingEquipment] Failed to load character from API:', err);
+          this.syncLocalCharacterState();
+        }
+      });
+  }
+
+  private syncLocalCharacterState(): void {
+    // Fallback to whatever is currently in memory; still validate so the UI
+    // remains usable even if the API call fails or the ID is missing.
+    if (!this.character) {
+      this.character = this.characterState.getCharacter();
+    }
+    if (this.character) {
+      this.loadStartingKit();
+      this.loadAvailableItems();
+    }
   }
 
   ngOnDestroy(): void {
@@ -294,9 +341,8 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    const character = this.characterState.getCharacter();
-    if ((character as any)?.id) {
-      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    if (this.character && this.characterId) {
+      this.storageService.saveCharacter(this.character).subscribe({ next: () => {}, error: () => {} });
     }
   }
 }

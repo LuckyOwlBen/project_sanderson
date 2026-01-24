@@ -106,14 +106,12 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
             this.fetchSkillSlice(this.characterId);
           }
         } else if (this.character && !this.isLevelUpMode) {
-          // In non-level-up mode (creation), still initialize from current character state
-          console.log('[SkillManager] Character creation mode - using local state (no API call)');
+          // Always fetch slice from API even in creation mode to keep server as source of truth
+          console.log('[SkillManager] Character creation mode - fetching slice from API');
           this.isInitialized = false;
-          // Get skill points from local level manager for character creation
-          this.serverSkillPoints = this.levelUpManager.getSkillPointsForLevel(this.character.level || 1);
-          console.log('[SkillManager] Calculated local skill points:', this.serverSkillPoints);
-          this.initializeSkills();
-          this.updateValidation();
+          if (this.characterId) {
+            this.fetchSkillSlice(this.characterId);
+          }
         }
       });
   }
@@ -162,11 +160,16 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     }
 
     const payload = this.character.skills.getAllSkillRanks();
+    console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
     this.levelUpApi.updateSkillSlice(this.characterId, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {},
-        error: () => {}
+        next: (response) => {
+          console.log('[SkillManager] Skills persisted successfully:', response);
+        },
+        error: (err) => {
+          console.error('[SkillManager] Failed to persist skills:', err);
+        }
       });
   }
 

@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { getTalentPath } from '../../character/talents/talentTrees/talentTrees';
@@ -42,6 +43,8 @@ export class PathSelector implements OnInit, OnDestroy {
   selectedSpecialization: string | null = null;
   availableSpecializations: TalentTree[] = [];
   maxPaths: number = 1;
+  isLevelUpMode: boolean = false;
+  private characterId: string | null = null;
 
   availablePaths: PathOption[] = [
     {
@@ -83,6 +86,7 @@ export class PathSelector implements OnInit, OnDestroy {
   ];
 
   constructor(
+    private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
     private levelUpApi: LevelUpApiService,
@@ -90,26 +94,77 @@ export class PathSelector implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.characterState.character$
+    // Subscribe to route params to detect level-up mode and always
+    // fetch a fresh character snapshot from the backend by ID.
+    this.activatedRoute.queryParams
       .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        this.character = character;
-        // Load existing paths - expect format like ["warrior", "Soldier"]
-        if (character.paths.length >= 2) {
-          this.selectedMainPath = character.paths[0];
-          this.selectedSpecialization = character.paths[1];
-          
-          // Load specializations for the selected main path
-          const talentPath = getTalentPath(this.selectedMainPath);
-          if (talentPath) {
-            this.availableSpecializations = talentPath.paths;
-          }
-        } else if (character.paths.length === 1) {
-          // Legacy format or incomplete selection
-          this.selectedSpecialization = character.paths[0];
+      .subscribe((params) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
+
+        // Read the current character snapshot to get the ID, but do not
+        // subscribe to character$ (avoids stale state re-emits).
+        this.character = this.characterState.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
+
+        if (this.characterId) {
+          this.fetchCharacterFromApi(this.characterId);
+        } else {
+          console.warn('[PathSelector] No character ID found; cannot load from API');
+          this.syncLocalCharacterState();
         }
-        this.updateValidation();
       });
+  }
+
+  private fetchCharacterFromApi(characterId: string): void {
+    this.storageService.loadCharacter(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (loaded) => {
+          if (!loaded) {
+            console.warn('[PathSelector] API returned no character for ID:', characterId);
+            this.syncLocalCharacterState();
+            return;
+          }
+          this.character = loaded;
+          this.characterState.updateCharacter(loaded);
+          this.loadPathsFromCharacter();
+        },
+        error: (err) => {
+          console.error('[PathSelector] Failed to load character from API:', err);
+          this.syncLocalCharacterState();
+        }
+      });
+  }
+
+  private syncLocalCharacterState(): void {
+    // Fallback to whatever is currently in memory; still validate so the UI
+    // remains usable even if the API call fails or the ID is missing.
+    if (!this.character) {
+      this.character = this.characterState.getCharacter();
+    }
+    if (this.character) {
+      this.loadPathsFromCharacter();
+    }
+  }
+
+  private loadPathsFromCharacter(): void {
+    if (!this.character) return;
+    
+    // Load existing paths - expect format like ["warrior", "Soldier"]
+    if (this.character.paths.length >= 2) {
+      this.selectedMainPath = this.character.paths[0];
+      this.selectedSpecialization = this.character.paths[1];
+      
+      // Load specializations for the selected main path
+      const talentPath = getTalentPath(this.selectedMainPath);
+      if (talentPath) {
+        this.availableSpecializations = talentPath.paths;
+      }
+    } else if (this.character.paths.length === 1) {
+      // Legacy format or incomplete selection
+      this.selectedSpecialization = this.character.paths[0];
+    }
+    this.updateValidation();
   }
 
   ngOnDestroy(): void {
@@ -200,9 +255,8 @@ export class PathSelector implements OnInit, OnDestroy {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    const character = this.characterState.getCharacter();
-    if ((character as any)?.id) {
-      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    if (this.character && this.characterId) {
+      this.storageService.saveCharacter(this.character).subscribe({ next: () => {}, error: () => {} });
     }
   }
 }

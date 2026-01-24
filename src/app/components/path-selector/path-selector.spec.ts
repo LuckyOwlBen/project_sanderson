@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 import { PathSelector } from './path-selector';
 
@@ -8,7 +10,15 @@ describe('PathSelector', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PathSelector]
+      imports: [PathSelector],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({})
+          }
+        }
+      ]
     })
     .compileComponents();
 
