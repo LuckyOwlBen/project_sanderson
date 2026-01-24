@@ -7,6 +7,8 @@ const multer = require('multer');
 const sharp = require('sharp');
 const talentRules = require('./talent-rules');
 const attributeAllocator = require('./services/attribute-allocator');
+const InventoryManager = require('./inventory-manager');
+const itemDefinitions = require('./item-definitions');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 
@@ -411,6 +413,504 @@ app.post('/api/characters/save', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: error.message 
+    });
+  }
+});
+
+// ===== INVENTORY ENDPOINTS =====
+
+// Purchase item from store
+app.post('/api/character/:id/inventory/purchase', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemId, quantity = 1, price } = req.body;
+
+    if (!itemId || !price || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        error: 'itemId, price, and quantity are required'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Validate item exists
+    const item = itemDefinitions.getItemById(itemId);
+    if (!item) {
+      return res.status(400).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+
+    // Instantiate inventory manager and restore from character data
+    const inventoryManager = new InventoryManager();
+    if (character.inventory) {
+      inventoryManager.deserialize(character.inventory);
+    }
+
+    // Attempt purchase
+    if (!inventoryManager.purchaseItem(itemId, price, quantity)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot afford item'
+      });
+    }
+
+    // Log transaction
+    const conversion = inventoryManager.convertToMixedDenominations(price * quantity);
+    console.log(`[Store] Purchase: Character ${id} bought ${quantity}x ${item.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`);
+
+    // Save character with updated inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Purchased ${quantity}x ${item.name}`
+    });
+  } catch (error) {
+    console.error('Error purchasing item:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Apply starting equipment kit
+app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { kitId } = req.body;
+
+    if (!kitId) {
+      return res.status(400).json({
+        success: false,
+        error: 'kitId is required'
+      });
+    }
+
+    // Validate kit exists
+    const kit = itemDefinitions.getKitById(kitId);
+    if (!kit) {
+      return res.status(400).json({
+        success: false,
+        error: 'Starting kit not found'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Instantiate inventory manager and apply kit
+    const inventoryManager = new InventoryManager();
+    inventoryManager.applyStartingKit(kitId);
+
+    // Log action
+    console.log(`[Inventory] Applied kit '${kit.name}' to character ${id}`);
+
+    // Save character with new inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Applied ${kit.name}`
+    });
+  } catch (error) {
+    console.error('Error applying kit:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Add item directly (GM grant)
+app.post('/api/character/:id/inventory/add', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemId, quantity = 1 } = req.body;
+
+    if (!itemId || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        error: 'itemId and quantity are required'
+      });
+    }
+
+    // Validate item exists
+    const item = itemDefinitions.getItemById(itemId);
+    if (!item) {
+      return res.status(400).json({
+        success: false,
+        error: 'Item not found'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Instantiate inventory manager and restore from character data
+    const inventoryManager = new InventoryManager();
+    if (character.inventory) {
+      inventoryManager.deserialize(character.inventory);
+    }
+
+    // Add item
+    inventoryManager.addItem(itemId, quantity);
+
+    // Log action
+    console.log(`[Inventory] GM added ${quantity}x ${item.name} to character ${id}`);
+
+    // Save character with updated inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Added ${quantity}x ${item.name}`
+    });
+  } catch (error) {
+    console.error('Error adding item:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Remove item
+app.post('/api/character/:id/inventory/remove', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemId, quantity = 1 } = req.body;
+
+    if (!itemId || quantity < 1) {
+      return res.status(400).json({
+        success: false,
+        error: 'itemId and quantity are required'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Instantiate inventory manager and restore from character data
+    const inventoryManager = new InventoryManager();
+    if (character.inventory) {
+      inventoryManager.deserialize(character.inventory);
+    }
+
+    // Remove item
+    if (!inventoryManager.removeItem(itemId, quantity)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Item not found in inventory'
+      });
+    }
+
+    // Log action
+    console.log(`[Inventory] Removed ${quantity}x item ${itemId} from character ${id}`);
+
+    // Save character with updated inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Removed item`
+    });
+  } catch (error) {
+    console.error('Error removing item:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Equip item
+app.post('/api/character/:id/inventory/equip', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemId } = req.body;
+
+    if (!itemId) {
+      return res.status(400).json({
+        success: false,
+        error: 'itemId is required'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Instantiate inventory manager and restore from character data
+    const inventoryManager = new InventoryManager();
+    if (character.inventory) {
+      inventoryManager.deserialize(character.inventory);
+    }
+
+    // Get item definition for expertise validation
+    const item = itemDefinitions.getItemById(itemId);
+    if (item) {
+      // Check weapon expertise requirements
+      if (item.weaponProperties?.expertTraits && item.weaponProperties.expertTraits.length > 0) {
+        // Map item to required expertise
+        const requiredExpertise = getRequiredExpertiseForWeapon(item.id, item.name);
+        if (requiredExpertise) {
+          const characterExpertises = character.expertises || [];
+          const hasExpertise = characterExpertises.some(e => {
+            const expertiseName = typeof e === 'string' ? e : e.name;
+            return expertiseName === requiredExpertise;
+          });
+          
+          if (!hasExpertise) {
+            console.log(`[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`);
+            // Log but don't block - character can equip but won't get benefit from expert traits
+          }
+        }
+      }
+
+      // Check armor expertise requirements
+      if (item.armorProperties?.expertTraits && item.armorProperties.expertTraits.length > 0) {
+        const requiredExpertise = getRequiredExpertiseForArmor(item.id, item.name);
+        if (requiredExpertise) {
+          const characterExpertises = character.expertises || [];
+          const hasExpertise = characterExpertises.some(e => {
+            const expertiseName = typeof e === 'string' ? e : e.name;
+            return expertiseName === requiredExpertise;
+          });
+          
+          if (!hasExpertise) {
+            console.log(`[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`);
+            // Log but don't block
+          }
+        }
+      }
+    }
+
+    // Equip item
+    if (!inventoryManager.equipItem(itemId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot equip item'
+      });
+    }
+
+    // Log action
+    console.log(`[Inventory] Equipped item ${itemId} on character ${id}`);
+
+    // Save character with updated inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Item equipped`
+    });
+  } catch (error) {
+    console.error('Error equipping item:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get required expertise for weapon based on item ID or name
+ * @bonus Expertise validation helper for equipment
+ */
+function getRequiredExpertiseForWeapon(itemId, itemName) {
+  const weaponMap = {
+    'sword': 'Dueling',
+    'axe': 'Axe Fighting',
+    'mace': 'Bludgeoning Weapons',
+    'spear': 'Spear Fighting',
+    'bow': 'Archery',
+    'dagger': 'Knife Fighting',
+    'staff': 'Staff Fighting',
+    'hammer': 'Hammer Fighting',
+    'lance': 'Mounted Combat'
+  };
+
+  const lowerName = itemName.toLowerCase();
+  const lowerId = itemId.toLowerCase();
+
+  for (const [weaponType, expertise] of Object.entries(weaponMap)) {
+    if (lowerName.includes(weaponType) || lowerId.includes(weaponType)) {
+      return expertise;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get required expertise for armor based on item ID or name
+ * @bonus Expertise validation helper for equipment
+ */
+function getRequiredExpertiseForArmor(itemId, itemName) {
+  const armorMap = {
+    'plate': 'Armor Mastery',
+    'mail': 'Armor Mastery',
+    'leather': 'Light Armor',
+    'hide': 'Light Armor'
+  };
+
+  const lowerName = itemName.toLowerCase();
+  const lowerId = itemId.toLowerCase();
+
+  for (const [armorType, expertise] of Object.entries(armorMap)) {
+    if (lowerName.includes(armorType) || lowerId.includes(armorType)) {
+      return expertise;
+    }
+  }
+
+  return null;
+}
+
+// Unequip item
+app.post('/api/character/:id/inventory/unequip', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { itemId } = req.body;
+
+    if (!itemId) {
+      return res.status(400).json({
+        success: false,
+        error: 'itemId is required'
+      });
+    }
+
+    // Load character
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
+      });
+    }
+
+    // Instantiate inventory manager and restore from character data
+    const inventoryManager = new InventoryManager();
+    if (character.inventory) {
+      inventoryManager.deserialize(character.inventory);
+    }
+
+    // Unequip item
+    if (!inventoryManager.unequipItem(itemId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot unequip item'
+      });
+    }
+
+    // Log action
+    console.log(`[Inventory] Unequipped item ${itemId} from character ${id}`);
+
+    // Save character with updated inventory
+    character.inventory = inventoryManager.serialize();
+    await saveCharacterData(character);
+
+    res.json({
+      success: true,
+      inventory: character.inventory,
+      message: `Item unequipped`
+    });
+  } catch (error) {
+    console.error('Error unequipping item:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get all available items with optional filters
+app.get('/api/items', (req, res) => {
+  try {
+    const { type, rarity } = req.query;
+    let items = itemDefinitions.ALL_ITEMS;
+
+    if (type) {
+      items = items.filter(item => item.type === type);
+    }
+
+    if (rarity) {
+      items = items.filter(item => item.rarity === rarity);
+    }
+
+    res.json({
+      success: true,
+      count: items.length,
+      items
+    });
+  } catch (error) {
+    console.error('Error retrieving items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get store items (respects GM toggles)
+app.get('/api/store/items', (req, res) => {
+  try {
+    // Filter to common rarity items only
+    const storeItems = itemDefinitions.ALL_ITEMS.filter(item => item.rarity === 'common');
+
+    res.json({
+      success: true,
+      count: storeItems.length,
+      items: storeItems,
+      storeState
+    });
+  } catch (error) {
+    console.error('Error retrieving store items:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });

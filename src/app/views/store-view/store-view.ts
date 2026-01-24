@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Character } from '../../character/character';
 import { InventoryItem, ItemType, CurrencyConversion } from '../../character/inventory/inventoryItem';
-import { ALL_ITEMS, LIGHT_WEAPONS, HEAVY_WEAPONS, ARMOR_ITEMS, EQUIPMENT_ITEMS, FABRIAL_ITEMS, MOUNT_ITEMS } from '../../character/inventory/itemDefinitions';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
 
@@ -28,10 +28,11 @@ export class StoreView implements OnInit, OnDestroy {
   searchQuery: string = '';
   isLoading: boolean = true;
   isConnected: boolean = false;
-  private stateReceived: boolean = false;
+  isSaving: boolean = false;
+  availableItems: InventoryItem[] = [];
   
   // Cached items list that will trigger re-render
-  availableItems: InventoryItem[] = [];
+  private allItems: InventoryItem[] = [];
   
   // Track which category sections are enabled by GM (make public for template access)
   public categoryEnabled = new Map<ItemType, boolean>([
@@ -45,16 +46,6 @@ export class StoreView implements OnInit, OnDestroy {
 
   // Only categories that the GM can toggle are tracked for open/closed display
   private readonly trackedCategories: ItemType[] = ['weapon', 'armor', 'equipment', 'consumable', 'fabrial', 'mount'];
-  
-  // Map store toggle IDs to item categories
-  private storeIdToCategory = new Map<string, ItemType>([
-    ['weapons-shop', 'weapon'],
-    ['armor-shop', 'armor'],
-    ['equipment-shop', 'equipment'],
-    ['consumables-shop', 'consumable'],
-    ['fabrials-shop', 'fabrial'],
-    ['mounts-shop', 'mount']
-  ]);
   
   // Currency converter
   showConverter: boolean = false;
@@ -75,11 +66,15 @@ export class StoreView implements OnInit, OnDestroy {
   constructor(
     private characterState: CharacterStateService,
     private websocketService: WebsocketService,
+    private http: HttpClient,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Load store items from backend
+    this.loadStoreItems();
+    
     // Connect to WebSocket server
     this.websocketService.connect();
     
@@ -89,7 +84,7 @@ export class StoreView implements OnInit, OnDestroy {
       .subscribe(connected => {
         this.isConnected = connected;
         
-        if (connected && !this.stateReceived) {
+        if (connected) {
           // Request current store state from server
           this.websocketService.requestStoreState();
         }
@@ -106,12 +101,6 @@ export class StoreView implements OnInit, OnDestroy {
     this.websocketService.storeToggle$
       .pipe(takeUntil(this.destroy$))
       .subscribe(event => {
-        // Mark state as received (initial load complete)
-        if (!this.stateReceived) {
-          this.stateReceived = true;
-          this.isLoading = false;
-        }
-        
         // Handle main-store toggle (all categories)
         if (event.storeId === 'main-store') {
           this.storeEnabled = event.enabled;
@@ -121,7 +110,15 @@ export class StoreView implements OnInit, OnDestroy {
           }
         } else {
           // Handle category-specific toggles
-          const category = this.storeIdToCategory.get(event.storeId);
+          const storeIdToCategory = new Map<string, ItemType>([
+            ['weapons-shop', 'weapon'],
+            ['armor-shop', 'armor'],
+            ['equipment-shop', 'equipment'],
+            ['consumables-shop', 'consumable'],
+            ['fabrials-shop', 'fabrial'],
+            ['mounts-shop', 'mount']
+          ]);
+          const category = storeIdToCategory.get(event.storeId);
           if (category) {
             this.categoryEnabled.set(category, event.enabled);
           }
@@ -140,6 +137,25 @@ export class StoreView implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // ===== ITEM LOADING =====
+
+  loadStoreItems(): void {
+    this.http.get<any>('/api/store/items')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.allItems = response.items || [];
+          this.isLoading = false;
+          this.updateAvailableItems();
+        },
+        error: (error) => {
+          console.error('Error loading store items:', error);
+          this.isLoading = false;
+          this.showNotification('Failed to load store items');
+        }
+      });
+  }
+
   // ===== CATEGORY FILTERING =====
 
   selectCategory(category: ItemType | 'all'): void {
@@ -152,7 +168,7 @@ export class StoreView implements OnInit, OnDestroy {
   }
 
   computeAvailableItems(): InventoryItem[] {
-    let items = ALL_ITEMS.filter(item => item.rarity === 'common');
+    let items = [...this.allItems];
 
     // Filter out items from disabled categories
     items = items.filter(item => {
@@ -180,32 +196,47 @@ export class StoreView implements OnInit, OnDestroy {
   // ===== PURCHASING =====
 
   purchaseItem(item: InventoryItem, quantity: number = 1): void {
-    if (!this.character) return;
-
-    const totalCost = item.price * quantity;
-
-    if (!this.character.inventory.canAfford(totalCost)) {
-      this.showNotification('Not enough currency!');
+    if (!this.character) {
+      this.showNotification('No character selected');
       return;
     }
 
-    if (this.character.inventory.purchaseItem(item.id, item.price, quantity)) {
-      this.showNotification(`Purchased ${quantity}x ${item.name}`);
-      
-      // Emit websocket event for GM tracking
-      this.websocketService.emitStoreTransaction({
-        storeId: 'main-store',
-        characterId: (this.character as any).id || 'unknown',
-        items: [{
-          itemId: item.id,
-          quantity,
-          price: item.price,
-          type: 'buy'
-        }],
-        totalCost,
-        timestamp: new Date().toISOString()
-      });
+    if (this.isSaving) {
+      this.showNotification('Purchase in progress...');
+      return;
     }
+
+    const characterId = (this.character as any).id;
+    if (!characterId) {
+      this.showNotification('Character ID not found');
+      return;
+    }
+
+    this.isSaving = true;
+
+    this.http.post<any>(`/api/character/${characterId}/inventory/purchase`, {
+      itemId: item.id,
+      quantity,
+      price: item.price
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Update character inventory from backend response
+            this.character!.inventory.deserialize(response.inventory);
+            this.showNotification(`Purchased ${quantity}x ${item.name}`);
+          } else {
+            this.showNotification(response.error || 'Purchase failed');
+          }
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Error purchasing item:', error);
+          this.showNotification('Failed to purchase item');
+          this.isSaving = false;
+        }
+      });
   }
 
   canAfford(item: InventoryItem, quantity: number = 1): boolean {

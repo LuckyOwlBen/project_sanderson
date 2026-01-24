@@ -1,6 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,7 +11,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { InventoryItem, ItemType } from '../../character/inventory/inventoryItem';
-import { ALL_ITEMS } from '../../character/inventory/itemDefinitions';
 import { PlayerJoinedEvent } from '../../services/websocket.service';
 
 @Component({
@@ -444,7 +444,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
     }
   `]
 })
-export class ItemGrantDialogComponent {
+export class ItemGrantDialogComponent implements OnInit {
   selectedItem: InventoryItem | null = null;
   quantity: number = 1;
   searchQuery: string = '';
@@ -456,13 +456,31 @@ export class ItemGrantDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ItemGrantDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { player: PlayerJoinedEvent }
+    @Inject(MAT_DIALOG_DATA) public data: { player: PlayerJoinedEvent },
+    private http: HttpClient
   ) {
-    this.filterItems();
+    this.loadItems();
+  }
+
+  ngOnInit(): void {
+    // Items loaded in constructor
+  }
+
+  private loadItems(): void {
+    this.http.get<any>('/api/items').subscribe({
+      next: (response) => {
+        this.filteredItems = response.items || [];
+        this.filterItems();
+      },
+      error: (err) => {
+        console.error('Failed to load items:', err);
+        this.filteredItems = [];
+      }
+    });
   }
 
   filterItems(): void {
-    this.filteredItems = ALL_ITEMS.filter(item => {
+    this.filteredItems = this.filteredItems.filter(item => {
       // Category filter
       if (this.selectedCategory !== 'all' && item.type !== this.selectedCategory) {
         return false;

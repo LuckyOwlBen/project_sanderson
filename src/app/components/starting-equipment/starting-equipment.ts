@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,9 +13,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
-import { ALL_ITEMS, STARTING_KITS } from '../../character/inventory/itemDefinitions';
 import { InventoryItem, ItemType, StartingKit } from '../../character/inventory/inventoryItem';
-import { getItemById } from '../../character/inventory/itemDefinitions';
 import { CharacterStorageService } from '../../services/character-storage.service';
 
 @Component({
@@ -61,6 +60,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private router: Router,
+    private http: HttpClient,
     private storageService: CharacterStorageService
   ) {}
 
@@ -129,7 +129,6 @@ export class StartingEquipment implements OnInit, OnDestroy {
     if (!this.character) return;
 
     // Determine starting kit based on character background/class
-    // For now, use a default kit - you could base this on culture, ancestry, or a new property
     const culture = this.character.cultures?.[0] || '';
     
     // Map cultures to starting kits
@@ -144,74 +143,83 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
     const cultureStr = typeof culture === 'string' ? culture : culture?.name || '';
     const kitId = kitMapping[cultureStr] || 'military-kit';
-    this.startingKit = STARTING_KITS.find(k => k.id === kitId) || STARTING_KITS[0];
-
-    // Apply starting kit to inventory if not already applied
-    if (this.startingKit && !this.hasRefundedKit && !this.hasAppliedKit) {
-      // Check if inventory is empty before applying
-      const hasItems = this.character.inventory.getAllItems().length > 0;
-      if (!hasItems) {
-        this.applyStartingKit();
-        this.hasAppliedKit = true;
-      } else {
-        this.hasAppliedKit = true; // Already has items
-      }
-    }
+    
+    // Load kit from API
+    this.http.get<any>('/api/items')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          // Find kit from backend definition or use default
+          // For now, we'll just store the kitId for later use
+          this.startingKit = { id: kitId } as StartingKit;
+          
+          // Check if inventory is empty before applying
+          const hasItems = this.character!.inventory.getAllItems().length > 0;
+          if (!hasItems) {
+            this.applyStartingKit();
+            this.hasAppliedKit = true;
+          } else {
+            this.hasAppliedKit = true; // Already has items
+          }
+        },
+        error: (err) => {
+          console.error('Error loading starting kit:', err);
+          this.hasAppliedKit = true;
+        }
+      });
   }
 
   applyStartingKit(): void {
     if (!this.character || !this.startingKit) return;
 
-    // Clear existing starting items
-    const inventory = this.character.inventory;
-    
-    // Add starting kit items
-    this.startingKit.weapons.forEach(kitItem => {
-      inventory.addItem(kitItem.itemId, kitItem.quantity);
-    });
-    this.startingKit.armor.forEach(kitItem => {
-      inventory.addItem(kitItem.itemId, kitItem.quantity);
-    });
-    this.startingKit.equipment.forEach(kitItem => {
-      inventory.addItem(kitItem.itemId, kitItem.quantity);
-    });
+    const characterId = (this.character as any).id;
+    if (!characterId) {
+      console.error('Character ID not found');
+      return;
+    }
 
-    // Add starting currency
-    inventory.addCurrency(this.startingKit.currency);
-    
-    this.hasAppliedKit = true;
-    this.characterState.updateCharacter(this.character);
+    // Call backend endpoint to apply kit
+    this.http.post<any>(`/api/character/${characterId}/inventory/apply-kit`, {
+      kitId: this.startingKit.id
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Update character inventory from backend response
+            this.character!.inventory.deserialize(response.inventory);
+            this.characterState.updateCharacter(this.character!);
+            this.hasAppliedKit = true;
+          } else {
+            console.error('Failed to apply kit:', response.error);
+          }
+        },
+        error: (err) => {
+          console.error('Error applying starting kit:', err);
+        }
+      });
   }
 
   refundStartingKit(): void {
-    if (!this.character || !this.startingKit || this.hasRefundedKit) return;
-
-    const inventory = this.character.inventory;
-
-    // Remove all starting kit items and add sell value
-    const allItems = [...this.startingKit.weapons, ...this.startingKit.armor, ...this.startingKit.equipment];
-    
-    allItems.forEach(kitItem => {
-      const item = getItemById(kitItem.itemId);
-      if (item) {
-        // Remove the item
-        for (let i = 0; i < kitItem.quantity; i++) {
-          inventory.removeItem(kitItem.itemId);
-        }
-        // Add sell value (50% of price)
-        inventory.addCurrency(Math.floor(item.price * kitItem.quantity * 0.5));
-      }
-    });
-
+    // Note: Refunding requires backend implementation for accurate price calculations
+    // For now, this is a placeholder
+    console.warn('Refunding starting kit is not yet implemented on backend');
     this.hasRefundedKit = true;
-    this.hasAppliedKit = false;
-    this.characterState.updateCharacter(this.character);
   }
 
   loadAvailableItems(): void {
-    // Only show common items (exclude reward-only and talent-only)
-    this.availableItems = ALL_ITEMS.filter(item => item.rarity === 'common');
-    this.filterItems();
+    // Load available items from backend
+    this.http.get<any>('/api/items?rarity=common')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.availableItems = response.items || [];
+          this.filterItems();
+        },
+        error: (err) => {
+          console.error('Error loading available items:', err);
+        }
+      });
   }
 
   filterItems(): void {
@@ -245,24 +253,39 @@ export class StartingEquipment implements OnInit, OnDestroy {
   purchaseItem(item: InventoryItem): void {
     if (!this.character) return;
 
-    const inventory = this.character.inventory;
-    
-    if (inventory.getCurrency() >= item.price) {
-      inventory.purchaseItem(item.id, item.price, 1);
-      this.characterState.updateCharacter(this.character);
+    const characterId = (this.character as any).id;
+    if (!characterId) {
+      console.error('Character ID not found');
+      return;
     }
+
+    // Call backend endpoint to purchase
+    this.http.post<any>(`/api/character/${characterId}/inventory/purchase`, {
+      itemId: item.id,
+      quantity: 1,
+      price: item.price
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Update character inventory from backend response
+            this.character!.inventory.deserialize(response.inventory);
+            this.characterState.updateCharacter(this.character!);
+          } else {
+            console.error('Failed to purchase item:', response.error);
+          }
+        },
+        error: (err) => {
+          console.error('Error purchasing item:', err);
+        }
+      });
   }
 
   sellItem(itemId: string): void {
-    if (!this.character) return;
-
-    const inventory = this.character.inventory;
-    const item = getItemById(itemId);
-    
-    if (item) {
-      inventory.sellItem(itemId, item.price, 1);
-      this.characterState.updateCharacter(this.character);
-    }
+    // Note: Selling requires backend implementation
+    // For now, this is a placeholder
+    console.warn('Selling items is not yet implemented on backend');
   }
 
   canAfford(item: InventoryItem): boolean {
