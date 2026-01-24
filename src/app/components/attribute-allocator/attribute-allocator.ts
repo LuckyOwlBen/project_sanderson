@@ -121,7 +121,9 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   private fetchAttributeSlice(characterId: string): void {
     console.log('[AttributeAllocator] fetchAttributeSlice called with ID:', characterId);
-    this.levelUpApi.getAttributeSlice(characterId)
+    // In creation mode (level > 1), request cumulative points instead of single-level
+    const isCreationMode = (this.character?.level ?? 1) > 1;
+    this.levelUpApi.getAttributeSlice(characterId, isCreationMode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (slice) => {
@@ -172,7 +174,9 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       presence: this.character.attributes.presence
     };
 
-    this.levelUpApi.updateAttributeSlice(this.characterId, payload)
+    // In creation mode (level > 1), pass isCreationMode flag to use cumulative points
+    const isCreationMode = (this.character.level ?? 1) > 1;
+    this.levelUpApi.updateAttributeSlice(this.characterId, payload, isCreationMode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {},

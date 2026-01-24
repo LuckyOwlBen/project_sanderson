@@ -10,6 +10,17 @@
         <h2>What is your name?</h2>
       </div>
 
+      <!-- Character Level Selection -->
+      <mat-form-field appearance="outline" class="level-input" *ngIf="character">
+        <mat-label>Character Level</mat-label>
+        <mat-select [(ngModel)]="character.level" (ngModelChange)="onLevelChange()">
+          <mat-select-trigger>{{ character.level }}</mat-select-trigger>
+          <mat-option *ngFor="let lvl of availableLevels" [value]="lvl">
+            Level {{ lvl }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="name-input">
         <mat-label>Character Name</mat-label>
         <input 

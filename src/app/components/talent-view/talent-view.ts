@@ -170,17 +170,11 @@ export class TalentView implements OnInit, OnDestroy {
             this.lazyLoadTrees();
           }
         }, 1000); // 1 second timeout
-        
+
         // Lazy load talent data from API if we have a character ID
-        if (this.characterId && this.isLevelUpMode) {
+        // Both level-up and creation modes need to fetch from API to get proper talent calculations
+        if (this.characterId) {
           this.fetchTalentForLevel(this.characterId);
-        } else if (!this.isLevelUpMode) {
-          // In character creation mode, calculate talent points locally
-          console.log('[TalentView] Character creation mode - calculating local talent points');
-          this.baseTalentPoints = this.levelUpManager.getTalentPointsForLevel(this.character.level || 1);
-          this.availableTalentPoints = this.baseTalentPoints;
-          this.sliceLoaded = true; // Mark as loaded since we're not fetching from API
-          console.log('[TalentView] Calculated local talent points:', this.baseTalentPoints);
         }
       } else {
         // Sync current talents
@@ -195,12 +189,9 @@ export class TalentView implements OnInit, OnDestroy {
         this.calculateAvailablePoints();
         this.updateValidation();
 
-        // Lazy load talent data if needed and in level-up mode
-        if (this.characterId && this.isLevelUpMode) {
+        // Lazy load talent data from API in both creation and level-up modes
+        if (this.characterId) {
           this.fetchTalentForLevel(this.characterId);
-        } else if (!this.isLevelUpMode) {
-          // In creation mode, mark as loaded since we're not fetching from API
-          this.sliceLoaded = true;
         }
       }
     });
@@ -284,7 +275,10 @@ export class TalentView implements OnInit, OnDestroy {
     console.log('[TalentView] Starting lazy load of talent data from API...');
     this.isLoadingTalentData = true;
     
-    this.levelUpApi.getTalentForLevel(characterId)
+    // During character creation: request cumulative points from level 1 to current level
+    // During level-up: request points for current level only
+    const isCreationMode = !this.isLevelUpMode;
+    this.levelUpApi.getTalentForLevel(characterId, isCreationMode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (resp) => {
@@ -697,9 +691,10 @@ export class TalentView implements OnInit, OnDestroy {
     // Special handling for tier 0 talents (key talents)
     if (talent.tier === 0) {
       // At level 1, humans and singers can select tier 0 talents from other paths as their bonus talent
-      // During level-up, they can also select tier 0 talents if they have points
+      // During level-up or multi-level creation, they can also select tier 0 talents if they have points
+      // isInLevelUpMode covers both explicit level-up AND multi-level creation scenarios
       if ((this.character.ancestry === 'human' || this.character.ancestry === 'singer') && 
-          (this.character.level === 1 || this.isLevelUpMode)) {
+          (this.character.level === 1 || this.isInLevelUpMode())) {
         // Allow if they still have points available
         return true;
       }
@@ -818,7 +813,7 @@ export class TalentView implements OnInit, OnDestroy {
     
     // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
     if (talent.tier === 0 && (this.character.ancestry === 'human' || this.character.ancestry === 'singer') && 
-        (this.character.level === 1 || this.isLevelUpMode)) {
+        (this.character.level === 1 || this.isInLevelUpMode())) {
       this.loadAvailableTrees();
     }
     

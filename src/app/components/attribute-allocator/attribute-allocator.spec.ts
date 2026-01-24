@@ -83,7 +83,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
 
     // Should have called API once on initial route params
     expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(1);
-    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledWith('char-123');
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledWith('char-123', false);
 
     // Now emit character$ again (simulating navigating back from skills step)
     const updatedCharacter = new Character();
@@ -216,7 +216,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     await fixture.whenStable();
 
     expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledTimes(1);
-    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledWith('char-123');
+    expect(levelUpApiService.getAttributeSlice).toHaveBeenCalledWith('char-123', false);
     // One call from test setup, one from component syncing mapped attributes
     expect(updateCharacterSpy).toHaveBeenCalledTimes(2);
     const mappedCharacter = characterStateService.getCharacter();

@@ -123,7 +123,9 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
   private fetchSkillSlice(characterId: string): void {
     this.isFetchingSlice = true;
-    this.levelUpApi.getSkillSlice(characterId)
+    // In creation mode (level > 1), request cumulative points instead of single-level
+    const isCreationMode = (this.character?.level ?? 1) > 1;
+    this.levelUpApi.getSkillSlice(characterId, isCreationMode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (slice) => {
@@ -161,7 +163,9 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
     const payload = this.character.skills.getAllSkillRanks();
     console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
-    this.levelUpApi.updateSkillSlice(this.characterId, payload)
+    // In creation mode (level > 1), pass isCreationMode flag to use cumulative points
+    const isCreationMode = (this.character.level ?? 1) > 1;
+    this.levelUpApi.updateSkillSlice(this.characterId, payload, isCreationMode)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

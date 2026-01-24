@@ -80,7 +80,7 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
 
     // Should have called API once on initial route params
     expect(levelUpApiService.getSkillSlice).toHaveBeenCalledTimes(1);
-    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledWith('char-123');
+    expect(levelUpApiService.getSkillSlice).toHaveBeenCalledWith('char-123', false);
 
     // Now emit character$ again (simulating navigating back from talents step)
     const updatedCharacter = new Character();

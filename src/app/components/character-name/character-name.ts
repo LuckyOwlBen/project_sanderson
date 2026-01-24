@@ -6,12 +6,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { ActivatedRoute } from '@angular/router';
+import { LevelUpManager } from '../../levelup/levelUpManager';
+import { LevelUpApiService } from '../../services/levelup-api.service';
 
 @Component({
   selector: 'app-character-name',
@@ -23,7 +27,9 @@ import { ActivatedRoute } from '@angular/router';
     MatInputModule,
     MatCardModule,
     MatIconModule,
-    MatChipsModule
+    MatChipsModule,
+    MatSelectModule,
+    MatOptionModule
   ],
   templateUrl: './character-name.html',
   styleUrl: './character-name.scss',
@@ -38,13 +44,20 @@ export class CharacterName implements OnInit, OnDestroy {
   suggestedNames: string[] = [];
   isLevelUpMode: boolean = false;
   private characterId: string | null = null;
+  availableLevels: number[] = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService
-  ) {}
+    private storageService: CharacterStorageService,
+    private levelUpManager: LevelUpManager,
+    private levelUpApi: LevelUpApiService
+  ) {
+    // Generate available levels based on LevelUpManager's progression table
+    // The progression tables have 21 entries (levels 1-21)
+    this.availableLevels = Array.from({ length: 21 }, (_, i) => i + 1);
+  }
 
   ngOnInit(): void {
     // Scroll to top when component loads
@@ -136,6 +149,13 @@ export class CharacterName implements OnInit, OnDestroy {
     this.onNameChange();
   }
 
+  onLevelChange(): void {
+    if (this.character) {
+      this.characterState.updateCharacter(this.character);
+      this.updateValidation();
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -217,7 +237,18 @@ export class CharacterName implements OnInit, OnDestroy {
       if (this.nameError === '') {
         this.character.name = this.characterName.trim();
       }
-      this.storageService.saveCharacter(this.character).subscribe({ next: () => {}, error: () => {} });
+      this.storageService.saveCharacter(this.character).subscribe({
+        next: () => {
+          // If level > 1, initialize the level with cumulative points
+          if (this.character && this.character.level > 1) {
+            this.levelUpApi.initializeLevel(this.characterId!, this.character.level).subscribe({
+              next: () => {},
+              error: (err) => console.error('Failed to initialize level:', err)
+            });
+          }
+        },
+        error: () => {}
+      });
     }
   }
 }

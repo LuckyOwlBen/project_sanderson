@@ -195,7 +195,14 @@ async function loadCharacterData(id, retries = 3) {
         throw new Error('Character file is empty');
       }
       
-      return JSON.parse(data);
+      const character = JSON.parse(data);
+      
+      // Ensure paths array exists and is initialized properly
+      if (!character.paths) {
+        character.paths = [];
+      }
+      
+      return character;
     } catch (error) {
       // If it's a JSON parse error and we have retries left, wait and try again
       if (error instanceof SyntaxError && attempt < retries - 1) {
@@ -1067,13 +1074,70 @@ app.get('/api/characters/:id/level/summary', async (req, res) => {
   }
 });
 
+// Character creation: initialize level with cumulative points
+app.post('/api/characters/:id/creation-init', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { targetLevel } = req.body;
+    
+    if (!targetLevel || targetLevel < 1 || targetLevel > 21) {
+      return res.status(400).json({
+        success: false,
+        error: 'targetLevel must be between 1 and 21'
+      });
+    }
+    
+    const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
+    const data = await fs.readFile(filepath, 'utf8');
+    const character = JSON.parse(data);
+    
+    // Set level and clear spent points for fresh creation at this level
+    character.level = targetLevel;
+    character.spentPoints = {}; // Fresh state for creation
+    
+    // Save character
+    const tempPath = `${filepath}.tmp`;
+    await fs.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
+    await fs.rename(tempPath, filepath);
+    
+    console.log(`[Character Creation] Initialized character ${character.name} (${id}) at level ${targetLevel}`);
+    res.json({
+      success: true,
+      id,
+      level: targetLevel,
+      message: `Character initialized for creation at level ${targetLevel}`
+    });
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
+    console.error('Error initializing character level:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Helper function to calculate cumulative points
+function getCumulativePoints(table, level) {
+  if (level < 1 || level > table.length) return 0;
+  let total = 0;
+  for (let i = 0; i < level; i++) {
+    total += table[i];
+  }
+  return total;
+}
+
 // Level-up: attribute slice
 app.get('/api/characters/:id/level/attributes', async (req, res) => {
   try {
     const { id } = req.params;
+    const isCreationMode = req.query.isCreationMode === 'true';
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    const totalPointsForLevel = getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
+    
+    // In creation mode, return cumulative points; otherwise single-level points
+    const totalPointsForLevel = isCreationMode 
+      ? getCumulativePoints(LEVEL_TABLES.attributePointsPerLevel, level)
+      : getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
     
     // Track spent points per level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
@@ -1081,12 +1145,14 @@ app.get('/api/characters/:id/level/attributes', async (req, res) => {
     const spentForThisLevel = character.spentPoints.attributes[level] || 0;
     const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
     
-    console.log(`[LevelUp] Provided attribute points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent)`);
+    const mode = isCreationMode ? 'creation' : 'level-up';
+    console.log(`[${mode.toUpperCase()}] Provided attribute points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`);
     res.json({
       id: character.id,
       level,
       attributes: character.attributes || {},
-      pointsForLevel
+      pointsForLevel,
+      isCreationMode
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1101,9 +1167,14 @@ app.get('/api/characters/:id/level/attributes', async (req, res) => {
 app.get('/api/characters/:id/level/skills', async (req, res) => {
   try {
     const { id } = req.params;
+    const isCreationMode = req.query.isCreationMode === 'true';
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    const totalPointsForLevel = getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
+    
+    // In creation mode, return cumulative points; otherwise single-level points
+    const totalPointsForLevel = isCreationMode
+      ? getCumulativePoints(LEVEL_TABLES.skillPointsPerLevel, level)
+      : getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
     
     // Track spent points per level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
@@ -1111,8 +1182,9 @@ app.get('/api/characters/:id/level/skills', async (req, res) => {
     const spentForThisLevel = character.spentPoints.skills[level] || 0;
     const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
     
-    console.log(`[LevelUp] Provided skill points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent)`);
-    console.log(`[LevelUp] Current skills for ${character.name}:`, character.skills || {});
+    const mode = isCreationMode ? 'creation' : 'level-up';
+    console.log(`[${mode.toUpperCase()}] Provided skill points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`);
+    console.log(`[${mode}] Current skills for ${character.name}:`, character.skills || {});
     res.json({
       id: character.id,
       level,
@@ -1135,6 +1207,7 @@ app.get('/api/characters/:id/level/skills', async (req, res) => {
 app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
   try {
     const { id } = req.params;
+    const isCreationMode = req.query.isCreationMode === 'true';
     const character = await loadCharacterData(id);
     const level = character.level || 1;
     const mainPath = character.paths && character.paths.length > 0 ? character.paths[0] : null;
@@ -1149,12 +1222,13 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
         requiresPathSelection: true,
         ancestry: character.ancestry || null,
         level,
-        mainPath: null
+        mainPath: null,
+        isCreationMode
       });
     }
     
-    // Determine if this is character creation (level 1, minimal talents) or level-up
-    const isLevelUp = level > 1 || (character.unlockedTalents && character.unlockedTalents.length > 1);
+    // Determine if this is character creation or level-up
+    const isLevelUp = !isCreationMode && (level > 1 || (character.unlockedTalents && character.unlockedTalents.length > 1));
     
     // Get previously selected talents (for locking in level-up mode)
     // For character creation, this is empty. For level-up, it's all talents from before this level
@@ -1163,14 +1237,23 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       ? (character.unlockedTalents || []).filter(id => id !== tier0TalentId)
       : [];
     
-    // Calculate available talent points using consolidated rules
-    const currentUnlockedTalents = character.unlockedTalents || [];
-    const talentPoints = talentRules.calculateAvailableTalentPoints(
-      level,
-      currentUnlockedTalents,
-      mainPath,
-      previouslySelectedTalents
-    );
+    // Calculate available talent points
+    let talentPoints;
+    if (isCreationMode) {
+      // For creation mode, give cumulative talent points
+      talentPoints = getCumulativePoints(LEVEL_TABLES.talentPointsPerLevel, level);
+      // Subtract tier 0 talent (it's free)
+      talentPoints -= 1;
+    } else {
+      // For level-up mode, use normal rules
+      const currentUnlockedTalents = character.unlockedTalents || [];
+      talentPoints = talentRules.calculateAvailableTalentPoints(
+        level,
+        currentUnlockedTalents,
+        mainPath,
+        previouslySelectedTalents
+      );
+    }
     
     // Determine if Singer tree selection is required
     const requiresSingerSelection = talentRules.requiresSingerSelection(
@@ -1178,7 +1261,8 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       level
     );
     
-    console.log(`[Talents] ${character.name} (L${level}): ${talentPoints} points available, ${previouslySelectedTalents.length} previously selected, Singer required: ${requiresSingerSelection}`);
+    const mode = isCreationMode ? 'creation' : 'level-up';
+    console.log(`[${mode.toUpperCase()}] ${character.name} (L${level}): ${talentPoints} points available, ${previouslySelectedTalents.length} previously selected, Singer required: ${requiresSingerSelection}`);
     
     res.json({
       talentPoints,
@@ -1187,7 +1271,8 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       requiresSingerSelection,
       ancestry: character.ancestry || null,
       level,
-      mainPath
+      mainPath,
+      isCreationMode
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1270,6 +1355,7 @@ app.get('/api/characters/:id/level/talents', async (req, res) => {
 app.patch('/api/characters/:id/level/attributes', async (req, res) => {
   try {
     const { id } = req.params;
+    const isCreationMode = req.query.isCreationMode === 'true';
     const { attributes } = req.body || {};
     if (!attributes || typeof attributes !== 'object') {
       return res.status(400).json({ success: false, error: 'attributes payload required' });
@@ -1277,7 +1363,10 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
 
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    const pointsForLevel = getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
+    // In creation mode, use cumulative points; otherwise single-level points
+    const pointsForLevel = isCreationMode
+      ? getCumulativePoints(LEVEL_TABLES.attributePointsPerLevel, level)
+      : getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
     const prevAttrs = character.attributes || {};
     // Calculate total positive increases compared to previous values
     const keys = ['strength','speed','awareness','intellect','willpower','presence'];
@@ -1323,6 +1412,7 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
 app.patch('/api/characters/:id/level/skills', async (req, res) => {
   try {
     const { id } = req.params;
+    const isCreationMode = req.query.isCreationMode === 'true';
     const { skills } = req.body || {};
     if (!skills || typeof skills !== 'object') {
       return res.status(400).json({ success: false, error: 'skills payload required' });
@@ -1332,7 +1422,10 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    const pointsForLevel = getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
+    // In creation mode, use cumulative points; otherwise single-level points
+    const pointsForLevel = isCreationMode
+      ? getCumulativePoints(LEVEL_TABLES.skillPointsPerLevel, level)
+      : getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
     const maxRank = getLevelTableValue(LEVEL_TABLES.maxSkillRanksPerLevel, level);
     const prevSkills = character.skills || {};
     // Validate increases and max rank

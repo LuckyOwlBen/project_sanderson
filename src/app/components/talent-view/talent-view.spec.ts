@@ -197,7 +197,7 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
 
     // Should have called API once on initial load
     expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledTimes(1);
-    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledWith('char-123');
+    expect(levelUpApiService.getTalentForLevel).toHaveBeenCalledWith('char-123', false);
 
     // Now emit character$ again (simulating navigating back from another step)
     const updatedCharacter = new Character();
