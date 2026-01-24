@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ===== CHARACTER =====
+model Character {
+  id               String    @id
+  name             String
+  level            Int       @default(1)
+  pendingLevelPoints Int      @default(0)
+  ancestry         String?
+  sessionNotes     String    @default("")
+  lastModified     DateTime  @default(now()) @updatedAt
+
+  // Relations
+  cultures         CultureSelection[]
+  paths            PathSelection[]
+  attributes       Attributes?
+  skills           Skill[]
+  inventory        InventoryItem[]
+  talents          UnlockedTalent[]
+  expertises       SelectedExpertise[]
+  resources        CharacterResources?
+  radiantPath      RadiantPath?
+  singerForms      UnlockedSingerForm[]
+  spentPoints      SpentPoints?
+
+  @@index([name])
+  @@index([lastModified])
+}
+
+// ===== CULTURES & PATHS =====
+model CultureSelection {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  // Store culture data as JSON to preserve full structure
+  name        String
+  description String
+  expertise   String
+  suggestedNames String  // JSON array stored as string for SQLite
+  
+  @@unique([characterId, name])
+}
+
+model PathSelection {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  pathName    String
+
+  @@unique([characterId, pathName])
+}
+
+// ===== ATTRIBUTES =====
+model Attributes {
+  id          String   @id @default(cuid())
+  characterId String   @unique
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  strength    Int      @default(2)
+  speed       Int      @default(2)
+  intellect   Int      @default(2)
+  willpower   Int      @default(2)
+  awareness   Int      @default(2)
+  presence    Int      @default(2)
+}
+
+// ===== SKILLS =====
+model Skill {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  skillName   String   // e.g., "AGILITY", "ATHLETICS"
+  value       Int      @default(0)
+
+  @@unique([characterId, skillName])
+  @@index([characterId])
+}
+
+// ===== TALENTS =====
+model UnlockedTalent {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  talentId    String   // e.g., "vigilant_stance", "shard_training"
+  unlockedAt  DateTime @default(now())
+  level       Int      @default(1) // Track which level this talent was unlocked at
+
+  @@unique([characterId, talentId])
+  @@index([characterId])
+}
+
+// ===== EXPERTISES =====
+model SelectedExpertise {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  name        String
+  source      String   // e.g., "culture", "ancestry"
+  sourceId    String   // e.g., "culture:Azish"
+
+  @@unique([characterId, name])
+  @@index([characterId])
+}
+
+// ===== INVENTORY =====
+model InventoryItem {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  itemId      String
+  quantity    Int      @default(1)
+  equipped    Boolean  @default(false)
+
+  @@unique([characterId, itemId])
+  @@index([characterId])
+}
+
+// ===== RESOURCES =====
+model CharacterResources {
+  id            String   @id @default(cuid())
+  characterId   String   @unique
+  character     Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  healthCurrent Int      @default(0)
+  healthMax     Int      @default(0)
+  
+  focusCurrent  Int      @default(0)
+  focusMax      Int      @default(0)
+  
+  investitureCurrent Int  @default(0)
+  investitureMax     Int  @default(0)
+  investitureActive  Boolean @default(false)
+}
+
+// ===== RADIANT PATH =====
+model RadiantPath {
+  id              String   @id @default(cuid())
+  characterId     String   @unique
+  character       Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  boundOrder      String?  // e.g., "Windrunner", "Skybreaker"
+  currentIdeal    Int      @default(1) // Which ideal currently spoken
+  idealSpoken     Boolean  @default(false)
+  surgePair       String?  // e.g., "Adhesion/Gravitation"
+  sprenType       String?  // Type of spren bonded
+}
+
+// ===== SINGER FORMS =====
+model UnlockedSingerForm {
+  id          String   @id @default(cuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  formId      String   // e.g., "nimbleform", "warform"
+  unlockedAt  DateTime @default(now())
+
+  @@unique([characterId, formId])
+  @@index([characterId])
+}
+
+// ===== SPENT POINTS TRACKING =====
+// Track how many points were spent at each level to prevent re-spending
+model SpentPoints {
+  id          String   @id @default(cuid())
+  characterId String   @unique
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  // JSON objects: { "1": 12, "2": 14, ... } keyed by level number
+  attributes  String   @default("{}")  // JSON stored as string for SQLite: { "1": 12, "2": 14 }
+  skills      String   @default("{}")  // JSON stored as string for SQLite: { "1": 4, "2": 6 }
+  talents     String   @default("{}")  // JSON stored as string for SQLite: { "1": 1, "2": 2 }
+}
