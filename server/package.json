@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": ["rpg", "character-management", "api"],
   "author": "",
@@ -15,6 +17,11 @@
     "cors": "^2.8.5",
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.33.0",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "@prisma/client": "^7.3.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.8",
+    "prisma": "^7.3.0"
   }
 }
