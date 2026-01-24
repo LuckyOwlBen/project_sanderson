@@ -40,10 +40,11 @@ export class StoreView implements OnInit, OnDestroy {
     ['equipment', true],
     ['consumable', true],
     ['fabrial', true],
-    ['mount', true],
-    ['vehicle', false],
-    ['pet', false]
+    ['mount', true]
   ]);
+
+  // Only categories that the GM can toggle are tracked for open/closed display
+  private readonly trackedCategories: ItemType[] = ['weapon', 'armor', 'equipment', 'consumable', 'fabrial', 'mount'];
   
   // Map store toggle IDs to item categories
   private storeIdToCategory = new Map<string, ItemType>([
@@ -343,9 +344,11 @@ export class StoreView implements OnInit, OnDestroy {
   
   getDisabledCategories(): ItemType[] {
     const disabled: ItemType[] = [];
-    this.categoryEnabled.forEach((enabled, category) => {
-      if (!enabled) disabled.push(category);
-    });
+    for (const category of this.trackedCategories) {
+      if (this.categoryEnabled.get(category) === false) {
+        disabled.push(category);
+      }
+    }
     return disabled;
   }
   

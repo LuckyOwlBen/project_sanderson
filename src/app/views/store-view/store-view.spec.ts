@@ -166,9 +166,7 @@ describe('StoreView - Category Filtering', () => {
     const disabled = component.getDisabledCategories();
     expect(disabled).toContain('weapon');
     expect(disabled).toContain('armor');
-    expect(disabled).toContain('vehicle'); // vehicle is disabled by default
-    expect(disabled).toContain('pet'); // pet is disabled by default
-    expect(disabled.length).toBe(4);
+    expect(disabled.length).toBe(2);
   });
 
   it('should re-enable categories when toggled back on', () => {
@@ -194,9 +192,6 @@ describe('StoreView - Category Filtering', () => {
   });
 
   it('should return empty array when all categories enabled', () => {
-    // Enable all categories that start disabled
-    component.categoryEnabled.set('vehicle', true);
-    component.categoryEnabled.set('pet', true);
     const disabled = component.getDisabledCategories();
     expect(disabled.length).toBe(0);
   });
@@ -210,8 +205,8 @@ describe('StoreView - Category Filtering', () => {
 
     const message = component.getDisabledCategoriesMessage();
     expect(message).toContain('Weapons'); // Should contain weapons since we disabled it
-    expect(message).toContain('Pets'); // Pets are disabled by default
-    expect(message).toContain('Mounts & Vehicles'); // Vehicles are disabled by default
+    expect(message).not.toContain('Pets');
+    expect(message).not.toContain('Mounts & Vehicles');
   });
 
   it('should generate disabled categories message for multiple categories', () => {
