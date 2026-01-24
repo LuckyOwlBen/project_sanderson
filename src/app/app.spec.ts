@@ -2,14 +2,21 @@ import { TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
 import { of } from 'rxjs';
+import { ServerHealthService } from './services/server-health.service';
+import { vi } from 'vitest';
 
 describe('App', () => {
   beforeEach(async () => {
+    const mockServerHealthService = {
+      serverHealth$: of(true) // Mock server as healthy
+    };
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        provideRouter([]),
+        provideRouter(routes),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -18,6 +25,10 @@ describe('App', () => {
             snapshot: { params: {}, queryParams: {} },
           },
         },
+        {
+          provide: ServerHealthService,
+          useValue: mockServerHealthService
+        }
       ],
     }).compileComponents();
   });

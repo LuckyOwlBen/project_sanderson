@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
 const talentRules = require('./talent-rules');
+const attributeAllocator = require('./services/attribute-allocator');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 
