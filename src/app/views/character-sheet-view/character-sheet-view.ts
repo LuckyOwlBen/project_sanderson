@@ -33,6 +33,8 @@ import { InventoryItem } from '../../character/inventory/inventoryItem';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
+import { CombatTurnSpeedSelectorComponent } from "../../components/combat-turn-speed-selector/combat-turn-speed-selector.component";
+import { CombatService } from "../../services/combat.service";
 
 @Component({
   selector: 'app-character-sheet-view',
@@ -59,8 +61,9 @@ import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/
     SkillRoller,
     CraftingView,
     FormSelectorComponent,
-    PetDisplayComponent
-  ],
+    PetDisplayComponent,
+    CombatTurnSpeedSelectorComponent
+],
   templateUrl: './character-sheet-view.html',
   styleUrl: './character-sheet-view.scss',
 })
@@ -85,6 +88,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
     private websocketService: WebsocketService,
+    private combatService: CombatService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
@@ -273,6 +277,20 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         }
       });
     console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
+
+    // Set up combat start listener
+    console.log('[Character Sheet] ⚔️ Setting up combat start listener...');
+    this.websocketService.combatStart$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] ⚔️ Combat started event received:', event);
+        if (this.characterId) {
+          // Register this character for combat
+          this.combatService.registerPlayer(this.characterId);
+          console.log('[Character Sheet] ⚔️ Player registered for combat:', this.characterId);
+        }
+      });
+    console.log('[Character Sheet] ⚔️ Combat start listener subscription complete');
   }
 
   ngOnDestroy(): void {

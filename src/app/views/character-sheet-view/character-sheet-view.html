@@ -7,6 +7,9 @@
     (navigateBack)="backToList()">
   </app-character-sheet-header>
 
+  <!-- Combat Turn Speed Selector -->
+  <app-combat-turn-speed-selector [characterId]="characterId"></app-combat-turn-speed-selector>
+
   <!-- Radiant Path Notifications -->
   <app-radiant-path-notifications 
     [character]="character"
@@ -67,6 +70,8 @@
       </mat-card-actions>
     </mat-card>
   </div>
+
+  <app-combat-turn-speed-selector [characterId]="characterId"></app-combat-turn-speed-selector>
 
   <!-- Main Content -->
   <div class="sheet-tabs custom-tabs">

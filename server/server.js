@@ -1530,6 +1530,34 @@ io.on('connection', (socket) => {
     console.log(`[GM Action] ⚡ Highstorm ${active ? 'activated' : 'ended'}`);
   });
 
+  // Handle combat start from GM
+  socket.on('gm-start-combat', ({ timestamp }) => {
+    console.log(`[Combat] ⚔️ GM starting combat`);
+    
+    const payload = {
+      timestamp: timestamp || new Date().toISOString()
+    };
+    
+    // Broadcast to all connected clients
+    io.emit('combat-start', payload);
+    console.log(`[Combat] ⚔️ Combat started`);
+  });
+
+  // Handle turn speed selection from player
+  socket.on('player-select-turn-speed', ({ characterId, turnSpeed, timestamp }) => {
+    console.log(`[Combat] 🔄 Player ${characterId} selected ${turnSpeed} turn`);
+    
+    const payload = {
+      characterId,
+      turnSpeed,
+      timestamp: timestamp || new Date().toISOString()
+    };
+    
+    // Broadcast to all connected clients (GM needs to see updates)
+    io.emit('turn-speed-selection', payload);
+    console.log(`[Combat] 🔄 Turn speed selection broadcasted`);
+  });
+
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);

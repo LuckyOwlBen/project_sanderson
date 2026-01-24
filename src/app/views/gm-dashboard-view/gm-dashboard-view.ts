@@ -15,6 +15,7 @@ import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
 import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 import { ItemGrantDialogComponent } from './item-grant-dialog.component';
 import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.component';
+import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -29,8 +30,9 @@ import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.componen
     MatBadgeModule,
     MatDialogModule,
     MatListModule,
-    MatSnackBarModule
-  ],
+    MatSnackBarModule,
+    CombatPanelComponent
+],
   templateUrl: './gm-dashboard-view.html',
   styleUrl: './gm-dashboard-view.scss',
 })
@@ -162,6 +164,22 @@ export class GmDashboardView implements OnInit, OnDestroy {
         console.log('[GM Dashboard] 🏪 Store toggle event received:', event);
         this.storeEnabled.set(event.storeId, event.enabled);
         this.cdr.detectChanges();
+      });
+
+    // Subscribe to turn speed selection events to update combat panel
+    this.websocketService.turnSpeedSelection$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[GM Dashboard] 🔄 Turn speed selected:', event);
+        this.cdr.markForCheck();
+      });
+
+    // Subscribe to combat start events
+    this.websocketService.combatStart$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[GM Dashboard] ⚔️ Combat started');
+        this.cdr.markForCheck();
       });
   }
 

@@ -91,6 +91,24 @@ export interface HighstormEvent {
   timestamp: string;
 }
 
+export interface CombatStartEvent {
+  timestamp: string;
+}
+
+export interface TurnSpeedSelectionEvent {
+  characterId: string;
+  turnSpeed: 'fast' | 'slow';
+  timestamp: string;
+}
+
+export interface TurnGroupsUpdateEvent {
+  fastPC: string[];
+  fastNPC: string[];
+  slowPC: string[];
+  slowNPC: string[];
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -138,6 +156,15 @@ export class WebsocketService implements OnDestroy {
 
   private highstormSubject = new Subject<HighstormEvent>();
   public highstorm$ = this.highstormSubject.asObservable();
+
+  private combatStartSubject = new Subject<CombatStartEvent>();
+  public combatStart$ = this.combatStartSubject.asObservable();
+
+  private turnSpeedSelectionSubject = new Subject<TurnSpeedSelectionEvent>();
+  public turnSpeedSelection$ = this.turnSpeedSelectionSubject.asObservable();
+
+  private turnGroupsUpdateSubject = new Subject<TurnGroupsUpdateEvent>();
+  public turnGroupsUpdate$ = this.turnGroupsUpdateSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -260,6 +287,22 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] ⚡⚡⚡ HIGHSTORM EVENT RECEIVED ⚡⚡⚡');
       console.log('[WebSocket] ⚡ Highstorm event data:', data);
       this.highstormSubject.next(data);
+    });
+
+    // Listen for combat events
+    this.socket.on('combat-start', (data: CombatStartEvent) => {
+      console.log('[WebSocket] ⚔️ Combat started');
+      this.combatStartSubject.next(data);
+    });
+
+    this.socket.on('turn-speed-selection', (data: TurnSpeedSelectionEvent) => {
+      console.log('[WebSocket] 🔄 Turn speed selected:', data);
+      this.turnSpeedSelectionSubject.next(data);
+    });
+
+    this.socket.on('turn-groups-update', (data: TurnGroupsUpdateEvent) => {
+      console.log('[WebSocket] 📋 Turn groups updated:', data);
+      this.turnGroupsUpdateSubject.next(data);
     });
     
     console.log('[WebSocket] ✅ All event listeners registered');
@@ -479,6 +522,33 @@ export class WebsocketService implements OnDestroy {
     console.log('[WebSocket] ⚡ Toggling highstorm:', { active });
     this.socket.emit('gm-toggle-highstorm', {
       active,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Combat event emissions
+  startCombat(): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot start combat: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] ⚔️ Starting combat');
+    this.socket.emit('gm-start-combat', {
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  selectTurnSpeed(characterId: string, turnSpeed: 'fast' | 'slow'): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot select turn speed: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 🔄 Selecting turn speed:', { characterId, turnSpeed });
+    this.socket.emit('player-select-turn-speed', {
+      characterId,
+      turnSpeed,
       timestamp: new Date().toISOString()
     });
   }
