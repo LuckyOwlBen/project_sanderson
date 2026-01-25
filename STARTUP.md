@@ -18,9 +18,9 @@
 
 **What it does:**
 - Builds Angular app to optimized static files
-- Starts single Node.js server on port 3000
-- Serves both app and API from one process
-- Accessible network-wide at `http://<mini-pc-ip>:3000`
+- Starts single Node.js server on port 80
+- Serves both app and API from one process (unified server)
+- Accessible network-wide at `http://<mini-pc-ip>`
 
 **Windows:**
 ```powershell
@@ -40,12 +40,22 @@ $env:NODE_ENV="production"; node server.js
 
 **Linux/Mac:**
 ```bash
-# Start dev servers (hot reload)
+# Start dev servers (hot reload, unified startup)
 ./start.sh dev
+
+# Or using npm directly
+npm start
+
+# Or the quick dev script
+./start-dev.sh
 
 # Stop both
 ./stop.sh
 ```
+
+**Ports (Dev):**
+- Backend API: http://localhost:3000/api
+- Frontend App: http://localhost:4200
 
 **Windows:**
 ```bash
@@ -389,3 +399,64 @@ Common issues:
 - Dependencies not installed (`npm install`)
 - Ports already in use
 - Wrong working directory in systemd service
+
+---
+
+## Unified Full Stack Start (NEW - January 2026)
+
+Starting January 2026, you can now start both backend and frontend with a single command.
+
+### Option 1: npm start (Concurrently) - Recommended
+```bash
+npm start
+```
+- Starts both in same terminal window with `[0]` and `[1]` prefixes
+- Both share one terminal session
+- Ctrl+C stops both together
+- Great for single monitor setups
+
+### Option 2: PowerShell Script (Separate Windows)
+```powershell
+.\start-full-stack.ps1
+```
+- Opens two independent terminal windows
+- Can manage each separately
+- Close one window to stop that service
+- Great for dual monitor setups
+
+### Option 3: Batch Script (Separate Windows)
+```cmd
+start-full-stack.bat
+```
+- Same as PowerShell option
+- For users who prefer cmd.exe
+
+### Option 4: Manual (Terminal by Terminal)
+```bash
+# Terminal 1
+cd server
+npm start
+# Backend ready at http://localhost:3000/api
+
+# Terminal 2
+ng serve
+# Frontend ready at http://localhost:4200
+```
+
+### npm Scripts Summary
+```bash
+npm start              # Both backend + frontend (concurrently)
+npm run start:server   # Backend only
+npm run start:ui       # Frontend only
+npm run start:ui:only  # Alias for start:ui
+```
+
+---
+
+## Accessing the Application
+
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:3000/api
+- **Test Component**: http://localhost:4200/test/attack-roller
+
+The frontend automatically connects to the backend at `localhost:3000` via the `BackendCalculationsService`.

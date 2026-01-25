@@ -1,0 +1,80 @@
+╔════════════════════════════════════════════════════════════╗
+║         SANDERSON RPG - QUICK START REFERENCE             ║
+╚════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  FASTEST WAY TO START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From root directory:
+  npm start
+
+That's it! Both backend + frontend will start.
+
+✓ Backend running:   http://localhost:3000/api
+✓ Frontend running:  http://localhost:4200
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ALTERNATIVE METHODS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PowerShell (separate windows):
+  .\start-full-stack.ps1
+
+Batch Script (separate windows):
+  start-full-stack.bat
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INDIVIDUAL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend only:
+  npm run start:server
+  OR
+  cd server && npm start
+
+Frontend only:
+  npm run start:ui
+  OR
+  ng serve
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TESTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Frontend tests:
+  npm test              (run once)
+  npm run test:watch    (watch mode)
+
+Backend tests:
+  npm run test:server
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  EXPECTED STARTUP TIME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend:  2-5 seconds (instant)
+Frontend: 30-60 seconds (first time), 5-10 seconds (after)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ACCESSING THE APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Main App:          http://localhost:4200
+Attack Roller:     http://localhost:4200/test/attack-roller
+Backend API Docs:  http://localhost:3000/api/logs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  STOPPING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+npm start:  Ctrl+C once (stops both)
+Separate:   Close each window individually
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For full details, see:
+  STARTUP.md
+  UNIFIED_STARTUP_SUMMARY.md
+
+═════════════════════════════════════════════════════════════════

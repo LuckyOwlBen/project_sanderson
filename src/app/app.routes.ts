@@ -17,6 +17,7 @@ import { CharacterListView } from './views/character-list-view/character-list-vi
 import { GmDashboardView } from './views/gm-dashboard-view/gm-dashboard-view';
 import { StoreView } from './views/store-view/store-view';
 import { LogsView } from './views/logs-view/logs-view';
+import { AttackRollerComponent } from './components/attack-roller/attack-roller.component';
 
 export const routes: Routes = [
   { path: '', component: LandingView },  // Menu: New Game, Load Game, etc.
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'error', component: Error404View },
   { path: 'gm-control-center', component: GmDashboardView },
   { path: 'store', component: StoreView, title: 'General Store' },
+  { path: 'test/attack-roller', component: AttackRollerComponent, title: 'Attack Roller Test' },
   { 
     path: 'character-creator-view', 
     component: CharacterCreatorView,

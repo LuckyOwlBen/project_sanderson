@@ -25,7 +25,6 @@ import { CharacterDefensesCard } from '../../components/shared/character-defense
 import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
 import { CharacterResourcesBar } from '../../components/shared/character-resources-bar/character-resources-bar';
 import { CharacterSkillsCard } from '../../components/shared/character-skills-card/character-skills-card';
-import { SkillRoller } from '../../components/shared/skill-roller/skill-roller';
 import { CraftingView } from '../../components/crafting-view/crafting-view';
 import { FormSelectorComponent } from '../../components/shared/form-selector/form-selector';
 import { PetDisplayComponent } from '../../components/shared/pet-display/pet-display.component';
@@ -58,7 +57,6 @@ import { CombatService } from "../../services/combat.service";
     CharacterPowersTab,
     CharacterResourcesBar,
     CharacterSkillsCard,
-    SkillRoller,
     CraftingView,
     FormSelectorComponent,
     PetDisplayComponent,

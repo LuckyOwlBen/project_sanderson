@@ -175,17 +175,16 @@ if [ "$MODE" == "dev" ]; then
     echo -e "${BLUE}========================================${NC}"
     echo -e "${BLUE}  Starting in DEVELOPMENT mode${NC}"
     echo -e "${BLUE}========================================${NC}"
+    echo -e "${YELLOW}Using npm start (concurrently)...${NC}"
+    echo ""
     
-    start_backend "dev"
-    BACKEND_STATUS=$?
-    
-    start_frontend
-    FRONTEND_STATUS=$?
+    cd "$SCRIPT_DIR"
+    npm start
     
     echo -e "${BLUE}========================================${NC}"
     echo -e "${GREEN}Startup complete!${NC}"
     echo ""
-    echo -e "Backend API:  ${GREEN}http://localhost:80${NC}"
+    echo -e "Backend API:  ${GREEN}http://localhost:3000/api${NC}"
     echo -e "Frontend App: ${GREEN}http://localhost:4200${NC}"
     echo ""
     echo -e "Logs: ${YELLOW}$LOG_DIR${NC}"

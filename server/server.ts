@@ -1,24 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const fsPromises = require('fs').promises;
-const util = require('util');
-const path = require('path');
-const multer = require('multer');
-const sharp = require('sharp');
-const talentRules = require('./talent-rules');
-const talentService = require('./talent-service');
-const attributeAllocator = require('./services/attribute-allocator');
-const InventoryManager = require('./inventory-manager');
-const itemDefinitions = require('./item-definitions');
-const { Server } = require('socket.io');
-const { createServer } = require('http');
-const createCreationRoutes = require('./routes/creation');
-const createConstantsRoutes = require('./routes/constants');
-const createAllocationRoutes = require('./routes/allocations');
-const createCalculationsRoutes = require('./routes/calculations');
-const createSkillCalculationsRoutes = require('./routes/skill-calculations');
-const { createAttackCalculationsRoutes } = require('./routes/attack-calculations');
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
+import util from 'util';
+import path from 'path';
+import multer from 'multer';
+// import sharp from 'sharp'; // TODO: Fix C++ build issue on Node 24.11.1
+import talentRules from './talent-rules';
+import talentService from './talent-service';
+import attributeAllocator from './services/attribute-allocator';
+import InventoryManager from './inventory-manager';
+import itemDefinitions from './item-definitions';
+import { Server } from 'socket.io';
+import { createServer } from 'http';
+import createCreationRoutes from './routes/creation';
+import createConstantsRoutes from './routes/constants';
+import createAllocationRoutes from './routes/allocations';
+import createCalculationsRoutes from './routes/calculations';
+import createSkillCalculationsRoutes from './routes/skill-calculations';
+import { createAttackCalculationsRoutes } from './routes/attack-calculations';
 
 const app = express();
 const httpServer = createServer(app);
@@ -1640,6 +1640,14 @@ app.post('/api/images/upload', upload.single('image'), async (req, res) => {
       });
     }
 
+    // Sharp not available
+    if (!sharp) {
+      return res.status(503).json({
+        success: false,
+        error: 'Image processing service temporarily unavailable'
+      });
+    }
+
     const { characterId, imageType } = req.body; // imageType: 'portrait', 'background', etc.
     
     // Generate filename
@@ -2219,7 +2227,13 @@ io.on('connection', (socket) => {
 async function startServer() {
   await ensureDirectories();
   
-  httpServer.listen(PORT, '0.0.0.0', () => {
+  httpServer.on('error', (err) => {
+    console.error('[Server Error]', err);
+    process.exit(1);
+  });
+  
+  // Bind to localhost and 0.0.0.0 to ensure both work
+  httpServer.listen(PORT, '127.0.0.1', () => {
     console.log('========================================');
     console.log('  Sanderson RPG Character Server');
     console.log('========================================');
@@ -2228,13 +2242,16 @@ async function startServer() {
     console.log(`  Port: ${PORT}`);
     console.log(`  Storage: ${CHARACTERS_DIR}`);
     console.log(`  Images: ${IMAGES_DIR}`);
-    console.log(`  API: http://0.0.0.0:${PORT}/api`);
+    console.log(`  API: http://localhost:${PORT}/api`);
     console.log(`  WebSocket: Active`);
     if (IS_PRODUCTION) {
-      console.log(`  App: http://0.0.0.0:${PORT}`);
+      console.log(`  App: http://localhost:${PORT}`);
     }
     console.log('========================================');
   });
 }
 
-startServer().catch(console.error);
+startServer().catch(err => {
+  console.error('[Startup Error]', err);
+  process.exit(1);
+});
