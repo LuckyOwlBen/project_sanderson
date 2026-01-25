@@ -86,12 +86,12 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
 
   /**
    * POST /api/characters/:id/name
-   * Update character name
+   * Update character name and optionally level
    */
   app.post('/api/characters/:id/name', async (req, res) => {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name, level } = req.body;
 
       if (!name || typeof name !== 'string') {
         return res.status(400).json({
@@ -120,6 +120,9 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       const character = JSON.parse(data);
       
       character.name = trimmedName;
+      if (level !== undefined && level !== null) {
+        character.level = level;
+      }
       character.lastModified = new Date().toISOString();
 
       await fsPromises.writeFile(

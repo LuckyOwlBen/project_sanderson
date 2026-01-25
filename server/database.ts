@@ -6,19 +6,36 @@
  * No ORM complexity - just SQL and transactions for safety.
  */
 
-import Database from 'better-sqlite3';
+import sqlite3 from 'sqlite3';
+import { open, Database as SqliteDatabase } from 'sqlite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Use __dirname directly for compatibility with CommonJS
 const DB_PATH = path.join(__dirname, '..', 'prisma', 'dev.db');
 
-// Initialize database connection
-export const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL'); // Enable WAL mode for better concurrency
+// Initialize async database connection
+let db: SqliteDatabase | null = null;
+let dbInitialized = false;
+let dbError: Error | null = null;
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
+export async function initDatabase() {
+  try {
+    db = await open({
+      filename: DB_PATH,
+      driver: sqlite3.Database
+    });
+    await db.run('PRAGMA journal_mode = WAL');
+    await db.run('PRAGMA foreign_keys = ON');
+    dbInitialized = true;
+    console.log('[Database] Successfully initialized database');
+  } catch (error) {
+    dbError = error as Error;
+    console.error('[Database] Failed to initialize database:', dbError.message);
+    dbInitialized = false;
+  }
+}
+export { dbInitialized, dbError };
 
 // ============================================================================
 // TIER 0 TALENT MAPPING
@@ -78,10 +95,11 @@ export interface TalentResult {
 /**
  * Initialize database schema if it doesn't exist
  */
-export function initializeSchema(): void {
+export async function initializeSchema(): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
   try {
     // Create Character table
-    db.exec(`
+    await db.exec(`
       CREATE TABLE IF NOT EXISTS Character (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -204,7 +222,6 @@ export function initializeSchema(): void {
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
     `);
-
     console.log('[Database] Schema initialized');
   } catch (error) {
     if ((error as any).message.includes('already exists')) {
@@ -218,21 +235,20 @@ export function initializeSchema(): void {
 /**
  * Load a character from the database by ID
  */
-export function loadCharacter(characterId: string): CharacterData | null {
+export async function loadCharacter(characterId: string): Promise<CharacterData | null> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    const stmt = db.prepare(`SELECT * FROM Character WHERE id = ?`);
-    const char = stmt.get(characterId) as any;
-    
+    const char = await db.get(`SELECT * FROM Character WHERE id = ?`, characterId);
     if (!char) return null;
 
     // Load related data
-    const attrs = db.prepare('SELECT * FROM Attributes WHERE characterId = ?').get(characterId) as any;
-    const skills = db.prepare('SELECT skillName, value FROM Skill WHERE characterId = ?').all(characterId) as any[];
-    const talents = db.prepare('SELECT talentId FROM UnlockedTalent WHERE characterId = ?').all(characterId) as any[];
-    const expertises = db.prepare('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?').all(characterId) as any[];
-    const items = db.prepare('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?').all(characterId) as any[];
-    const resources = db.prepare('SELECT * FROM CharacterResources WHERE characterId = ?').get(characterId) as any;
-    const paths = db.prepare('SELECT pathName FROM PathSelection WHERE characterId = ?').all(characterId) as any[];
+    const attrs = await db.get('SELECT * FROM Attributes WHERE characterId = ?', characterId);
+    const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
+    const talents = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
+    const expertises = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
+    const items = await db.all('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?', characterId);
+    const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
+    const paths = await db.all('SELECT pathName FROM PathSelection WHERE characterId = ?', characterId);
 
     // Serialize to character format
     return {
@@ -278,164 +294,154 @@ export function loadCharacter(characterId: string): CharacterData | null {
 /**
  * Save a character to the database atomically
  */
-export function saveCharacter(
+export async function saveCharacter(
   character: CharacterData,
   spentPointsTracking?: { attributes?: number; skills?: number; talents?: number; level: number }
-): SaveResult {
+): Promise<SaveResult> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    const result = db.transaction(() => {
-      // Upsert character
-      const insertChar = db.prepare(`
-        INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, lastModified)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          name = excluded.name,
-          level = excluded.level,
-          pendingLevelPoints = excluded.pendingLevelPoints,
-          ancestry = excluded.ancestry,
-          sessionNotes = excluded.sessionNotes,
-          lastModified = excluded.lastModified
-      `);
-      
-      insertChar.run(
+    await db.run('BEGIN TRANSACTION');
+    // Upsert character
+    await db.run(`
+      INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, lastModified)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        level = excluded.level,
+        pendingLevelPoints = excluded.pendingLevelPoints,
+        ancestry = excluded.ancestry,
+        sessionNotes = excluded.sessionNotes,
+        lastModified = excluded.lastModified
+    `,
+      character.id,
+      character.name,
+      character.level ?? 1,
+      character.pendingLevelPoints ?? 0,
+      character.ancestry ?? null,
+      character.sessionNotes ?? '',
+      character.lastModified ?? new Date().toISOString()
+    );
+
+    // Save attributes
+    if (character.attributes) {
+      await db.run(`
+        INSERT INTO Attributes (id, characterId, strength, speed, intellect, willpower, awareness, presence)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET
+          strength = excluded.strength,
+          speed = excluded.speed,
+          intellect = excluded.intellect,
+          willpower = excluded.willpower,
+          awareness = excluded.awareness,
+          presence = excluded.presence
+      `,
+        `attr-${character.id}`,
         character.id,
-        character.name,
-        character.level ?? 1,
-        character.pendingLevelPoints ?? 0,
-        character.ancestry ?? null,
-        character.sessionNotes ?? '',
-        character.lastModified ?? new Date().toISOString()
+        character.attributes.strength ?? 2,
+        character.attributes.speed ?? 2,
+        character.attributes.intellect ?? 2,
+        character.attributes.willpower ?? 2,
+        character.attributes.awareness ?? 2,
+        character.attributes.presence ?? 2
       );
+    }
 
-      // Save attributes
-      if (character.attributes) {
-        const insertAttrs = db.prepare(`
-          INSERT INTO Attributes (id, characterId, strength, speed, intellect, willpower, awareness, presence)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(characterId) DO UPDATE SET
-            strength = excluded.strength,
-            speed = excluded.speed,
-            intellect = excluded.intellect,
-            willpower = excluded.willpower,
-            awareness = excluded.awareness,
-            presence = excluded.presence
-        `);
-        
-        insertAttrs.run(
-          `attr-${character.id}`,
+    // Save skills
+    if (character.skills) {
+      await db.run('DELETE FROM Skill WHERE characterId = ?', character.id);
+      for (const [skillName, value] of Object.entries(character.skills)) {
+        await db.run('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)',
+          `skill-${character.id}-${skillName}`, character.id, skillName, value);
+      }
+    }
+
+    // Save paths
+    if (character.paths && character.paths.length > 0) {
+      await db.run('DELETE FROM PathSelection WHERE characterId = ?', character.id);
+      for (const pathName of character.paths) {
+        await db.run('INSERT INTO PathSelection (id, characterId, pathName) VALUES (?, ?, ?)',
+          `path-${character.id}-${pathName}`, character.id, pathName);
+      }
+    }
+
+    // Save resources
+    if (character.resources) {
+      await db.run(`
+        INSERT INTO CharacterResources (id, characterId, healthCurrent, healthMax, focusCurrent, focusMax, investitureCurrent, investitureMax, investitureActive)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET
+          healthCurrent = excluded.healthCurrent,
+          healthMax = excluded.healthMax,
+          focusCurrent = excluded.focusCurrent,
+          focusMax = excluded.focusMax,
+          investitureCurrent = excluded.investitureCurrent,
+          investitureMax = excluded.investitureMax,
+          investitureActive = excluded.investitureActive
+      `,
+        `res-${character.id}`,
+        character.id,
+        character.resources.health?.current ?? 0,
+        character.resources.health?.max ?? 0,
+        character.resources.focus?.current ?? 0,
+        character.resources.focus?.max ?? 0,
+        character.resources.investiture?.current ?? 0,
+        character.resources.investiture?.max ?? 0,
+        character.resources.investiture?.isActive ? 1 : 0
+      );
+    }
+
+    // Save inventory
+    if (character.inventory && Array.isArray(character.inventory)) {
+      await db.run('DELETE FROM InventoryItem WHERE characterId = ?', character.id);
+      for (const item of character.inventory) {
+        await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
+          `inv-${character.id}-${item.itemId}`,
           character.id,
-          character.attributes.strength ?? 2,
-          character.attributes.speed ?? 2,
-          character.attributes.intellect ?? 2,
-          character.attributes.willpower ?? 2,
-          character.attributes.awareness ?? 2,
-          character.attributes.presence ?? 2
+          item.itemId,
+          item.quantity ?? 1,
+          item.equipped ? 1 : 0
         );
       }
+    }
 
-      // Save skills
-      if (character.skills) {
-        db.prepare('DELETE FROM Skill WHERE characterId = ?').run(character.id);
-        const insertSkill = db.prepare('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)');
-        for (const [skillName, value] of Object.entries(character.skills)) {
-          insertSkill.run(`skill-${character.id}-${skillName}`, character.id, skillName, value);
-        }
+    // Track spent points if provided
+    if (spentPointsTracking) {
+      const spent = await db.get('SELECT * FROM SpentPoints WHERE characterId = ?', character.id);
+      const attributes = spent?.attributes ? JSON.parse(spent.attributes) : {};
+      const skills = spent?.skills ? JSON.parse(spent.skills) : {};
+      const talents = spent?.talents ? JSON.parse(spent.talents) : {};
+
+      if (spentPointsTracking.attributes !== undefined) {
+        attributes[spentPointsTracking.level] = spentPointsTracking.attributes;
+      }
+      if (spentPointsTracking.skills !== undefined) {
+        skills[spentPointsTracking.level] = spentPointsTracking.skills;
+      }
+      if (spentPointsTracking.talents !== undefined) {
+        talents[spentPointsTracking.level] = spentPointsTracking.talents;
       }
 
-      // Save paths
-      if (character.paths && character.paths.length > 0) {
-        db.prepare('DELETE FROM PathSelection WHERE characterId = ?').run(character.id);
-        const insertPath = db.prepare('INSERT INTO PathSelection (id, characterId, pathName) VALUES (?, ?, ?)');
-        for (const pathName of character.paths) {
-          insertPath.run(`path-${character.id}-${pathName}`, character.id, pathName);
-        }
-      }
+      await db.run(`
+        INSERT INTO SpentPoints (id, characterId, attributes, skills, talents)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET
+          attributes = excluded.attributes,
+          skills = excluded.skills,
+          talents = excluded.talents
+      `,
+        `spent-${character.id}`,
+        character.id,
+        JSON.stringify(attributes),
+        JSON.stringify(skills),
+        JSON.stringify(talents)
+      );
+    }
 
-      // Save resources
-      if (character.resources) {
-        const insertResources = db.prepare(`
-          INSERT INTO CharacterResources (id, characterId, healthCurrent, healthMax, focusCurrent, focusMax, investitureCurrent, investitureMax, investitureActive)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON CONFLICT(characterId) DO UPDATE SET
-            healthCurrent = excluded.healthCurrent,
-            healthMax = excluded.healthMax,
-            focusCurrent = excluded.focusCurrent,
-            focusMax = excluded.focusMax,
-            investitureCurrent = excluded.investitureCurrent,
-            investitureMax = excluded.investitureMax,
-            investitureActive = excluded.investitureActive
-        `);
-        
-        insertResources.run(
-          `res-${character.id}`,
-          character.id,
-          character.resources.health?.current ?? 0,
-          character.resources.health?.max ?? 0,
-          character.resources.focus?.current ?? 0,
-          character.resources.focus?.max ?? 0,
-          character.resources.investiture?.current ?? 0,
-          character.resources.investiture?.max ?? 0,
-          character.resources.investiture?.isActive ? 1 : 0
-        );
-      }
-
-      // Save inventory
-      if (character.inventory && Array.isArray(character.inventory)) {
-        db.prepare('DELETE FROM InventoryItem WHERE characterId = ?').run(character.id);
-        const insertItem = db.prepare('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)');
-        for (const item of character.inventory) {
-          insertItem.run(
-            `inv-${character.id}-${item.itemId}`,
-            character.id,
-            item.itemId,
-            item.quantity ?? 1,
-            item.equipped ? 1 : 0
-          );
-        }
-      }
-
-      // Track spent points if provided
-      if (spentPointsTracking) {
-        const spent = db.prepare('SELECT * FROM SpentPoints WHERE characterId = ?').get(character.id) as any;
-        
-        const attributes = spent?.attributes ? JSON.parse(spent.attributes) : {};
-        const skills = spent?.skills ? JSON.parse(spent.skills) : {};
-        const talents = spent?.talents ? JSON.parse(spent.talents) : {};
-
-        if (spentPointsTracking.attributes !== undefined) {
-          attributes[spentPointsTracking.level] = spentPointsTracking.attributes;
-        }
-        if (spentPointsTracking.skills !== undefined) {
-          skills[spentPointsTracking.level] = spentPointsTracking.skills;
-        }
-        if (spentPointsTracking.talents !== undefined) {
-          talents[spentPointsTracking.level] = spentPointsTracking.talents;
-        }
-
-        const insertSpent = db.prepare(`
-          INSERT INTO SpentPoints (id, characterId, attributes, skills, talents)
-          VALUES (?, ?, ?, ?, ?)
-          ON CONFLICT(characterId) DO UPDATE SET
-            attributes = excluded.attributes,
-            skills = excluded.skills,
-            talents = excluded.talents
-        `);
-        
-        insertSpent.run(
-          `spent-${character.id}`,
-          character.id,
-          JSON.stringify(attributes),
-          JSON.stringify(skills),
-          JSON.stringify(talents)
-        );
-      }
-
-      return { success: true, id: character.id };
-    })();
-
+    await db.run('COMMIT');
     console.log(`[Database] Saved character: ${character.name} (${character.id})`);
-    return result as SaveResult;
+    return { success: true, id: character.id };
   } catch (error) {
+    if (db) await db.run('ROLLBACK');
     console.error(`[Database] Error saving character ${character.id}:`, error);
     return { success: false, error: (error as Error).message };
   }
@@ -444,70 +450,62 @@ export function saveCharacter(
 /**
  * Unlock talents atomically with transaction safety
  */
-export function unlockTalent(
+export async function unlockTalent(
   characterId: string,
   talentIds: string[],
   level: number
-): TalentResult {
+): Promise<TalentResult> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    const result = db.transaction(() => {
-      // Verify character exists
-      const char = db.prepare('SELECT id FROM Character WHERE id = ?').get(characterId);
-      if (!char) {
-        throw new Error(`Character not found: ${characterId}`);
-      }
+    await db.run('BEGIN TRANSACTION');
+    // Verify character exists
+    const char = await db.get('SELECT id FROM Character WHERE id = ?', characterId);
+    if (!char) {
+      throw new Error(`Character not found: ${characterId}`);
+    }
 
-      // Get current talents
-      const existing = db.prepare('SELECT talentId FROM UnlockedTalent WHERE characterId = ?').all(characterId) as any[];
-      const existingIds = new Set(existing.map((t: any) => t.talentId));
+    // Get current talents
+    const existing = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
+    const existingIds = new Set(existing.map((t: any) => t.talentId));
 
-      // Only create talents that don't already exist
-      const newTalents = talentIds.filter(id => !existingIds.has(id));
-      
-      const now = new Date().toISOString();
-      const insertTalent = db.prepare(`
-        INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level)
-        VALUES (?, ?, ?, ?, ?)
-      `);
-
-      for (const talentId of newTalents) {
-        insertTalent.run(
-          `talent-${characterId}-${talentId}`,
-          characterId,
-          talentId,
-          now,
-          level
-        );
-      }
-
-      // Get all unlocked talents
-      const allTalents = db.prepare('SELECT talentId FROM UnlockedTalent WHERE characterId = ?').all(characterId) as any[];
-
-      // Update spent points tracking
-      const spent = db.prepare('SELECT * FROM SpentPoints WHERE characterId = ?').get(characterId) as any;
-      const talents = spent?.talents ? JSON.parse(spent.talents) : {};
-      talents[level] = (talents[level] ?? 0) + newTalents.length;
-
-      const insertSpent = db.prepare(`
-        INSERT INTO SpentPoints (id, characterId, talents, attributes, skills)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(characterId) DO UPDATE SET talents = excluded.talents
-      `);
-
-      insertSpent.run(
-        `spent-${characterId}`,
+    // Only create talents that don't already exist
+    const newTalents = talentIds.filter(id => !existingIds.has(id));
+    const now = new Date().toISOString();
+    for (const talentId of newTalents) {
+      await db.run(
+        `INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level) VALUES (?, ?, ?, ?, ?)`,
+        `talent-${characterId}-${talentId}`,
         characterId,
-        JSON.stringify(talents),
-        spent?.attributes ?? '{}',
-        spent?.skills ?? '{}'
+        talentId,
+        now,
+        level
       );
+    }
 
-      return allTalents.map((t: any) => t.talentId);
-    })();
+    // Get all unlocked talents
+    const allTalents = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
 
+    // Update spent points tracking
+    const spent = await db.get('SELECT * FROM SpentPoints WHERE characterId = ?', characterId);
+    const talents = spent?.talents ? JSON.parse(spent.talents) : {};
+    talents[level] = (talents[level] ?? 0) + newTalents.length;
+
+    await db.run(
+      `INSERT INTO SpentPoints (id, characterId, talents, attributes, skills)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET talents = excluded.talents`,
+      `spent-${characterId}`,
+      characterId,
+      JSON.stringify(talents),
+      spent?.attributes ?? '{}',
+      spent?.skills ?? '{}'
+    );
+
+    await db.run('COMMIT');
     console.log(`[Database] Unlocked talents for ${characterId}: ${talentIds.join(', ')}`);
-    return { success: true, unlockedTalents: result as string[] };
+    return { success: true, unlockedTalents: allTalents.map((t: any) => t.talentId) };
   } catch (error) {
+    if (db) await db.run('ROLLBACK');
     console.error(`[Database] Error unlocking talents for ${characterId}:`, error);
     return { success: false, error: (error as Error).message };
   }
@@ -530,14 +528,17 @@ export function getTalentPoints(characterId: string, level: number): number {
 /**
  * Get amount spent on a category at a specific level
  */
-export function getSpentPoints(
+/**
+ * Get amount spent on a category at a specific level
+ */
+export async function getSpentPoints(
   characterId: string,
   category: 'attributes' | 'skills' | 'talents',
   level: number
-): number {
+): Promise<number> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    const spent = db.prepare('SELECT * FROM SpentPoints WHERE characterId = ?').get(characterId) as any;
-    
+    const spent = await db.get('SELECT * FROM SpentPoints WHERE characterId = ?', characterId);
     if (!spent) return 0;
 
     let data: Record<string, number> = {};
@@ -562,13 +563,19 @@ export function getSpentPoints(
 /**
  * List all characters
  */
-export function listCharacters(): CharacterData[] {
+export async function listCharacters(): Promise<CharacterData[]> {
+  if (!dbInitialized || !db) {
+    console.warn('[Database] Database not initialized, returning empty list');
+    return [];
+  }
   try {
-    const chars = db.prepare('SELECT * FROM Character ORDER BY lastModified DESC').all() as any[];
-    return chars.map(c => {
-      const loaded = loadCharacter(c.id);
-      return loaded || c;
-    }).filter(c => c !== null) as CharacterData[];
+    const chars = await db.all('SELECT * FROM Character ORDER BY lastModified DESC');
+    const results: CharacterData[] = [];
+    for (const c of chars) {
+      const loaded = await loadCharacter(c.id);
+      if (loaded) results.push(loaded);
+    }
+    return results;
   } catch (error) {
     console.error('[Database] Error listing characters:', error);
     throw error;
@@ -578,14 +585,13 @@ export function listCharacters(): CharacterData[] {
 /**
  * Delete a character
  */
-export function deleteCharacter(characterId: string): SaveResult {
+export async function deleteCharacter(characterId: string): Promise<SaveResult> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    const result = db.prepare('DELETE FROM Character WHERE id = ?').run(characterId);
-    
+    const result = await db.run('DELETE FROM Character WHERE id = ?', characterId);
     if (result.changes === 0) {
       return { success: false, error: 'Character not found' };
     }
-
     console.log(`[Database] Deleted character: ${characterId}`);
     return { success: true, id: characterId };
   } catch (error) {
@@ -597,9 +603,10 @@ export function deleteCharacter(characterId: string): SaveResult {
 /**
  * Clear all data from database (for testing)
  */
-export function clearDatabase(): void {
+export async function clearDatabase(): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
   try {
-    db.exec(`
+    await db.exec(`
       DELETE FROM UnlockedSingerForm;
       DELETE FROM UnlockedTalent;
       DELETE FROM SelectedExpertise;
@@ -620,4 +627,4 @@ export function clearDatabase(): void {
   }
 }
 
-export default db;
+

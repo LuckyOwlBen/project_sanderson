@@ -246,8 +246,8 @@ export class CharacterName implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    // Try to save name via API first
-    this.creationApiService.updateName(this.characterId, this.character.name)
+    // Try to save name and level via API first
+    this.creationApiService.updateName(this.characterId, this.character.name, this.character.level)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

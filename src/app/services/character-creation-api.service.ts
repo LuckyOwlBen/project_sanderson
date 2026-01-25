@@ -61,10 +61,10 @@ export class CharacterCreationApiService {
    * Update character name
    * POST /api/characters/:id/name
    */
-  updateName(id: string, name: string): Observable<CharacterNameUpdateResponse> {
+  updateName(id: string, name: string, level?: number): Observable<CharacterNameUpdateResponse> {
     return this.http.post<CharacterNameUpdateResponse>(
       `${this.charactersUrl}/${id}/name`,
-      { name }
+      { name, level }
     );
   }
 

@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Character } from '../../../character/character';
 import { TalentNode, TalentTree, ActionCostCode } from '../../../character/talents/talentInterface';
-import { ALL_TALENT_PATHS, getTalentTree } from '../../../character/talents/talentTrees/talentTrees';
+import { ALL_TALENT_PATHS, getTalentTree, getTalentPath } from '../../../character/talents/talentTrees/talentTrees';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
 import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
@@ -54,23 +54,51 @@ export class CharacterPowersTab {
   }
 
   getPowers(): TalentNode[] {
-    const powerIds = Array.from(this.character?.unlockedTalents || []);
-    const powers: TalentNode[] = [];
+    // Safely handle unlockedTalents which can be a Set or an array
+    let powerIds: string[] = [];
+    if (this.character?.unlockedTalents) {
+      if (this.character.unlockedTalents instanceof Set) {
+        powerIds = Array.from(this.character.unlockedTalents);
+      } else if (Array.isArray(this.character.unlockedTalents)) {
+        powerIds = this.character.unlockedTalents;
+      }
+    }
     
+    const powers: TalentNode[] = [];
     const allTrees: TalentTree[] = [];
     
+    // Load all talent paths (main core + specialization)
+    if (this.character?.paths && this.character.paths.length > 0) {
+      this.character.paths.forEach(pathName => {
+        const path = getTalentPath(pathName);
+        if (path) {
+          if (path.talentNodes) {
+            allTrees.push({ pathName: path.name, nodes: path.talentNodes });
+          }
+          if (path.paths) {
+            allTrees.push(...path.paths);
+          }
+        }
+      });
+    }
+    
+    // Also load all other paths from ALL_TALENT_PATHS as fallback
     Object.values(ALL_TALENT_PATHS).forEach(path => {
       if (path.talentNodes) {
         allTrees.push({ pathName: path.name, nodes: path.talentNodes });
       }
-      allTrees.push(...path.paths);
+      if (path.paths) {
+        allTrees.push(...path.paths);
+      }
     });
     
+    // Add ancestry tree if applicable
     const ancestryTree = getTalentTree('singer');
     if (ancestryTree) {
       allTrees.push(ancestryTree);
     }
     
+    // Find and add all talents
     powerIds.forEach(powerId => {
       for (const tree of allTrees) {
         const power = tree.nodes.find(n => n.id === powerId);
@@ -80,6 +108,7 @@ export class CharacterPowersTab {
         }
       }
     });
+    
     // If the character has spoken the First Ideal, ensure base surge powers are shown
     if (this.character?.radiantPath.hasSpokenIdeal()) {
       const surgeTreeIds = this.character.radiantPath.getSurgeTrees();

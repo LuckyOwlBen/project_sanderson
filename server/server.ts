@@ -6,6 +6,7 @@ import util from 'util';
 import path from 'path';
 import multer from 'multer';
 // import sharp from 'sharp'; // TODO: Fix C++ build issue on Node 24.11.1
+
 import talentRules from './talent-rules';
 import talentService from './talent-service';
 import attributeAllocator from './services/attribute-allocator';
@@ -19,6 +20,23 @@ import createAllocationRoutes from './routes/allocations';
 import createCalculationsRoutes from './routes/calculations';
 import createSkillCalculationsRoutes from './routes/skill-calculations';
 import { createAttackCalculationsRoutes } from './routes/attack-calculations';
+
+import {
+  initDatabase,
+  initializeSchema,
+  saveCharacter,
+  loadCharacter,
+  listCharacters,
+  deleteCharacter,
+  unlockTalent,
+  getSpentPoints,
+  clearDatabase
+} from './database';
+
+// Initialize database at server startup
+initDatabase().then(() => initializeSchema()).catch((err) => {
+  console.error('[Startup] Failed to initialize database:', err);
+});
 
 const app = express();
 const httpServer = createServer(app);
@@ -364,8 +382,7 @@ app.post('/api/characters/create', async (req, res) => {
     
     // Also save to database
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Create] Saved new character to database: ${id}`);
     } catch (dbError) {
       console.warn(`[Create] Warning: Failed to save to database: ${dbError.message}`);
@@ -424,8 +441,7 @@ app.post('/api/characters/save', async (req, res) => {
     
     // Also save to database
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Database] Saved character to database: ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Database] Warning: Failed to save character to database: ${dbError.message}`);
@@ -502,8 +518,8 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     
     // Also save to database
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character);
+      // database.js require removed; use imported async functions
+      await saveCharacter(character);
       console.log(`[Inventory] Saved purchase to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save purchase to database: ${dbError.message}`);
@@ -568,8 +584,8 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     
     // Also save to database
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character);
+      // database.js require removed; use imported async functions
+      await saveCharacter(character);
       console.log(`[Inventory] Saved starting kit to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save starting kit to database: ${dbError.message}`);
@@ -640,7 +656,7 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     // Also save to database
     try {
       const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Inventory] Saved item addition to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save item addition to database: ${dbError.message}`);
@@ -707,7 +723,7 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     // Also save to database
     try {
       const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Inventory] Saved item removal to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save item removal to database: ${dbError.message}`);
@@ -813,7 +829,7 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     // Also save to database
     try {
       const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
@@ -933,7 +949,7 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     // Also save to database
     try {
       const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
@@ -1055,7 +1071,7 @@ app.post('/api/characters/:id/paths', async (req, res) => {
     // Also save to database
     try {
       const db = require('./database.js');
-      db.saveCharacter(character);
+      await saveCharacter(character);
       console.log(`[Paths] Saved paths to database for ${character.name} (${character.id})`);
     } catch (dbError) {
       console.warn(`[Paths] Warning: Failed to save paths to database: ${dbError.message}`);
@@ -1112,10 +1128,24 @@ app.get('/api/characters/load/:id', async (req, res) => {
 // List all characters
 app.get('/api/characters/list', async (req, res) => {
   try {
+    // Try to load from database first
+    let characters: any[] = [];
+    try {
+      const db = require('./database.js');
+      characters = await listCharacters();
+      if (characters && characters.length > 0) {
+        console.log(`[Characters/List] Retrieved ${characters.length} characters from database`);
+        return res.json(characters);
+      }
+    } catch (dbError) {
+      console.warn('[Characters/List] Database not available, falling back to filesystem:', (dbError as Error).message);
+    }
+    
+    // Fallback: Load from filesystem
     const files = await fsPromises.readdir(CHARACTERS_DIR);
     const jsonFiles = files.filter(f => f.endsWith('.json'));
     
-    const characters = await Promise.all(
+    const fileCharacters = await Promise.all(
       jsonFiles.map(async (file) => {
         try {
           const filepath = path.join(CHARACTERS_DIR, file);
@@ -1138,15 +1168,15 @@ app.get('/api/characters/list', async (req, res) => {
     );
     
     // Filter out any failed reads and sort by last modified
-    const validCharacters = characters
+    const validCharacters = fileCharacters
       .filter(c => c !== null)
       .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
     
-    console.log(`Listed ${validCharacters.length} characters`);
+    console.log(`[Characters/List] Retrieved ${validCharacters.length} characters from filesystem`);
     
     res.json(validCharacters);
   } catch (error) {
-    console.error('Error listing characters:', error);
+    console.error('[Characters/List] Error listing characters:', error);
     res.status(500).json({ 
       success: false, 
       error: error.message 
@@ -1433,8 +1463,7 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
     
     // Also save to database
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character, {
+      await saveCharacter(character, {
         attributes: increaseTotal,
         level
       });
@@ -1510,8 +1539,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
     
     // Also save to database (like talents do)
     try {
-      const db = require('./database.js');
-      db.saveCharacter(character, {
+      await saveCharacter(character, {
         skills: increaseTotal,
         level,
         attributes: character.spentPoints.attributes?.[level] ?? 0,
@@ -1608,13 +1636,13 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
 app.delete('/api/characters/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    
-    await fsPromises.unlink(filepath);
-    
-    console.log(`Deleted character: ${id}`);
-    
-    res.json({ success: true });
+    const result = await deleteCharacter(id);
+    if (result.success) {
+      console.log(`Deleted character: ${id}`);
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ success: false, error: result.error || 'Character not found' });
+    }
   } catch (error) {
     if (error.code === 'ENOENT') {
       return res.status(404).json({ 
