@@ -643,17 +643,8 @@ export class TalentView implements OnInit, OnDestroy {
     // Base points provided by server for this level
     const totalPoints = this.baseTalentPoints ?? 0;
     
-    // Build a set of tier 0 talent IDs (they don't cost points)
+    // Only main path tier 0 talent is free
     const tier0Talents = new Set<string>();
-    this.availableTrees.forEach(tree => {
-      tree.nodes.forEach(talent => {
-        if (talent.tier === 0) {
-          tier0Talents.add(talent.id);
-        }
-      });
-    });
-
-    // Ensure main path tier 0 is treated as free even if core tree is hidden
     const mainPath = this.character.paths?.[0];
     if (mainPath) {
       const mainPathDef = getTalentPath(mainPath);
@@ -663,13 +654,6 @@ export class TalentView implements OnInit, OnDestroy {
       }
     }
 
-    // Also mark any core-path bonus tier 0 talents as free if shown in the core selector
-    this.availableCorePaths.forEach(corePath => {
-      if (corePath?.keyTalent?.tier === 0) {
-        tier0Talents.add(corePath.keyTalent.id);
-      }
-    });
-    
     let newTalents = 0;
     this.unlockedTalents.forEach(talentId => {
       if (!this.lockedTalents.has(talentId) && !tier0Talents.has(talentId)) {
