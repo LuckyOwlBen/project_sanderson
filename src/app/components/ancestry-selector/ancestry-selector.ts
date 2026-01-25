@@ -5,6 +5,7 @@ import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -32,6 +33,7 @@ export class AncestrySelector implements OnInit {
   
   selectedAncestry: Ancestry | null = null;
   Ancestry = Ancestry; // Expose enum to template
+  isLoading: boolean = false;
 
   ancestries: AncestryInfo[] = [
     {
@@ -67,7 +69,8 @@ export class AncestrySelector implements OnInit {
     private characterState: CharacterStateService,
     private router: Router,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService
+    private storageService: CharacterStorageService,
+    private creationApiService: CharacterCreationApiService
   ) {}
 
   ngOnInit(): void {
@@ -94,9 +97,30 @@ export class AncestrySelector implements OnInit {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     const character = this.characterState.getCharacter();
-    if ((character as any)?.id) {
-      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    const characterId = (character as any)?.id;
+    
+    if (!characterId || !this.selectedAncestry) {
+      return;
     }
+
+    this.isLoading = true;
+    this.creationApiService.updateAncestry(characterId, this.selectedAncestry)
+      .subscribe({
+        next: (response) => {
+          console.log('[AncestrySelector] Ancestry saved to server:', response);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('[AncestrySelector] Failed to save ancestry:', error);
+          this.isLoading = false;
+          // Fall back to local storage if API fails
+          this.storageService.saveCharacter(character).subscribe({ 
+            next: () => console.log('[AncestrySelector] Ancestry saved to localStorage'),
+            error: () => console.error('[AncestrySelector] Failed to save ancestry to localStorage')
+          });
+        }
+      });
   }
 }
+
 

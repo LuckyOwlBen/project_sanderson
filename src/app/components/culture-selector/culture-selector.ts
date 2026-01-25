@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
 import { ALL_CULTURES } from '../../character/culture/allCultures';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
+import { Subject, takeUntil } from 'rxjs';
 
 interface CultureInfo {
   culture: CulturalInterface;
@@ -31,20 +33,29 @@ interface CultureInfo {
   templateUrl: './culture-selector.html',
   styleUrls: ['./culture-selector.scss']
 })
-export class CultureSelector implements OnInit {
+export class CultureSelector implements OnInit, OnDestroy {
   private readonly STEP_INDEX = 1; // Culture is step 1
+  private destroy$ = new Subject<void>();
   
   allCultureInfos: CultureInfo[] = [];
   selectedCulture: CultureInfo | null = null;
   confirmedCultures: CulturalInterface[] = [];
   showValidation = false;
+  isLoading = false;
+  private characterId: string | null = null;
   
   constructor(
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService
+    private storageService: CharacterStorageService,
+    private creationApiService: CharacterCreationApiService
   ) {
     this.initializeCultureInfos();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   
   get canProgress(): boolean {
@@ -69,6 +80,7 @@ export class CultureSelector implements OnInit {
 
   ngOnInit(): void {
     const current = this.characterState.getCharacter();
+    this.characterId = (current as any)?.id || null;
     this.confirmedCultures = current.cultures || [];
     this.initializeCultureInfos();
     this.updateValidation();
@@ -181,8 +193,32 @@ export class CultureSelector implements OnInit {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     const character = this.characterState.getCharacter();
-    if ((character as any)?.id) {
-      this.storageService.saveCharacter(character).subscribe({ next: () => {}, error: () => {} });
+    if (!this.characterId) {
+      return;
     }
+
+    this.isLoading = true;
+
+    // Try to save cultures via API first
+    this.creationApiService.updateCultures(this.characterId, this.confirmedCultures)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('[CultureSelector] Cultures saved to server:', response);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('[CultureSelector] Failed to save cultures via API:', err);
+          this.isLoading = false;
+
+          // Fallback to localStorage
+          this.storageService.saveCharacter(character).subscribe({
+            next: () => {
+              console.log('[CultureSelector] Cultures saved to localStorage');
+            },
+            error: () => console.error('[CultureSelector] Failed to save cultures to localStorage')
+          });
+        }
+      });
   }
 }

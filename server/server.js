@@ -13,6 +13,7 @@ const InventoryManager = require('./inventory-manager');
 const itemDefinitions = require('./item-definitions');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
+const createCreationRoutes = require('./routes/creation');
 
 const app = express();
 const httpServer = createServer(app);
@@ -137,6 +138,9 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve images directory as static
 app.use('/images', express.static(IMAGES_DIR));
+
+// Register character creation routes (ancestry, name, cultures, attributes)
+createCreationRoutes(app, CHARACTERS_DIR);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {
@@ -338,6 +342,15 @@ app.post('/api/characters/create', async (req, res) => {
     
     await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
     
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Create] Saved new character to database: ${id}`);
+    } catch (dbError) {
+      console.warn(`[Create] Warning: Failed to save to database: ${dbError.message}`);
+    }
+    
     console.log(`Created new character: ${id}`);
     
     res.json({ 
@@ -388,6 +401,16 @@ app.post('/api/characters/save', async (req, res) => {
     await fsPromises.rename(tempPath, filepath);
     
     console.log(`Saved character: ${character.name} (${character.id})`);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Database] Saved character to database: ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Database] Warning: Failed to save character to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
     
     res.json({ 
       success: true, 
@@ -456,6 +479,16 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved purchase to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save purchase to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -512,6 +545,16 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     // Save character with new inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved starting kit to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save starting kit to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -573,6 +616,16 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved item addition to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save item addition to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -630,6 +683,16 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved item removal to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save item removal to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -726,6 +789,16 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -836,6 +909,16 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -943,10 +1026,21 @@ app.post('/api/characters/:id/paths', async (req, res) => {
       character.paths.push(specialization);
     }
     
+    character.lastModified = new Date().toISOString();
     await fsPromises.writeFile(
       path.join(CHARACTERS_DIR, `character_${id}.json`),
       JSON.stringify(character, null, 2)
     );
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character);
+      console.log(`[Paths] Saved paths to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Paths] Warning: Failed to save paths to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -1316,6 +1410,19 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
     character.spentPoints.attributes[level] = increaseTotal;
 
     await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+    
+    // Also save to database
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character, {
+        attributes: increaseTotal,
+        level
+      });
+      console.log(`[Attributes] Saved attributes to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Attributes] Warning: Failed to save attributes to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,
@@ -1378,7 +1485,23 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 
     console.log(`[Skills] Saved skills for ${character.name} (${character.id}):`, character.skills);
 
+    // Save to both JSON file (for backwards compatibility) and database
     await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
+    
+    // Also save to database (like talents do)
+    try {
+      const db = require('./database.js');
+      db.saveCharacter(character, {
+        skills: increaseTotal,
+        level,
+        attributes: character.spentPoints.attributes?.[level] ?? 0,
+        talents: character.spentPoints.talents?.[level] ?? 0
+      });
+      console.log(`[Skills] Saved skills to database for ${character.name} (${character.id})`);
+    } catch (dbError) {
+      console.warn(`[Skills] Warning: Failed to save skills to database: ${dbError.message}`);
+      // Continue anyway - JSON save succeeded
+    }
 
     res.json({
       success: true,

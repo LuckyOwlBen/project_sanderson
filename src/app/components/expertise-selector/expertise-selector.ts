@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { ALL_EXPERTISES, CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { LevelUpManager } from '../../levelup/levelUpManager';
@@ -47,6 +48,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
+    private creationApiService: CharacterCreationApiService,
     private levelUpManager: LevelUpManager,
     private storageService: CharacterStorageService
   ) {}
@@ -294,7 +296,18 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     if (this.character && this.characterId) {
-      this.storageService.saveCharacter(this.character).subscribe({ next: () => {}, error: () => {} });
+      // API-first approach with localStorage fallback
+      this.creationApiService.updateExpertises(this.characterId, this.character.selectedExpertises)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            console.log(`[ExpertiseSelector] Expertises saved via API for ${this.characterId}`);
+          },
+          error: (err) => {
+            console.warn(`[ExpertiseSelector] API error, falling back to storage:`, err);
+            this.storageService.saveCharacter(this.character!).subscribe({ next: () => {}, error: () => {} });
+          }
+        });
     }
   }
 }

@@ -13,6 +13,7 @@ import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { ActivatedRoute } from '@angular/router';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { LevelUpApiService } from '../../services/levelup-api.service';
@@ -43,6 +44,7 @@ export class CharacterName implements OnInit, OnDestroy {
   nameError: string = '';
   suggestedNames: string[] = [];
   isLevelUpMode: boolean = false;
+  isLoading: boolean = false;
   private characterId: string | null = null;
   availableLevels: number[] = [];
 
@@ -51,6 +53,7 @@ export class CharacterName implements OnInit, OnDestroy {
     private characterState: CharacterStateService,
     private validationService: StepValidationService,
     private storageService: CharacterStorageService,
+    private creationApiService: CharacterCreationApiService,
     private levelUpManager: LevelUpManager,
     private levelUpApi: LevelUpApiService
   ) {
@@ -232,23 +235,52 @@ export class CharacterName implements OnInit, OnDestroy {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    if (this.character && this.characterId) {
-      // Ensure the latest name is on the character before saving
-      if (this.nameError === '') {
-        this.character.name = this.characterName.trim();
-      }
-      this.storageService.saveCharacter(this.character).subscribe({
-        next: () => {
+    if (!this.character || !this.characterId) {
+      return;
+    }
+
+    // Ensure the latest name is on the character before saving
+    if (this.nameError === '') {
+      this.character.name = this.characterName.trim();
+    }
+
+    this.isLoading = true;
+
+    // Try to save name via API first
+    this.creationApiService.updateName(this.characterId, this.character.name)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('[CharacterName] Name saved to server:', response);
+          this.isLoading = false;
+
           // If level > 1, initialize the level with cumulative points
           if (this.character && this.character.level > 1) {
             this.levelUpApi.initializeLevel(this.characterId!, this.character.level).subscribe({
               next: () => {},
-              error: (err) => console.error('Failed to initialize level:', err)
+              error: (err) => console.error('[CharacterName] Failed to initialize level:', err)
             });
           }
         },
-        error: () => {}
+        error: (err) => {
+          console.error('[CharacterName] Failed to save name via API:', err);
+          this.isLoading = false;
+
+          // Fallback to localStorage
+          this.storageService.saveCharacter(this.character!).subscribe({
+            next: () => {
+              console.log('[CharacterName] Name saved to localStorage');
+              if (this.character && this.character.level > 1) {
+                this.levelUpApi.initializeLevel(this.characterId!, this.character.level).subscribe({
+                  next: () => {},
+                  error: (err) => console.error('[CharacterName] Failed to initialize level:', err)
+                });
+              }
+            },
+            error: () => console.error('[CharacterName] Failed to save name to localStorage')
+          });
+        }
       });
-    }
   }
 }
+

@@ -379,6 +379,21 @@ export function saveCharacter(
         );
       }
 
+      // Save inventory
+      if (character.inventory && Array.isArray(character.inventory)) {
+        db.prepare('DELETE FROM InventoryItem WHERE characterId = ?').run(character.id);
+        const insertItem = db.prepare('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)');
+        for (const item of character.inventory) {
+          insertItem.run(
+            `inv-${character.id}-${item.itemId}`,
+            character.id,
+            item.itemId,
+            item.quantity ?? 1,
+            item.equipped ? 1 : 0
+          );
+        }
+      }
+
       // Track spent points if provided
       if (spentPointsTracking) {
         const spent = db.prepare('SELECT * FROM SpentPoints WHERE characterId = ?').get(character.id) as any;

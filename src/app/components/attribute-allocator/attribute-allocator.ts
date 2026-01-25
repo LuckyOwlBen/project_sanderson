@@ -29,6 +29,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
@@ -57,6 +58,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   movementSpeed: number = 0;
   recoveryDie: string = '';
   isLevelUpMode: boolean = false;
+  isLoading: boolean = false;
   private characterId: string | null = null;
   private levelTables?: LevelTables;
   private serverAttributePoints?: number;
@@ -66,6 +68,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   constructor(
     private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
+    private creationApiService: CharacterCreationApiService,
     private levelUpApi: LevelUpApiService,
     private validationService: StepValidationService
   ) {
@@ -160,37 +163,6 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   // Offline mode removed: no local points tables
 
-  private persistAttributes(): void {
-    if (!this.character || !this.characterId) {
-      return;
-    }
-
-    const payload = {
-      strength: this.character.attributes.strength,
-      speed: this.character.attributes.speed,
-      awareness: this.character.attributes.awareness,
-      intellect: this.character.attributes.intellect,
-      willpower: this.character.attributes.willpower,
-      presence: this.character.attributes.presence
-    };
-
-    // In creation mode (level > 1), pass isCreationMode flag to use cumulative points
-    const isCreationMode = (this.character.level ?? 1) > 1;
-    this.levelUpApi.updateAttributeSlice(this.characterId, payload, isCreationMode)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {},
-        error: () => {}
-      });
-  }
-
-  // Persist hook called by CharacterCreatorView before navigating to next step
-  public persistStep(): void {
-    if (this.characterId) {
-      this.persistAttributes();
-    }
-  }
-
   private initializeAttributes(): void {
     if (!this.character || this.isInitialized) return;
 
@@ -275,5 +247,44 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     // Has pending changes if there are points available to allocate
     const hasPending = this.remainingPoints > 0;
     this.pendingChange.emit(hasPending);
+  }
+
+  public persistStep(): void {
+    if (this.character && this.characterId) {
+      // Convert Attributes to plain object for API
+      const attributesObj = {
+        strength: this.character.attributes.strength,
+        speed: this.character.attributes.speed,
+        intellect: this.character.attributes.intellect,
+        willpower: this.character.attributes.willpower,
+        awareness: this.character.attributes.awareness,
+        presence: this.character.attributes.presence
+      };
+
+      // API-first approach with levelUpApi fallback
+      this.creationApiService.updateAttributes(this.characterId, attributesObj)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            console.log(`[AttributeAllocator] Attributes saved via API for ${this.characterId}`);
+          },
+          error: (err: any) => {
+            console.warn(`[AttributeAllocator] API error, falling back to levelUpApi:`, err);
+            // Fallback to levelUpApi if creation API fails
+            if (this.characterId) {
+              this.levelUpApi.updateAttributeSlice(this.characterId, attributesObj)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                  next: () => {
+                    console.log(`[AttributeAllocator] Attributes saved via levelUpApi fallback`);
+                  },
+                  error: (fallbackErr: any) => {
+                    console.error(`[AttributeAllocator] Both APIs failed:`, fallbackErr);
+                  }
+                });
+            }
+          }
+        });
+    }
   }
 }
