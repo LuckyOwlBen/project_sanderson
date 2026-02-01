@@ -20,6 +20,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AttributeAllocator } from './attribute-allocator';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { LevelUpApiService, AttributeSlice } from '../../services/levelup-api.service';
 import { Character } from '../../character/character';
@@ -29,6 +30,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
   let component: AttributeAllocator;
   let fixture: ComponentFixture<AttributeAllocator>;
   let levelUpApiService: any;
+  let creationApiService: any;
   let characterStateService: CharacterStateService;
   let queryParamsSubject: BehaviorSubject<any>;
   let updateCharacterSpy: any;
@@ -37,6 +39,10 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     levelUpApiService = {
       getAttributeSlice: vi.fn(),
       updateAttributeSlice: vi.fn()
+    };
+
+    creationApiService = {
+      updateAttributes: vi.fn()
     };
 
     queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
@@ -48,6 +54,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         LevelUpManager,
         StepValidationService,
         { provide: LevelUpApiService, useValue: levelUpApiService },
+        { provide: CharacterCreationApiService, useValue: creationApiService },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -58,6 +65,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     }).compileComponents();
 
     levelUpApiService = TestBed.inject(LevelUpApiService);
+    creationApiService = TestBed.inject(CharacterCreationApiService);
     characterStateService = TestBed.inject(CharacterStateService);
     updateCharacterSpy = vi.spyOn(characterStateService, 'updateCharacter');
 
@@ -269,7 +277,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
     };
 
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
-    levelUpApiService.updateAttributeSlice.mockReturnValue(of(slice));
+    creationApiService.updateAttributes.mockReturnValue(of({ success: true, attributes: slice.attributes, id: 'char-999' }));
 
     characterStateService.updateCharacter(testCharacter);
     queryParamsSubject.next({ levelUp: 'false' });
@@ -278,14 +286,14 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
 
     component.persistStep();
 
-    expect(levelUpApiService.updateAttributeSlice).toHaveBeenCalledTimes(1);
-    expect(levelUpApiService.updateAttributeSlice).toHaveBeenCalledWith('char-999', {
+    expect(creationApiService.updateAttributes).toHaveBeenCalledTimes(1);
+    expect(creationApiService.updateAttributes).toHaveBeenCalledWith('char-999', {
       strength: 12,
       speed: 10,
       awareness: 8,
       intellect: 7,
       willpower: 6,
       presence: 5
-    }, false);
+    });
   });
 });

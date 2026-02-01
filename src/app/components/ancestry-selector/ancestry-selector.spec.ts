@@ -22,6 +22,7 @@ import { AncestrySelector } from './ancestry-selector';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { Character } from '../../character/character';
 
@@ -31,11 +32,16 @@ describe('AncestrySelector', () => {
   let characterState: CharacterStateService;
   let validationService: StepValidationService;
   let storageService: any;
+  let creationApiService: any;
   let navigateSpy: any;
 
   beforeEach(async () => {
     storageService = {
       saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' }))
+    };
+
+    creationApiService = {
+      updateAncestry: vi.fn().mockReturnValue(of({ success: true, ancestry: 'human', id: 'char-123' }))
     };
 
     const routerStub = {
@@ -48,6 +54,7 @@ describe('AncestrySelector', () => {
         CharacterStateService,
         StepValidationService,
         { provide: CharacterStorageService, useValue: storageService },
+        { provide: CharacterCreationApiService, useValue: creationApiService },
         { provide: Router, useValue: routerStub }
       ]
     })
@@ -84,19 +91,22 @@ describe('AncestrySelector', () => {
   it('should persist when character has an id', () => {
     const char = new Character();
     (char as any).id = 'char-123';
+    char.ancestry = Ancestry.HUMAN;
     characterState.updateCharacter(char);
+    component.selectedAncestry = Ancestry.HUMAN;
 
     component.persistStep();
-    expect(storageService.saveCharacter).toHaveBeenCalledTimes(1);
-    expect(storageService.saveCharacter).toHaveBeenCalledWith(char);
+    expect(creationApiService.updateAncestry).toHaveBeenCalledTimes(1);
+    expect(creationApiService.updateAncestry).toHaveBeenCalledWith('char-123', Ancestry.HUMAN);
   });
 
   it('should not persist when character has no id', () => {
     const char = new Character();
     characterState.updateCharacter(char);
+    component.selectedAncestry = Ancestry.HUMAN;
 
     component.persistStep();
-    expect(storageService.saveCharacter).not.toHaveBeenCalled();
+    expect(creationApiService.updateAncestry).not.toHaveBeenCalled();
   });
 
   it('should navigate to culture on navigateNext', () => {

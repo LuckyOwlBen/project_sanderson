@@ -155,16 +155,19 @@ export class AttackCalculationsService {
   calculateAttackRoll(
     skillTotal: number = 0,
     bonusModifiers: number = 0,
-    advantageMode: AdvantageMode = AdvantageMode.NORMAL
+    advantageMode: AdvantageMode | string = AdvantageMode.NORMAL
   ): AttackRoll {
     let rollsGenerated: number[] = [];
     let finalRoll: number;
 
-    if (advantageMode === AdvantageMode.NORMAL) {
+    // Normalize the advantage mode
+    const normalizedMode = typeof advantageMode === 'string' ? advantageMode : String(advantageMode);
+
+    if (normalizedMode === AdvantageMode.NORMAL || normalizedMode === 'normal') {
       // Single d20 roll
       finalRoll = this.rollD20();
       rollsGenerated = [finalRoll];
-    } else if (advantageMode === AdvantageMode.ADVANTAGE) {
+    } else if (normalizedMode === AdvantageMode.ADVANTAGE || normalizedMode === 'advantage') {
       // Roll 2d20, take higher
       const roll1 = this.rollD20();
       const roll2 = this.rollD20();
@@ -280,7 +283,7 @@ export class AttackCalculationsService {
     damageNotation: string = 'd6',
     damageBonus: number = 0,
     targetDefense: number = 10,
-    advantageMode: AdvantageMode = AdvantageMode.NORMAL
+    advantageMode: AdvantageMode | string = AdvantageMode.NORMAL
   ): Attack {
     const attackRoll = this.calculateAttackRoll(skillTotal, attackBonus, advantageMode);
     const damageRoll = this.calculateDamageRoll(damageNotation, damageBonus);
@@ -318,7 +321,7 @@ export class AttackCalculationsService {
     damageNotation: string = 'd6',
     damageBonus: number = 0,
     targetDefense: number = 10,
-    advantageMode: AdvantageMode = AdvantageMode.NORMAL
+    advantageMode: AdvantageMode | string = AdvantageMode.NORMAL
   ): AttackCombination {
     if (attackCount < 1) {
       throw new Error('Must make at least 1 attack');

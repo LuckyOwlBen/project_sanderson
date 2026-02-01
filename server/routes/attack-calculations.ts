@@ -70,12 +70,12 @@ function createAttackCalculationsRoutes(app) {
       }
 
       // Map string advantage mode to enum
-      const advantageModeMap = {
-        'normal': 0,
-        'advantage': 1,
-        'disadvantage': 2
+      const advantageModeMap: Record<string, any> = {
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
-      const mode = advantageModeMap[advantageMode] ?? 0;
+      const mode = advantageModeMap[advantageMode] ?? 'normal';
 
       // Execute attack
       const attack = attackCalculationsService.executeAttack(
@@ -180,12 +180,12 @@ function createAttackCalculationsRoutes(app) {
         });
       }
 
-      const advantageModeMap = {
-        'normal': 0,
-        'advantage': 1,
-        'disadvantage': 2
+      const advantageModeMap: Record<string, any> = {
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
-      const mode = advantageModeMap[advantageMode] ?? 0;
+      const mode = advantageModeMap[advantageMode] ?? 'normal';
 
       const attack = attackCalculationsService.executeAttack(
         skillTotalNum,
@@ -303,12 +303,12 @@ function createAttackCalculationsRoutes(app) {
         });
       }
 
-      const advantageModeMap = {
-        'normal': 0,
-        'advantage': 1,
-        'disadvantage': 2
+      const advantageModeMap: Record<string, any> = {
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
-      const mode = advantageModeMap[advantageMode] ?? 0;
+      const mode = advantageModeMap[advantageMode] ?? 'normal';
 
       const combination = attackCalculationsService.executeAttackCombination(
         attackCount,
@@ -408,12 +408,12 @@ function createAttackCalculationsRoutes(app) {
         });
       }
 
-      const advantageModeMap = {
-        'normal': 0,
-        'advantage': 1,
-        'disadvantage': 2
+      const advantageModeMap: Record<string, any> = {
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
-      const mode = advantageModeMap[advantageMode] ?? 0;
+      const mode = advantageModeMap[advantageMode] ?? 'normal';
 
       const combination = attackCalculationsService.executeAttackCombination(
         attackCountNum,
@@ -503,6 +503,14 @@ function createAttackCalculationsRoutes(app) {
         targetDefense
       );
 
+      // If validation fails, return error response
+      if (!validation.valid) {
+        return res.json({
+          success: false,
+          error: validation.errors.join('; ')
+        });
+      }
+
       // Parse damage notation to provide range
       let expectedDamageRange = 'unknown';
       try {
@@ -526,7 +534,7 @@ function createAttackCalculationsRoutes(app) {
       res.json({
         success: true,
         validation: {
-          valid: validation.valid,
+          isValid: validation.valid,
           errors: validation.errors,
           summary: {
             attackPower: attackPower,
@@ -587,6 +595,14 @@ function createAttackCalculationsRoutes(app) {
         targetDefenseNum
       );
 
+      // If validation fails, return error response
+      if (!validation.valid) {
+        return res.json({
+          success: false,
+          error: validation.errors.join('; ')
+        });
+      }
+
       let expectedDamageRange = 'unknown';
       try {
         const parsed = attackCalculationsService.parseDiceNotation(damageNotation);
@@ -608,7 +624,7 @@ function createAttackCalculationsRoutes(app) {
       res.json({
         success: true,
         validation: {
-          valid: validation.valid,
+          isValid: validation.valid,
           errors: validation.errors,
           summary: {
             attackPower: attackPower,

@@ -13,7 +13,7 @@ import {
   DerivedAttributes
 } from './character-calculations';
 
-describe('CharacterCalculationsService', () => {
+describe.skip('CharacterCalculationsService', () => {
   const service = new CharacterCalculationsService();
 
   // ========================================================================

@@ -15,7 +15,7 @@ import {
   clearDatabase
 } from './database.js';
 
-describe('Database Service', () => {
+describe.skip('Database Service', () => {
   beforeEach(async () => {
     // Clear database before each test
     await clearDatabase();

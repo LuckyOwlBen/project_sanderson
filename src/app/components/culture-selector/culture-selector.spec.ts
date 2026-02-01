@@ -25,12 +25,14 @@ import { Ancestry } from '../../character/ancestry/ancestry';
 import { ALETHI_CULTURE } from '../../character/culture/alethi';
 import { AZISH_CULTURE } from '../../character/culture/azish';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 
 describe('CultureSelector', () => {
   let component: CultureSelector;
   let characterStateService: CharacterStateService;
   let validationService: StepValidationService;
   let storageService: any;
+  let creationApiService: any;
   let mockCharacter: Character;
 
   beforeEach(() => {
@@ -39,12 +41,17 @@ describe('CultureSelector', () => {
       saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' }))
     };
 
+    creationApiService = {
+      updateCultures: vi.fn().mockReturnValue(of({ success: true, cultures: [], id: 'char-123' }))
+    };
+
     TestBed.configureTestingModule({
       imports: [CultureSelector],
       providers: [
         CharacterStateService,
         StepValidationService,
-        { provide: CharacterStorageService, useValue: storageService }
+        { provide: CharacterStorageService, useValue: storageService },
+        { provide: CharacterCreationApiService, useValue: creationApiService }
       ]
     });
     
@@ -321,10 +328,13 @@ describe('CultureSelector', () => {
       component = fixture.componentInstance;
       const char = new Character();
       (char as any).id = 'char-123';
+      char.cultures = [ALETHI_CULTURE];
       characterStateService.updateCharacter(char);
+      component.ngOnInit();
+      component.confirmedCultures = [ALETHI_CULTURE];
 
       component.persistStep();
-      expect(storageService.saveCharacter).toHaveBeenCalledWith(char);
+      expect(creationApiService.updateCultures).toHaveBeenCalledWith('char-123', [ALETHI_CULTURE]);
     });
   });
 });
