@@ -299,8 +299,20 @@ export async function saveCharacter(
   spentPointsTracking?: { attributes?: number; skills?: number; talents?: number; level: number }
 ): Promise<SaveResult> {
   if (!db) throw new Error('Database not initialized');
+  let transactionStarted = false;
   try {
-    await db.run('BEGIN TRANSACTION');
+    // Check if we're already in a transaction (sqlite library doesn't expose this directly)
+    // So we just try to begin and catch if nested
+    try {
+      await db.run('BEGIN TRANSACTION');
+      transactionStarted = true;
+    } catch (e: any) {
+      // If we can't start a transaction, we're already in one, so proceed without explicit transaction
+      if (!(e.message?.includes('cannot start a transaction'))) {
+        throw e;
+      }
+      transactionStarted = false;
+    }
     // Upsert character
     await db.run(`
       INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, lastModified)
@@ -437,11 +449,20 @@ export async function saveCharacter(
       );
     }
 
-    await db.run('COMMIT');
+    if (transactionStarted) {
+      await db.run('COMMIT');
+    }
     console.log(`[Database] Saved character: ${character.name} (${character.id})`);
     return { success: true, id: character.id };
   } catch (error) {
-    if (db) await db.run('ROLLBACK');
+    if (transactionStarted) {
+      try {
+        await db.run('ROLLBACK');
+      } catch (rollbackError) {
+        // Transaction may not exist if another concurrent operation already committed
+        console.warn('[Database] Rollback failed (transaction may not be active):', (rollbackError as Error).message);
+      }
+    }
     console.error(`[Database] Error saving character ${character.id}:`, error);
     return { success: false, error: (error as Error).message };
   }
@@ -456,8 +477,21 @@ export async function unlockTalent(
   level: number
 ): Promise<TalentResult> {
   if (!db) throw new Error('Database not initialized');
+  let transactionStarted = false;
   try {
-    await db.run('BEGIN TRANSACTION');
+    // Check if we're already in a transaction (sqlite library doesn't expose this directly)
+    // So we just try to begin and catch if nested
+    try {
+      await db.run('BEGIN TRANSACTION');
+      transactionStarted = true;
+    } catch (e: any) {
+      // If we can't start a transaction, we're already in one, so proceed without explicit transaction
+      if (!(e.message?.includes('cannot start a transaction'))) {
+        throw e;
+      }
+      transactionStarted = false;
+    }
+    
     // Verify character exists
     const char = await db.get('SELECT id FROM Character WHERE id = ?', characterId);
     if (!char) {
@@ -501,11 +535,20 @@ export async function unlockTalent(
       spent?.skills ?? '{}'
     );
 
-    await db.run('COMMIT');
+    if (transactionStarted) {
+      await db.run('COMMIT');
+    }
     console.log(`[Database] Unlocked talents for ${characterId}: ${talentIds.join(', ')}`);
     return { success: true, unlockedTalents: allTalents.map((t: any) => t.talentId) };
   } catch (error) {
-    if (db) await db.run('ROLLBACK');
+    if (transactionStarted) {
+      try {
+        await db.run('ROLLBACK');
+      } catch (rollbackError) {
+        // Transaction may not exist if another concurrent operation already committed
+        console.warn('[Database] Rollback failed (transaction may not be active):', (rollbackError as Error).message);
+      }
+    }
     console.error(`[Database] Error unlocking talents for ${characterId}:`, error);
     return { success: false, error: (error as Error).message };
   }

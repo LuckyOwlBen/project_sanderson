@@ -3,7 +3,7 @@
  * Tests for character CRUD and transaction-safe talent/attribute operations
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest';
 import { 
   loadCharacter, 
   saveCharacter, 
@@ -12,10 +12,18 @@ import {
   unlockTalent,
   getTalentPoints,
   getSpentPoints,
-  clearDatabase
+  clearDatabase,
+  initDatabase,
+  initializeSchema
 } from './database.js';
 
-describe.skip('Database Service', () => {
+describe('Database Service', () => {
+  beforeAll(async () => {
+    // Initialize database before any tests run
+    await initDatabase();
+    await initializeSchema();
+  });
+
   beforeEach(async () => {
     // Clear database before each test
     await clearDatabase();

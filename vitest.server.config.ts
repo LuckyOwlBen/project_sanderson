@@ -6,5 +6,6 @@ export default defineConfig({
     environment: 'node',
     include: ['server/**/*.spec.{ts,js}'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
+    globalSetup: ['./vitest.global-setup.server.ts'],
   },
 });
