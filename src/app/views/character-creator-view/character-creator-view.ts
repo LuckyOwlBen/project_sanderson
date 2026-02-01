@@ -58,29 +58,6 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).subscribe(params => {
       this.isLevelUpMode = params['levelUp'] === 'true';
       console.log('[Character Creator] Level-up mode:', this.isLevelUpMode);
-      
-      // Ensure character has an ID for API calls (both creation and level-up modes)
-      const character = this.characterState.getCharacter();
-      const existingId = (character as any)?.id;
-      
-      if (!existingId) {
-        console.log('[Character Creator] No character ID found, creating new character on server');
-        this.storageService.createCharacter().subscribe({
-          next: (result) => {
-            if (result.success && result.id) {
-              console.log('[Character Creator] Character created with ID:', result.id);
-              (character as any).id = result.id;
-              this.characterState.updateCharacter(character);
-            }
-          },
-          error: (error) => {
-            console.error('[Character Creator] Failed to create character:', error);
-            // Server health service will handle navigation to error page
-          }
-        });
-      } else {
-        console.log('[Character Creator] Using existing character ID:', existingId);
-      }
     });
 
     // Subscribe to flow service changes and update local property
@@ -114,29 +91,9 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).subscribe(() => {
       this.flowService.setCurrentStepByRoute(this.router.url);
     });
-
-    // Subscribe to character changes to validate all steps and trigger change detection
-    this.characterState.character$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(character => {
-      // Validate all steps whenever character changes
-      this.validationService.validateAllSteps(character);
-    });
   }
 
   ngOnDestroy(): void {
-    // If we're exiting level-up mode without completing through nextStep(),
-    // still complete the level-up to decrement pendingLevelPoints
-    if (this.isLevelUpMode) {
-      const character = this.characterState.getCharacter();
-      if (character && character.pendingLevelPoints > 0) {
-        character.pendingLevelPoints -= 1;
-        delete character.baselineUnlockedTalents;
-        this.characterState.updateCharacter(character);
-        console.log('[Character Creator] Level-up auto-completed on view exit, pending points:', character.pendingLevelPoints);
-      }
-    }
-    
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -145,21 +102,7 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     // Persist the current step before navigating to the next
     this.persistCurrentStep();
 
-    if (this.isLevelUpMode) {
-      // In level-up mode, skip to the next relevant step
-      const currentIndex = this.flowService.getCurrentStep();
-      const nextRoute = this.getNextLevelUpStep(currentIndex + 1);
-      if (nextRoute) {
-        console.log('[Character Creator] Navigating to next level-up step:', nextRoute);
-        this.router.navigate([nextRoute], { 
-          relativeTo: this.activatedRoute,
-          queryParamsHandling: 'preserve'
-        });
-      } else {
-        // No more level-up steps, complete level-up
-        this.completeLevelUp();
-      }
-    } else if (this.flowService.canGoNext()) {
+    if (this.flowService.canGoNext()) {
       const nextIndex = this.flowService.getCurrentStep() + 1;
       const nextRoute = this.flowService.getStepRoute(nextIndex);
       if (nextRoute) {
@@ -242,27 +185,6 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     }
     
     return null;
-  }
-
-  /**
-   * Complete level-up process
-   */
-  private completeLevelUp(): void {
-    const character = this.characterState.getCharacter();
-    if (character && character.pendingLevelPoints > 0) {
-      character.pendingLevelPoints -= 1;
-      
-      // Clear baseline talents tracking now that level-up is complete
-      delete character.baselineUnlockedTalents;
-      
-      this.characterState.updateCharacter(character);
-      console.log('[Character Creator] Level-up completed, pending points:', character.pendingLevelPoints);
-      
-      // Navigate back to character sheet and clear levelUp query param
-      this.router.navigate(['/character-sheet'], {
-        queryParams: {}
-      });
-    }
   }
 
   canGoNext(): boolean {

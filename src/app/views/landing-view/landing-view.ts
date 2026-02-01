@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { CharacterStateService } from '../../character/characterStateService';
-import { Character } from '../../character/character';
+import { CharacterId } from '../../services/character-id';
 
 @Component({
   selector: 'app-landing-view',
@@ -19,13 +18,12 @@ export class LandingView {
 
   constructor(
     private router: Router,
-    private characterState: CharacterStateService
+    private characterIdService: CharacterId
   ) {}
   
   newCharacter() {
     // Reset to a brand new character
-    const freshCharacter = new Character();
-    this.characterState.updateCharacter(freshCharacter);
+    this.characterIdService.newId();
     this.router.navigateByUrl('/character-creator-view/ancestry')
   }
 

@@ -8,7 +8,7 @@ const controller = new CharacterController(service);
 export function createCharacterRouter(controller: CharacterController) {
     const router = Router();
 
-    router.get('/character/newCharacter', (res) => controller.newCharacter(res));
+    router.get('/character/newCharacter', (req, res) => controller.newCharacter(res));
 
     return router;
 }

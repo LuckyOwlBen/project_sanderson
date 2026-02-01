@@ -10,6 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { CreationProgressComponent } from '../../components/creation-progress/creation-progress';
+import { CharacterId } from '../../services/character-id';
 
 @Component({
   selector: 'app-sidenav-view',
@@ -36,7 +37,8 @@ export class SidenavView implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private characterState: CharacterStateService
+    private characterState: CharacterStateService,
+    private characterIdService: CharacterId
   ) {}
 
   ngOnInit(): void {
@@ -81,8 +83,7 @@ export class SidenavView implements OnInit, OnDestroy {
 
   createNewCharacter(): void {
     // Create a fresh character and reset state
-    const newCharacter = new Character();
-    this.characterState.updateCharacter(newCharacter);
+    this.characterIdService.newId();
     this.router.navigate(['/character-creator-view']);
   }
 
