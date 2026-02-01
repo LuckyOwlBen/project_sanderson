@@ -1,4 +1,20 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import 'zone.js';
+import 'zone.js/testing';
+import { getTestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+
+// Initialize TestBed before anything else
+const testBed = getTestBed();
+try {
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
+} catch (e) {
+  // Already initialized, that's fine
+}
+
+import { ComponentFixture, TestBed as TestBedInstance } from '@angular/core/testing';
 import { CharacterDefensesCard } from './character-defenses-card';
 import { Character } from '../../../character/character';
 import { By } from '@angular/platform-browser';
@@ -9,11 +25,11 @@ describe('CharacterDefensesCard', () => {
   let mockCharacter: Character;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBedInstance.configureTestingModule({
       imports: [CharacterDefensesCard]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CharacterDefensesCard);
+    fixture = TestBedInstance.createComponent(CharacterDefensesCard);
     component = fixture.componentInstance;
     
     // Create a mock character
