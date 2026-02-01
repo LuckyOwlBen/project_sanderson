@@ -1,10 +1,11 @@
+import { AttributesDao } from "../../dao/attributesDao";
 import { Attributes } from "../attributes/attributes";
 import { AbstractResourceManager } from "./abstractResourceManager";
 
 export class InvestitureManager extends AbstractResourceManager {
     private isInvestitureActive: boolean = false;
 
-    protected override calculateMaxValue(attributes: Attributes, bonus: number): number {
+    protected override calculateMaxValue(attributes: AttributesDao, bonus: number): number {
         return this.isInvestitureActive ? 
             2 + Math.max(attributes.presence, attributes.awareness) + bonus
             : 0;
@@ -31,7 +32,7 @@ export class InvestitureManager extends AbstractResourceManager {
     /**
      * Recalculate max value and ensure current is properly initialized
      */
-    override recalculateMax(attributes: Attributes, bonus: number = 0): void {
+    override recalculateMax(attributes: AttributesDao, bonus: number = 0): void {
         const needsInitialization = this.currentValue === -1;
         super.recalculateMax(attributes, bonus);
         
