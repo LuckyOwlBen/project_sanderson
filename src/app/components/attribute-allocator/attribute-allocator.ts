@@ -25,7 +25,7 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -60,61 +60,43 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   isLevelUpMode: boolean = false;
   isLoading: boolean = false;
   private characterId: string | null = null;
-  private levelTables?: LevelTables;
   private serverAttributePoints?: number;
   private isInitialized: boolean = false;
-  private sliceFetched: boolean = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
     private creationApiService: CharacterCreationApiService,
     private levelUpApi: LevelUpApiService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private router: Router
   ) {
     super();
   }
 
   ngOnInit(): void {
-    // Subscribe only to route params changes - do NOT subscribe to character$
-    // during level-up mode. This prevents stale cache reuse when navigating
-    // between level-up steps.
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
-        // Reset sliceFetched when route params change - this forces fresh fetch
-        // if we re-enter level-up mode
-        this.sliceFetched = false;
-        
-        // Get current character from service (not from subscription)
-        this.character = this.characterStateService.getCharacter();
-        this.characterId = (this.character as any)?.id || null;
+     // Check if we have a character ID - if not, redirect immediately
+  const character = this.characterStateService.getCharacter();
+  const characterId = (character as any)?.id;
+  
+  if (!characterId) {
+    console.warn('[AttributeAllocator] No character ID found - redirecting to landing');
+    this.router.navigate(['/landing']);
+    return;
+  }
 
-        console.log('[AttributeAllocator] ngOnInit - params:', params);
-        console.log('[AttributeAllocator] character:', this.character);
-        console.log('[AttributeAllocator] characterId:', this.characterId);
-        console.log('[AttributeAllocator] isLevelUpMode:', this.isLevelUpMode);
-
-        if (this.character && this.isLevelUpMode) {
-          this.isInitialized = false;
-          if (this.characterId) {
-            console.log('[AttributeAllocator] Fetching attribute slice for character:', this.characterId);
-            this.fetchAttributeSlice(this.characterId);
-          } else {
-            console.warn('[AttributeAllocator] Level-up mode but no characterId found!');
-          }
-        } else if (this.character && !this.isLevelUpMode) {
-          // Always fetch slice from API even in creation mode to keep server as source of truth
-          console.log('[AttributeAllocator] Character creation mode - fetching slice from API');
-          this.isInitialized = false;
-          if (this.characterId) {
-            this.fetchAttributeSlice(this.characterId);
-          }
-        } else {
-          console.warn('[AttributeAllocator] No character available or invalid state');
-        }
-      });
+  // Always fetch from backend, never use cached state
+  this.isLoading = true;
+  this.activatedRoute.queryParams
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((params) => {
+      this.isLevelUpMode = params['levelUp'] === 'true';
+      this.character = character;
+      this.characterId = characterId;
+      
+      // Force fresh fetch from backend
+      this.fetchAttributeSlice(characterId);
+    });
   }
 
   ngOnDestroy(): void {
@@ -123,33 +105,29 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   }
 
   private fetchAttributeSlice(characterId: string): void {
-    console.log('[AttributeAllocator] fetchAttributeSlice called with ID:', characterId);
-    // In creation mode (level > 1), request cumulative points instead of single-level
-    const isCreationMode = (this.character?.level ?? 1) > 1;
-    this.levelUpApi.getAttributeSlice(characterId, isCreationMode)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (slice) => {
-          console.log('[AttributeAllocator] Attribute slice received:', slice);
-          this.sliceFetched = true;
-          this.serverAttributePoints = slice.pointsForLevel;
-          if (this.character && slice.attributes) {
-            this.mapAttributesFromSlice(slice.attributes);
-            // Don't broadcast during level-up - component handles its own state
-            if (!this.isLevelUpMode) {
-              this.characterStateService.updateCharacter(this.character);
-            }
-          }
-          this.initializeAttributes();
-          this.updateValidation();
-        },
-        error: (err) => {
-          // Server health service will handle navigation to error page
-          console.error('[AttributeAllocator] Failed to load attribute slice:', err);
-          console.error('[AttributeAllocator] Character ID was:', characterId);
+  console.log('[AttributeAllocator] Fetching from backend: /attributes/' + characterId);
+  
+  const isCreationMode = (this.character?.level ?? 1) > 1;
+  this.levelUpApi.getAttributeSlice(characterId, isCreationMode)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (slice) => {
+        console.log('[AttributeAllocator] Attribute slice from backend:', slice);
+        this.serverAttributePoints = slice.pointsForLevel;
+        if (this.character && slice.attributes) {
+          this.mapAttributesFromSlice(slice.attributes);
         }
-      });
-  }
+        this.initializeAttributes();
+        this.updateValidation();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('[AttributeAllocator] Backend fetch failed:', err);
+        this.isLoading = false;
+        // Error handling - show message or redirect
+      }
+    });
+}
 
   private mapAttributesFromSlice(attributes: Record<string, number>): void {
     if (!this.character) return;
