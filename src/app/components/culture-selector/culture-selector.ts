@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
-import { ALL_CULTURES } from '../../character/culture/allCultures';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CultureApiService } from '../../services/culture-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
+import { CulturesService } from '../../services/cultures.service';
 import { Subject, takeUntil, filter } from 'rxjs';
 
 interface CultureInfo {
@@ -51,6 +51,7 @@ export class CultureSelector implements OnInit, OnDestroy {
     private validationService: StepValidationService,
     private cultureApiService: CultureApiService,
     private identityService: CharacterIdentityService,
+    private culturesService: CulturesService,
     private cdr: ChangeDetectorRef
   ) {
     this.initializeCultureInfos();
@@ -136,40 +137,16 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   private initializeCultureInfos(): void {
-    this.allCultureInfos = ALL_CULTURES
+    this.allCultureInfos = this.culturesService.getAllCultures()
       .map(culture => ({
         culture: culture,
         name: culture.name,
         expertise: culture.expertise,
         description: culture.description,
-        imagePlaceholder: this.getImagePlaceholder(culture.name),
-        imageUrl: this.getImageUrl(culture.name),
+        imagePlaceholder: this.culturesService.getImagePlaceholder(culture.name),
+        imageUrl: this.culturesService.getImageUrl(culture.name),
         suggestedNames: culture.suggestedNames
       }));
-  }
-
-  private getImagePlaceholder(cultureName: string): string {
-    const placeholders: { [key: string]: string } = {
-      'Alethi': 'linear-gradient(135deg, #8B4513 0%, #D2691E 100%)',
-      'Azish': 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-      'Herdazian': 'linear-gradient(135deg, #228B22 0%, #32CD32 100%)',
-      'Iriali': 'linear-gradient(135deg, #FF6347 0%, #FF4500 100%)',
-      'Kharbranthian': 'linear-gradient(135deg, #4169E1 0%, #1E90FF 100%)',
-      'Listener': 'linear-gradient(135deg, #800080 0%, #9932CC 100%)',
-      'Natan': 'linear-gradient(135deg, #20B2AA 0%, #48D1CC 100%)',
-      'Reshi': 'linear-gradient(135deg, #00CED1 0%, #40E0D0 100%)',
-      'Shin': 'linear-gradient(135deg, #F0E68C 0%, #EEE8AA 100%)',
-      'Thaylen': 'linear-gradient(135deg, #2F4F4F 0%, #708090 100%)',
-      'Unkalaki': 'linear-gradient(135deg, #A0522D 0%, #CD853F 100%)',
-      'Veden': 'linear-gradient(135deg, #DC143C 0%, #B22222 100%)',
-      'Wayfarer': 'linear-gradient(135deg, #696969 0%, #808080 100%)'
-    };
-    return placeholders[cultureName] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-  }
-
-  private getImageUrl(cultureName: string): string {
-    const fileName = cultureName.toLowerCase().replace(/\s+/g, '-');
-    return `/images/cultures/${fileName}.jpg`;
   }
 
   viewCultureDetails(cultureInfo: CultureInfo): void {

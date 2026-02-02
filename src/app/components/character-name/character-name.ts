@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,15 +8,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
-import { Subject, takeUntil } from 'rxjs';
-import { CharacterStateService } from '../../character/characterStateService';
+import { Router } from '@angular/router';
+import { Subject, takeUntil, filter } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
-import { Character } from '../../character/character';
-import { CharacterStorageService } from '../../services/character-storage.service';
-import { CharacterCreationApiService } from '../../services/character-creation-api.service';
-import { ActivatedRoute } from '@angular/router';
-import { LevelUpManager } from '../../levelup/levelUpManager';
-import { LevelUpApiService } from '../../services/levelup-api.service';
+import { NameApiService } from '../../services/name-api.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
+import { CulturesService } from '../../services/cultures.service';
 
 @Component({
   selector: 'app-character-name',
@@ -39,26 +36,24 @@ export class CharacterName implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 2; // Name is step 2
   
-  character: Character | null = null;
   characterName: string = '';
+  characterLevel: number = 1;
   nameError: string = '';
   suggestedNames: string[] = [];
-  isLevelUpMode: boolean = false;
   isLoading: boolean = false;
-  private characterId: string | null = null;
+  isWaitingForIdentity: boolean = false;
   availableLevels: number[] = [];
+  private characterId: string | null = null;
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private characterState: CharacterStateService,
+    private router: Router,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService,
-    private creationApiService: CharacterCreationApiService,
-    private levelUpManager: LevelUpManager,
-    private levelUpApi: LevelUpApiService
+    private nameApiService: NameApiService,
+    private identityService: CharacterIdentityService,
+    private culturesService: CulturesService,
+    private cdr: ChangeDetectorRef
   ) {
-    // Generate available levels based on LevelUpManager's progression table
-    // The progression tables have 21 entries (levels 1-21)
+    // Generate available levels 1-21
     this.availableLevels = Array.from({ length: 21 }, (_, i) => i + 1);
   }
 
@@ -71,80 +66,66 @@ export class CharacterName implements OnInit, OnDestroy {
       }
     }, 0);
 
-    // Subscribe to route params so we can detect level-up mode and always
-    // fetch a fresh character snapshot from the backend by ID.
-    this.activatedRoute.queryParams
+    // Monitor the waiting flag from identity service
+    this.identityService.waitingForIdentity$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
 
-        // Read the current character snapshot to get the ID, but do not
-        // subscribe to character$ (avoids stale state re-emits).
-        this.character = this.characterState.getCharacter();
-        this.characterId = (this.character as any)?.id || null;
-
-        if (this.characterId) {
-          this.fetchCharacterFromApi(this.characterId);
-        } else {
-          console.warn('[CharacterName] No character ID found; cannot load name from API');
-          this.syncLocalCharacterState();
+    // Once we have a character ID, load name and level from API
+    this.identityService.currentCharacterId$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((id) => id !== null) // Only proceed when ID exists
+      )
+      .subscribe((characterId) => {
+        if (characterId) {
+          this.characterId = characterId;
+          this.loadNameFromApi(characterId);
         }
       });
   }
 
-  private fetchCharacterFromApi(characterId: string): void {
-    this.storageService.loadCharacter(characterId)
+  private loadNameFromApi(characterId: string): void {
+    console.log('[CharacterName] Loading name and level for character:', characterId);
+    this.nameApiService.getName(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (loaded) => {
-          if (!loaded) {
-            console.warn('[CharacterName] API returned no character for ID:', characterId);
-            this.syncLocalCharacterState();
-            return;
+        next: (nameData) => {
+          if (nameData) {
+            this.characterName = nameData.name;
+            this.characterLevel = nameData.level;
+            console.log('[CharacterName] Loaded name:', this.characterName, 'level:', this.characterLevel);
+            console.log('[CharacterName] Loaded cultures:', nameData.cultures);
+            this.updateSuggestedNames(nameData.cultures);
+          } else {
+            console.warn('[CharacterName] API returned null for name');
+            this.characterName = '';
+            this.characterLevel = 1;
+            this.updateSuggestedNames([]);
           }
-          this.character = loaded;
-          this.characterName = loaded.name || '';
-          this.characterState.updateCharacter(loaded);
-          this.updateSuggestedNames();
           this.validateName();
           this.updateValidation();
+          this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('[CharacterName] Failed to load character from API:', err);
-          this.syncLocalCharacterState();
+          console.error('[CharacterName] Failed to load name:', err);
+          this.characterName = '';
+          this.characterLevel = 1;
+          this.updateSuggestedNames([]);
+          this.validateName();
+          this.updateValidation();
+          this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
+          this.router.navigate(['/']);
         }
       });
   }
 
-  private syncLocalCharacterState(): void {
-    // Fallback to whatever is currently in memory; still validate so the UI
-    // remains usable even if the API call fails or the ID is missing.
-    if (!this.character) {
-      this.character = this.characterState.getCharacter();
-    }
-    if (this.character && !this.characterName) {
-      this.characterName = this.character.name || '';
-    }
-    this.updateSuggestedNames();
-    this.validateName();
-    this.updateValidation();
-  }
-
-  private updateSuggestedNames(): void {
-    if (!this.character?.cultures || this.character.cultures.length === 0) {
-      this.suggestedNames = [];
-      return;
-    }
-    
-    // Combine suggested names from all cultures
-    const allNames = new Set<string>();
-    this.character.cultures.forEach(culture => {
-      if (culture.suggestedNames) {
-        culture.suggestedNames.forEach(name => allNames.add(name));
-      }
-    });
-    
-    this.suggestedNames = Array.from(allNames);
+  private updateSuggestedNames(cultureNames: string[] = []): void {
+    this.suggestedNames = this.culturesService.getSuggestedNames(cultureNames);
   }
 
   selectSuggestedName(name: string): void {
@@ -153,10 +134,7 @@ export class CharacterName implements OnInit, OnDestroy {
   }
 
   onLevelChange(): void {
-    if (this.character) {
-      this.characterState.updateCharacter(this.character);
-      this.updateValidation();
-    }
+    this.updateValidation();
   }
 
   ngOnDestroy(): void {
@@ -166,21 +144,7 @@ export class CharacterName implements OnInit, OnDestroy {
 
   onNameChange(): void {
     this.validateName();
-    // characterName is the proxy - user can type anything
-    // Only update character.name when validation passes
-    if (this.character) {
-      if (this.nameError === '') {
-        // Valid: update character name
-        this.character.name = this.characterName.trim();
-        (this.character as any).nameInputHasError = false;
-      } else {
-        // Invalid: clear character name but keep nameInputHasError flag
-        this.character.name = '';
-        (this.character as any).nameInputHasError = true;
-      }
-      this.characterState.updateCharacter(this.character);
-      this.updateValidation();
-    }
+    this.updateValidation();
   }
 
   private updateValidation(): void {
@@ -227,58 +191,35 @@ export class CharacterName implements OnInit, OnDestroy {
     this.nameError = '';
   }
 
-  isNameValid(): boolean {
-    // Re-validate to ensure we have current state
-    this.validateName();
-    return this.nameError === '' && this.characterName.trim().length >= 2;
-  }
-
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    if (!this.character || !this.characterId) {
+    console.log('[CharacterName] persistStep called');
+    
+    if (!this.characterId) {
+      console.warn('[CharacterName] No character ID available for saving');
       return;
     }
 
-    // Ensure the latest name is on the character before saving
-    if (this.nameError === '') {
-      this.character.name = this.characterName.trim();
+    if (this.nameError !== '') {
+      console.warn('[CharacterName] Name has validation errors, cannot save');
+      return;
     }
 
+    const nameToSave = this.characterName.trim();
+    console.log('[CharacterName] Saving name:', nameToSave, 'level:', this.characterLevel);
+    
     this.isLoading = true;
-
-    // Try to save name and level via API first
-    this.creationApiService.updateName(this.characterId, this.character.name, this.character.level)
+    this.nameApiService.saveName(this.characterId, nameToSave, this.characterLevel)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           console.log('[CharacterName] Name saved to server:', response);
           this.isLoading = false;
-
-          // If level > 1, initialize the level with cumulative points
-          if (this.character && this.character.level > 1) {
-            this.levelUpApi.initializeLevel(this.characterId!, this.character.level).subscribe({
-              next: () => {},
-              error: (err) => console.error('[CharacterName] Failed to initialize level:', err)
-            });
-          }
         },
-        error: (err) => {
-          console.error('[CharacterName] Failed to save name via API:', err);
+        error: (error) => {
+          console.error('[CharacterName] Failed to save name:', error);
           this.isLoading = false;
-
-          // Fallback to localStorage
-          this.storageService.saveCharacter(this.character!).subscribe({
-            next: () => {
-              console.log('[CharacterName] Name saved to localStorage');
-              if (this.character && this.character.level > 1) {
-                this.levelUpApi.initializeLevel(this.characterId!, this.character.level).subscribe({
-                  next: () => {},
-                  error: (err) => console.error('[CharacterName] Failed to initialize level:', err)
-                });
-              }
-            },
-            error: () => console.error('[CharacterName] Failed to save name to localStorage')
-          });
+          this.router.navigate(['/']);
         }
       });
   }

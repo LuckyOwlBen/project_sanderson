@@ -11,10 +11,10 @@
       </div>
 
       <!-- Character Level Selection -->
-      <mat-form-field appearance="outline" class="level-input" *ngIf="character">
+      <mat-form-field appearance="outline" class="level-input">
         <mat-label>Character Level</mat-label>
-        <mat-select [(ngModel)]="character.level" (ngModelChange)="onLevelChange()">
-          <mat-select-trigger>{{ character.level }}</mat-select-trigger>
+        <mat-select [(ngModel)]="characterLevel" (ngModelChange)="onLevelChange()">
+          <mat-select-trigger>{{ characterLevel }}</mat-select-trigger>
           <mat-option *ngFor="let lvl of availableLevels" [value]="lvl">
             Level {{ lvl }}
           </mat-option>
@@ -64,7 +64,7 @@
     </mat-card-header>
     
     <mat-card-content>
-      <p class="suggestions-subtitle">Based on your selected culture{{ (character?.cultures?.length ?? 0) > 1 ? 's' : '' }}</p>
+      <p class="suggestions-subtitle">Based on your selected culture</p>
       
       <div class="name-chips">
         <mat-chip-set>
