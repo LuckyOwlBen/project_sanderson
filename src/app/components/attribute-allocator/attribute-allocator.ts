@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -6,6 +6,9 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 import { AttributesApiService, AttributesState } from '../../services/attributes-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
+import { DerivedAttributesManager } from '../../character/attributes/derivedAttributes/derivedAttributesManager';
+import { ResourceManager } from '../../character/resources/resourceManager';
+import { Attributes } from '../../character/attributes/attributes';
 
 type AttributeKey = 'strength' | 'speed' | 'awareness' | 'intellect' | 'willpower' | 'presence';
 
@@ -28,6 +31,8 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 3; // Attributes is step 3
+  private derivedAttributesManager = new DerivedAttributesManager();
+  private resourceManager: ResourceManager | null = null;
   
   movementSpeed: number = 0;
   recoveryDie: string = '';
@@ -40,7 +45,8 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   constructor(
     private identityService: CharacterIdentityService,
     private attributesApi: AttributesApiService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private cdr: ChangeDetectorRef
   ) {
     super();
   }
@@ -81,7 +87,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
         error: (err) => {
           console.error('[AttributeAllocator] Failed to load attributes:', err);
           this.isLoading = false;
-          // Don't initialize defaults - wait for successful API response
+          // Don''t initialize defaults - wait for successful API response
           // This prevents overwriting server state with client defaults
         }
       });
@@ -104,11 +110,24 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       { name: 'Presence', key: 'presence', currentValue: state.presence }
     ];
 
-    // Initialize with data and ensure values aren't reset
+    // Initialize with data and ensure values aren''t reset
     this.initialize(attributes, state.totalPoints, false);
+    
+    // Initialize resource manager with base attributes
+    const attrs = new Attributes();
+    attrs.strength = state.strength;
+    attrs.speed = state.speed;
+    attrs.awareness = state.awareness;
+    attrs.intellect = state.intellect;
+    attrs.willpower = state.willpower;
+    attrs.presence = state.presence;
+    this.resourceManager = new ResourceManager(attrs);
     
     // Force recalculation to ensure remainingPoints is correct
     this.updateValidation();
+
+    // Trigger change detection to ensure DOM updates
+    this.cdr.markForCheck();
   }
 
   // BaseAllocator abstract methods implementation
@@ -126,12 +145,12 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
 
   protected onItemChanged(item: AttributeConfig, newValue: number): void {
     this.updateValidation();
-    // Derived attributes are backend-calculated; updated on save
+    this.updateLiveDerivedAttributes();
   }
 
   protected onResetComplete(): void {
     this.updateValidation();
-    // Derived attributes are backend-calculated; updated on save
+    this.updateLiveDerivedAttributes();
   }
 
   private updateValidation(): void {
@@ -147,6 +166,36 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     this.pendingChange.emit(hasPending);
   }
 
+  private updateLiveDerivedAttributes(): void {
+    if (!this.resourceManager) return;
+    
+    // Build Attributes object from current item values
+    const attrs = this.buildAttributesFromItems();
+    
+    // Recalculate resource manager with new attribute values
+    this.resourceManager.recalculateMaxValues(attrs);
+    
+    // Update derived attributes from calculated values
+    this.derivedHealth = this.resourceManager.health.max;
+    this.derivedFocus = this.resourceManager.focus.max;
+    this.movementSpeed = this.derivedAttributesManager.getMovementSpeed(attrs);
+    this.recoveryDie = this.derivedAttributesManager.getRecoveryDie(attrs);
+    
+    // Trigger change detection
+    this.cdr.markForCheck();
+  }
+
+  private buildAttributesFromItems(): Attributes {
+    const attrs = new Attributes();
+    attrs.strength = this.items.find(i => i.key === 'strength')?.currentValue ?? 0;
+    attrs.speed = this.items.find(i => i.key === 'speed')?.currentValue ?? 0;
+    attrs.awareness = this.items.find(i => i.key === 'awareness')?.currentValue ?? 0;
+    attrs.intellect = this.items.find(i => i.key === 'intellect')?.currentValue ?? 0;
+    attrs.willpower = this.items.find(i => i.key === 'willpower')?.currentValue ?? 0;
+    attrs.presence = this.items.find(i => i.key === 'presence')?.currentValue ?? 0;
+    return attrs;
+  }
+
   public persistStep(): void {
     if (!this.characterId) return;
 
@@ -160,7 +209,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       .subscribe({
         next: (state) => {
           console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);
-          // Update derived attributes from server response
+          // Update derived attributes from server response for authoritative values
           this.derivedHealth = state.derived.health;
           this.derivedFocus = state.derived.focus;
           this.movementSpeed = state.derived.movement;
