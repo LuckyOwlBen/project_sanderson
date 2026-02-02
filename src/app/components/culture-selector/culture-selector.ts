@@ -1,15 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
 import { ALL_CULTURES } from '../../character/culture/allCultures';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
-import { CharacterStorageService } from '../../services/character-storage.service';
-import { CharacterCreationApiService } from '../../services/character-creation-api.service';
-import { Subject, takeUntil } from 'rxjs';
+import { CultureApiService } from '../../services/culture-api.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
+import { Subject, takeUntil, filter } from 'rxjs';
 
 interface CultureInfo {
   culture: CulturalInterface;
@@ -39,18 +39,22 @@ export class CultureSelector implements OnInit, OnDestroy {
   
   allCultureInfos: CultureInfo[] = [];
   selectedCulture: CultureInfo | null = null;
-  confirmedCultures: CulturalInterface[] = [];
+  selectedCultureNames: string[] = [];
+  availableCultureInfos: CultureInfo[] = [];
+  selectedCultureInfos: CultureInfo[] = [];
   showValidation = false;
   isLoading = false;
-  private characterId: string | null = null;
+  isWaitingForIdentity = false;
   
   constructor(
-    private characterState: CharacterStateService,
+    private router: Router,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService,
-    private creationApiService: CharacterCreationApiService
+    private cultureApiService: CultureApiService,
+    private identityService: CharacterIdentityService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeCultureInfos();
+    this.updateCultureLists();
   }
 
   ngOnDestroy(): void {
@@ -59,54 +63,80 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
   
   get canProgress(): boolean {
-    return this.confirmedCultures.length > 0;
-  }
-  
-  get availableCultureInfos(): CultureInfo[] {
-    return this.allCultureInfos.filter(info => 
-      !this.confirmedCultures.some(culture => culture.name === info.culture.name)
-    );
-  }
-  
-  get selectedCultureInfos(): CultureInfo[] {
-    return this.allCultureInfos.filter(info => 
-      this.confirmedCultures.some(culture => culture.name === info.culture.name)
-    );
+    return this.selectedCultureNames.length > 0;
   }
   
   get isMaxCulturesSelected(): boolean {
-    return this.confirmedCultures.length >= 2;
+    return this.selectedCultureNames.length >= 2;
+  }
+
+  private updateCultureLists(): void {
+    this.availableCultureInfos = this.allCultureInfos.filter(info => 
+      !this.selectedCultureNames.includes(info.culture.name)
+    );
+    this.selectedCultureInfos = this.allCultureInfos.filter(info => 
+      this.selectedCultureNames.includes(info.culture.name)
+    );
   }
 
   ngOnInit(): void {
-    const current = this.characterState.getCharacter();
-    this.characterId = (current as any)?.id || null;
-    this.confirmedCultures = current.cultures || [];
-    this.initializeCultureInfos();
-    this.updateValidation();
-    this.showValidation = this.confirmedCultures.length === 0;
+    // Monitor the waiting flag from identity service
+    this.identityService.waitingForIdentity$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
+
+    // Once we have a character ID, load cultures from API
+    this.identityService.currentCharacterId$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((id) => id !== null) // Only proceed when ID exists
+      )
+      .subscribe((characterId) => {
+        if (characterId) {
+          this.loadCulturesFromApi(characterId);
+        }
+      });
+  }
+
+  private loadCulturesFromApi(characterId: string): void {
+    console.log('[CultureSelector] Loading cultures for character:', characterId);
+    this.cultureApiService.getCultures(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cultureNames) => {
+          console.log('[CultureSelector] Received cultures from API:', cultureNames);
+          this.selectedCultureNames = cultureNames || [];
+          this.updateCultureLists();
+          this.updateValidation();
+          this.isWaitingForIdentity = false;
+          console.log('[CultureSelector] Updated selectedCultureNames:', this.selectedCultureNames);
+          console.log('[CultureSelector] Available cultures:', this.availableCultureInfos.length);
+          console.log('[CultureSelector] Selected cultures:', this.selectedCultureInfos.length);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('[CultureSelector] Failed to load cultures:', err);
+          this.selectedCultureNames = [];
+          this.updateCultureLists();
+          this.updateValidation();
+          this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
+          this.router.navigate(['/']);
+        }
+      });
   }
 
   private updateValidation(): void {
-    const isValid = this.confirmedCultures.length > 0;
+    // Culture selection is optional on first load, becomes valid once at least one is selected
+    // Allow empty state initially, but require at least one culture before proceeding
+    const isValid = true; // Step is always valid for navigation purposes
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
   }
 
   private initializeCultureInfos(): void {
-    // Get current character ancestry from the service
-    let currentCharacter: any = null;
-    const subscription = this.characterState.character$.subscribe(char => currentCharacter = char);
-    subscription.unsubscribe();
-    const currentAncestry = currentCharacter?.ancestry;
-    
     this.allCultureInfos = ALL_CULTURES
-      .filter(culture => {
-        // Filter out cultures restricted to specific ancestries if character doesn't match
-        if (culture.restrictedToAncestry) {
-          return currentAncestry === culture.restrictedToAncestry;
-        }
-        return true;
-      })
       .map(culture => ({
         culture: culture,
         name: culture.name,
@@ -162,9 +192,8 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   confirmCulture(): void {
     if (this.selectedCulture) {
-      this.characterState.addCulture(this.selectedCulture.culture);
-      this.confirmedCultures = this.characterState.getCharacter().cultures || [];
-      this.initializeCultureInfos();
+      this.selectedCultureNames.push(this.selectedCulture.culture.name);
+      this.updateCultureLists();
       this.updateValidation();
       this.selectedCulture = null;
       this.showValidation = false;
@@ -184,41 +213,40 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   removeCulture(cultureInfo: CultureInfo): void {
-    this.characterState.removeCulture(cultureInfo.culture);
-    this.confirmedCultures = this.characterState.getCharacter().cultures || [];
-    this.initializeCultureInfos();
+    this.selectedCultureNames = this.selectedCultureNames.filter(name => name !== cultureInfo.culture.name);
+    this.updateCultureLists();
     this.updateValidation();
   }
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    const character = this.characterState.getCharacter();
-    if (!this.characterId) {
-      return;
-    }
+    console.log('[CultureSelector] persistStep called');
+    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
+      if (!characterId) {
+        console.warn('[CultureSelector] No character ID available for saving');
+        return;
+      }
+      
+      if (this.selectedCultureNames.length === 0) {
+        console.warn('[CultureSelector] No cultures selected for saving');
+        return;
+      }
 
-    this.isLoading = true;
-
-    // Try to save cultures via API first
-    this.creationApiService.updateCultures(this.characterId, this.confirmedCultures)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('[CultureSelector] Cultures saved to server:', response);
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('[CultureSelector] Failed to save cultures via API:', err);
-          this.isLoading = false;
-
-          // Fallback to localStorage
-          this.storageService.saveCharacter(character).subscribe({
-            next: () => {
-              console.log('[CultureSelector] Cultures saved to localStorage');
-            },
-            error: () => console.error('[CultureSelector] Failed to save cultures to localStorage')
-          });
-        }
-      });
+      console.log('[CultureSelector] Saving cultures:', this.selectedCultureNames, 'for character:', characterId);
+      this.isLoading = true;
+      this.cultureApiService.saveCultures(characterId, this.selectedCultureNames)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            console.log('[CultureSelector] Cultures saved to server:', response);
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('[CultureSelector] Failed to save cultures:', error);
+            this.isLoading = false;
+            this.router.navigate(['/']);
+          }
+        });
+    });
   }
 }

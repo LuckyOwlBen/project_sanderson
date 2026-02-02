@@ -249,6 +249,7 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
     const items = await db.all('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?', characterId);
     const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
     const paths = await db.all('SELECT pathName FROM PathSelection WHERE characterId = ?', characterId);
+    const cultures = await db.all('SELECT name FROM CultureSelection WHERE characterId = ?', characterId);
 
     // Serialize to character format
     return {
@@ -283,7 +284,8 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
           isActive: resources.investitureActive === 1
         }
       } : undefined,
-      paths: paths.map((p: any) => p.pathName)
+      paths: paths.map((p: any) => p.pathName),
+      cultures: cultures.map((c: any) => c.name)
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -373,6 +375,23 @@ export async function saveCharacter(
       for (const pathName of character.paths) {
         await db.run('INSERT INTO PathSelection (id, characterId, pathName) VALUES (?, ?, ?)',
           `path-${character.id}-${pathName}`, character.id, pathName);
+      }
+    }
+
+    // Save cultures
+    if (character.cultures !== undefined) {
+      await db.run('DELETE FROM CultureSelection WHERE characterId = ?', character.id);
+      if (Array.isArray(character.cultures) && character.cultures.length > 0) {
+        for (const cultureName of character.cultures) {
+          await db.run('INSERT INTO CultureSelection (id, characterId, name, description, expertise, suggestedNames) VALUES (?, ?, ?, ?, ?, ?)',
+            `culture-${character.id}-${cultureName}`,
+            character.id,
+            cultureName,
+            '',  // description can be populated later if needed
+            '',  // expertise can be populated later if needed
+            '[]' // suggestedNames as empty JSON array
+          );
+        }
       }
     }
 

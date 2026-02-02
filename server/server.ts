@@ -22,6 +22,7 @@ import createSkillCalculationsRoutes from './routes/skill-calculations';
 import { createAttackCalculationsRoutes } from './routes/attack-calculations';
 import createCharacterRoutes from './routes/character';
 import createAncestryRoute from './routes/ancestry-route';
+import createCultureRoute from './routes/culture-route';
 
 import {
   initDatabase,
@@ -203,6 +204,9 @@ createCharacterRoutes(app, CHARACTERS_DIR);
 
 // Register ancestry routes (read ancestry by character ID)
 createAncestryRoute(app);
+
+// Register culture routes (read/write cultures by character ID)
+createCultureRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {

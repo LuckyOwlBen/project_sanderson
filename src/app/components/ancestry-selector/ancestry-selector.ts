@@ -1,11 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
-import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
-import { CharacterStorageService } from '../../services/character-storage.service';
 import { AncestryApiService } from '../../services/ancestry-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { MatCardModule } from '@angular/material/card';
@@ -70,12 +68,11 @@ export class AncestrySelector implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private characterState: CharacterStateService,
     private router: Router,
     private validationService: StepValidationService,
-    private storageService: CharacterStorageService,
     private ancestryApiService: AncestryApiService,
-    private identityService: CharacterIdentityService
+    private identityService: CharacterIdentityService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -100,25 +97,31 @@ export class AncestrySelector implements OnInit, OnDestroy {
   }
 
   private loadAncestryFromApi(characterId: string): void {
-    this.ancestryApiService.getAncestry(characterId).subscribe({
-      next: (ancestry) => {
-        if (ancestry) {
-          this.selectedAncestry = ancestry;
-          this.characterState.setAncestry(ancestry);
-        } else {
+    console.log('[AncestrySelector] Loading ancestry from API for character:', characterId);
+    this.ancestryApiService.getAncestry(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (ancestry) => {
+          console.log('[AncestrySelector] Received ancestry from API:', ancestry);
+          if (ancestry) {
+            this.selectedAncestry = ancestry;
+          } else {
+            this.selectedAncestry = null;
+          }
+          this.updateValidation();
+          this.isWaitingForIdentity = false;
+          console.log('[AncestrySelector] Updated selectedAncestry:', this.selectedAncestry);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('[AncestrySelector] Error loading ancestry from API:', err);
           this.selectedAncestry = null;
+          this.updateValidation();
+          this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
+          this.router.navigate(['/']);
         }
-        this.updateValidation();
-        // Turn off waiting flag once ancestry is loaded
-        this.isWaitingForIdentity = false;
-      },
-      error: () => {
-        this.selectedAncestry = null;
-        this.updateValidation();
-        this.isWaitingForIdentity = false;
-        this.router.navigate(['/']);
-      }
-    });
+      });
   }
 
   ngOnDestroy(): void {
@@ -128,7 +131,6 @@ export class AncestrySelector implements OnInit, OnDestroy {
 
   selectAncestry(ancestry: Ancestry): void {
     this.selectedAncestry = ancestry;
-    this.characterState.setAncestry(ancestry);
     this.updateValidation();
   }
 
@@ -158,6 +160,7 @@ export class AncestrySelector implements OnInit, OnDestroy {
       console.log('[AncestrySelector] Saving ancestry:', this.selectedAncestry, 'for character:', characterId);
       this.isLoading = true;
       this.ancestryApiService.saveAncestry(characterId, this.selectedAncestry)
+        .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
             console.log('[AncestrySelector] Ancestry saved to server:', response);
@@ -166,12 +169,7 @@ export class AncestrySelector implements OnInit, OnDestroy {
           error: (error) => {
             console.error('[AncestrySelector] Failed to save ancestry:', error);
             this.isLoading = false;
-            // Fall back to local storage if API fails
-            const character = this.characterState.getCharacter();
-            this.storageService.saveCharacter(character).subscribe({ 
-              next: () => console.log('[AncestrySelector] Ancestry saved to localStorage'),
-              error: () => console.error('[AncestrySelector] Failed to save ancestry to localStorage')
-            });
+            this.router.navigate(['/']);
           }
         });
     });
