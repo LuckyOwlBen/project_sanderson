@@ -1,39 +1,20 @@
 /**
- * SkillManager Component - PHASE 2.2 REFACTOR
- * 
- * MIGRATION: Removed subscription to character$ Observable
- * 
- * PROBLEM FIXED:
- * - Previously subscribed to combineLatest([queryParams, character$])
- * - When navigating back from talents, character$ would re-emit
- * - Component would reuse stale serverSkillPoints from first visit
- * - This caused incorrect remaining points calculation
- * 
- * SOLUTION:
- * - Now subscribes ONLY to queryParams changes
- * - Gets current character state directly via getCharacter() snapshot
- * - Resets isFetchingSlice flag on each param change to force fresh API fetch
- * - Only fetches during level-up mode to avoid unnecessary calls
- * - Prevents stale cache from being reused when revisiting step
- * 
- * ARCHITECTURE:
- * - Level-up components are now independent of character$ emissions
- * - Backend slice APIs remain the source of truth for point allocation
- * - Each visit to a level-up step triggers fresh data fetch
+ * SkillManager Component
+ *
+ * Uses the Skills API as the source of truth for skill allocations.
  */
 
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil, filter } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
-import { LevelUpManager } from '../../levelup/levelUpManager';
-import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
+import { SkillsApiService, SkillsState } from '../../services/skills-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
-import { SkillType, isSurgeSkill } from '../../character/skills/skillTypes';
+import { SkillType } from '../../character/skills/skillTypes';
 import { SkillAssociationTable } from '../../character/skills/skillAssociationTable';
 
 interface SkillConfig {
@@ -60,9 +41,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   
   character: Character | null = null;
   private skillAssociationTable = new SkillAssociationTable();
-  isLevelUpMode: boolean = false;
   private characterId: string | null = null;
-  private levelTables?: LevelTables;
   private serverSkillPoints?: number;
   private isInitialized: boolean = false;
   private isFetchingSlice: boolean = false;
@@ -74,10 +53,9 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   surgeSkills: SkillConfig[] = [];
 
   constructor(
-    private activatedRoute: ActivatedRoute,
     private characterStateService: CharacterStateService,
-    private levelUpManager: LevelUpManager,
-    private levelUpApi: LevelUpApiService,
+    private identityService: CharacterIdentityService,
+    private skillsApi: SkillsApiService,
     private validationService: StepValidationService,
     private cdr: ChangeDetectorRef
   ) {
@@ -85,33 +63,17 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   }
 
   ngOnInit(): void {
-    // Subscribe only to route params changes - do NOT subscribe to character$
-    // during level-up mode. This prevents stale cache reuse when navigating
-    // between level-up steps.
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
-        // Reset isFetchingSlice when route params change - this forces fresh fetch
-        // if we re-enter level-up mode
-        this.isFetchingSlice = false;
-        
-        // Get current character from service (not from subscription)
-        this.character = this.characterStateService.getCharacter();
-        this.characterId = (this.character as any)?.id || null;
-
-        if (this.character && this.isLevelUpMode) {
+    this.identityService.currentCharacterId$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((id): id is string => id !== null)
+      )
+      .subscribe((characterId) => {
+        if (this.characterId !== characterId) {
+          this.characterId = characterId;
+          this.character = this.characterStateService.getCharacter();
           this.isInitialized = false;
-          if (this.characterId) {
-            this.fetchSkillSlice(this.characterId);
-          }
-        } else if (this.character && !this.isLevelUpMode) {
-          // Always fetch slice from API even in creation mode to keep server as source of truth
-          console.log('[SkillManager] Character creation mode - fetching slice from API');
-          this.isInitialized = false;
-          if (this.characterId) {
-            this.fetchSkillSlice(this.characterId);
-          }
+          this.fetchSkillState(characterId);
         }
       });
   }
@@ -121,27 +83,25 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     this.destroy$.complete();
   }
 
-  private fetchSkillSlice(characterId: string): void {
+  private fetchSkillState(characterId: string): void {
+    if (this.isFetchingSlice) return;
     this.isFetchingSlice = true;
-    // In creation mode (level > 1), request cumulative points instead of single-level
-    const isCreationMode = (this.character?.level ?? 1) > 1;
-    this.levelUpApi.getSkillSlice(characterId, isCreationMode)
+
+    this.skillsApi.getSkills(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (slice) => {
+        next: (state: SkillsState) => {
           this.isFetchingSlice = false;
-          this.serverSkillPoints = slice.pointsForLevel;
-          if (this.character && slice.skills) {
-            this.mapSkillsFromSlice(slice.skills);
+          this.serverSkillPoints = state.totalPoints;
+          if (this.character && state.skills) {
+            this.mapSkillsFromSlice(state.skills);
           }
-          // Mark as initialized before initializing to prevent re-fetching
-          this.isInitialized = false; // Allow re-init
+          this.isInitialized = false;
           this.initializeSkills();
-          this.cdr.detectChanges(); // Trigger change detection
+          this.cdr.detectChanges();
         },
         error: () => {
-          // Server health service will handle navigation to error page
-          console.error('Failed to load skill slice, server may be down');
+          console.error('Failed to load skills, server may be down');
           this.isFetchingSlice = false;
         }
       });
@@ -154,8 +114,6 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     });
   }
 
-  // Offline mode removed: no local points tables
-
   private persistSkills(): void {
     if (!this.character || !this.characterId) {
       return;
@@ -163,9 +121,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
     const payload = this.character.skills.getAllSkillRanks();
     console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
-    // In creation mode (level > 1), pass isCreationMode flag to use cumulative points
-    const isCreationMode = (this.character.level ?? 1) > 1;
-    this.levelUpApi.updateSkillSlice(this.characterId, payload, isCreationMode)
+    this.skillsApi.updateSkills(this.characterId, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -205,21 +161,8 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     // Group skills by category
     this.categorizeSkills(skills);
 
-    // Always use server points (character always has ID from creation)
     const totalPoints = this.serverSkillPoints ?? 0;
-    const useBaseline = this.serverSkillPoints !== undefined;
-    
-    // Initialize without baseline first
     this.initialize(skills, totalPoints, false);
-    
-    // If in level-up mode, set baseline to current values (these are pre-levelup allocations)
-    if (useBaseline) {
-      skills.forEach(skill => {
-        this.baselineValues.set(skill.name, skill.currentValue);
-      });
-      // Recalculate points with new baseline
-      this.calculatePoints();
-    }
     
     // Set initialized AFTER everything is setup
     this.isInitialized = true;
@@ -297,10 +240,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
   protected onItemChanged(item: SkillConfig, newValue: number): void {
     if (this.character) {
-      // Skip broadcasting during level-up to avoid resetting input bindings
-      if (!this.isLevelUpMode) {
-        this.characterStateService.updateCharacter(this.character);
-      }
+      this.characterStateService.updateCharacter(this.character);
       this.updateSkillTotals();
       this.updateValidation();
       // Don't auto-persist on every change - only persist when Next is clicked
@@ -309,10 +249,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
   protected onResetComplete(): void {
     if (this.character) {
-      // Skip broadcasting during level-up to avoid resetting input bindings
-      if (!this.isLevelUpMode) {
-        this.characterStateService.updateCharacter(this.character);
-      }
+      this.characterStateService.updateCharacter(this.character);
       this.updateSkillTotals();
       this.updateValidation();
       // Don't auto-persist on every change - only persist when Next is clicked

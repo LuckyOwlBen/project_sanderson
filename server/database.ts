@@ -94,6 +94,14 @@ export interface AttributesRecord {
   finalized: boolean;
 }
 
+export interface SkillsStateRecord {
+  characterId: string;
+  totalPoints: number;
+  pointsSpent: number;
+  pointsRemaining: number;
+  finalized: boolean;
+}
+
 export interface SaveResult {
   success: boolean;
   id?: string;
@@ -146,6 +154,16 @@ export async function initializeSchema(): Promise<void> {
         skillName TEXT NOT NULL,
         value INTEGER DEFAULT 0,
         UNIQUE(characterId, skillName),
+        FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS SkillsState (
+        id TEXT PRIMARY KEY,
+        characterId TEXT UNIQUE NOT NULL,
+        totalPoints INTEGER DEFAULT 0,
+        pointsSpent INTEGER DEFAULT 0,
+        pointsRemaining INTEGER DEFAULT 0,
+        finalized INTEGER DEFAULT 0,
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
 
@@ -411,6 +429,101 @@ export async function setAttributesFinalized(characterId: string, finalized: boo
     finalized ? 1 : 0,
     characterId
   );
+}
+
+// ============================================================================
+// SKILLS STATE HELPERS
+// ============================================================================
+
+export async function getSkillsStateRecord(characterId: string): Promise<SkillsStateRecord | null> {
+  if (!db) throw new Error('Database not initialized');
+  const state = await db.get('SELECT * FROM SkillsState WHERE characterId = ?', characterId);
+  if (!state) return null;
+  return {
+    characterId: state.characterId,
+    totalPoints: state.totalPoints ?? 0,
+    pointsSpent: state.pointsSpent ?? 0,
+    pointsRemaining: state.pointsRemaining ?? 0,
+    finalized: (state.finalized ?? 0) === 1
+  };
+}
+
+export async function createSkillsStateRecord(record: SkillsStateRecord): Promise<SkillsStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(`
+    INSERT INTO SkillsState (
+      id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `,
+    `skills-${record.characterId}`,
+    record.characterId,
+    record.totalPoints,
+    record.pointsSpent,
+    record.pointsRemaining,
+    record.finalized ? 1 : 0
+  );
+  return record;
+}
+
+export async function updateSkillsStateRecord(
+  characterId: string,
+  updates: Partial<SkillsStateRecord>
+): Promise<SkillsStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const current = await getSkillsStateRecord(characterId);
+  if (!current) {
+    throw new Error(`Skills state record not found for character ${characterId}`);
+  }
+
+  const merged: SkillsStateRecord = {
+    ...current,
+    ...updates,
+    characterId
+  };
+
+  await db.run(`
+    UPDATE SkillsState SET
+      totalPoints = ?,
+      pointsSpent = ?,
+      pointsRemaining = ?,
+      finalized = ?
+    WHERE characterId = ?
+  `,
+    merged.totalPoints,
+    merged.pointsSpent,
+    merged.pointsRemaining,
+    merged.finalized ? 1 : 0,
+    characterId
+  );
+
+  return merged;
+}
+
+export async function setSkillsStateFinalized(characterId: string, finalized: boolean): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(
+    'UPDATE SkillsState SET finalized = ? WHERE characterId = ?',
+    finalized ? 1 : 0,
+    characterId
+  );
+}
+
+export async function getSkillRanks(characterId: string): Promise<Record<string, number>> {
+  if (!db) throw new Error('Database not initialized');
+  const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
+  return skills.reduce((acc: Record<string, number>, s: any) => {
+    acc[s.skillName] = s.value;
+    return acc;
+  }, {});
+}
+
+export async function replaceSkillRanks(characterId: string, skills: Record<string, number>): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run('DELETE FROM Skill WHERE characterId = ?', characterId);
+  for (const [skillName, value] of Object.entries(skills)) {
+    await db.run('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)',
+      `skill-${characterId}-${skillName}`, characterId, skillName, value);
+  }
 }
 
 /**

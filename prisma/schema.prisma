@@ -8,7 +8,6 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 // ===== CHARACTER =====
@@ -25,6 +24,7 @@ model Character {
   cultures         CultureSelection[]
   paths            PathSelection[]
   attributes       Attributes?
+  skillsState      SkillsState?
   skills           Skill[]
   inventory        InventoryItem[]
   talents          UnlockedTalent[]
@@ -194,4 +194,19 @@ model SpentPoints {
   attributes  String   @default("{}")  // JSON stored as string for SQLite: { "1": 12, "2": 14 }
   skills      String   @default("{}")  // JSON stored as string for SQLite: { "1": 4, "2": 6 }
   talents     String   @default("{}")  // JSON stored as string for SQLite: { "1": 1, "2": 2 }
+}
+
+// ===== SKILLS STATE =====
+// Tracks available skill points and allocation progress
+model SkillsState {
+  id                String   @id @default(cuid())
+  characterId       String   @unique
+  character         Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  totalPoints       Int      @default(0)
+  pointsSpent       Int      @default(0)
+  pointsRemaining   Int      @default(0)
+  finalized         Boolean  @default(false)
+  
+  @@index([characterId])
 }
