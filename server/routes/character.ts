@@ -28,10 +28,18 @@ export default function createCharacterRoutes(app: Express, charactersDir: strin
         character: characterDTO
       });
     } catch (error) {
-      console.error('Error creating character:', error);
+      console.error('[Character Route] Error creating character:', error);
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+        ? (error as { message: string }).message 
+        : String(error);
+      const errorStack = typeof error === 'object' && error !== null && 'stack' in error
+        ? (error as { stack: string }).stack
+        : '';
+      console.error('[Character Route] Error details:', errorStack);
       res.status(500).json({ 
         success: false, 
-        error: typeof error === 'object' && error !== null && 'message' in error ? (error as { message: string }).message : String(error)
+        error: errorMessage,
+        details: errorStack
       });
     }
   });

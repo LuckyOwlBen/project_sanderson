@@ -80,6 +80,20 @@ export interface CharacterData {
   };
 }
 
+export interface AttributesRecord {
+  characterId: string;
+  totalPoints: number;
+  pointsSpent: number;
+  pointsRemaining: number;
+  strength: number;
+  speed: number;
+  intellect: number;
+  willpower: number;
+  awareness: number;
+  presence: number;
+  finalized: boolean;
+}
+
 export interface SaveResult {
   success: boolean;
   id?: string;
@@ -113,6 +127,10 @@ export async function initializeSchema(): Promise<void> {
       CREATE TABLE IF NOT EXISTS Attributes (
         id TEXT PRIMARY KEY,
         characterId TEXT UNIQUE NOT NULL,
+        totalPoints INTEGER DEFAULT 0,
+        pointsSpent INTEGER DEFAULT 0,
+        pointsRemaining INTEGER DEFAULT 0,
+        finalized INTEGER DEFAULT 0,
         strength INTEGER DEFAULT 2,
         speed INTEGER DEFAULT 2,
         intellect INTEGER DEFAULT 2,
@@ -293,6 +311,108 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
   }
 }
 
+// ============================================================================
+// ATTRIBUTES RECORD HELPERS
+// ============================================================================
+
+export async function getAttributesRecord(characterId: string): Promise<AttributesRecord | null> {
+  if (!db) throw new Error('Database not initialized');
+  const attrs = await db.get('SELECT * FROM Attributes WHERE characterId = ?', characterId);
+  if (!attrs) return null;
+  return {
+    characterId: attrs.characterId,
+    totalPoints: attrs.totalPoints ?? 0,
+    pointsSpent: attrs.pointsSpent ?? 0,
+    pointsRemaining: attrs.pointsRemaining ?? 0,
+    strength: attrs.strength ?? 2,
+    speed: attrs.speed ?? 2,
+    intellect: attrs.intellect ?? 2,
+    willpower: attrs.willpower ?? 2,
+    awareness: attrs.awareness ?? 2,
+    presence: attrs.presence ?? 2,
+    finalized: (attrs.finalized ?? 0) === 1
+  };
+}
+
+export async function createAttributesRecord(record: AttributesRecord): Promise<AttributesRecord> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(`
+    INSERT INTO Attributes (
+      id, characterId, totalPoints, pointsSpent, pointsRemaining,
+      strength, speed, intellect, willpower, awareness, presence, finalized
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `,
+    `attr-${record.characterId}`,
+    record.characterId,
+    record.totalPoints,
+    record.pointsSpent,
+    record.pointsRemaining,
+    record.strength,
+    record.speed,
+    record.intellect,
+    record.willpower,
+    record.awareness,
+    record.presence,
+    record.finalized ? 1 : 0
+  );
+  return record;
+}
+
+export async function updateAttributesRecord(
+  characterId: string,
+  updates: Partial<AttributesRecord>
+): Promise<AttributesRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const current = await getAttributesRecord(characterId);
+  if (!current) {
+    throw new Error(`Attributes record not found for character ${characterId}`);
+  }
+
+  const merged: AttributesRecord = {
+    ...current,
+    ...updates,
+    characterId
+  };
+
+  await db.run(`
+    UPDATE Attributes SET
+      totalPoints = ?,
+      pointsSpent = ?,
+      pointsRemaining = ?,
+      strength = ?,
+      speed = ?,
+      intellect = ?,
+      willpower = ?,
+      awareness = ?,
+      presence = ?,
+      finalized = ?
+    WHERE characterId = ?
+  `,
+    merged.totalPoints,
+    merged.pointsSpent,
+    merged.pointsRemaining,
+    merged.strength,
+    merged.speed,
+    merged.intellect,
+    merged.willpower,
+    merged.awareness,
+    merged.presence,
+    merged.finalized ? 1 : 0,
+    characterId
+  );
+
+  return merged;
+}
+
+export async function setAttributesFinalized(characterId: string, finalized: boolean): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(
+    'UPDATE Attributes SET finalized = ? WHERE characterId = ?',
+    finalized ? 1 : 0,
+    characterId
+  );
+}
+
 /**
  * Save a character to the database atomically
  */
@@ -336,28 +456,37 @@ export async function saveCharacter(
       character.lastModified ?? new Date().toISOString()
     );
 
-    // Save attributes
-    if (character.attributes) {
-      await db.run(`
-        INSERT INTO Attributes (id, characterId, strength, speed, intellect, willpower, awareness, presence)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(characterId) DO UPDATE SET
-          strength = excluded.strength,
-          speed = excluded.speed,
-          intellect = excluded.intellect,
-          willpower = excluded.willpower,
-          awareness = excluded.awareness,
-          presence = excluded.presence
-      `,
-        `attr-${character.id}`,
-        character.id,
-        character.attributes.strength ?? 2,
-        character.attributes.speed ?? 2,
-        character.attributes.intellect ?? 2,
-        character.attributes.willpower ?? 2,
-        character.attributes.awareness ?? 2,
-        character.attributes.presence ?? 2
+    // NOTE: Attributes creation is handled by character-service.createCharacter() during initial creation
+    // Only update existing attributes records here (not for new characters)
+    if (character.attributes && character.attributes.totalPoints && character.attributes.totalPoints > 0) {
+      // Check if attributes record already exists for this character
+      const existingAttrs = await db.get(
+        'SELECT id FROM Attributes WHERE characterId = ?',
+        character.id
       );
+      
+      if (existingAttrs) {
+        // Update existing attributes record
+        await db.run(`
+          UPDATE Attributes 
+          SET totalPoints = ?, pointsSpent = ?, pointsRemaining = ?, finalized = ?, 
+              strength = ?, speed = ?, intellect = ?, willpower = ?, awareness = ?, presence = ?
+          WHERE characterId = ?
+        `,
+          (character.attributes as any).totalPoints,
+          (character.attributes as any).pointsSpent ?? 0,
+          (character.attributes as any).pointsRemaining ?? 0,
+          (character.attributes as any).finalized ? 1 : 0,
+          character.attributes.strength ?? 2,
+          character.attributes.speed ?? 2,
+          character.attributes.intellect ?? 2,
+          character.attributes.willpower ?? 2,
+          character.attributes.awareness ?? 2,
+          character.attributes.presence ?? 2,
+          character.id
+        );
+      }
+      // If no existing record, do nothing - let character-service handle creation
     }
 
     // Save skills

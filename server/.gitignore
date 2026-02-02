@@ -2,3 +2,4 @@ node_modules/
 characters/
 *.log
 .env
+dist/

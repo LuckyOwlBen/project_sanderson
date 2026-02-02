@@ -10,6 +10,12 @@
 
 const path = require('path');
 const fsPromises = require('fs').promises;
+const { attributesService } = require('../services/attributes-service');
+const {
+  getAttributesRecord,
+  updateAttributesRecord,
+  saveCharacter
+} = require('../database');
 
 function createCreationRoutes(app, CHARACTERS_DIR) {
   console.log('[Routes] Registering creation routes...');
@@ -206,60 +212,6 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         return res.status(404).json({ success: false, error: 'Character not found' });
       }
       console.error('[Cultures] Error updating cultures:', error);
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-  /**
-   * POST /api/characters/:id/attributes
-   * Update character attributes
-   */
-  app.post('/api/characters/:id/attributes', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { attributes } = req.body;
-
-      if (!attributes || typeof attributes !== 'object') {
-        return res.status(400).json({
-          success: false,
-          error: 'attributes must be an object'
-        });
-      }
-
-      const filepath = getCharacterFilepath(id);
-      const data = await fsPromises.readFile(filepath, 'utf8');
-      const character = JSON.parse(data);
-      
-      character.attributes = { ...character.attributes, ...attributes };
-      character.lastModified = new Date().toISOString();
-
-      await fsPromises.writeFile(
-        filepath,
-        JSON.stringify(character, null, 2)
-      );
-      
-      // Also save to database
-      try {
-        const db = require('../database.js');
-        db.saveCharacter(character);
-        console.log(`[Attributes] Saved attributes to database for ${character.name} (${id})`);
-      } catch (dbError) {
-        console.warn(`[Attributes] Warning: Failed to save to database: ${dbError.message}`);
-      }
-
-      console.log(`[Attributes] Updated ${character.name} (${id}) attributes:`, attributes);
-
-      res.json({
-        success: true,
-        id,
-        attributes: character.attributes,
-        message: 'Attributes updated'
-      });
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        return res.status(404).json({ success: false, error: 'Character not found' });
-      }
-      console.error('[Attributes] Error updating attributes:', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });

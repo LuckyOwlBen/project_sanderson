@@ -143,6 +143,10 @@ export class CharacterRepository {
       character.attributes.willpower = dto.attributes.willpower;
       character.attributes.awareness = dto.attributes.awareness;
       character.attributes.presence = dto.attributes.presence;
+      (character.attributes as any).totalPoints = (dto.attributes as any).totalPoints ?? 0;
+      (character.attributes as any).pointsSpent = (dto.attributes as any).pointsSpent ?? 0;
+      (character.attributes as any).pointsRemaining = (dto.attributes as any).pointsRemaining ?? 0;
+      (character.attributes as any).finalized = (dto.attributes as any).finalized ?? false;
     }
 
     // MODULE 5: SKILLS - SkillManager handles this internally

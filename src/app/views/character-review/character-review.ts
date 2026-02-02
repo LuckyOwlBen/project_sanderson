@@ -11,6 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { CharacterStateService } from '../../character/characterStateService';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { AttributesApiService } from '../../services/attributes-api.service';
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
@@ -47,6 +48,7 @@ export class CharacterReview implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private characterState: CharacterStateService,
     private characterStorage: CharacterStorageService,
+    private attributesApi: AttributesApiService,
     private router: Router,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
@@ -213,12 +215,29 @@ export class CharacterReview implements OnInit, OnDestroy {
           
           if (result.success && result.id) {
             console.log('[CharacterReview] Character creation successful - ID:', result.id);
-            // Character creation confirmed as successful - route to character sheet
-            this.router.navigate(['/character-sheet', result.id], {
-              queryParams: {
-                created: 'true' // Flag indicating character was just created
-              }
-            });
+            // Finalize attributes module
+            this.attributesApi.finalizeAttributes(result.id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: () => {
+                  console.log('[CharacterReview] Attributes finalized for:', result.id);
+                  // Character creation confirmed as successful - route to character sheet
+                  this.router.navigate(['/character-sheet', result.id], {
+                    queryParams: {
+                      created: 'true' // Flag indicating character was just created
+                    }
+                  });
+                },
+                error: (err) => {
+                  console.error('[CharacterReview] Failed to finalize attributes:', err);
+                  // Continue to character sheet even if finalization fails
+                  this.router.navigate(['/character-sheet', result.id], {
+                    queryParams: {
+                      created: 'true'
+                    }
+                  });
+                }
+              });
           } else {
             console.error('[CharacterReview] Character save returned success=false');
             this.characterLoadError = 'Failed to finalize character. Please try again.';

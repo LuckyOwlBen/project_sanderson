@@ -12,7 +12,7 @@
 
     <div class="attributes-list">
       <app-value-stepper
-        *ngFor="let attr of items"
+        *ngFor="let attr of items; trackBy: trackByAttributeKey"
         [label]="attr.name"
         [currentValue]="attr.currentValue"
         [minValue]="getMinValue(attr)"
@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  <div class="sidebar" *ngIf="character">
+  <div class="sidebar" *ngIf="!isLoading">
     <div class="sidebar-header">
       <h3>Derived Attributes</h3>
       <p class="sidebar-subtitle">Preview of your character's statistics</p>
@@ -34,7 +34,7 @@
         <div class="stat-icon">❤️</div>
         <div class="stat-info">
           <label>Health</label>
-          <span class="stat-value">{{ character.resources.health.max }}</span>
+          <span class="stat-value">{{ derivedHealth }}</span>
         </div>
       </div>
       
@@ -42,7 +42,7 @@
         <div class="stat-icon">⚡</div>
         <div class="stat-info">
           <label>Focus</label>
-          <span class="stat-value">{{ character.resources.focus.max }}</span>
+          <span class="stat-value">{{ derivedFocus }}</span>
         </div>
       </div>
       

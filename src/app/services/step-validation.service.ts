@@ -65,21 +65,13 @@ export class StepValidationService {
   }
 
   private validateAttributes(character: Character): void {
-    if (!character.attributes) {
-      this.setStepValid(3, false);
+    // Attribute validation is handled by the AttributeAllocator using backend data.
+    // Avoid overwriting that state here unless it has not been set.
+    if (this.validationState.has(3)) {
       return;
     }
-    
-    // Check if all points are allocated
-    const attrs = character.attributes;
-    const totalAllocated = attrs.strength + attrs.speed + attrs.intellect + 
-                          attrs.willpower + attrs.awareness + attrs.presence;
-    const baseTotal = 18; // 6 attributes * 3 base
-    const level = character.level || 1;
-    const pointsToAllocate = 12; // At level 1
-    const expectedTotal = baseTotal + pointsToAllocate;
-    
-    const isValid = totalAllocated === expectedTotal;
+
+    const isValid = !!character.attributes;
     this.setStepValid(3, isValid);
   }
 

@@ -68,12 +68,21 @@ model Attributes {
   characterId String   @unique
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   
+  // Points pool
+  totalPoints Int      @default(0)
+  pointsSpent Int      @default(0)
+  pointsRemaining Int  @default(0)
+  
+  // Current allocation
   strength    Int      @default(2)
   speed       Int      @default(2)
   intellect   Int      @default(2)
   willpower   Int      @default(2)
   awareness   Int      @default(2)
   presence    Int      @default(2)
+  
+  // Gates editing during creation/level-up
+  finalized   Boolean  @default(false)
 }
 
 // ===== SKILLS =====

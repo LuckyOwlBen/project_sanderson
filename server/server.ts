@@ -24,6 +24,9 @@ import createCharacterRoutes from './routes/character';
 import createAncestryRoute from './routes/ancestry-route';
 import createCultureRoute from './routes/culture-route';
 import createNameRoute from './routes/name-route';
+import createAttributesRoute from './routes/attributes-route';
+import { attributesService } from './services/attributes-service';
+import { AttributesFinalizationService } from './services/attributes-finalization';
 
 import {
   initDatabase,
@@ -34,6 +37,9 @@ import {
   deleteCharacter,
   unlockTalent,
   getSpentPoints,
+  getAttributesRecord,
+  updateAttributesRecord,
+  setAttributesFinalized,
   clearDatabase
 } from './database';
 
@@ -52,6 +58,8 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST']
   }
 });
+
+const attributesFinalizationService = new AttributesFinalizationService();
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || (IS_PRODUCTION ? 80 : 3000);
@@ -212,6 +220,9 @@ createCultureRoute(app);
 // Register name routes (read/write name and level by character ID)
 createNameRoute(app);
 
+// Register attributes routes (read/write attributes by character ID)
+createAttributesRoute(app);
+
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {
   const limit = Math.min(parseInt(req.query.limit, 10) || 200, LOG_BUFFER_SIZE);
@@ -369,72 +380,13 @@ app.get('/invite/:name', (req, res) => {
    
 });
 
-// Save character
-app.post('/api/characters/save', async (req, res) => {
-  try {
-    const character = req.body;
-    
-    if (!character.id) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Character ID is required' 
-      });
-    }
-
-    // Load existing character to preserve server-side tracking (like spentPoints)
-    let existingCharacter = null;
-    try {
-      existingCharacter = await loadCharacterData(character.id);
-    } catch (err) {
-      // Character doesn't exist yet, that's fine
-    }
-
-    // Always preserve spentPoints from existing character (server-side only, client never sends)
-    if (existingCharacter && existingCharacter.spentPoints) {
-      character.spentPoints = existingCharacter.spentPoints;
-    }
-
-    const filename = `${character.id}.json`;
-    const filepath = path.join(CHARACTERS_DIR, filename);
-    const tempPath = `${filepath}.tmp`;
-    
-    // Write to temp file first, then rename for atomic operation
-    await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
-    await fsPromises.rename(tempPath, filepath);
-    
-    console.log(`Saved character: ${character.name} (${character.id})`);
-    
-    // Also save to database
-    try {
-      await saveCharacter(character);
-      console.log(`[Database] Saved character to database: ${character.name} (${character.id})`);
-    } catch (dbError) {
-      console.warn(`[Database] Warning: Failed to save character to database: ${dbError.message}`);
-      // Continue anyway - JSON save succeeded
-    }
-    
-    res.json({ 
-      success: true, 
-      id: character.id 
-    });
-  } catch (error) {
-    console.error('Error saving character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
-});
-
-// ===== INVENTORY ENDPOINTS =====
-
 // Purchase item from store
-app.post('/api/character/:id/inventory/purchase', async (req, res) => {
+app.post('/api/characters/:id/inventory/purchase', async (req, res) => {
   try {
     const { id } = req.params;
-    const { itemId, quantity = 1, price } = req.body;
+    const { itemId, price, quantity } = req.body;
 
-    if (!itemId || !price || quantity < 1) {
+    if (!itemId || price === undefined || quantity === undefined) {
       return res.status(400).json({
         success: false,
         error: 'itemId, price, and quantity are required'
@@ -1227,43 +1179,6 @@ function getCumulativePoints(table, level) {
   }
   return total;
 }
-
-// Level-up: attribute slice
-app.get('/api/characters/:id/level/attributes', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const isCreationMode = req.query.isCreationMode === 'true';
-    const character = await loadCharacterData(id);
-    const level = character.level || 1;
-    
-    // In creation mode, return cumulative points; otherwise single-level points
-    const totalPointsForLevel = isCreationMode 
-      ? getCumulativePoints(LEVEL_TABLES.attributePointsPerLevel, level)
-      : getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
-    
-    // Track spent points per level to prevent re-adding on revisits
-    if (!character.spentPoints) character.spentPoints = {};
-    if (!character.spentPoints.attributes) character.spentPoints.attributes = {};
-    const spentForThisLevel = character.spentPoints.attributes[level] || 0;
-    const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
-    
-    const mode = isCreationMode ? 'creation' : 'level-up';
-    console.log(`[${mode.toUpperCase()}] Provided attribute points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`);
-    res.json({
-      id: character.id,
-      level,
-      attributes: character.attributes || {},
-      pointsForLevel,
-      isCreationMode
-    });
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ success: false, error: 'Character not found' });
-    }
-    console.error('Error loading attribute slice:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // Level-up: skill slice
 app.get('/api/characters/:id/level/skills', async (req, res) => {
