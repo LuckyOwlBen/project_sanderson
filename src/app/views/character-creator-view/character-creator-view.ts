@@ -3,7 +3,6 @@ import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/ro
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { StepValidationService } from '../../services/step-validation.service';
-import { CharacterStorageService } from '../../services/character-storage.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
@@ -45,8 +44,7 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     public characterState: CharacterStateService,
     public flowService: CharacterCreationFlowService,
-    private validationService: StepValidationService,
-    private storageService: CharacterStorageService
+    private validationService: StepValidationService
   ) {
     this.steps = this.flowService.getSteps();
   }
@@ -59,28 +57,6 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       this.isLevelUpMode = params['levelUp'] === 'true';
       console.log('[Character Creator] Level-up mode:', this.isLevelUpMode);
       
-      // Ensure character has an ID for API calls (both creation and level-up modes)
-      const character = this.characterState.getCharacter();
-      const existingId = (character as any)?.id;
-      
-      if (!existingId) {
-        console.log('[Character Creator] No character ID found, creating new character on server');
-        this.storageService.createCharacter().subscribe({
-          next: (result) => {
-            if (result.success && result.id) {
-              console.log('[Character Creator] Character created with ID:', result.id);
-              (character as any).id = result.id;
-              this.characterState.updateCharacter(character);
-            }
-          },
-          error: (error) => {
-            console.error('[Character Creator] Failed to create character:', error);
-            // Server health service will handle navigation to error page
-          }
-        });
-      } else {
-        console.log('[Character Creator] Using existing character ID:', existingId);
-      }
     });
 
     // Subscribe to flow service changes and update local property

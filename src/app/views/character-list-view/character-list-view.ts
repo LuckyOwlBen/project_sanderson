@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 import { CharacterStorageService, SavedCharacter } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
-import { Character } from '../../character/character';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 
 @Component({
   selector: 'app-character-list-view',
@@ -34,7 +34,8 @@ export class CharacterListView implements OnInit, OnDestroy {
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private characterIdentity: CharacterIdentityService
   ) {}
 
   ngOnInit(): void {
@@ -94,11 +95,13 @@ export class CharacterListView implements OnInit, OnDestroy {
     }
   }
 
-  createNewCharacter(): void {
-    // Create a fresh character and reset state
-    const newCharacter = new Character();
-    this.characterState.updateCharacter(newCharacter);
-    this.router.navigate(['/character-creator-view']);
+  async createNewCharacter(): Promise<void> {
+    try {
+      await this.characterIdentity.newIdentity();
+      this.router.navigate(['/character-creator-view/ancestry']);
+    } catch (error) {
+      console.error('[Character List] Error creating new character:', error);
+    }
   }
 
   editCharacter(character: SavedCharacter, event: Event): void {
@@ -111,6 +114,7 @@ export class CharacterListView implements OnInit, OnDestroy {
         next: (loadedCharacter: any) => {
           if (loadedCharacter) {
             this.characterState.updateCharacter(loadedCharacter);
+            this.characterIdentity.setCurrentCharacterId(character.id);
             this.router.navigate(['/character-creator-view']);
           }
         },

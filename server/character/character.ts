@@ -14,45 +14,148 @@ import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilit
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
+import { TalentNode } from './talents/talentInterface';
+
+// Import new character modules
+import {
+  IdentityModule,
+  ProgressionModule,
+  AncestryModule,
+  TalentsModule,
+  ExpertisesModule,
+  SingerFormsModule,
+  CombatModule,
+  MetadataModule
+} from './modules';
 
 
 export class Character {
-  id: string = '';
-  name: string = '';
-  level: number = 1;
-  pendingLevelPoints: number = 0; // Track levels that haven't been spent yet
-  paths: string[] = [];
-  ancestry: Ancestry | null = null;
+  // ============================================================================
+  // MODULE 1: IDENTITY - Character identification
+  // ============================================================================
+  readonly identity: IdentityModule = new IdentityModule();
+
+  // Backward compatibility getters/setters
+  get id(): string { return this.identity.id; }
+  set id(value: string) { this.identity.id = value; }
+  get name(): string { return this.identity.name; }
+  set name(value: string) { this.identity.name = value; }
+
+  // ============================================================================
+  // MODULE 2: PROGRESSION - Experience and level tracking
+  // ============================================================================
+  readonly progression: ProgressionModule = new ProgressionModule();
+
+  // Backward compatibility getters/setters
+  get level(): number { return this.progression.level; }
+  set level(value: number) { this.progression.level = value; }
+  get pendingLevelPoints(): number { return this.progression.pendingLevelPoints; }
+  set pendingLevelPoints(value: number) { this.progression.pendingLevelPoints = value; }
+
+  // ============================================================================
+  // MODULE 3: ANCESTRY/CULTURE - Character background and heritage
+  // ============================================================================
+  readonly ancestryModule: AncestryModule = new AncestryModule();
+
+  // Backward compatibility getters/setters
+  get ancestry(): Ancestry | null { return this.ancestryModule.ancestry; }
+  set ancestry(value: Ancestry | null) { this.ancestryModule.ancestry = value; }
+  get cultures(): CulturalInterface[] { return this.ancestryModule.cultures; }
+  set cultures(value: CulturalInterface[]) { this.ancestryModule.cultures = value; }
+  get paths(): string[] { return this.ancestryModule.paths; }
+  set paths(value: string[]) { this.ancestryModule.paths = value; }
+
+  // ============================================================================
+  // MODULE 4: ATTRIBUTES - Core character statistics
+  // ============================================================================
   attributes: Attributes;
-  cultures: CulturalInterface[] = [];
-  private _selectedExpertises: ExpertiseSource[] = [];
-  unlockedTalents: Set<string> = new Set<string>();
-  baselineUnlockedTalents?: Set<string>; // Talents unlocked before current level-up session
-  
-  // Singer forms tracking - stores IDs of unlocked forms
-  unlockedSingerForms: string[] = [];
-  
-  // Active Singer form - the form currently granting bonuses
-  activeForm?: string;
 
-  // Combat stance tracking - stores the ID of the currently active stance
-  activeStanceId: string | null = null;
-
+  // ============================================================================
+  // MODULE 5: SKILLS - Skill rankings and management
+  // ============================================================================
   private skillManager = new SkillManager();
+
+  // ============================================================================
+  // MODULE 6: TALENTS - Talent selection and tracking
+  // ============================================================================
+  readonly talentsModule: TalentsModule = new TalentsModule();
+
+  // Backward compatibility getters/setters
+  get unlockedTalents(): Set<string> { return this.talentsModule.unlockedTalents; }
+  set unlockedTalents(value: Set<string>) { this.talentsModule.unlockedTalents = value; }
+  get baselineUnlockedTalents(): Set<string> | undefined { return this.talentsModule.baselineUnlockedTalents; }
+  set baselineUnlockedTalents(value: Set<string> | undefined) { this.talentsModule.baselineUnlockedTalents = value; }
+
+  // ============================================================================
+  // MODULE 7: EXPERTISES - Specialized knowledge domains
+  // ============================================================================
+  readonly expertisesModule: ExpertisesModule = new ExpertisesModule();
+
+  // Backward compatibility getters/setters
+  private get _selectedExpertises(): ExpertiseSource[] { return this.expertisesModule.selectedExpertises; }
+  private set _selectedExpertises(value: ExpertiseSource[]) { this.expertisesModule.selectedExpertises = value; }
+
+  // ============================================================================
+  // MODULE 8: RESOURCES - Health, Focus, and Investiture pools
+  // ============================================================================
+  private resourceManager: ResourceManager;
+
+  // ============================================================================
+  // MODULE 9: SINGER FORMS - Symbiotic form tracking and activation
+  // ============================================================================
+  readonly singerFormsModule: SingerFormsModule = new SingerFormsModule();
+
+  // Backward compatibility getters/setters
+  get unlockedSingerForms(): string[] { return this.singerFormsModule.unlockedSingerForms; }
+  set unlockedSingerForms(value: string[]) { this.singerFormsModule.unlockedSingerForms = value; }
+  get activeForm(): string | undefined { return this.singerFormsModule.activeForm; }
+  set activeForm(value: string | undefined) { this.singerFormsModule.activeForm = value; }
+
+  // ============================================================================
+  // MODULE 10: COMBAT - Combat stance and attack system
+  // ============================================================================
+  readonly combatModule: CombatModule = new CombatModule();
+
+  // Backward compatibility getters/setters
+  get activeStanceId(): string | null { return this.combatModule.activeStanceId; }
+  set activeStanceId(value: string | null) { this.combatModule.activeStanceId = value; }
+
+  // ============================================================================
+  // MODULE 11: INVENTORY - Items and equipment management
+  // ============================================================================
+  private inventoryManager = new InventoryManager();
+
+  // ============================================================================
+  // MODULE 12: BONUSES - Bonus tracking and application
+  // ============================================================================
+  private bonusManager = new BonusManager();
+
+  // ============================================================================
+  // MODULE 13: RADIANT PATH - Oath and ideal tracking for Radians
+  // ============================================================================
+  private radiantPathManager = new RadiantPathManager();
+
+  // ============================================================================
+  // MODULE 14: CRAFTING - Item creation and customization
+  // ============================================================================
+  private craftingManager: CraftingManager;
+
+  // ============================================================================
+  // MODULE 15: METADATA - Session and modification tracking
+  // ============================================================================
+  readonly metadataModule: MetadataModule = new MetadataModule();
+
+  // Backward compatibility getters/setters
+  get sessionNotes(): string { return this.metadataModule.sessionNotes; }
+  set sessionNotes(value: string) { this.metadataModule.sessionNotes = value; }
+  get lastModified(): string { return this.metadataModule.lastModified; }
+  set lastModified(value: string) { this.metadataModule.lastModified = value; }
+
+  // ============================================================================
+  // INTERNAL MANAGERS (supporting calculations)
+  // ============================================================================
   private derivedAttributesManager = new DerivedAttributesManager();
   private defenseManager = new DefenseManager();
-  private resourceManager: ResourceManager;
-  private bonusManager = new BonusManager();
-  private radiantPathManager = new RadiantPathManager();
-  private inventoryManager = new InventoryManager();
-  private craftingManager: CraftingManager;
-  
-  /**
-   * Performance cache: Set of expertise names for O(1) lookup
-   * Invalidated when selectedExpertises changes
-   * @private
-   */
-  private expertiseCache: Set<string> | null = null;
 
   /**
    * Get the character's expertises
@@ -60,7 +163,7 @@ export class Character {
    * Use addExpertise/removeExpertise methods or call invalidateExpertiseCache() after manual changes
    */
   get selectedExpertises(): ExpertiseSource[] {
-    return this._selectedExpertises;
+    return this.expertisesModule.selectedExpertises;
   }
 
   /**
@@ -68,8 +171,7 @@ export class Character {
    * Automatically invalidates cache when array is replaced
    */
   set selectedExpertises(value: ExpertiseSource[]) {
-    this._selectedExpertises = value;
-    this.invalidateExpertiseCache();
+    this.expertisesModule.selectedExpertises = value;
   }
 
   constructor() {
@@ -79,7 +181,15 @@ export class Character {
     this.inventoryManager.setBonusManager(this.bonusManager);
     this.inventoryManager.setCharacter(this);
     this.craftingManager = new CraftingManager(this);
+    
+    // Wire up module cross-references
+    this.singerFormsModule.setBonusManager(this.bonusManager);
+    this.combatModule.setCharacter(this);
   }
+
+  // ============================================================================
+  // PROGRESSION MODULE - Level and tier calculations
+  // ============================================================================
 
   /**
    * Get the character's tier based on level.
@@ -90,13 +200,12 @@ export class Character {
    * Tier 5: level 21+
    */
   getTier(): number {
-    const lvl = this.level || 1;
-    if (lvl <= 5) return 1;
-    if (lvl <= 10) return 2;
-    if (lvl <= 15) return 3;
-    if (lvl <= 20) return 4;
-    return 5;
+    return this.progression.getTier();
   }
+
+  // ============================================================================
+  // MODULE ACCESSORS - Expose manager instances
+  // ============================================================================
 
   get skills(): SkillManager {
     return this.skillManager;
@@ -129,6 +238,10 @@ export class Character {
   get crafting(): CraftingManager {
     return this.craftingManager;
   }
+
+  // ============================================================================
+  // RESOURCES MODULE - Health, Focus, and Investiture management
+  // ============================================================================
 
   /**
    * Unlock investiture - called when character speaks first ideal and has bonded spren
@@ -165,6 +278,10 @@ export class Character {
     this.resourceManager.investiture.restoreFully();
   }
 
+  // ============================================================================
+  // RADIANT PATH MODULE - Universal abilities from Radiant Oaths
+  // ============================================================================
+
   /**
    * Get all universal abilities available to this character
    * Includes Radiant abilities and any other special one-off abilities
@@ -186,22 +303,62 @@ export class Character {
     return abilities;
   }
 
+  // ============================================================================
+  // SINGER FORMS MODULE - Symbiotic form tracking and management
+  // ============================================================================
+
+  // ============================================================================
+  // SINGER FORMS MODULE - Symbiotic form tracking and management
+  // ============================================================================
+
   /**
    * Unlock a Singer form
    * @param formId - The ID of the form to unlock (e.g., 'nimbleform', 'artform')
    */
   unlockSingerForm(formId: string): void {
-    if (!this.unlockedSingerForms.includes(formId)) {
-      this.unlockedSingerForms.push(formId);
-    }
+    this.singerFormsModule.unlockForm(formId);
   }
 
   /**
    * Check if character has unlocked a specific Singer form
    */
   hasSingerForm(formId: string): boolean {
-    return this.unlockedSingerForms.includes(formId);
+    return this.singerFormsModule.hasForm(formId);
   }
+
+  /**
+   * Set the active Singer form
+   * @param formId - ID of the form to activate, or undefined to clear
+   * @throws Error if trying to set a form that hasn't been unlocked
+   */
+  setActiveForm(formId: string | undefined): void {
+    this.singerFormsModule.setActiveForm(formId);
+  }
+
+  /**
+   * Get list of available Singer forms for selection
+   */
+  getAvailableForms(): UniversalAbility[] {
+    return this.singerFormsModule.getAvailableForms();
+  }
+
+  /**
+   * Get bonuses from the currently active form
+   */
+  getActiveFormBonuses(): BonusEffect[] {
+    return this.singerFormsModule.getActiveFormBonuses();
+  }
+
+  /**
+   * Get information about the active form
+   */
+  getActiveFormInfo(): UniversalAbility | undefined {
+    return this.singerFormsModule.getActiveFormInfo();
+  }
+
+  // ============================================================================
+  // EXPERTISES MODULE - Specialized knowledge domains
+  // ============================================================================
 
   /**
    * Get all expertise names (for skill checks)
@@ -220,16 +377,7 @@ export class Character {
    * @returns True if character has the expertise, false otherwise
    */
   hasExpertise(expertiseName: string): boolean {
-    // Always check if cache needs rebuilding
-    const currentExpertiseCount = this._selectedExpertises.length;
-    const cacheSize = this.expertiseCache?.size ?? -1;
-    
-    // Rebuild cache if array length changed (detects push/splice/etc)
-    if (!this.expertiseCache || cacheSize !== currentExpertiseCount) {
-      this.rebuildExpertiseCache();
-    }
-    
-    return this.expertiseCache!.has(expertiseName);
+    return this.expertisesModule.hasExpertise(expertiseName);
   }
 
   /**
@@ -239,245 +387,26 @@ export class Character {
    * @returns 1 if character has expertise, 0 otherwise
    */
   getExpertiseRank(expertiseName: string): number {
-    return this.hasExpertise(expertiseName) ? 1 : 0;
+    return this.expertisesModule.getExpertiseRank(expertiseName);
   }
 
-  /**
-   * Rebuild the expertise cache from selectedExpertises array
-   * Called automatically when cache is invalidated
-   * @private
-   */
-  private rebuildExpertiseCache(): void {
-    this.expertiseCache = new Set(this.selectedExpertises.map(e => e.name));
-  }
-
-  /**
-   * Invalidate expertise cache
-   * Call this whenever selectedExpertises array is modified
-   * Cache will be rebuilt on next hasExpertise() call
-   */
-  invalidateExpertiseCache(): void {
-    this.expertiseCache = null;
-  }
-
-  /**
-   * Set the active Singer form
-   * @param formId - ID of the form to activate, or undefined to clear
-   * @throws Error if trying to set a form that hasn't been unlocked
-   */
-  setActiveForm(formId: string | undefined): void {
-    // If clearing the form
-    if (formId === undefined) {
-      this.clearActiveFormBonuses();
-      this.activeForm = undefined;
-      return;
-    }
-
-    // Validate that the form is unlocked (dullform is always available)
-    if (formId !== 'dullform' && !this.hasSingerForm(formId)) {
-      throw new Error(`Cannot activate form "${formId}" - it has not been unlocked`);
-    }
-
-    // Clear previous form bonuses
-    this.clearActiveFormBonuses();
-
-    // Set new active form
-    this.activeForm = formId;
-
-    // Apply new form bonuses
-    this.applyActiveFormBonuses();
-  }
-
-  /**
-   * Get list of available Singer forms for selection
-   */
-  getAvailableForms(): UniversalAbility[] {
-    // Dullform is always available for Singers
-    return SINGER_FORMS.filter(form => 
-      form.id === 'dullform' || this.hasSingerForm(form.id)
-    );
-  }
-
-  /**
-   * Get bonuses from the currently active form
-   */
-  getActiveFormBonuses(): BonusEffect[] {
-    if (!this.activeForm) {
-      return [];
-    }
-
-    // Return the bonuses for the active form source
-    const source = this.getActiveFormSource();
-    // BonusModule doesn't expose a way to get bonuses by source, so we'll track them ourselves
-    const bonuses: BonusEffect[] = [];
-    
-    // Retrieve form info to determine which bonuses should be active
-    const formInfo = this.getActiveFormInfo();
-    if (!formInfo) {
-      return [];
-    }
-
-    // We need to build the list from what we know we applied
-    // This is a limitation of the current BonusModule design
-    // For now, return indication that bonuses are active
-    switch (this.activeForm) {
-      case 'dullform':
-        // Dullform provides no bonuses
-        return [];
-      case 'nimbleform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
-        break;
-      case 'artform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'presence', value: 1 });
-        break;
-      case 'meditationform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
-        break;
-      case 'scholarform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        break;
-      case 'warform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'workform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'direform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
-        break;
-      case 'stormform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'vitality', value: 2 });
-        break;
-      case 'decayform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'envoyform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'presence', value: 2 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        break;
-      case 'nightform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'agility', value: 2 });
-        break;
-      case 'relayform':
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        bonuses.push({ type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
-        break;
-    }
-
-    return bonuses;
-  }
-
-  /**
-   * Get information about the active form
-   */
-  getActiveFormInfo(): UniversalAbility | undefined {
-    if (!this.activeForm) {
-      return undefined;
-    }
-
-    return SINGER_FORMS.find(f => f.id === this.activeForm);
-  }
-
-  /**
-   * Get source string for active form bonuses
-   * @private
-   */
-  private getActiveFormSource(): string {
-    return `activeform:${this.activeForm}`;
-  }
-
-  /**
-   * Apply bonuses from the currently active form
-   * @private
-   */
-  private applyActiveFormBonuses(): void {
-    if (!this.activeForm) {
-      return;
-    }
-
-    const form = SINGER_FORMS.find(f => f.id === this.activeForm);
-    if (!form) {
-      return;
-    }
-
-    const source = this.getActiveFormSource();
-
-    switch (this.activeForm) {
-      case 'nimbleform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
-        break;
-      case 'artform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 1 });
-        break;
-      case 'meditationform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
-        break;
-      case 'scholarform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        break;
-      case 'warform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'workform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'direform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
-        break;
-      case 'stormform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 2 });
-        break;
-      case 'decayform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
-        break;
-      case 'envoyform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        break;
-      case 'nightform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 2 });
-        break;
-      case 'relayform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
-        break;
-    }
-  }
-
-  /**
-   * Clear bonuses from active form
-   * @private
-   */
-  private clearActiveFormBonuses(): void {
-    if (this.activeForm) {
-      const source = this.getActiveFormSource();
-      this.bonusManager.bonuses.removeBonus(source);
-    }
-  }
+  // ============================================================================
+  // COMBAT MODULE - Combat stance and attack system
+  // ============================================================================
 
   /**
    * Get all available attacks for combat
    * Combines equipped weapons and combat talents
    */
   getAvailableAttacks(): Attack[] {
-    const calculator = new AttackCalculator(this);
-    return calculator.getAvailableAttacks();
+    return this.combatModule.getAvailableAttacks();
   }
 
   /**
    * Get available combat stances
    */
   getAvailableStances(): Stance[] {
-    const calculator = new AttackCalculator(this);
-    return calculator.getAvailableStances();
+    return this.combatModule.getAvailableStances();
   }
 
   /**
@@ -486,22 +415,7 @@ export class Character {
    * @returns true if the stance was successfully set, false otherwise
    */
   setActiveStance(stanceId: string | null): boolean {
-    if (stanceId === null) {
-      this.activeStanceId = null;
-      return true;
-    }
-
-    // Verify the stance exists and is available
-    const availableStances = this.getAvailableStances();
-    const stanceExists = availableStances.some(s => s.id === stanceId);
-
-    if (!stanceExists) {
-      console.warn(`Stance with ID "${stanceId}" is not available for this character`);
-      return false;
-    }
-
-    this.activeStanceId = stanceId;
-    return true;
+    return this.combatModule.setActiveStance(stanceId);
   }
 
   /**
@@ -509,12 +423,7 @@ export class Character {
    * @returns The active Stance object, or null if no stance is active
    */
   getActiveStance(): Stance | null {
-    if (!this.activeStanceId) {
-      return null;
-    }
-
-    const availableStances = this.getAvailableStances();
-    return availableStances.find(s => s.id === this.activeStanceId) || null;
+    return this.combatModule.getActiveStance();
   }
 
   /**
@@ -524,15 +433,7 @@ export class Character {
    * @param talentNode - The talent node containing the stance bonuses
    */
   applyStanceBonuses(stanceId: string, talentNode: TalentNode): void {
-    // Build source identifier for stance bonuses
-    const source = `stance:${stanceId}`;
-
-    // Apply all bonuses from the talent node
-    if (talentNode.bonuses && talentNode.bonuses.length > 0) {
-      talentNode.bonuses.forEach(bonus => {
-        this.bonusManager.bonuses.addBonus(source, bonus);
-      });
-    }
+    this.combatModule.applyStanceBonuses(stanceId, talentNode);
   }
 
   /**
@@ -540,10 +441,7 @@ export class Character {
    * Removes bonuses with source pattern "stance:{activeStanceId}"
    */
   clearStanceBonuses(): void {
-    if (this.activeStanceId) {
-      const source = `stance:${this.activeStanceId}`;
-      this.bonusManager.bonuses.removeBonus(source);
-    }
+    this.combatModule.clearStanceBonuses();
   }
 
 }

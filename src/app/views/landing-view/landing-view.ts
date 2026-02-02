@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { CharacterStateService } from '../../character/characterStateService';
-import { Character } from '../../character/character';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 
 @Component({
   selector: 'app-landing-view',
@@ -19,14 +18,18 @@ export class LandingView {
 
   constructor(
     private router: Router,
-    private characterState: CharacterStateService
+    private characterIdentity: CharacterIdentityService
   ) {}
   
-  newCharacter() {
-    // Reset to a brand new character
-    const freshCharacter = new Character();
-    this.characterState.updateCharacter(freshCharacter);
-    this.router.navigateByUrl('/character-creator-view/ancestry')
+  async newCharacter() {
+    try {
+      await this.characterIdentity.newIdentity();
+      // Navigate to ancestry page once identity is ready
+      this.router.navigateByUrl('/character-creator-view/ancestry');
+    } catch (error) {
+      console.error('[Landing] Error creating new character:', error);
+      // Stay on landing page, user can try again
+    }
   }
 
   loadCharacter() {

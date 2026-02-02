@@ -16,13 +16,14 @@ try {
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AncestrySelector } from './ancestry-selector';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
-import { CharacterCreationApiService } from '../../services/character-creation-api.service';
+import { AncestryApiService } from '../../services/ancestry-api.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { Character } from '../../character/character';
 
@@ -32,7 +33,8 @@ describe('AncestrySelector', () => {
   let characterState: CharacterStateService;
   let validationService: StepValidationService;
   let storageService: any;
-  let creationApiService: any;
+  let ancestryApiService: any;
+  let identityService: any;
   let navigateSpy: any;
 
   beforeEach(async () => {
@@ -40,8 +42,19 @@ describe('AncestrySelector', () => {
       saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' }))
     };
 
-    creationApiService = {
-      updateAncestry: vi.fn().mockReturnValue(of({ success: true, ancestry: 'human', id: 'char-123' }))
+    ancestryApiService = {
+      getAncestry: vi.fn().mockReturnValue(of(Ancestry.SINGER)),
+      saveAncestry: vi.fn().mockReturnValue(of(Ancestry.HUMAN))
+    };
+
+    const identityId$ = new BehaviorSubject<string | null>('char-123');
+    const waiting$ = new BehaviorSubject<boolean>(false);
+    identityService = {
+      currentCharacterId$: identityId$.asObservable(),
+      waitingForIdentity$: waiting$.asObservable(),
+      getCurrentCharacterId: vi.fn().mockReturnValue('char-123'),
+      setCurrentCharacterId: vi.fn(),
+      newIdentity: vi.fn()
     };
 
     const routerStub = {
@@ -54,7 +67,8 @@ describe('AncestrySelector', () => {
         CharacterStateService,
         StepValidationService,
         { provide: CharacterStorageService, useValue: storageService },
-        { provide: CharacterCreationApiService, useValue: creationApiService },
+        { provide: AncestryApiService, useValue: ancestryApiService },
+        { provide: CharacterIdentityService, useValue: identityService },
         { provide: Router, useValue: routerStub }
       ]
     })
@@ -74,6 +88,7 @@ describe('AncestrySelector', () => {
 
   it('should initialize selection from current character snapshot and mark valid', () => {
     const char = new Character();
+    (char as any).id = 'char-123';
     char.ancestry = Ancestry.SINGER;
     characterState.updateCharacter(char);
 
@@ -96,8 +111,8 @@ describe('AncestrySelector', () => {
     component.selectedAncestry = Ancestry.HUMAN;
 
     component.persistStep();
-    expect(creationApiService.updateAncestry).toHaveBeenCalledTimes(1);
-    expect(creationApiService.updateAncestry).toHaveBeenCalledWith('char-123', Ancestry.HUMAN);
+    expect(ancestryApiService.saveAncestry).toHaveBeenCalledTimes(1);
+    expect(ancestryApiService.saveAncestry).toHaveBeenCalledWith('char-123', Ancestry.HUMAN);
   });
 
   it('should not persist when character has no id', () => {
@@ -106,7 +121,7 @@ describe('AncestrySelector', () => {
     component.selectedAncestry = Ancestry.HUMAN;
 
     component.persistStep();
-    expect(creationApiService.updateAncestry).not.toHaveBeenCalled();
+    expect(ancestryApiService.saveAncestry).not.toHaveBeenCalled();
   });
 
   it('should navigate to culture on navigateNext', () => {

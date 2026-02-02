@@ -1,11 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil, filter } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { CharacterStateService } from '../../character/characterStateService';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
-import { CharacterCreationApiService } from '../../services/character-creation-api.service';
+import { AncestryApiService } from '../../services/ancestry-api.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -28,12 +30,14 @@ interface AncestryInfo {
   templateUrl: './ancestry-selector.html',
   styleUrl: './ancestry-selector.scss',
 })
-export class AncestrySelector implements OnInit {
+export class AncestrySelector implements OnInit, OnDestroy {
   private readonly STEP_INDEX = 0; // Ancestry is step 0
+  private destroy$ = new Subject<void>();
   
   selectedAncestry: Ancestry | null = null;
   Ancestry = Ancestry; // Expose enum to template
   isLoading: boolean = false;
+  isWaitingForIdentity: boolean = false;
 
   ancestries: AncestryInfo[] = [
     {
@@ -70,13 +74,56 @@ export class AncestrySelector implements OnInit {
     private router: Router,
     private validationService: StepValidationService,
     private storageService: CharacterStorageService,
-    private creationApiService: CharacterCreationApiService
+    private ancestryApiService: AncestryApiService,
+    private identityService: CharacterIdentityService
   ) {}
 
   ngOnInit(): void {
-    const currentCharacter = this.characterState.getCharacter();
-    this.selectedAncestry = currentCharacter.ancestry;
-    this.updateValidation();
+    // Monitor the waiting flag from identity service
+    this.identityService.waitingForIdentity$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
+
+    // Once we have a character ID, lazy load ancestry from API
+    this.identityService.currentCharacterId$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((id) => id !== null) // Only proceed when ID exists
+      )
+      .subscribe((characterId) => {
+        if (characterId) {
+          this.loadAncestryFromApi(characterId);
+        }
+      });
+  }
+
+  private loadAncestryFromApi(characterId: string): void {
+    this.ancestryApiService.getAncestry(characterId).subscribe({
+      next: (ancestry) => {
+        if (ancestry) {
+          this.selectedAncestry = ancestry;
+          this.characterState.setAncestry(ancestry);
+        } else {
+          this.selectedAncestry = null;
+        }
+        this.updateValidation();
+        // Turn off waiting flag once ancestry is loaded
+        this.isWaitingForIdentity = false;
+      },
+      error: () => {
+        this.selectedAncestry = null;
+        this.updateValidation();
+        this.isWaitingForIdentity = false;
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   selectAncestry(ancestry: Ancestry): void {
@@ -96,30 +143,38 @@ export class AncestrySelector implements OnInit {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    const character = this.characterState.getCharacter();
-    const characterId = (character as any)?.id;
-    
-    if (!characterId || !this.selectedAncestry) {
-      return;
-    }
+    console.log('[AncestrySelector] persistStep called');
+    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
+      if (!characterId) {
+        console.warn('[AncestrySelector] No character ID available for saving');
+        return;
+      }
+      
+      if (!this.selectedAncestry) {
+        console.warn('[AncestrySelector] No ancestry selected for saving');
+        return;
+      }
 
-    this.isLoading = true;
-    this.creationApiService.updateAncestry(characterId, this.selectedAncestry)
-      .subscribe({
-        next: (response) => {
-          console.log('[AncestrySelector] Ancestry saved to server:', response);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('[AncestrySelector] Failed to save ancestry:', error);
-          this.isLoading = false;
-          // Fall back to local storage if API fails
-          this.storageService.saveCharacter(character).subscribe({ 
-            next: () => console.log('[AncestrySelector] Ancestry saved to localStorage'),
-            error: () => console.error('[AncestrySelector] Failed to save ancestry to localStorage')
-          });
-        }
-      });
+      console.log('[AncestrySelector] Saving ancestry:', this.selectedAncestry, 'for character:', characterId);
+      this.isLoading = true;
+      this.ancestryApiService.saveAncestry(characterId, this.selectedAncestry)
+        .subscribe({
+          next: (response) => {
+            console.log('[AncestrySelector] Ancestry saved to server:', response);
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('[AncestrySelector] Failed to save ancestry:', error);
+            this.isLoading = false;
+            // Fall back to local storage if API fails
+            const character = this.characterState.getCharacter();
+            this.storageService.saveCharacter(character).subscribe({ 
+              next: () => console.log('[AncestrySelector] Ancestry saved to localStorage'),
+              error: () => console.error('[AncestrySelector] Failed to save ancestry to localStorage')
+            });
+          }
+        });
+    });
   }
 }
 

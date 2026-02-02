@@ -20,6 +20,8 @@ import createAllocationRoutes from './routes/allocations';
 import createCalculationsRoutes from './routes/calculations';
 import createSkillCalculationsRoutes from './routes/skill-calculations';
 import { createAttackCalculationsRoutes } from './routes/attack-calculations';
+import createCharacterRoutes from './routes/character';
+import createAncestryRoute from './routes/ancestry-route';
 
 import {
   initDatabase,
@@ -32,6 +34,8 @@ import {
   getSpentPoints,
   clearDatabase
 } from './database';
+
+import { createCharacter } from './services/character-service';
 
 // Initialize database at server startup
 initDatabase().then(() => initializeSchema()).catch((err) => {
@@ -159,6 +163,20 @@ const upload = multer({
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Handle malformed JSON bodies gracefully
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const parseErrorType = (err as { type?: string })?.type;
+  if (err instanceof SyntaxError && parseErrorType === 'entity.parse.failed') {
+    console.warn('[API] Malformed JSON payload:', err.message);
+    return res.status(400).json({
+      success: false,
+      error: 'Malformed JSON payload'
+    });
+  }
+
+  return next(err);
+});
+
 // Serve images directory as static
 app.use('/images', express.static(IMAGES_DIR));
 
@@ -179,6 +197,12 @@ createSkillCalculationsRoutes(app);
 
 // Register attack calculations routes (attack rolls, damage, advantage/disadvantage)
 createAttackCalculationsRoutes(app);
+
+// Register character service routes (create character, etc.)
+createCharacterRoutes(app, CHARACTERS_DIR);
+
+// Register ancestry routes (read ancestry by character ID)
+createAncestryRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {
@@ -335,73 +359,6 @@ function sendPendingItemGrants(characterId) {
 //Wireguard invite validation
 app.get('/invite/:name', (req, res) => {
    
-});
-
-// Create new character (minimal data with generated ID)
-app.post('/api/characters/create', async (req, res) => {
-  try {
-    const timestamp = Date.now();
-    const id = `character_${timestamp}`;
-    
-    // Create minimal character structure for creation flow
-    const character = {
-      id,
-      name: '',
-      level: 1,
-      pendingLevelPoints: 0,
-      ancestry: null,
-      cultures: [],
-      paths: [],
-      selectedExpertises: [],
-      attributes: {
-        strength: 0,
-        speed: 0,
-        intellect: 0,
-        willpower: 0,
-        awareness: 0,
-        presence: 0
-      },
-      skills: {},
-      unlockedTalents: [],
-      baselineUnlockedTalents: [],
-      unlockedSingerForms: [],
-      activeForm: null,
-      health: { current: 0, max: 0 },
-      focus: { current: 0, max: 0 },
-      investiture: { current: 0, max: 0, isActive: false },
-      radiantPath: { currentIdeal: 1, currentOath: null },
-      inventory: { items: [], equipped: { armor: null, weapons: [] } },
-      sessionNotes: '',
-      lastModified: new Date().toISOString()
-    };
-
-    const filename = `${id}.json`;
-    const filepath = path.join(CHARACTERS_DIR, filename);
-    
-    await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
-    
-    // Also save to database
-    try {
-      await saveCharacter(character);
-      console.log(`[Create] Saved new character to database: ${id}`);
-    } catch (dbError) {
-      console.warn(`[Create] Warning: Failed to save to database: ${dbError.message}`);
-    }
-    
-    console.log(`Created new character: ${id}`);
-    
-    res.json({ 
-      success: true, 
-      id,
-      character
-    });
-  } catch (error) {
-    console.error('Error creating character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
-    });
-  }
 });
 
 // Save character

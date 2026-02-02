@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Character } from '../../character/character';
 import { InventoryItem, ItemType, CurrencyConversion } from '../../character/inventory/inventoryItem';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { WebsocketService } from '../../services/websocket.service';
 
 @Component({
@@ -65,6 +66,7 @@ export class StoreView implements OnInit, OnDestroy {
 
   constructor(
     private characterState: CharacterStateService,
+    private characterIdentity: CharacterIdentityService,
     private websocketService: WebsocketService,
     private http: HttpClient,
     private route: ActivatedRoute,
@@ -206,7 +208,7 @@ export class StoreView implements OnInit, OnDestroy {
       return;
     }
 
-    const characterId = (this.character as any).id;
+    const characterId = this.characterIdentity.getCurrentCharacterId();
     if (!characterId) {
       this.showNotification('Character ID not found');
       return;
