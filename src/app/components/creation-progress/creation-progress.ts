@@ -73,8 +73,8 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
       { label: 'Culture', icon: 'public', route: 'culture', stepNumber: 1, completed: false, hasPending: false },
       { label: 'Name', icon: 'badge', route: 'name', stepNumber: 2, completed: false, hasPending: false },
       { label: 'Attributes', icon: 'fitness_center', route: 'attributes', stepNumber: 3, completed: false, hasPending: false },
-      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 4, completed: false, hasPending: false },
-      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 5, completed: false, hasPending: false },
+      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 4, completed: false, hasPending: false },
+      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 5, completed: false, hasPending: false },
       { label: 'Path', icon: 'explore', route: 'paths', stepNumber: 6, completed: false, hasPending: false },
       { label: 'Talents', icon: 'stars', route: 'talents', stepNumber: 7, completed: false, hasPending: false },
       { label: 'Equipment', icon: 'inventory_2', route: 'equipment', stepNumber: 8, completed: false, hasPending: false },
@@ -94,8 +94,8 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
     this.steps[1].completed = this.character.cultures && this.character.cultures.length > 0;
     this.steps[2].completed = !!(this.character.name && this.character.name.length > 0);
     this.steps[3].completed = this.hasAttributesAllocated();
-    this.steps[4].completed = this.hasSkillsAllocated();
-    this.steps[5].completed = (this.character.selectedExpertises?.length ?? 0) > 0;
+    this.steps[4].completed = (this.character.selectedExpertises?.length ?? 0) > 0;
+    this.steps[5].completed = this.hasSkillsAllocated();
     this.steps[6].completed = !!this.character.radiantPath;
     this.steps[7].completed = (this.character.unlockedTalents?.size ?? 0) > 0;
     this.steps[8].completed = true; // Equipment is optional
@@ -121,9 +121,9 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
       const attributePointsThisLevel = this.levelUpManager.getAttributePointsForLevel(currentLevel);
       this.steps[3].hasPending = attributePointsThisLevel > 0;
       
-      // Skills (step 4): always available (every level has skill points)
+      // Skills (step 5): always available (every level has skill points)
       const skillPointsThisLevel = this.levelUpManager.getSkillPointsForLevel(currentLevel);
-      this.steps[4].hasPending = skillPointsThisLevel > 0;
+      this.steps[5].hasPending = skillPointsThisLevel > 0;
       
       // Talents (step 7): always available (every level has at least 1 talent point)
       const talentPointsThisLevel = this.levelUpManager.getTalentPointsForLevel(currentLevel);

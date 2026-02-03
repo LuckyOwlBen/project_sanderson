@@ -526,6 +526,114 @@ export async function replaceSkillRanks(characterId: string, skills: Record<stri
   }
 }
 
+// ============================================================================
+// EXPERTISE HELPERS
+// ============================================================================
+
+export interface ExpertiseRecord {
+  name: string;
+  source: string; // 'culture' | 'talent' | 'gm' | 'manual'
+  sourceId?: string;
+}
+
+export interface ExpertiseStateRecord {
+  characterId: string;
+  totalPoints: number; // Intellect
+  pointsSpent: number;
+  pointsRemaining: number;
+  finalized: boolean;
+}
+
+export async function getSelectedExpertises(characterId: string): Promise<ExpertiseRecord[]> {
+  if (!db) throw new Error('Database not initialized');
+  const records = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
+  return records.map(r => ({
+    name: r.name,
+    source: r.source,
+    sourceId: r.sourceId
+  }));
+}
+
+export async function replaceSelectedExpertises(characterId: string, expertises: ExpertiseRecord[]): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', characterId);
+  for (const exp of expertises) {
+    await db.run(
+      'INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) VALUES (?, ?, ?, ?, ?)',
+      `expertise-${characterId}-${exp.name}`,
+      characterId,
+      exp.name,
+      exp.source,
+      exp.sourceId || ''
+    );
+  }
+}
+
+export async function getExpertiseStateRecord(characterId: string): Promise<ExpertiseStateRecord | null> {
+  if (!db) throw new Error('Database not initialized');
+  const state = await db.get('SELECT * FROM ExpertiseState WHERE characterId = ?', characterId);
+  if (!state) return null;
+  return {
+    characterId: state.characterId,
+    totalPoints: state.totalPoints ?? 0,
+    pointsSpent: state.pointsSpent ?? 0,
+    pointsRemaining: state.pointsRemaining ?? 0,
+    finalized: (state.finalized ?? 0) === 1
+  };
+}
+
+export async function createExpertiseStateRecord(record: ExpertiseStateRecord): Promise<ExpertiseStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(`
+    INSERT INTO ExpertiseState (
+      id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `,
+    `expertise-state-${record.characterId}`,
+    record.characterId,
+    record.totalPoints,
+    record.pointsSpent,
+    record.pointsRemaining,
+    record.finalized ? 1 : 0
+  );
+  return record;
+}
+
+export async function updateExpertiseStateRecord(
+  characterId: string,
+  updates: Partial<ExpertiseStateRecord>
+): Promise<ExpertiseStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const current = await getExpertiseStateRecord(characterId);
+  if (!current) {
+    throw new Error(`Expertise state record not found for character ${characterId}`);
+  }
+
+  const merged: ExpertiseStateRecord = {
+    ...current,
+    ...updates,
+    characterId
+  };
+
+  await db.run(`
+    UPDATE ExpertiseState SET
+      totalPoints = ?,
+      pointsSpent = ?,
+      pointsRemaining = ?,
+      finalized = ?
+    WHERE characterId = ?
+  `,
+    merged.totalPoints,
+    merged.pointsSpent,
+    merged.pointsRemaining,
+    merged.finalized ? 1 : 0,
+    characterId
+  );
+
+  return merged;
+}
+
+
 /**
  * Save a character to the database atomically
  */
@@ -608,6 +716,21 @@ export async function saveCharacter(
       for (const [skillName, value] of Object.entries(character.skills)) {
         await db.run('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)',
           `skill-${character.id}-${skillName}`, character.id, skillName, value);
+      }
+    }
+
+    // Save expertises
+    if (character.selectedExpertises && character.selectedExpertises.length > 0) {
+      await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', character.id);
+      for (const exp of character.selectedExpertises) {
+        await db.run(
+          'INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) VALUES (?, ?, ?, ?, ?)',
+          `expertise-${character.id}-${exp.name}`,
+          character.id,
+          exp.name,
+          exp.source || 'manual',
+          exp.sourceId || ''
+        );
       }
     }
 

@@ -25,6 +25,7 @@ model Character {
   paths            PathSelection[]
   attributes       Attributes?
   skillsState      SkillsState?
+  expertiseState   ExpertiseState?
   skills           Skill[]
   inventory        InventoryItem[]
   talents          UnlockedTalent[]
@@ -206,6 +207,21 @@ model SkillsState {
   totalPoints       Int      @default(0)
   pointsSpent       Int      @default(0)
   pointsRemaining   Int      @default(0)
+  finalized         Boolean  @default(false)
+  
+  @@index([characterId])
+}
+
+// ===== EXPERTISE STATE =====
+// Tracks available expertise points (derived from Intellect) and allocation progress
+model ExpertiseState {
+  id                String   @id @default(cuid())
+  characterId       String   @unique
+  character         Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  totalPoints       Int      @default(0)  // Recalculated from character.attributes.intellect
+  pointsSpent       Int      @default(0)  // Count of non-cultural expertises
+  pointsRemaining   Int      @default(0)  // total - spent
   finalized         Boolean  @default(false)
   
   @@index([characterId])

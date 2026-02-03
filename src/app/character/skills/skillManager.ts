@@ -2,7 +2,7 @@ import { Attributes } from "../attributes/attributes";
 import { SkillAssociationTable } from "./skillAssociationTable";
 import { SkillType } from "./skillTypes";
 
-export type SkillRanks = Record<SkillType, number>; //0-5 ranks
+export type SkillRanks = Record<string, number>; //0-5 ranks
 
 export class SkillManager {
 
@@ -20,16 +20,16 @@ export class SkillManager {
         return skills;
     }
 
-    getSkillRank(skill: SkillType): number {
-        return this.skillRanks[skill];
+    getSkillRank(skill: SkillType | string): number {
+        return this.skillRanks[skill] ?? 0;
     }
 
-    setSkillRank(skill: SkillType, rank: number): void {
+    setSkillRank(skill: SkillType | string, rank: number): void {
         this.skillRanks[skill] = Math.max(0, Math.min(5, rank));
     }
 
      calculateSkillTotal(skill: SkillType, attributes: Attributes): number {
-        const skillRank = this.skillRanks[skill];
+        const skillRank = this.skillRanks[skill] ?? 0;
         const associatedAttribute = this.skillAssociationTable.checkSkillAssociation(skill);
         const attributeValue = attributes.getAttribute(associatedAttribute);
         return skillRank + attributeValue;
