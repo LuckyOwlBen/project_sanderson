@@ -167,11 +167,12 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   selectMainPath(pathId: string): void {
-    this.selectedMainPath = pathId;
+    // Ensure path ID is lowercase for consistent backend lookup
+    this.selectedMainPath = pathId.toLowerCase();
     this.selectedSpecialization = null;
     
     // Load specializations for this path
-    const talentPath = getTalentPath(pathId);
+    const talentPath = getTalentPath(pathId.toLowerCase());
     if (talentPath) {
       this.availableSpecializations = talentPath.paths;
     } else {
@@ -180,7 +181,8 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   selectSpecialization(spec: TalentTree): void {
-    this.selectedSpecialization = spec.pathName;
+    // Store ID (lowercase) instead of display name for consistent backend lookup
+    this.selectedSpecialization = spec.pathName.toLowerCase();
     this.updateValidation();
   }
 
@@ -214,32 +216,38 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
+  public persistStep(): Promise<void> {
     console.log('[PathSelector] persistStep called');
-    this.identityService.currentCharacterId$.pipe(take(1)).subscribe(characterId => {
-      if (!characterId) {
-        console.warn('[PathSelector] No character ID available for saving');
-        return;
-      }
-      
-      if (!this.selectedMainPath || !this.selectedSpecialization) {
-        console.warn('[PathSelector] No path selection to save');
-        return;
-      }
+    return new Promise((resolve, reject) => {
+      this.identityService.currentCharacterId$.pipe(take(1)).subscribe(characterId => {
+        if (!characterId) {
+          console.warn('[PathSelector] No character ID available for saving');
+          resolve();
+          return;
+        }
+        
+        if (!this.selectedMainPath || !this.selectedSpecialization) {
+          console.warn('[PathSelector] No path selection to save');
+          resolve();
+          return;
+        }
 
-      console.log('[PathSelector] Saving paths:', this.selectedMainPath, this.selectedSpecialization, 'for character:', characterId);
-      this.isLoading = true;
-      this.pathsApiService.savePaths(characterId, this.selectedMainPath, this.selectedSpecialization)
-        .subscribe({
-          next: (response) => {
-            console.log('[PathSelector] Paths saved to server:', response);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('[PathSelector] Failed to save paths:', error);
-            this.isLoading = false;
-          }
-        });
+        console.log('[PathSelector] Saving paths:', this.selectedMainPath, this.selectedSpecialization, 'for character:', characterId);
+        this.isLoading = true;
+        this.pathsApiService.savePaths(characterId, this.selectedMainPath, this.selectedSpecialization)
+          .subscribe({
+            next: (response) => {
+              console.log('[PathSelector] Paths saved to server:', response);
+              this.isLoading = false;
+              resolve();
+            },
+            error: (error) => {
+              console.error('[PathSelector] Failed to save paths:', error);
+              this.isLoading = false;
+              reject(error);
+            }
+          });
+      });
     });
   }
 }

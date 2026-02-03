@@ -27,6 +27,7 @@ import createNameRoute from './routes/name-route';
 import createAttributesRoute from './routes/attributes-route';
 import createSkillsRoute from './routes/skills-route';
 import createExpertiseRoute from './routes/expertise-route';
+import createTalentsRoute from './routes/talents-route';
 import createPathsRoute from './routes/paths';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
@@ -228,6 +229,9 @@ createAttributesRoute(app);
 
 // Register skills routes (read/write skills by character ID)
 createSkillsRoute(app);
+
+// Register talents routes (read/write talents by character ID)
+createTalentsRoute(app);
 
 // Register expertise routes (read/write expertise by character ID)
 createExpertiseRoute(app);

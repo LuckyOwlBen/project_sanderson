@@ -4,7 +4,8 @@ import { Character } from '../character/character';
 import { createEmptyCharacterDTO } from '../data-access/character-dto';
 import { characterRepository } from '../repositories/character-repository';
 import { pointAllocationService } from './point-allocation-service';
-import { createAttributesRecord, createSkillsStateRecord } from '../database';
+import { createAttributesRecord, createSkillsStateRecord, createTalentsStateRecord } from '../database';
+import { getTotalTalentPointsUpToLevel } from './calculation-constants';
 
 /**
  * Create a new character with minimal data and generated ID
@@ -78,6 +79,25 @@ export async function createCharacter(charactersDir: string): Promise<{ success:
       console.log(`[Create] Successfully created skills state record for character: ${id} with ${startingSkillPoints} points`);
     } catch (skillsError) {
       console.warn(`[Create] Warning: Failed to create skills state record:`, skillsError);
+      // Continue anyway - character was saved successfully
+    }
+
+    // Create talents state record with starting talent points
+    try {
+      const startingTalentPoints = getTotalTalentPointsUpToLevel(1);
+      console.log(`[Create] Creating talents state record with totalPoints: ${startingTalentPoints}`);
+      await createTalentsStateRecord({
+        characterId: id,
+        totalPoints: startingTalentPoints,
+        pointsSpent: 0,
+        pointsRemaining: startingTalentPoints,
+        finalized: false,
+        totalTalents: [],
+        pendingTalents: []
+      });
+      console.log(`[Create] Successfully created talents state record for character: ${id} with ${startingTalentPoints} points`);
+    } catch (talentsError) {
+      console.warn(`[Create] Warning: Failed to create talents state record:`, talentsError);
       // Continue anyway - character was saved successfully
     }
     

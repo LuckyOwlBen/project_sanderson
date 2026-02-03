@@ -117,9 +117,9 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  nextStep(): void {
+  async nextStep(): Promise<void> {
     // Persist the current step before navigating to the next
-    this.persistCurrentStep();
+    await this.persistCurrentStep();
 
     if (this.isLevelUpMode) {
       // In level-up mode, skip to the next relevant step
@@ -145,12 +145,16 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     }
   }
 
-  private persistCurrentStep(): void {
+  private async persistCurrentStep(): Promise<void> {
     try {
       const active = this.outlet?.isActivated ? (this.outlet!.component as any) : null;
       if (active && typeof active.persistStep === 'function') {
         // Call the routed component's persist hook
-        active.persistStep();
+        const result = active.persistStep();
+        // If the component returns a Promise, await it
+        if (result && typeof result.then === 'function') {
+          await result;
+        }
       }
     } catch (err) {
       console.warn('[Character Creator] Persist hook failed or not available for current step', err);

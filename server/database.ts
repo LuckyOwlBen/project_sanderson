@@ -102,6 +102,16 @@ export interface SkillsStateRecord {
   finalized: boolean;
 }
 
+export interface TalentsStateRecord {
+  characterId: string;
+  totalPoints: number;
+  pointsSpent: number;
+  pointsRemaining: number;
+  finalized: boolean;
+  totalTalents: string[];
+  pendingTalents: string[];
+}
+
 export interface SaveResult {
   success: boolean;
   id?: string;
@@ -164,6 +174,18 @@ export async function initializeSchema(): Promise<void> {
         pointsSpent INTEGER DEFAULT 0,
         pointsRemaining INTEGER DEFAULT 0,
         finalized INTEGER DEFAULT 0,
+        FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS CharacterTalents (
+        id TEXT PRIMARY KEY,
+        characterId TEXT UNIQUE NOT NULL,
+        totalPoints INTEGER DEFAULT 0,
+        pointsSpent INTEGER DEFAULT 0,
+        pointsRemaining INTEGER DEFAULT 0,
+        finalized INTEGER DEFAULT 0,
+        totalTalents TEXT DEFAULT '[]',
+        pendingTalents TEXT DEFAULT '[]',
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
 
@@ -506,6 +528,86 @@ export async function setSkillsStateFinalized(characterId: string, finalized: bo
     finalized ? 1 : 0,
     characterId
   );
+}
+
+// ============================================================================
+// TALENTS STATE HELPERS
+// ============================================================================
+
+export async function getTalentsStateRecord(characterId: string): Promise<TalentsStateRecord | null> {
+  if (!db) throw new Error('Database not initialized');
+  const record = await db.get('SELECT * FROM CharacterTalents WHERE characterId = ?', characterId);
+  if (!record) return null;
+
+  const totalTalents = record.totalTalents ? JSON.parse(record.totalTalents) : [];
+  const pendingTalents = record.pendingTalents ? JSON.parse(record.pendingTalents) : [];
+
+  return {
+    characterId: record.characterId,
+    totalPoints: record.totalPoints ?? 0,
+    pointsSpent: record.pointsSpent ?? 0,
+    pointsRemaining: record.pointsRemaining ?? 0,
+    finalized: (record.finalized ?? 0) === 1,
+    totalTalents: Array.isArray(totalTalents) ? totalTalents : [],
+    pendingTalents: Array.isArray(pendingTalents) ? pendingTalents : []
+  };
+}
+
+export async function createTalentsStateRecord(record: TalentsStateRecord): Promise<TalentsStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run(`
+    INSERT INTO CharacterTalents (
+      id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized, totalTalents, pendingTalents
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `,
+    `talents-${record.characterId}`,
+    record.characterId,
+    record.totalPoints,
+    record.pointsSpent,
+    record.pointsRemaining,
+    record.finalized ? 1 : 0,
+    JSON.stringify(record.totalTalents ?? []),
+    JSON.stringify(record.pendingTalents ?? [])
+  );
+  return record;
+}
+
+export async function updateTalentsStateRecord(
+  characterId: string,
+  updates: Partial<TalentsStateRecord>
+): Promise<TalentsStateRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const current = await getTalentsStateRecord(characterId);
+  if (!current) {
+    throw new Error(`Talents state record not found for character ${characterId}`);
+  }
+
+  const merged: TalentsStateRecord = {
+    ...current,
+    ...updates,
+    characterId
+  };
+
+  await db.run(`
+    UPDATE CharacterTalents SET
+      totalPoints = ?,
+      pointsSpent = ?,
+      pointsRemaining = ?,
+      finalized = ?,
+      totalTalents = ?,
+      pendingTalents = ?
+    WHERE characterId = ?
+  `,
+    merged.totalPoints,
+    merged.pointsSpent,
+    merged.pointsRemaining,
+    merged.finalized ? 1 : 0,
+    JSON.stringify(merged.totalTalents ?? []),
+    JSON.stringify(merged.pendingTalents ?? []),
+    characterId
+  );
+
+  return merged;
 }
 
 export async function getSkillRanks(characterId: string): Promise<Record<string, number>> {
@@ -1043,6 +1145,7 @@ export async function clearDatabase(): Promise<void> {
       DELETE FROM RadiantPath;
       DELETE FROM SpentPoints;
       DELETE FROM Attributes;
+      DELETE FROM CharacterTalents;
       DELETE FROM CultureSelection;
       DELETE FROM PathSelection;
       DELETE FROM Character;

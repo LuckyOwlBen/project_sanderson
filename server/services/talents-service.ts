@@ -1,0 +1,275 @@
+import {
+  createTalentsStateRecord,
+  getTalentsStateRecord,
+  updateTalentsStateRecord,
+  loadCharacter
+} from '../database';
+import { getTalentPath } from '../character/talents/talentTrees/talentTrees';
+import { getPathsByCharacterId } from './paths-service';
+
+export interface TalentsStateDTO {
+  characterId: string;
+  totalPoints: number;
+  pointsSpent: number;
+  pointsRemaining: number;
+  finalized: boolean;
+  totalTalents: string[];
+  pendingTalents: string[];
+  availableTrees: string[];
+  selectedTreeId: string | null;
+  requiresSingerSelection: boolean;
+  ancestry: string | null;
+  level: number;
+  tier0TalentId?: string | null;
+}
+
+export function createEmptyTalentsDTO(characterId: string): TalentsStateDTO {
+  return {
+    characterId,
+    totalPoints: 0,
+    pointsSpent: 0,
+    pointsRemaining: 0,
+    finalized: false,
+    totalTalents: [],
+    pendingTalents: [],
+    availableTrees: [],
+    selectedTreeId: null,
+    requiresSingerSelection: false,
+    ancestry: null,
+    level: 1,
+    tier0TalentId: null
+  };
+}
+
+function normalizePaths(paths: { type: string | null; sub: string | null }): { mainPathName: string | null; specializationName: string | null } {
+  const corePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+
+  let mainPathName = paths.type;
+  let specializationName = paths.sub;
+
+  // Normalize swapped values (e.g., type contains specialization and sub contains main path)
+  if (mainPathName && specializationName) {
+    const mainIsCore = corePaths.includes(mainPathName.toLowerCase());
+    const subIsCore = corePaths.includes(specializationName.toLowerCase());
+    if (!mainIsCore && subIsCore) {
+      console.warn('[TalentsService] Swapping path fields (type/sub appear reversed):', {
+        type: mainPathName,
+        sub: specializationName
+      });
+      const temp = mainPathName;
+      mainPathName = specializationName;
+      specializationName = temp;
+    }
+  }
+
+  return { mainPathName, specializationName };
+}
+export async function getTalentsByCharacterId(characterId: string): Promise<TalentsStateDTO> {
+  const state = await getTalentsStateRecord(characterId);
+  if (!state) {
+    return createEmptyTalentsDTO(characterId);
+  }
+
+  // Get character to determine available trees
+  const character = await loadCharacter(characterId);
+  if (!character) {
+    return createEmptyTalentsDTO(characterId);
+  }
+
+  // Load paths from paths table
+  const paths = await getPathsByCharacterId(characterId);
+  console.log('[TalentsService] Loaded paths for character:', characterId, paths);
+
+  const { mainPathName } = normalizePaths(paths);
+  const mainPath = mainPathName ? getTalentPath(mainPathName) : null;
+  const tier0TalentId = mainPath?.talentNodes?.find(node => node.tier === 0)?.id ?? null;
+
+  const totalTalents = state.totalTalents ?? [];
+  const pendingTalents = state.pendingTalents ?? [];
+  const unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
+
+  const { availableTrees, selectedTreeId, requiresSingerSelection } = 
+    determineAvailableTrees(character, paths, unlockedTalents);
+  
+  console.log('[TalentsService] Determined trees:', { availableTrees, selectedTreeId, requiresSingerSelection });
+
+  return {
+    characterId,
+    totalPoints: state.totalPoints,
+    pointsSpent: state.pointsSpent,
+    pointsRemaining: state.pointsRemaining,
+    finalized: state.finalized,
+    totalTalents,
+    pendingTalents,
+    availableTrees,
+    selectedTreeId,
+    requiresSingerSelection,
+    ancestry: character.ancestry || null,
+    level: character.level || 1,
+    tier0TalentId
+  };
+}
+
+export async function setTalentsByCharacterId(
+  characterId: string,
+  talents: Partial<TalentsStateDTO>
+): Promise<TalentsStateDTO> {
+  const existing = await getTalentsStateRecord(characterId);
+
+  let totalTalents = Array.isArray(talents.totalTalents)
+    ? talents.totalTalents
+    : existing?.totalTalents ?? [];
+  let pendingTalents = Array.isArray(talents.pendingTalents)
+    ? talents.pendingTalents
+    : existing?.pendingTalents ?? [];
+  const finalized = typeof talents.finalized === 'boolean'
+    ? talents.finalized
+    : existing?.finalized ?? false;
+
+  if (finalized) {
+    const merged = new Set<string>([...totalTalents, ...pendingTalents]);
+    totalTalents = Array.from(merged);
+    pendingTalents = [];
+  }
+
+  const totalPoints = typeof talents.totalPoints === 'number'
+    ? talents.totalPoints
+    : existing?.totalPoints ?? 0;
+  const pointsSpent = totalTalents.length + pendingTalents.length;
+  const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
+
+  const record = {
+    characterId,
+    totalPoints,
+    pointsSpent,
+    pointsRemaining,
+    finalized,
+    totalTalents,
+    pendingTalents
+  };
+
+  const updated = existing
+    ? await updateTalentsStateRecord(characterId, record)
+    : await createTalentsStateRecord(record);
+
+  return getTalentsByCharacterId(characterId);
+}
+
+function determineAvailableTrees(
+  character: any,
+  paths: { type: string | null; sub: string | null },
+  unlockedTalents: Set<string>
+): { availableTrees: string[]; selectedTreeId: string | null; requiresSingerSelection: boolean } {
+  const treeIds: string[] = [];
+  const addedTreeNames = new Set<string>();
+
+  const { mainPathName, specializationName } = normalizePaths(paths);
+  const ancestry = character.ancestry;
+  const level = character.level || 1;
+  
+  console.log('[TalentsService] determineAvailableTrees START -', { mainPathName, specializationName, ancestry, level });
+  console.log('[TalentsService] unlockedTalents:', Array.from(unlockedTalents));
+
+  // Check if any singer tier 1+ talents are unlocked
+  const hasSingerTalent = (unlockedTalents: Set<string>): boolean => {
+    // This is a simplified check - in practice you'd check if unlocked talents belong to singer trees
+    return Array.from(unlockedTalents).some(id => id.includes('singer') || id.includes('form'));
+  };
+
+  const requiresSingerSelection = ancestry === 'singer' && !hasSingerTalent(unlockedTalents);
+
+  // Helper to check if a path's tier-0 talent is unlocked
+  const hasPathKeyTalent = (pathId: string): boolean => {
+    const talentPath = getTalentPath(pathId);
+    if (!talentPath?.talentNodes) {
+      console.log('[TalentsService] hasPathKeyTalent - no talent nodes for path:', pathId);
+      return false;
+    }
+    return talentPath.talentNodes.some(node => 
+      node.tier === 0 && unlockedTalents.has(node.id)
+    );
+  };
+
+  // For humans and singers at level 1 or during level-up
+  if (['human', 'singer'].includes(ancestry) && level === 1) {
+    console.log('[TalentsService] Processing level 1 character');
+    
+    // Add main path specialization trees
+    if (mainPathName) {
+      console.log('[TalentsService] Getting main path:', mainPathName);
+      const talentPath = getTalentPath(mainPathName);
+      console.log('[TalentsService] talentPath for', mainPathName, ':', talentPath ? 'FOUND' : 'NOT FOUND');
+      if (talentPath?.paths) {
+        console.log('[TalentsService] Found specialization trees:', talentPath.paths.map(p => p.pathName));
+        talentPath.paths.forEach(specTree => {
+          const treeId = specTree.pathName.toLowerCase();
+          if (!addedTreeNames.has(treeId)) {
+            console.log('[TalentsService] Adding tree:', treeId);
+            treeIds.push(treeId);
+            addedTreeNames.add(treeId);
+          }
+        });
+      } else {
+        console.log('[TalentsService] No specialization trees found for:', mainPathName);
+      }
+    } else {
+      console.log('[TalentsService] No mainPathName provided');
+    }
+
+    // Check all paths for unlocked key talents and add their specialties
+    const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+    console.log('[TalentsService] Checking all paths for unlocked key talents');
+    allPaths.forEach(pathId => {
+      if (hasPathKeyTalent(pathId)) {
+        console.log('[TalentsService] Path has key talent:', pathId);
+        const talentPath = getTalentPath(pathId);
+        if (talentPath?.paths) {
+          talentPath.paths.forEach(specTree => {
+            const treeId = specTree.pathName.toLowerCase();
+            if (!addedTreeNames.has(treeId)) {
+              console.log('[TalentsService] Adding unlocked path tree:', treeId);
+              treeIds.push(treeId);
+              addedTreeNames.add(treeId);
+            }
+          });
+        }
+      }
+    });
+  } else {
+    console.log('[TalentsService] Processing non-level-1 or non-human/singer character');
+    // For other ancestries or higher levels, only add chosen specialization
+    if (specializationName) {
+      const treeId = specializationName.toLowerCase();
+      console.log('[TalentsService] Adding specialization tree:', treeId);
+      if (!addedTreeNames.has(treeId)) {
+        treeIds.push(treeId);
+        addedTreeNames.add(treeId);
+      }
+    } else {
+      console.log('[TalentsService] No specializationName provided');
+    }
+  }
+
+  // Add ancestry-specific trees
+  if (ancestry === 'singer') {
+    console.log('[TalentsService] Character is singer, adding singer tree');
+    if (!addedTreeNames.has('singer')) {
+      treeIds.push('singer');
+      addedTreeNames.add('singer');
+    }
+  }
+
+  // Determine selected tree (singer tree for singers, otherwise first available)
+  let selectedTreeId: string | null = null;
+  if (treeIds.length > 0) {
+    if (ancestry === 'singer' && treeIds.includes('singer')) {
+      selectedTreeId = 'singer';
+    } else {
+      selectedTreeId = treeIds[0];
+    }
+  }
+
+  console.log('[TalentsService] determineAvailableTrees END -', { availableTrees: treeIds, selectedTreeId, requiresSingerSelection });
+
+  return { availableTrees: treeIds, selectedTreeId, requiresSingerSelection };
+}

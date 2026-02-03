@@ -25,6 +25,7 @@ model Character {
   paths            PathSelection[]
   attributes       Attributes?
   skillsState      SkillsState?
+  talentsState     CharacterTalents?
   expertiseState   ExpertiseState?
   skills           Skill[]
   inventory        InventoryItem[]
@@ -209,6 +210,25 @@ model SkillsState {
   pointsRemaining   Int      @default(0)
   finalized         Boolean  @default(false)
   
+  @@index([characterId])
+}
+
+// ===== TALENTS STATE =====
+// Tracks talent points and finalized/pending selections
+model CharacterTalents {
+  id              String   @id @default(cuid())
+  characterId     String   @unique
+  character       Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  totalPoints     Int      @default(0)
+  pointsSpent     Int      @default(0)
+  pointsRemaining Int      @default(0)
+  finalized       Boolean  @default(false)
+
+  // JSON arrays stored as strings for SQLite
+  totalTalents    String   @default("[]")
+  pendingTalents  String   @default("[]")
+
   @@index([characterId])
 }
 
