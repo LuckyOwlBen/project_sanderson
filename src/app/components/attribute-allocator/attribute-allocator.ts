@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, take } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { AttributesApiService, AttributesState } from '../../services/attributes-api.service';
@@ -205,7 +205,6 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     }, {} as Record<AttributeKey, number>);
 
     this.attributesApi.updateAttributes(this.characterId, attributesObj)
-      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (state) => {
           console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);

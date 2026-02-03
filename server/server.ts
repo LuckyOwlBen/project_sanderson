@@ -27,6 +27,7 @@ import createNameRoute from './routes/name-route';
 import createAttributesRoute from './routes/attributes-route';
 import createSkillsRoute from './routes/skills-route';
 import createExpertiseRoute from './routes/expertise-route';
+import createPathsRoute from './routes/paths';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
 
@@ -230,6 +231,9 @@ createSkillsRoute(app);
 
 // Register expertise routes (read/write expertise by character ID)
 createExpertiseRoute(app);
+
+// Register paths routes (read/write path selections by character ID)
+createPathsRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {

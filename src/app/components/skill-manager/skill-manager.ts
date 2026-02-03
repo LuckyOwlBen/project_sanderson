@@ -6,7 +6,7 @@
 
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, take } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterIdentityService } from '../../services/character-identity.service';
@@ -124,7 +124,6 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     const payload = this.character.skills.getAllSkillRanks();
     console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
     this.skillsApi.updateSkills(this.characterId, payload)
-      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           console.log('[SkillManager] Skills persisted successfully:', response);

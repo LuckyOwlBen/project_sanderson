@@ -334,7 +334,6 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       
       // Save expertises via API
       this.expertiseApiService.updateExpertise(this.characterId, expertiseForApi)
-        .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (result) => {
             console.log(`[ExpertiseSelector] Expertises saved via API for ${this.characterId}`, result);
