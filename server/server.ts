@@ -297,42 +297,14 @@ function getCharacterFilepath(id) {
   return path.join(CHARACTERS_DIR, `${id}.json`);
 }
 
-async function loadCharacterData(id, retries = 3) {
-  const filepath = getCharacterFilepath(id);
-  
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      const data = await fsPromises.readFile(filepath, 'utf8');
-      
-      // Check if data is empty
-      if (!data || data.trim().length === 0) {
-        throw new Error('Character file is empty');
-      }
-      
-      const character = JSON.parse(data);
-      
-      // Ensure paths array exists and is initialized properly
-      if (!character.paths) {
-        character.paths = [];
-      }
-      
-      return character;
-    } catch (error) {
-      // If it's a JSON parse error and we have retries left, wait and try again
-      if (error instanceof SyntaxError && attempt < retries - 1) {
-        console.warn(`JSON parse error on attempt ${attempt + 1} for ${id}, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
-        continue;
-      }
-      // Otherwise throw the error
-      throw error;
-    }
-  }
+async function loadCharacterData(id) {
+  // Load from database instead of JSON files
+  return await loadCharacter(id);
 }
 
 async function saveCharacterData(character) {
-  const filepath = getCharacterFilepath(character.id);
-await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+  // Save to database instead of JSON files
+  await saveCharacter(character);
 }
 
 function getLevelTableValue(table, level) {
@@ -1017,14 +989,9 @@ app.post('/api/characters/:id/paths', async (req, res) => {
     }
     
     character.lastModified = new Date().toISOString();
-    await fsPromises.writeFile(
-      path.join(CHARACTERS_DIR, `character_${id}.json`),
-      JSON.stringify(character, null, 2)
-    );
     
-    // Also save to database
+    // Save to database
     try {
-      const db = require('./database.js');
       await saveCharacter(character);
       console.log(`[Paths] Saved paths to database for ${character.name} (${character.id})`);
     } catch (dbError) {
@@ -1095,7 +1062,7 @@ app.get('/api/characters/load/:id', async (req, res) => {
           customData: {}
         })),
         equippedItems,
-        currencyInChips: 0
+        currencyInChips: character.inventory?.currencyInChips ?? 0
       };
     }
 
@@ -1123,6 +1090,11 @@ app.get('/api/characters/load/:id', async (req, res) => {
           properties: itemDef.properties
         };
       });
+    }
+
+    // Preserve currencyInChips from original inventory object
+    if (!Array.isArray(character.inventory) && character.inventory?.currencyInChips !== undefined) {
+      inventory.currencyInChips = character.inventory.currencyInChips;
     }
 
     const resources = character.resources || {
@@ -1184,43 +1156,12 @@ app.get('/api/characters/list', async (req, res) => {
         return res.json(characters);
       }
     } catch (dbError) {
-      console.warn('[Characters/List] Database not available, falling back to filesystem:', (dbError as Error).message);
+      console.error('[Characters/List] Database error:', (dbError as Error).message);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to retrieve characters from database'
+      });
     }
-    
-    // Fallback: Load from filesystem
-    const files = await fsPromises.readdir(CHARACTERS_DIR);
-    const jsonFiles = files.filter(f => f.endsWith('.json'));
-    
-    const fileCharacters = await Promise.all(
-      jsonFiles.map(async (file) => {
-        try {
-          const filepath = path.join(CHARACTERS_DIR, file);
-          const data = await fsPromises.readFile(filepath, 'utf8');
-          const character = JSON.parse(data);
-          
-          return {
-            id: character.id,
-            name: character.name,
-            level: character.level,
-            ancestry: character.ancestry,
-            lastModified: character.lastModified,
-            data: character
-          };
-        } catch (error) {
-          console.error(`Error reading ${file}:`, error);
-          return null;
-        }
-      })
-    );
-    
-    // Filter out any failed reads and sort by last modified
-    const validCharacters = fileCharacters
-      .filter(c => c !== null)
-      .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-    
-    console.log(`[Characters/List] Retrieved ${validCharacters.length} characters from filesystem`);
-    
-    res.json(validCharacters);
   } catch (error) {
     console.error('[Characters/List] Error listing characters:', error);
     res.status(500).json({ 
@@ -1270,18 +1211,17 @@ app.post('/api/characters/:id/creation-init', async (req, res) => {
       });
     }
     
-    const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    const data = await fsPromises.readFile(filepath, 'utf8');
-    const character = JSON.parse(data);
+    const character = await loadCharacterData(id);
+    if (!character) {
+      return res.status(404).json({ success: false, error: 'Character not found' });
+    }
     
     // Set level and clear spent points for fresh creation at this level
     character.level = targetLevel;
     character.spentPoints = {}; // Fresh state for creation
     
-    // Save character
-    const tempPath = `${filepath}.tmp`;
-    await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
-    await fsPromises.rename(tempPath, filepath);
+    // Save character to database
+    await saveCharacterData(character);
     
     console.log(`[Character Creation] Initialized character ${character.name} (${id}) at level ${targetLevel}`);
     res.json({
@@ -1468,9 +1408,7 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
     if (!character.spentPoints.attributes) character.spentPoints.attributes = {};
     character.spentPoints.attributes[level] = increaseTotal;
 
-    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-    
-    // Also save to database
+    // Save to database
     try {
       await saveCharacter(character, {
         attributes: increaseTotal,
@@ -1543,10 +1481,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
 
     console.log(`[Skills] Saved skills for ${character.name} (${character.id}):`, character.skills);
 
-    // Save to both JSON file (for backwards compatibility) and database
-    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-    
-    // Also save to database (like talents do)
+    // Save to database
     try {
       await saveCharacter(character, {
         skills: increaseTotal,
@@ -1617,10 +1552,8 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
 
     // Actually save to file/database (this is where server.js would call DB layer)
     character.unlockedTalents = unlockedTalents;
-    await fsPromises.writeFile(
-      path.join(CHARACTERS_DIR, `character_${id}.json`),
-      JSON.stringify(character, null, 2)
-    );
+    // Save to database
+    await saveCharacterData(character);
 
     // Return updated state (pass character object)
     const updatedState = talentService.getTalentSelectionState(character, level, false);
@@ -1963,23 +1896,96 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Store transaction from player
-  socket.on('store-transaction', (data) => {
+  // Store transaction from player - process purchase and broadcast state update
+  socket.on('store-transaction', async (data) => {
     const { storeId, characterId, items, totalCost, timestamp } = data;
     console.log(`[Store] Transaction at ${storeId} by ${characterId}: ${totalCost}mk`);
     
-    // Broadcast to all GM clients for tracking
-    io.emit('store-transaction', data);
+    try {
+      // Process each item purchase
+      for (const item of items) {
+        const { itemId, price, quantity } = item;
+        
+        // Load character
+        const character = await loadCharacterData(characterId);
+        if (!character) {
+          console.error(`[Store] Character ${characterId} not found`);
+          socket.emit('store-transaction-error', {
+            characterId,
+            error: 'Character not found'
+          });
+          return;
+        }
 
-    // Immediately acknowledge acceptance back to sender
-    const ackId = `${Date.now()}-${Math.random()}`;
-    socket.emit('store-transaction-accepted', {
-      ackId,
-      storeId,
-      characterId,
-      totalCost,
-      timestamp: timestamp || new Date().toISOString()
-    });
+        // Validate item exists
+        const itemDef = itemDefinitions.getItemById(itemId);
+        if (!itemDef) {
+          console.error(`[Store] Item ${itemId} not found`);
+          socket.emit('store-transaction-error', {
+            characterId,
+            error: `Item ${itemId} not found`
+          });
+          return;
+        }
+
+        // Instantiate inventory manager and restore from character data
+        const inventoryManager = new InventoryManager();
+        if (character.inventory) {
+          inventoryManager.deserialize(character.inventory);
+        }
+
+        // Attempt purchase
+        if (!inventoryManager.purchaseItem(itemId, price, quantity)) {
+          console.error(`[Store] Purchase failed - insufficient funds for ${characterId}`);
+          socket.emit('store-transaction-error', {
+            characterId,
+            error: 'Cannot afford item'
+          });
+          return;
+        }
+
+        // Log transaction
+        const conversion = inventoryManager.convertToMixedDenominations(price * quantity);
+        console.log(`[Store] Purchase: Character ${characterId} bought ${quantity}x ${itemDef.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`);
+
+        // Save character with updated inventory
+        character.inventory = inventoryManager.serialize();
+        await saveCharacterData(character);
+        
+        // Save to database
+        try {
+          await saveCharacter(character);
+          console.log(`[Store] Saved purchase to database for ${character.name} (${character.id})`);
+        } catch (dbError) {
+          console.warn(`[Store] Warning: Failed to save purchase to database: ${dbError.message}`);
+        }
+      }
+
+      // Broadcast to all GM clients for tracking
+      io.emit('store-transaction', data);
+
+      // Emit character-state-update to notify client of inventory change
+      io.to(socket.id).emit('character-updated', {
+        characterId,
+        timestamp: new Date().toISOString()
+      });
+
+      // Immediately acknowledge acceptance back to sender
+      const ackId = `${Date.now()}-${Math.random()}`;
+      socket.emit('store-transaction-accepted', {
+        ackId,
+        storeId,
+        characterId,
+        totalCost,
+        timestamp: timestamp || new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('[Store] Transaction error:', error);
+      socket.emit('store-transaction-error', {
+        characterId,
+        error: error.message || 'Transaction failed'
+      });
+    }
   });
 
   // GM grants item to a player

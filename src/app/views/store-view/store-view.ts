@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { Character } from '../../character/character';
 import { InventoryItem, ItemType, CurrencyConversion } from '../../character/inventory/inventoryItem';
 import { CharacterStateService } from '../../character/characterStateService';
@@ -31,6 +31,7 @@ export class StoreView implements OnInit, OnDestroy {
   isConnected: boolean = false;
   isSaving: boolean = false;
   availableItems: InventoryItem[] = [];
+  errorMessage: string = '';
   
   // Cached items list that will trigger re-render
   private allItems: InventoryItem[] = [];
@@ -74,9 +75,6 @@ export class StoreView implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Load store items from backend
-    this.loadStoreItems();
-    
     // Connect to WebSocket server
     this.websocketService.connect();
     
@@ -92,6 +90,22 @@ export class StoreView implements OnInit, OnDestroy {
         }
       });
     
+    // Load store items from backend (once, independent of character ID)
+    this.loadStoreItems();
+    
+    // Subscribe to character ID, then load inventory
+    this.characterIdentity.currentCharacterId$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((id) => id !== null)
+      )
+      .subscribe((characterId) => {
+        if (characterId) {
+          this.loadCharacterInventory(characterId);
+        }
+      });
+    
+    // Update local character state when CharacterStateService emits
     this.characterState.character$
       .pipe(takeUntil(this.destroy$))
       .subscribe((character: Character | null) => {
@@ -132,6 +146,42 @@ export class StoreView implements OnInit, OnDestroy {
         // Force change detection to update UI
         this.cdr.detectChanges();
       });
+
+    // Listen for character-state-update events from server after transactions
+    this.websocketService.characterUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        const characterId = this.characterIdentity.getCurrentCharacterId();
+        if (characterId === event.characterId) {
+          // Character state was updated on server; reload inventory to sync
+          this.loadCharacterInventory(characterId);
+        }
+      });
+  }
+
+  private loadCharacterInventory(characterId: string): void {
+    this.http.get<any>(`/api/characters/load/${characterId}`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('[StoreView] Loaded character for inventory sync:', characterId);
+          if (response && response.inventory) {
+            // Deserialize inventory into current character
+            if (this.character) {
+              this.character.inventory.deserialize(response.inventory);
+            }
+            // Emit update to CharacterStateService to ensure all subscribers are notified
+            if (response) {
+              this.characterState.updateCharacter(response);
+            }
+          }
+          this.clearError();
+        },
+        error: (error) => {
+          console.error('[StoreView] Error loading character inventory:', error);
+          this.showError('Failed to sync inventory');
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -153,7 +203,7 @@ export class StoreView implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error loading store items:', error);
           this.isLoading = false;
-          this.showNotification('Failed to load store items');
+          this.showError('Failed to load store items');
         }
       });
   }
@@ -199,46 +249,54 @@ export class StoreView implements OnInit, OnDestroy {
 
   purchaseItem(item: InventoryItem, quantity: number = 1): void {
     if (!this.character) {
-      this.showNotification('No character selected');
+      this.showError('No character selected');
       return;
     }
 
     if (this.isSaving) {
-      this.showNotification('Purchase in progress...');
+      this.showError('Purchase in progress...');
+      return;
+    }
+
+    if (!this.canAfford(item, quantity)) {
+      this.showError('Insufficient currency to purchase');
       return;
     }
 
     const characterId = this.characterIdentity.getCurrentCharacterId();
     if (!characterId) {
-      this.showNotification('Character ID not found');
+      this.showError('Character ID not found');
+      return;
+    }
+
+    if (!this.isConnected) {
+      this.showError('Not connected to server');
       return;
     }
 
     this.isSaving = true;
+    this.clearError();
 
-    this.http.post<any>(`/api/character/${characterId}/inventory/purchase`, {
-      itemId: item.id,
-      quantity,
-      price: item.price
-    })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            // Update character inventory from backend response
-            this.character!.inventory.deserialize(response.inventory);
-            this.showNotification(`Purchased ${quantity}x ${item.name}`);
-          } else {
-            this.showNotification(response.error || 'Purchase failed');
-          }
-          this.isSaving = false;
-        },
-        error: (error) => {
-          console.error('Error purchasing item:', error);
-          this.showNotification('Failed to purchase item');
-          this.isSaving = false;
-        }
-      });
+    // Emit store transaction via WebSocket
+    this.websocketService.emitStoreTransaction({
+      storeId: 'main-store',
+      characterId,
+      items: [{
+        itemId: item.id,
+        quantity,
+        price: item.price,
+        type: 'buy'
+      }],
+      totalCost: item.price * quantity,
+      timestamp: new Date().toISOString()
+    });
+
+    // Note: The actual inventory update will come via character-state-update WebSocket event
+    // which will trigger loadCharacterInventory to sync the latest state.
+    // Set a timeout to clear the saving flag after a reasonable time
+    setTimeout(() => {
+      this.isSaving = false;
+    }, 2000);
   }
 
   canAfford(item: InventoryItem, quantity: number = 1): boolean {
@@ -304,7 +362,6 @@ export class StoreView implements OnInit, OnDestroy {
     this.converterBroams = conversion.broams;
     this.converterMarks = conversion.marks;
     this.converterChips = conversion.chips;
-    this.showNotification('Currency converted!');
   }
 
   // ===== ITEM DETAILS =====
@@ -407,8 +464,16 @@ export class StoreView implements OnInit, OnDestroy {
 
   // ===== NOTIFICATIONS =====
 
-  private showNotification(message: string): void {
-    // Simple notification - could be enhanced with a custom notification service
-    // You could create a toast/notification component here
+  private showError(message: string): void {
+    this.errorMessage = message;
+    console.error('[StoreView] Error:', message);
+    // Auto-clear error after 5 seconds
+    setTimeout(() => {
+      this.clearError();
+    }, 5000);
+  }
+
+  clearError(): void {
+    this.errorMessage = '';
   }
 }

@@ -139,6 +139,7 @@ export async function initializeSchema(): Promise<void> {
         pendingLevelPoints INTEGER DEFAULT 0,
         ancestry TEXT,
         sessionNotes TEXT DEFAULT '',
+        currencyInChips REAL DEFAULT 0,
         lastModified TEXT NOT NULL
       );
 
@@ -280,6 +281,10 @@ export async function initializeSchema(): Promise<void> {
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
     `);
+    
+    // Run migrations for existing tables
+    await runMigrations();
+    
     console.log('[Database] Schema initialized');
   } catch (error) {
     if ((error as any).message.includes('already exists')) {
@@ -288,6 +293,45 @@ export async function initializeSchema(): Promise<void> {
     console.error('[Database] Error initializing schema:', error);
     throw error;
   }
+}
+
+/**
+ * Run database migrations for schema updates
+ */
+async function runMigrations(): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  try {
+    // Migration: Add currencyInChips column to Character table if it doesn't exist
+    const hasColumns = await db.all("PRAGMA table_info(Character)");
+    const hasCurrency = hasColumns.some((col: any) => col.name === 'currencyInChips');
+    
+    if (!hasCurrency) {
+      console.log('[Database] Running migration: Adding currencyInChips column to Character table');
+      try {
+        await db.run('ALTER TABLE Character ADD COLUMN currencyInChips REAL DEFAULT 0');
+        console.log('[Database] Migration completed: currencyInChips column added');
+      } catch (alterError) {
+        console.error('[Database] Migration error:', (alterError as Error).message);
+        throw alterError;
+      }
+    } else {
+      console.log('[Database] Migration skipped: currencyInChips column already exists');
+    }
+  } catch (error) {
+    console.error('[Database] Migration failed:', (error as Error).message);
+    throw error;
+  }
+}
+
+/**
+ * Helper to extract currency from inventory object or return 0
+ */
+function getCurrencyFromInventory(inventory: any): number {
+  if (!inventory) return 0;
+  if (inventory.currencyInChips !== undefined) {
+    return Number.isFinite(inventory.currencyInChips) ? inventory.currencyInChips : 0;
+  }
+  return 0;
 }
 
 /**
@@ -332,7 +376,11 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       }, {}),
       unlockedTalents: talents.map((t: any) => t.talentId),
       selectedExpertises: expertises,
-      inventory: items,
+      inventory: {
+        items: items,
+        equippedItems: [],
+        currencyInChips: char.currencyInChips ?? 0
+      },
       resources: resources ? {
         health: { current: resources.healthCurrent, max: resources.healthMax },
         focus: { current: resources.focusCurrent, max: resources.focusMax },
@@ -760,14 +808,15 @@ export async function saveCharacter(
     }
     // Upsert character
     await db.run(`
-      INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, lastModified)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, currencyInChips, lastModified)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         level = excluded.level,
         pendingLevelPoints = excluded.pendingLevelPoints,
         ancestry = excluded.ancestry,
         sessionNotes = excluded.sessionNotes,
+        currencyInChips = excluded.currencyInChips,
         lastModified = excluded.lastModified
     `,
       character.id,
@@ -776,6 +825,7 @@ export async function saveCharacter(
       character.pendingLevelPoints ?? 0,
       character.ancestry ?? null,
       character.sessionNotes ?? '',
+      getCurrencyFromInventory(character.inventory) ?? 0,
       character.lastModified ?? new Date().toISOString()
     );
 

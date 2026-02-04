@@ -1,4 +1,11 @@
 <div class="store-container" *ngIf="!isLoading && character && storeEnabled; else loadingOrClosed">
+  <!-- Error Banner -->
+  <div class="error-banner" *ngIf="errorMessage" [@slideDown]>
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">{{ errorMessage }}</span>
+    <button class="error-close" (click)="clearError()">✕</button>
+  </div>
+
   <!-- Store Header -->
   <div class="store-header">
     <div class="header-content">
