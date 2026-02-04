@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getCulturesByCharacterId, setCulturesByCharacterId } from '../services/culture-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getCultures(req: Request, res: Response): Promise<void> {
   try {
@@ -21,7 +22,7 @@ export async function getCultures(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setCultures(req: Request, res: Response): Promise<void> {
+export async function setCultures(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { cultures } = req.body ?? {};
@@ -35,6 +36,9 @@ export async function setCultures(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setCulturesByCharacterId(id, cultures);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

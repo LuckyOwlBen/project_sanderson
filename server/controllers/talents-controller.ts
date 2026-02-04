@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getTalentsByCharacterId, setTalentsByCharacterId } from '../services/talents-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getTalents(req: Request, res: Response): Promise<void> {
   try {
@@ -21,7 +22,7 @@ export async function getTalents(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setTalents(req: Request, res: Response): Promise<void> {
+export async function setTalents(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { talents } = req.body ?? {};
@@ -51,6 +52,9 @@ export async function setTalents(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setTalentsByCharacterId(id, talents);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

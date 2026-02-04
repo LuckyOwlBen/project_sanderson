@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getSkillsByCharacterId, setSkillsByCharacterId } from '../services/skills-service';
 import { skillsListManager } from '../services/skills-list-manager';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getSkills(req: Request, res: Response): Promise<void> {
   try {
@@ -22,7 +23,7 @@ export async function getSkills(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setSkills(req: Request, res: Response): Promise<void> {
+export async function setSkills(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { skills } = req.body ?? {};
@@ -36,6 +37,9 @@ export async function setSkills(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setSkillsByCharacterId(id, skills);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

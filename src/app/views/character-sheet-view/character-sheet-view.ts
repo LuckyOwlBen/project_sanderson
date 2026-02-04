@@ -70,7 +70,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   equipmentActiveTab: 'inventory' | 'crafting' | 'companions' = 'inventory';
   private destroy$ = new Subject<void>();
   private resourceUpdateSubject = new Subject<void>();
-  private autoSaveInterval: any = null;
   
   character: Character | null = null;
   characterId: string = '';
@@ -125,12 +124,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         this.emitResourceUpdate();
       });
 
-    // Set up auto-save interval (every 30 seconds)
-    this.autoSaveInterval = setInterval(() => {
-      if (this.character) {
-        this.saveCharacter();
-      }
-    }, 30000);
+    // NOTE: Auto-save disabled - relying on WebSocket real-time sync instead
+    // Individual module changes (ancestry, skills, etc.) save via their own APIs
+    // Character reloads automatically when backend updates occur
+    // Only save manually when GM grants occur (items, expertise, level-ups)
 
     // Listen for item grants
     this.websocketService.itemGrant$
@@ -276,6 +273,19 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       });
     console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
 
+    // Set up character-updated listener (sync with backend changes)
+    console.log('[Character Sheet] 🔄 Setting up character-updated listener...');
+    this.websocketService.characterUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] 🔄 Character updated event received:', event);
+        if (event && event.characterId === this.characterId) {
+          console.log('[Character Sheet] 🔄 Match! Reloading character from backend...');
+          this.loadCharacter(this.characterId);
+        }
+      });
+    console.log('[Character Sheet] 🔄 Character-updated listener subscription complete');
+
     // Set up combat start listener
     console.log('[Character Sheet] ⚔️ Setting up combat start listener...');
     const combatStartStream = (this.websocketService as any)?.combatStart$;
@@ -295,11 +305,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Save character state before leaving
-    if (this.character) {
-      this.saveCharacter();
-    }
-
+    // NOTE: No save on destroy - WebSocket sync keeps data current
+    // Resources auto-save via debounced emitResourceUpdate
+    // Module changes save via individual APIs (ancestry, skills, etc.)
+    
     // Emit player leave event
     if (this.characterId) {
       this.websocketService.emitPlayerLeave(this.characterId);
@@ -307,11 +316,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
     // Disconnect from WebSocket
     this.websocketService.disconnect();
-
-    // Clear auto-save interval
-    if (this.autoSaveInterval) {
-      clearInterval(this.autoSaveInterval);
-    }
 
     this.destroy$.next();
     this.destroy$.complete();

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getPathsByCharacterId, setPathsByCharacterId } from '../services/paths-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getPaths(req: Request, res: Response): Promise<void> {
   try {
@@ -22,7 +23,7 @@ export async function getPaths(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setPaths(req: Request, res: Response): Promise<void> {
+export async function setPaths(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { type, sub } = req.body ?? {};
@@ -36,6 +37,9 @@ export async function setPaths(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setPathsByCharacterId(id, type, sub);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

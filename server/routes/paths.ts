@@ -10,12 +10,14 @@
 
 import { Express } from 'express';
 import { getPaths, setPaths } from '../controllers/paths-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register paths routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createPathsRoute(app: Express): void {
+export default function createPathsRoute(app: Express, broadcaster: SocketBroadcaster): void {
   /**
    * GET /api/characters/:id/paths
    * Load path selections for a character
@@ -30,5 +32,5 @@ export default function createPathsRoute(app: Express): void {
    *
    * @returns { success: boolean, type: string, sub: string }
    */
-  app.post('/api/characters/:id/paths', setPaths);
+  app.post('/api/characters/:id/paths', (req, res) => setPaths(req, res, broadcaster));
 }

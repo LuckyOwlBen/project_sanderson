@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getAttributesByCharacterId, setAttributesByCharacterId, finalizeAttributesByCharacterId } from '../services/attributes-crud-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getAttributes(req: Request, res: Response): Promise<void> {
   try {
@@ -24,7 +25,7 @@ export async function getAttributes(req: Request, res: Response): Promise<void> 
   }
 }
 
-export async function setAttributes(req: Request, res: Response): Promise<void> {
+export async function setAttributes(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { attributes } = req.body ?? {};
@@ -66,6 +67,9 @@ export async function setAttributes(req: Request, res: Response): Promise<void> 
     }
 
     const updated = await setAttributesByCharacterId(id, attributes);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
@@ -97,10 +101,13 @@ export async function setAttributes(req: Request, res: Response): Promise<void> 
   }
 }
 
-export async function finalizeAttributes(req: Request, res: Response): Promise<void> {
+export async function finalizeAttributes(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const result = await finalizeAttributesByCharacterId(id);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

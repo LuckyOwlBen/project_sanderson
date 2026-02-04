@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getAncestryByCharacterId, setAncestryByCharacterId } from '../services/ancestry-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getAncestry(req: Request, res: Response): Promise<void> {
   try {
@@ -21,7 +22,7 @@ export async function getAncestry(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setAncestry(req: Request, res: Response): Promise<void> {
+export async function setAncestry(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { ancestry } = req.body ?? {};
@@ -35,6 +36,9 @@ export async function setAncestry(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setAncestryByCharacterId(id, ancestry ?? null);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

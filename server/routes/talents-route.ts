@@ -1,11 +1,13 @@
 import { Express } from 'express';
 import { getTalents, setTalents } from '../controllers/talents-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register talents routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createTalentsRoute(app: Express): void {
+export default function createTalentsRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering talents routes...');
 
   /**
@@ -22,5 +24,5 @@ export default function createTalentsRoute(app: Express): void {
    *
    * @returns { success: boolean, data: TalentsStateDTO }
    */
-  app.post('/api/characters/:id/talents', setTalents);
+  app.post('/api/characters/:id/talents', (req, res) => setTalents(req, res, broadcaster));
 }

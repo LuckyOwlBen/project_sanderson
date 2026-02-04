@@ -1,11 +1,13 @@
 import { Express } from 'express';
 import { getAvailableExpertise, getExpertise, setExpertise } from '../controllers/expertise-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register expertise routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createExpertiseRoute(app: Express): void {
+export default function createExpertiseRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering expertise routes...');
   /**
    * GET /api/expertise/available
@@ -29,5 +31,5 @@ export default function createExpertiseRoute(app: Express): void {
    *
    * @returns { success: boolean, data: ExpertiseStateDTO }
    */
-  app.post('/api/characters/:id/expertise', setExpertise);
+  app.post('/api/characters/:id/expertise', (req, res) => setExpertise(req, res, broadcaster));
 }

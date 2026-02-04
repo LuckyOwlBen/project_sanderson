@@ -109,6 +109,11 @@ export interface TurnGroupsUpdateEvent {
   timestamp: string;
 }
 
+export interface CharacterUpdatedEvent {
+  characterId: string;
+  timestamp: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -165,6 +170,9 @@ export class WebsocketService implements OnDestroy {
 
   private turnGroupsUpdateSubject = new Subject<TurnGroupsUpdateEvent>();
   public turnGroupsUpdate$ = this.turnGroupsUpdateSubject.asObservable();
+
+  private characterUpdatedSubject = new Subject<CharacterUpdatedEvent>();
+  public characterUpdated$ = this.characterUpdatedSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -303,6 +311,11 @@ export class WebsocketService implements OnDestroy {
     this.socket.on('turn-groups-update', (data: TurnGroupsUpdateEvent) => {
       console.log('[WebSocket] 📋 Turn groups updated:', data);
       this.turnGroupsUpdateSubject.next(data);
+    });
+    
+    this.socket.on('character-updated', (data: CharacterUpdatedEvent) => {
+      console.log('[WebSocket] 🔄 Character updated:', data);
+      this.characterUpdatedSubject.next(data);
     });
     
     console.log('[WebSocket] ✅ All event listeners registered');

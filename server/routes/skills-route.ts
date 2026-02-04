@@ -1,11 +1,13 @@
 import { Express } from 'express';
 import { getAvailableSkills, getSkills, setSkills } from '../controllers/skills-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register skills routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createSkillsRoute(app: Express): void {
+export default function createSkillsRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering skills routes...');
   /**
    * GET /api/skills/available
@@ -29,5 +31,5 @@ export default function createSkillsRoute(app: Express): void {
    *
    * @returns { success: boolean, data: SkillsStateDTO }
    */
-  app.post('/api/characters/:id/skills', setSkills);
+  app.post('/api/characters/:id/skills', (req, res) => setSkills(req, res, broadcaster));
 }

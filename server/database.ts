@@ -821,18 +821,38 @@ export async function saveCharacter(
       }
     }
 
-    // Save expertises
-    if (character.selectedExpertises && character.selectedExpertises.length > 0) {
+    // Save expertises (replace all if provided, even if empty)
+    if (character.selectedExpertises !== undefined) {
       await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', character.id);
-      for (const exp of character.selectedExpertises) {
-        await db.run(
-          'INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) VALUES (?, ?, ?, ?, ?)',
-          `expertise-${character.id}-${exp.name}`,
-          character.id,
-          exp.name,
-          exp.source || 'manual',
-          exp.sourceId || ''
-        );
+      if (Array.isArray(character.selectedExpertises) && character.selectedExpertises.length > 0) {
+        for (const exp of character.selectedExpertises) {
+          await db.run(
+            'INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) VALUES (?, ?, ?, ?, ?)',
+            `expertise-${character.id}-${exp.name}`,
+            character.id,
+            exp.name,
+            exp.source || 'manual',
+            exp.sourceId || ''
+          );
+        }
+      }
+    }
+
+    // Save unlocked talents (replace all if provided)
+    if (character.unlockedTalents !== undefined) {
+      await db.run('DELETE FROM UnlockedTalent WHERE characterId = ?', character.id);
+      if (Array.isArray(character.unlockedTalents) && character.unlockedTalents.length > 0) {
+        const now = new Date().toISOString();
+        for (const talentId of character.unlockedTalents) {
+          await db.run(
+            'INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level) VALUES (?, ?, ?, ?, ?)',
+            `talent-${character.id}-${talentId}`,
+            character.id,
+            talentId,
+            now,
+            character.level ?? 1
+          );
+        }
       }
     }
 
@@ -889,16 +909,56 @@ export async function saveCharacter(
     }
 
     // Save inventory
-    if (character.inventory && Array.isArray(character.inventory)) {
+    if (character.inventory) {
       await db.run('DELETE FROM InventoryItem WHERE characterId = ?', character.id);
-      for (const item of character.inventory) {
-        await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
-          `inv-${character.id}-${item.itemId}`,
-          character.id,
-          item.itemId,
-          item.quantity ?? 1,
-          item.equipped ? 1 : 0
-        );
+
+      // Legacy format: array of items
+      if (Array.isArray(character.inventory)) {
+        for (const item of character.inventory) {
+          await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
+            `inv-${character.id}-${item.itemId}`,
+            character.id,
+            item.itemId,
+            item.quantity ?? 1,
+            item.equipped ? 1 : 0
+          );
+        }
+      } else if (character.inventory.items && Array.isArray(character.inventory.items)) {
+        const equippedSet = new Set<string>();
+
+        // Map equipped items from equippedItems array
+        if (Array.isArray(character.inventory.equippedItems)) {
+          for (const entry of character.inventory.equippedItems) {
+            const itemId = Array.isArray(entry) ? entry[1] : undefined;
+            if (itemId) {
+              equippedSet.add(itemId);
+            }
+          }
+        }
+
+        // Map equipped items from equipped object (if present)
+        if (character.inventory.equipped) {
+          const armorId = character.inventory.equipped.armor?.itemId || character.inventory.equipped.armor?.id;
+          if (armorId) equippedSet.add(armorId);
+          if (Array.isArray(character.inventory.equipped.weapons)) {
+            character.inventory.equipped.weapons.forEach((weapon: any) => {
+              const weaponId = weapon?.itemId || weapon?.id;
+              if (weaponId) equippedSet.add(weaponId);
+            });
+          }
+        }
+
+        for (const item of character.inventory.items) {
+          const itemId = item.itemId || item.id;
+          if (!itemId) continue;
+          await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
+            `inv-${character.id}-${itemId}`,
+            character.id,
+            itemId,
+            item.quantity ?? 1,
+            equippedSet.has(itemId) ? 1 : 0
+          );
+        }
       }
     }
 

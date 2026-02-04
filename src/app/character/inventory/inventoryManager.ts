@@ -428,9 +428,30 @@ export class InventoryManager {
 
     if (data.items) {
       data.items.forEach((itemData: any) => {
-        const itemDef = getItemById(itemData.id.split('-')[0]); // Handle unique IDs
+        const rawId = itemData.id;
+        const itemDef = (itemData?.name && itemData?.type)
+          ? itemData
+          : (getItemById(rawId) || getItemById(rawId?.split('-')[0]));
+
         if (itemDef) {
-          const item = { ...itemDef, id: itemData.id, quantity: itemData.quantity };
+          const base = itemDef as any;
+          const item = {
+            id: rawId,
+            name: base.name ?? String(rawId).replace(/-/g, ' '),
+            type: base.type ?? 'equipment',
+            description: base.description ?? '',
+            rarity: base.rarity ?? 'common',
+            price: base.price ?? 0,
+            weight: base.weight ?? 0,
+            quantity: itemData.quantity ?? base.quantity ?? 1,
+            stackable: base.stackable ?? true,
+            equipable: base.equipable ?? false,
+            slot: base.slot,
+            weaponProperties: base.weaponProperties,
+            armorProperties: base.armorProperties,
+            fabrialProperties: base.fabrialProperties,
+            properties: base.properties
+          } as any;
           
           // Restore fabrial charges
           if (item.fabrialProperties && itemData.customData?.fabrialCharges !== undefined) {
@@ -442,7 +463,7 @@ export class InventoryManager {
             item.properties = { ...item.properties, ...itemData.customData.properties };
           }
 
-          this.items.set(itemData.id, item);
+          this.items.set(rawId, item);
         }
       });
     }

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getNameByCharacterId, setNameByCharacterId } from '../services/name-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getName(req: Request, res: Response): Promise<void> {
   try {
@@ -23,7 +24,7 @@ export async function getName(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setName(req: Request, res: Response): Promise<void> {
+export async function setName(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { name, level } = req.body ?? {};
@@ -89,6 +90,9 @@ export async function setName(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setNameByCharacterId(id, trimmedName, level);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,

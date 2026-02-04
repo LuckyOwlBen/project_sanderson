@@ -6,6 +6,7 @@
 
 import { Request, Response } from 'express';
 import { characterFinalizationService } from '../services/character-finalization.service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * POST /api/characters/:id/finalize
@@ -17,7 +18,7 @@ import { characterFinalizationService } from '../services/character-finalization
  * @returns { success: boolean } - Success indicator
  * @throws 400 if any section has unspent points
  */
-export async function finalizeCharacter(req: Request, res: Response): Promise<void> {
+export async function finalizeCharacter(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
 
@@ -27,6 +28,9 @@ export async function finalizeCharacter(req: Request, res: Response): Promise<vo
     const result = await characterFinalizationService.finalizeCharacterCreation(id);
 
     console.log(`[FinalizeController] ✅ Character ${id} finalized successfully`);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
     
     res.json({
       success: true

@@ -8,12 +8,14 @@ import {
   getAvailableKits,
   getStore
 } from '../controllers/equipment-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register equipment routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createEquipmentRoute(app: Express): void {
+export default function createEquipmentRoute(app: Express, broadcaster: SocketBroadcaster): void {
   /**
    * GET /api/characters/:id/equipment
    * Load equipment/inventory for a character
@@ -28,7 +30,7 @@ export default function createEquipmentRoute(app: Express): void {
    *
    * @returns { success: boolean, inventory: InventoryDTO }
    */
-  app.post('/api/characters/:id/equipment', setEquipment);
+  app.post('/api/characters/:id/equipment', (req, res) => setEquipment(req, res, broadcaster));
 
   /**
    * POST /api/characters/:id/equipment/purchase
@@ -37,7 +39,7 @@ export default function createEquipmentRoute(app: Express): void {
    * @body { itemId: string, quantity: number }
    * @returns { success: boolean, inventory: InventoryDTO, currency: number }
    */
-  app.post('/api/characters/:id/equipment/purchase', purchaseItem);
+  app.post('/api/characters/:id/equipment/purchase', (req, res) => purchaseItem(req, res, broadcaster));
 
   /**
    * POST /api/characters/:id/equipment/apply-kit
@@ -46,7 +48,7 @@ export default function createEquipmentRoute(app: Express): void {
    * @body { kitId: string }
    * @returns { success: boolean, inventory: InventoryDTO, appliedKit: string, currency: number }
    */
-  app.post('/api/characters/:id/equipment/apply-kit', applyStartingKit);
+  app.post('/api/characters/:id/equipment/apply-kit', (req, res) => applyStartingKit(req, res, broadcaster));
 
   /**
    * POST /api/characters/:id/equipment/refund-kit
@@ -54,7 +56,7 @@ export default function createEquipmentRoute(app: Express): void {
    *
    * @returns { success: boolean, inventory: InventoryDTO, currency: number }
    */
-  app.post('/api/characters/:id/equipment/refund-kit', refundStartingKit);
+  app.post('/api/characters/:id/equipment/refund-kit', (req, res) => refundStartingKit(req, res, broadcaster));
 
   /**
    * GET /api/equipment/kits

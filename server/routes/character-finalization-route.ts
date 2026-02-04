@@ -1,12 +1,14 @@
 import { Express } from 'express';
 import { finalizeCharacter } from '../controllers/character-finalization-controller';
 import { getCompleteCharacter } from '../controllers/character-complete-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register character finalization route
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createCharacterFinalizationRoute(app: Express): void {
+export default function createCharacterFinalizationRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering character finalization route...');
 
   /**
@@ -31,5 +33,5 @@ export default function createCharacterFinalizationRoute(app: Express): void {
    * @returns { success: boolean }
    * @throws 400 if any section has unspent points
    */
-  app.post('/api/characters/:id/finalize', finalizeCharacter);
+  app.post('/api/characters/:id/finalize', (req, res) => finalizeCharacter(req, res, broadcaster));
 }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getExpertiseByCharacterId, setExpertiseByCharacterId, ValidationError } from '../services/expertise-service';
 import { expertiseListManager } from '../services/expertise-list-manager';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getExpertise(req: Request, res: Response): Promise<void> {
   try {
@@ -22,7 +23,7 @@ export async function getExpertise(req: Request, res: Response): Promise<void> {
   }
 }
 
-export async function setExpertise(req: Request, res: Response): Promise<void> {
+export async function setExpertise(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { expertise } = req.body ?? {};
@@ -47,6 +48,9 @@ export async function setExpertise(req: Request, res: Response): Promise<void> {
       });
       return;
     }
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     // It's a successful ExpertiseStateDTO
     res.json({

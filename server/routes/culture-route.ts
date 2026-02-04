@@ -1,11 +1,13 @@
 import { Express } from 'express';
 import { getCultures, setCultures } from '../controllers/culture-controller';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * Register culture routes
  * @param app Express app instance
+ * @param broadcaster Socket broadcaster for character updates
  */
-export default function createCultureRoute(app: Express): void {
+export default function createCultureRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering culture routes...');
   /**
    * GET /api/characters/:id/cultures
@@ -21,5 +23,5 @@ export default function createCultureRoute(app: Express): void {
    *
    * @returns { success: boolean, cultures: string[] }
    */
-  app.post('/api/characters/:id/cultures', setCultures);
+  app.post('/api/characters/:id/cultures', (req, res) => setCultures(req, res, broadcaster));
 }

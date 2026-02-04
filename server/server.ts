@@ -14,6 +14,7 @@ import InventoryManager from './inventory-manager';
 import itemDefinitions from './item-definitions';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import { SocketBroadcaster } from './socket-broadcaster';
 import createCreationRoutes from './routes/creation';
 import createConstantsRoutes from './routes/constants';
 import createAllocationRoutes from './routes/allocations';
@@ -46,7 +47,8 @@ import {
   getAttributesRecord,
   updateAttributesRecord,
   setAttributesFinalized,
-  clearDatabase
+  clearDatabase,
+  getTalentsStateRecord
 } from './database';
 
 import { createCharacter } from './services/character-service';
@@ -85,6 +87,9 @@ const LEVEL_TABLES = {
 
 // Track active players
 const activePlayers = new Map(); // socketId -> {characterId, name, level, ancestry, joinedAt}
+
+// Initialize socket broadcaster (created after io initialization below)
+let socketBroadcaster: SocketBroadcaster;
 
 // Track store state
 const storeState = {
@@ -196,6 +201,14 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Serve images directory as static
 app.use('/images', express.static(IMAGES_DIR));
 
+// Initialize Socket Broadcaster for character updates
+socketBroadcaster = new SocketBroadcaster(io, activePlayers);
+
+// Set up periodic cleanup of expired queued updates (every 5 minutes)
+setInterval(() => {
+  socketBroadcaster.cleanupExpiredUpdates();
+}, 5 * 60 * 1000);
+
 // Register character creation routes (ancestry, name, cultures, attributes)
 createCreationRoutes(app, CHARACTERS_DIR);
 
@@ -218,34 +231,34 @@ createAttackCalculationsRoutes(app);
 createCharacterRoutes(app, CHARACTERS_DIR);
 
 // Register ancestry routes (read ancestry by character ID)
-createAncestryRoute(app);
+createAncestryRoute(app, socketBroadcaster);
 
 // Register culture routes (read/write cultures by character ID)
-createCultureRoute(app);
+createCultureRoute(app, socketBroadcaster);
 
 // Register name routes (read/write name and level by character ID)
-createNameRoute(app);
+createNameRoute(app, socketBroadcaster);
 
 // Register attributes routes (read/write attributes by character ID)
-createAttributesRoute(app);
+createAttributesRoute(app, socketBroadcaster);
 
 // Register skills routes (read/write skills by character ID)
-createSkillsRoute(app);
+createSkillsRoute(app, socketBroadcaster);
 
 // Register talents routes (read/write talents by character ID)
-createTalentsRoute(app);
+createTalentsRoute(app, socketBroadcaster);
 
 // Register expertise routes (read/write expertise by character ID)
-createExpertiseRoute(app);
+createExpertiseRoute(app, socketBroadcaster);
 
 // Register paths routes (read/write path selections by character ID)
-createPathsRoute(app);
+createPathsRoute(app, socketBroadcaster);
 
 // Register equipment routes (read/write equipment/inventory by character ID)
-createEquipmentRoute(app);
+createEquipmentRoute(app, socketBroadcaster);
 
 // Register character finalization route (finalize character creation)
-createCharacterFinalizationRoute(app);
+createCharacterFinalizationRoute(app, socketBroadcaster);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {
@@ -1042,22 +1055,114 @@ app.post('/api/characters/:id/paths', async (req, res) => {
 app.get('/api/characters/load/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    
-    const data = await fsPromises.readFile(filepath, 'utf8');
-    const character = JSON.parse(data);
-    
-    console.log(`Loaded character: ${character.name} (${id})`);
-    console.log(`Character skills:`, character.skills || {});
-    
-    res.json(character);
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Character not found' 
+    const character = await loadCharacter(id);
+
+    if (!character) {
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found'
       });
     }
+
+    // If unlocked talents are missing, backfill from talents state record
+    if (!character.unlockedTalents || character.unlockedTalents.length === 0) {
+      const talentsState = await getTalentsStateRecord(id);
+      if (talentsState) {
+        const mergedTalents = new Set<string>([
+          ...(talentsState.totalTalents || []),
+          ...(talentsState.pendingTalents || [])
+        ]);
+        character.unlockedTalents = Array.from(mergedTalents);
+      }
+    }
+
+    // Normalize inventory to client DTO shape
+    let inventory = character.inventory as any;
+    if (Array.isArray(inventory)) {
+      const equippedItems: [string, string][] = [];
+      inventory.forEach((item: any) => {
+        if (item?.equipped) {
+          const itemDef = itemDefinitions.getItemById(item.itemId);
+          const slot = itemDef?.slot || 'mainHand';
+          equippedItems.push([slot, item.itemId]);
+        }
+      });
+
+      inventory = {
+        items: inventory.map((item: any) => ({
+          id: item.itemId,
+          quantity: item.quantity ?? 1,
+          customData: {}
+        })),
+        equippedItems,
+        currencyInChips: 0
+      };
+    }
+
+    if (inventory?.items && Array.isArray(inventory.items)) {
+      inventory.items = inventory.items.map((item: any) => {
+        const itemId = item.id || item.itemId;
+        const itemDef = itemDefinitions.getItemById(itemId);
+        if (!itemDef) return item;
+        return {
+          id: itemId,
+          quantity: item.quantity ?? 1,
+          customData: item.customData ?? {},
+          name: itemDef.name,
+          type: itemDef.type,
+          description: itemDef.description,
+          rarity: itemDef.rarity,
+          price: itemDef.price,
+          weight: itemDef.weight,
+          stackable: itemDef.stackable,
+          equipable: itemDef.equipable,
+          slot: itemDef.slot,
+          weaponProperties: itemDef.weaponProperties,
+          armorProperties: itemDef.armorProperties,
+          fabrialProperties: itemDef.fabrialProperties,
+          properties: itemDef.properties
+        };
+      });
+    }
+
+    const resources = character.resources || {
+      health: { current: 10, max: 10 },
+      focus: { current: 2, max: 2 },
+      investiture: { current: 0, max: 0, isActive: false }
+    };
+
+    const response = {
+      ...character,
+      // Ensure expected DTO fields exist
+      unlockedTalents: character.unlockedTalents || [],
+      baselineUnlockedTalents: character.baselineUnlockedTalents || [],
+      selectedExpertises: character.selectedExpertises || [],
+      unlockedSingerForms: character.unlockedSingerForms || [],
+      activeStanceId: character.activeStanceId ?? null,
+      inventory: inventory || {
+        items: [],
+        equippedItems: [],
+        currencyInChips: 0
+      },
+      radiantPath: character.radiantPath || {
+        currentIdeal: 1,
+        currentOath: null,
+        hasSpren: false
+      },
+      sessionNotes: character.sessionNotes || '',
+      lastModified: character.lastModified || new Date().toISOString(),
+      resources,
+      // Backward compatibility for client deserializer
+      health: resources.health,
+      focus: resources.focus,
+      investiture: resources.investiture
+    };
+
+    console.log(`Loaded character: ${response.name} (${id})`);
+    console.log(`Character skills:`, response.skills || {});
+
+    res.json(response);
+  } catch (error) {
     console.error('Error loading character:', error);
     res.status(500).json({ 
       success: false, 
@@ -1755,6 +1860,9 @@ io.on('connection', (socket) => {
     sendPendingSprenGrant(characterId);
     sendPendingExpertiseGrants(characterId);
     sendPendingItemGrants(characterId);
+    
+    // Deliver any pending character-updated events
+    socketBroadcaster.deliverPendingUpdates(socket.id, characterId);
   });
 
   // Player leaves session
@@ -2152,6 +2260,9 @@ io.on('connection', (socket) => {
     } else {
       console.log(`[WebSocket] Client disconnected: ${socket.id}`);
     }
+    
+    // Clean up broadcaster timers for this socket
+    socketBroadcaster.cleanupSocket(socket.id);
   });
 });
 

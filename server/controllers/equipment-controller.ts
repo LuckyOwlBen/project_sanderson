@@ -8,6 +8,7 @@ import {
   getAllStartingKits,
   getStoreItems
 } from '../services/equipment-service';
+import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
  * GET /api/characters/:id/equipment
@@ -39,7 +40,7 @@ export async function getEquipment(req: Request, res: Response): Promise<void> {
  * POST /api/characters/:id/equipment
  * Save equipment/inventory for a character
  */
-export async function setEquipment(req: Request, res: Response): Promise<void> {
+export async function setEquipment(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { inventory } = req.body ?? {};
@@ -53,6 +54,9 @@ export async function setEquipment(req: Request, res: Response): Promise<void> {
     }
 
     const updated = await setEquipmentByCharacterId(id, inventory);
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
@@ -73,7 +77,7 @@ export async function setEquipment(req: Request, res: Response): Promise<void> {
  * POST /api/characters/:id/equipment/purchase
  * Purchase an item for a character
  */
-export async function purchaseItem(req: Request, res: Response): Promise<void> {
+export async function purchaseItem(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { itemId, quantity } = req.body ?? {};
@@ -95,6 +99,9 @@ export async function purchaseItem(req: Request, res: Response): Promise<void> {
       });
       return;
     }
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
@@ -118,7 +125,7 @@ export async function purchaseItem(req: Request, res: Response): Promise<void> {
  * POST /api/characters/:id/equipment/apply-kit
  * Apply a starting kit to a character
  */
-export async function applyStartingKit(req: Request, res: Response): Promise<void> {
+export async function applyStartingKit(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { kitId } = req.body ?? {};
@@ -140,6 +147,9 @@ export async function applyStartingKit(req: Request, res: Response): Promise<voi
       });
       return;
     }
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
@@ -164,7 +174,7 @@ export async function applyStartingKit(req: Request, res: Response): Promise<voi
  * POST /api/characters/:id/equipment/refund-kit
  * Refund a starting kit (remove items, restore currency)
  */
-export async function refundStartingKit(req: Request, res: Response): Promise<void> {
+export async function refundStartingKit(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const result = await refundStartingKitForCharacter(id);
@@ -176,6 +186,9 @@ export async function refundStartingKit(req: Request, res: Response): Promise<vo
       });
       return;
     }
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
