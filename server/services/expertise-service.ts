@@ -179,3 +179,37 @@ export async function setExpertiseByCharacterId(
     expertise: selectedExpertise
   };
 }
+
+/**
+ * Finalize expertises for a character
+ * Validates all points are spent, moves spent points to total, and locks from editing
+ * 
+ * Called during character creation finalization
+ */
+export async function finalizeExpertisesForCharacter(characterId: string): Promise<void> {
+  const existing = await getExpertiseStateRecord(characterId);
+  if (!existing) {
+    throw new Error(`Expertise state record not found for character ${characterId}`);
+  }
+
+  // Validate all points are spent
+  if (existing.pointsRemaining > 0) {
+    throw new Error(
+      `Cannot finalize expertises: ${existing.pointsRemaining} points remaining. All points must be spent.`
+    );
+  }
+
+  // Move spent points to total and reset spent/remaining
+  const newTotalPoints = existing.totalPoints + existing.pointsSpent;
+  
+  await updateExpertiseStateRecord(characterId, {
+    totalPoints: newTotalPoints,
+    pointsSpent: 0,
+    pointsRemaining: 0,
+    finalized: true
+  });
+
+  console.log(
+    `[ExpertisesFinalization] Finalized expertises for character: ${characterId} (moved ${existing.pointsSpent} points to total)`
+  );
+}

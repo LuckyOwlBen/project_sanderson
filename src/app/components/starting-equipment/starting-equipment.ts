@@ -9,7 +9,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, take } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
 import { EquipmentApiService, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem, EquipmentResponse } from '../../services/equipment-api.service';
@@ -398,12 +398,12 @@ export class StartingEquipment implements OnInit, OnDestroy {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     this.identityService.currentCharacterId$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(take(1))
       .subscribe(characterId => {
         if (!characterId || !this.currentInventory) return;
         
         this.equipmentApi.saveEquipment(characterId, this.currentInventory)
-          .pipe(takeUntil(this.destroy$))
+          .pipe(take(1))
           .subscribe({
             next: (response) => console.log('Equipment saved successfully:', response),
             error: (error) => console.error('Failed to save equipment:', error)

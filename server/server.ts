@@ -30,6 +30,7 @@ import createExpertiseRoute from './routes/expertise-route';
 import createTalentsRoute from './routes/talents-route';
 import createPathsRoute from './routes/paths';
 import createEquipmentRoute from './routes/equipment-route';
+import createCharacterFinalizationRoute from './routes/character-finalization-route';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
 
@@ -242,6 +243,9 @@ createPathsRoute(app);
 
 // Register equipment routes (read/write equipment/inventory by character ID)
 createEquipmentRoute(app);
+
+// Register character finalization route (finalize character creation)
+createCharacterFinalizationRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {

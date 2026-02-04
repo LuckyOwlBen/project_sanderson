@@ -5,42 +5,42 @@
  * Once finalized, attributes cannot be edited until next level-up.
  */
 
-import { createAttributesRecord, getAttributesRecord, setAttributesFinalized } from '../database';
+import { createAttributesRecord, getAttributesRecord, setAttributesFinalized, updateAttributesRecord } from '../database';
 
 export class AttributesFinalizationService {
   constructor() {}
 
   /**
    * Finalize attributes for a character
-   * Sets finalized flag to true, locking attributes from editing
+   * Validates all points are spent, moves spent points to total, and locks from editing
    * 
    * Called after character creation is complete (last step)
    */
   async finalizeAttributesForCharacter(characterId: string): Promise<void> {
     const existing = await getAttributesRecord(characterId);
     if (!existing) {
-      await createAttributesRecord({
-        characterId,
-        totalPoints: 12,
-        pointsSpent: 0,
-        pointsRemaining: 12,
-        strength: 0,
-        speed: 0,
-        intellect: 0,
-        willpower: 0,
-        awareness: 0,
-        presence: 0,
-        finalized: true
-      });
-      console.log(
-        `[AttributesFinalization] Created attributes and finalized for character: ${characterId}`
-      );
-      return;
+      throw new Error(`Attributes record not found for character ${characterId}`);
     }
 
-    await setAttributesFinalized(characterId, true);
+    // Validate all points are spent
+    if (existing.pointsRemaining > 0) {
+      throw new Error(
+        `Cannot finalize attributes: ${existing.pointsRemaining} points remaining. All points must be spent.`
+      );
+    }
+
+    // Move spent points to total and reset spent/remaining
+    const newTotalPoints = existing.totalPoints + existing.pointsSpent;
+    
+    await updateAttributesRecord(characterId, {
+      totalPoints: newTotalPoints,
+      pointsSpent: 0,
+      pointsRemaining: 0,
+      finalized: true
+    });
+
     console.log(
-      `[AttributesFinalization] Finalized attributes for character: ${characterId}`
+      `[AttributesFinalization] Finalized attributes for character: ${characterId} (moved ${existing.pointsSpent} points to total)`
     );
   }
 
