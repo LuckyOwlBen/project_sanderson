@@ -15,6 +15,8 @@ import itemDefinitions from './item-definitions';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { SocketBroadcaster } from './socket-broadcaster';
+import { SprenGrantService } from './services/spren-grant-service';
+import { ItemGrantRepository } from './repositories/item-grant-repository';
 import createCreationRoutes from './routes/creation';
 import createConstantsRoutes from './routes/constants';
 import createAllocationRoutes from './routes/allocations';
@@ -34,6 +36,8 @@ import createEquipmentRoute from './routes/equipment-route';
 import createCharacterFinalizationRoute from './routes/character-finalization-route';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
+import { SprenGrantService } from './services/spren-grant-service';
+import { ItemGrantRepository } from './repositories/item-grant-repository';
 
 import {
   initDatabase,
@@ -68,6 +72,10 @@ const io = new Server(httpServer, {
 });
 
 const attributesFinalizationService = new AttributesFinalizationService();
+
+// Initialize grant services
+const sprenGrantService = new SprenGrantService(io);
+const itemGrantRepository = new ItemGrantRepository();
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || (IS_PRODUCTION ? 80 : 3000);
@@ -111,20 +119,14 @@ let highstormActive = false;
 const pendingLevelUps = new Map();
 const lastConfirmedLevels = new Map();
 
-// Track spren grant delivery state
-// pendingSprenGrants stores queued spren grants per characterId (array of grant objects)
-// confirmedSprenGrants tracks which characters have received spren (Set of characterIds)
-const pendingSprenGrants = new Map();
-const confirmedSprenGrants = new Set();
-
 // Track expertise grant delivery state
 // pendingExpertiseGrants stores queued expertise grants per characterId (array of grant objects)
 const pendingExpertiseGrants = new Map();
 const confirmedExpertiseGrants = new Map(); // characterId -> Set of expertiseNames
 
-// Track item grant delivery state
-// pendingItemGrants stores queued item grants per characterId (array of grant objects)
-const pendingItemGrants = new Map();
+// NOTE: Spren grant and item grant delivery state is now managed by:
+// - SprenGrantService (in-memory queue + database persistence)
+// - ItemGrantRepository (with in-memory queue in socket-handlers/item-grant-handlers.ts)
 
 // Track recent server logs for transparency/ops
 const LOG_BUFFER_SIZE = 100;
@@ -336,21 +338,8 @@ function sendPendingLevelUp(characterId) {
   }
 }
 
-function sendPendingSprenGrant(characterId) {
-  const queue = pendingSprenGrants.get(characterId);
-  if (!queue || queue.length === 0) {
-    return;
-  }
-
-  const targetSocket = findSocketIdByCharacterId(characterId);
-  if (targetSocket) {
-    const grant = queue[0];
-    console.log(`[GM Action] ⭐ Sending pending spren grant to socket ${targetSocket}`);
-    io.to(targetSocket).emit('spren-granted', grant);
-  } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending spren grant`);
-  }
-}
+// NOTE: sendPendingSprenGrant is now handled by SprenGrantService
+// NOTE: sendPendingItemGrants is now handled by item grant handlers
 
 function sendPendingExpertiseGrants(characterId) {
   const queue = pendingExpertiseGrants.get(characterId);
@@ -365,22 +354,6 @@ function sendPendingExpertiseGrants(characterId) {
     io.to(targetSocket).emit('expertise-granted', grant);
   } else {
     console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending expertise grant`);
-  }
-}
-
-function sendPendingItemGrants(characterId) {
-  const queue = pendingItemGrants.get(characterId);
-  if (!queue || queue.length === 0) {
-    return;
-  }
-
-  const targetSocket = findSocketIdByCharacterId(characterId);
-  if (targetSocket) {
-    const grant = queue[0];
-    console.log(`[GM Action] 🎁 Sending pending item grant to socket ${targetSocket}: ${grant.itemId} x${grant.quantity}`);
-    io.to(targetSocket).emit('item-granted', grant);
-  } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending item grant`);
   }
 }
 
@@ -1743,7 +1716,7 @@ io.on('connection', (socket) => {
   });
 
   // Player joins session with character
-  socket.on('player-join', (data) => {
+  socket.on('player-join', async (data) => {
     const { characterId, name, level, ancestry, health, focus, investiture } = data;
     
     // Handle ancestry - should always be a string from Ancestry enum (e.g., 'human', 'singer')
@@ -1790,9 +1763,8 @@ io.on('connection', (socket) => {
 
     // Send any pending grants to the reconnected player
     sendPendingLevelUp(characterId);
-    sendPendingSprenGrant(characterId);
+    await sprenGrantService.resendPendingOnReconnect(characterId, socket.id);
     sendPendingExpertiseGrants(characterId);
-    sendPendingItemGrants(characterId);
     
     // Deliver any pending character-updated events
     socketBroadcaster.deliverPendingUpdates(socket.id, characterId);
@@ -1864,36 +1836,6 @@ io.on('connection', (socket) => {
     });
     
     console.log('[WebSocket] 📤 Sent current store state:', storeState);
-  });
-
-  // GM grants spren to a player
-  socket.on('gm-grant-spren', (data) => {
-    const { characterId, order, sprenType, surgePair, philosophy } = data;
-    console.log(`[GM Action] ⭐⭐⭐ RECEIVED GM-GRANT-SPREN REQUEST ⭐⭐⭐`);
-    console.log(`[GM Action] Granting ${order} spren to character ${characterId}`);
-    // Always accept and queue spren grants; client handles idempotency.
-    const targetSocket = findSocketIdByCharacterId(characterId);
-    
-    const payload = {
-      characterId,
-      order,
-      sprenType,
-      surgePair,
-      philosophy
-    };
-
-    // Queue the grant
-    const queue = pendingSprenGrants.get(characterId) || [];
-    queue.push(payload);
-    pendingSprenGrants.set(characterId, queue);
-    console.log(`[GM Action] ⭐ Spren grant queued for ${characterId}. Queue size: ${queue.length}`);
-
-    // Send if player is online
-    if (targetSocket) {
-      sendPendingSprenGrant(characterId);
-    } else {
-      console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
-    }
   });
 
   // Store transaction from player - process purchase and broadcast state update
@@ -1988,35 +1930,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // GM grants item to a player
-  socket.on('gm-grant-item', (data) => {
-    const { characterId, itemId, quantity, timestamp } = data;
-    console.log(`[GM Action] 🎁 Granting ${quantity}x ${itemId} to character ${characterId}`);
-    
-    const targetSocket = findSocketIdByCharacterId(characterId);
-    
-    const payload = {
-      characterId,
-      itemId,
-      quantity,
-      grantedBy: 'GM',
-      timestamp: timestamp || new Date().toISOString()
-    };
-
-    // Add to queue
-    const queue = pendingItemGrants.get(characterId) || [];
-    queue.push(payload);
-    pendingItemGrants.set(characterId, queue);
-    console.log(`[GM Action] 🎁 Item queued. Queue size: ${queue.length}`);
-
-    // Send if player is online
-    if (targetSocket) {
-      sendPendingItemGrants(characterId);
-    } else {
-      console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
-    }
-  });
-
   // GM toggles store availability
   socket.on('gm-toggle-store', (data) => {
     const { storeId, enabled } = data;
@@ -2032,6 +1945,93 @@ io.on('connection', (socket) => {
       toggledBy: 'GM'
     });
   });
+  
+  // GM grants spren to a player
+  socket.on('gm-grant-spren', async (data) => {
+    const { characterId, order, sprenType, surgePair, philosophy } = data;
+    console.log(`[GM Action] ⭐ RECEIVED GM-GRANT-SPREN REQUEST for ${characterId}: ${order}`);
+    
+    const targetSocket = findSocketIdByCharacterId(characterId);
+    
+    const payload = {
+      characterId,
+      order,
+      sprenType,
+      surgePair,
+      philosophy
+    };
+
+    // Queue via service
+    const result = await sprenGrantService.queueSprenGrant(payload, findSocketIdByCharacterId);
+    console.log(`[Spren] Queue result:`, result);
+  });
+
+  // Player acknowledges spren grant
+  socket.on('spren-grant-ack', async ({ characterId, order }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    const result = await sprenGrantService.handleSprenAck(characterId, order);
+    if (result.success) {
+      console.log(`[Spren] ✅ Ack processed for ${characterId}: ${order}`);
+    }
+  });
+
+  // GM grants item to a player
+  socket.on('gm-grant-item', async (data) => {
+    const { characterId, itemId, quantity, timestamp } = data;
+    console.log(`[GM Action] 🎁 Granting ${quantity}x ${itemId} to character ${characterId}`);
+    
+    // Add to database via repository
+    const result = await itemGrantRepository.addItemToCharacter(characterId, itemId, quantity);
+    
+    if (result.success) {
+      console.log(`[Item] ✅ Item grant succeeded for ${characterId}`);
+      
+      // Send acknowledgment back to GM
+      socket.emit('item-grant-success', {
+        characterId,
+        itemId,
+        quantity,
+        timestamp: timestamp || new Date().toISOString()
+      });
+      
+      // Notify the player that they received an item
+      const targetSocket = findSocketIdByCharacterId(characterId);
+      if (targetSocket) {
+        io.to(targetSocket).emit('item-granted', {
+          characterId,
+          itemId,
+          quantity,
+          grantedBy: 'GM',
+          timestamp: timestamp || new Date().toISOString()
+        });
+      }
+    } else {
+      console.error(`[Item] ❌ Item grant failed: ${result.error}`);
+      socket.emit('item-grant-error', {
+        characterId,
+        itemId,
+        error: result.error
+      });
+    }
+  });
+
+  // Player acknowledges item grant
+  socket.on('item-grant-ack', ({ characterId, itemId, quantity }) => {
+    const player = activePlayers.get(socket.id);
+    if (!player || player.characterId !== characterId) {
+      console.warn(`[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      return;
+    }
+
+    console.log(`[Item] ✅ Ack received for ${characterId} item: ${itemId} x${quantity}`);
+    // Item is already persisted, just log the ack
+  });
+
   // GM grants expertise to a player
   socket.on('gm-grant-expertise', (data) => {
     const { characterId, expertiseName, timestamp } = data;
@@ -2126,30 +2126,6 @@ io.on('connection', (socket) => {
     sendPendingLevelUp(characterId);
   });
 
-  socket.on('spren-grant-ack', ({ characterId, order }) => {
-    const player = activePlayers.get(socket.id);
-    if (!player || player.characterId !== characterId) {
-      console.warn(`[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
-      return;
-    }
-
-    console.log(`[Spren] ✅ Ack received for ${characterId} spren: ${order}`);
-    
-    // Mark first confirmation and dequeue current pending grant
-    if (!confirmedSprenGrants.has(characterId)) {
-      confirmedSprenGrants.add(characterId);
-    }
-
-    const queue = pendingSprenGrants.get(characterId) || [];
-    if (queue.length > 0) {
-      queue.shift();
-    }
-    pendingSprenGrants.set(characterId, queue);
-
-    // Send next queued spren grant if any
-    sendPendingSprenGrant(characterId);
-  });
-
   socket.on('expertise-grant-ack', ({ characterId, expertiseName }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
@@ -2179,32 +2155,6 @@ io.on('connection', (socket) => {
 
     // Send next queued expertise if any
     sendPendingExpertiseGrants(characterId);
-  });
-
-  socket.on('item-grant-ack', ({ characterId, itemId, quantity }) => {
-    const player = activePlayers.get(socket.id);
-    if (!player || player.characterId !== characterId) {
-      console.warn(`[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
-      return;
-    }
-
-    const queue = pendingItemGrants.get(characterId) || [];
-    if (queue.length > 0 && queue[0].itemId === itemId && queue[0].quantity === quantity) {
-      queue.shift();
-    } else {
-      const idx = queue.findIndex(entry => entry.itemId === itemId && entry.quantity === quantity);
-      if (idx !== -1) {
-        queue.splice(idx, 1);
-      } else {
-        console.warn(`[Item] ⚠️ Received ack for unexpected item ${itemId} x${quantity} on character ${characterId}`);
-      }
-    }
-    pendingItemGrants.set(characterId, queue);
-
-    console.log(`[Item] ✅ Ack received for ${characterId} item: ${itemId} x${quantity}. Remaining queue: ${queue.length}`);
-
-    // Send next queued item if any
-    sendPendingItemGrants(characterId);
   });
 
   // Handle highstorm toggle from GM

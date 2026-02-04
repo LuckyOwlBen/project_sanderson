@@ -16,3 +16,4 @@ export { SingerFormsModuleRepository } from './singer-forms-repository';
 export { CombatModuleRepository } from './combat-repository';
 export { InventoryModuleRepository } from './inventory-repository';
 export { MetadataModuleRepository } from './metadata-repository';
+export { RadiantPathModuleRepository } from './radiant-path-repository';

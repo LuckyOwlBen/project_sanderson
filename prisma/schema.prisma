@@ -36,6 +36,7 @@ model Character {
   radiantPath      RadiantPath?
   singerForms      UnlockedSingerForm[]
   spentPoints      SpentPoints?
+  pendingGrants    PendingGrantQueue[]
 
   @@index([name])
   @@index([lastModified])
@@ -246,4 +247,21 @@ model ExpertiseState {
   finalized         Boolean  @default(false)
   
   @@index([characterId])
+}
+
+// ===== PENDING GRANT QUEUE =====
+// Stores failed or offline grant deliveries for retry
+model PendingGrantQueue {
+  id              String   @id @default(cuid())
+  characterId     String
+  character       Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  
+  grantType       String   // "spren", "item", "expertise"
+  grantData       String   // JSON payload of the grant
+  socketId        String   // Target socket ID for delivery
+  createdAt       DateTime @default(now())
+  attempts        Int      @default(0)
+  
+  @@index([characterId])
+  @@index([createdAt])
 }

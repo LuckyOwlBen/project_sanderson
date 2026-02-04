@@ -1,4 +1,4 @@
-  import { Component, Input, OnDestroy } from '@angular/core';
+  import { Component, Input, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
   import { CommonModule } from '@angular/common';
   import { Subject } from 'rxjs';
   import { MatCardModule } from '@angular/material/card';
@@ -25,13 +25,24 @@
       MatExpansionModule
     ],
     templateUrl: './inventory-view.html',
-  styleUrls: ['./inventory-view.scss']
-})
-export class InventoryView implements OnDestroy {
-  private destroy$ = new Subject<void>();
-  @Input() character: Character | null = null;
-  selectedTab: 'equipped' | 'inventory' = 'equipped';
-  expandedItemId: string | null = null;
+    styleUrls: ['./inventory-view.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
+  })
+  export class InventoryView implements OnDestroy {
+    private destroy$ = new Subject<void>();
+    @Input() character: Character | null = null;
+    selectedTab: 'equipped' | 'inventory' = 'equipped';
+    expandedItemId: string | null = null;
+
+    constructor(private cdr: ChangeDetectorRef) {}
+
+    /**
+     * Trigger change detection for the inventory view
+     * Called when inventory changes externally (e.g., from item grants)
+     */
+    public refreshInventoryView(): void {
+      this.cdr.markForCheck();
+    }
 
   ngOnDestroy(): void {
     this.destroy$.next();

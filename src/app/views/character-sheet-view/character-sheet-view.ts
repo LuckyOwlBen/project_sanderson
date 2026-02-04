@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -70,6 +70,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   equipmentActiveTab: 'inventory' | 'crafting' | 'companions' = 'inventory';
   private destroy$ = new Subject<void>();
   private resourceUpdateSubject = new Subject<void>();
+  @ViewChild(InventoryView) inventoryViewComponent?: InventoryView;
   
   character: Character | null = null;
   characterId: string = '';
@@ -141,6 +142,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           
           if (added) {
             this.saveCharacter();
+            // Trigger change detection in inventory view component
+            if (this.inventoryViewComponent) {
+              this.inventoryViewComponent.refreshInventoryView();
+            }
             console.log('[Character Sheet] 🎁 Sending ack for item:', event.itemId, 'x', event.quantity);
             this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
           } else {

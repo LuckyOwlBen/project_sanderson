@@ -36,7 +36,8 @@ import {
   SingerFormsModuleRepository,
   CombatModuleRepository,
   InventoryModuleRepository,
-  MetadataModuleRepository
+  MetadataModuleRepository,
+  RadiantPathModuleRepository
 } from './modules';
 import { ExpertiseSourceType } from '../character/expertises/expertiseSource';
 
@@ -57,6 +58,7 @@ export class CharacterRepository {
   readonly combat = new CombatModuleRepository();
   readonly inventory = new InventoryModuleRepository();
   readonly metadata = new MetadataModuleRepository();
+  readonly radiantPath = new RadiantPathModuleRepository();
 
   // ============================================================================
   // FULL CHARACTER OPERATIONS
