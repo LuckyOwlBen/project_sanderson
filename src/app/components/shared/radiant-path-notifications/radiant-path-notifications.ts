@@ -67,9 +67,13 @@ export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
 
     console.log('[Radiant Path] Accepting spren grant:', this.pendingSprenGrant);
     
-    // Grant the spren to the character
+    // Grant the spren to the character with custom data from GM if provided
     this.character.radiantPath.grantSpren(
-      this.pendingSprenGrant.order
+      this.pendingSprenGrant.order,
+      {
+        surgePair: this.pendingSprenGrant.surgePair,
+        philosophy: this.pendingSprenGrant.philosophy
+      }
     );
 
     this.clearAutoDismiss();

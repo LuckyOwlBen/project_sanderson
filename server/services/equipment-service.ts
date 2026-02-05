@@ -1,50 +1,52 @@
 import { InventoryModuleRepository, InventoryDTO, InventoryItemDTO } from '../repositories/modules/inventory-repository';
-import { InventoryManager } from '../character/inventory/inventoryManager';
-import { InventoryItem } from '../character/inventory/inventoryItem';
 import { getItemById, STARTING_KITS, ALL_ITEMS } from '../character/inventory/itemDefinitions';
+import { loadCharacter, saveCharacter } from '../database';
 
-const inventoryRepository = new InventoryModuleRepository();
-
-export interface InventoryViewItem extends InventoryItem {
+export interface InventoryViewItem {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
   baseId: string;
   quantity: number;
 }
 
-function buildInventoryViewFromManager(manager: InventoryManager): { items: InventoryViewItem[]; currency: number } {
-  const items = manager.getAllItems().map((item) => ({
-    ...item,
-    baseId: item.id.split('-')[0],
-    quantity: item.quantity ?? 1
-  }));
-
-  return {
-    items,
-    currency: manager.getCurrency()
-  };
-}
-
-function buildInventoryViewFromSerialized(serialized: InventoryDTO | null): { items: InventoryViewItem[]; currency: number } {
-  const manager = new InventoryManager();
-  if (serialized) {
-    manager.deserialize(serialized);
-  }
-  return buildInventoryViewFromManager(manager);
-}
-
 /**
  * Get equipment/inventory for a character
+ * Loads directly from database
  */
 export async function getEquipmentByCharacterId(characterId: string): Promise<{
   inventory: InventoryDTO | null;
   inventoryItems: InventoryViewItem[];
   currency: number;
 }> {
-  const inventory = await inventoryRepository.load(characterId);
-  const view = buildInventoryViewFromSerialized(inventory);
+  const char = await loadCharacter(characterId);
+  if (!char) {
+    return {
+      inventory: null,
+      inventoryItems: [],
+      currency: 0
+    };
+  }
+
+  // Convert database inventory format to view format
+  const inventoryItems: InventoryViewItem[] = (char.inventory?.items ?? []).map((item: any) => {
+    const baseId = item.id.split('-')[0];
+    const itemDef = getItemById(baseId);
+    return {
+      id: item.id,
+      name: itemDef?.name ?? baseId,
+      description: itemDef?.description ?? '',
+      type: itemDef?.type ?? 'unknown',
+      baseId,
+      quantity: item.quantity ?? 1
+    };
+  });
+
   return {
-    inventory,
-    inventoryItems: view.items,
-    currency: view.currency
+    inventory: char.inventory || null,
+    inventoryItems,
+    currency: char.inventory?.currencyInChips ?? 0
   };
 }
 
@@ -55,12 +57,13 @@ export async function setEquipmentByCharacterId(
   characterId: string,
   inventory: InventoryDTO
 ): Promise<InventoryDTO> {
-  const result = await inventoryRepository.save(characterId, inventory);
-  
-  if (!result.success) {
-    throw new Error(result.error || 'Failed to save equipment');
+  const char = await loadCharacter(characterId);
+  if (!char) {
+    throw new Error('Character not found');
   }
 
+  char.inventory = inventory;
+  await saveCharacter(char);
   return inventory;
 }
 
@@ -89,42 +92,58 @@ export async function purchaseItemForCharacter(
       };
     }
 
-    // Load current inventory
-    const currentInventory = await inventoryRepository.load(characterId);
-    
-    // Create inventory manager and restore state
-    const inventoryManager = new InventoryManager();
-    if (currentInventory) {
-      inventoryManager.deserialize(currentInventory);
+    // Load current character
+    const char = await loadCharacter(characterId);
+    if (!char) {
+      return {
+        success: false,
+        error: 'Character not found'
+      };
     }
 
-    // Attempt purchase
-    if (!inventoryManager.purchaseItem(itemId, item.price, quantity)) {
+    const currentCurrency = char.inventory?.currencyInChips ?? 0;
+    const cost = (item.price ?? 0) * quantity;
+
+    // Check if can afford
+    if (currentCurrency < cost) {
       return {
         success: false,
         error: 'Cannot afford item'
       };
     }
 
-    // Log transaction
-    const conversion = inventoryManager.convertToMixedDenominations(item.price * quantity);
-    console.log(`[Equipment] Purchase: Character ${characterId} bought ${quantity}x ${item.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`);
-
-    // Save updated inventory
-    const serialized = inventoryManager.serialize();
-    const saveResult = await inventoryRepository.save(characterId, serialized);
-
-    if (!saveResult.success) {
-      throw new Error(saveResult.error || 'Failed to save inventory');
+    // Deduct currency and add item
+    const newCurrency = currentCurrency - cost;
+    const newItems = [...(char.inventory?.items ?? [])];
+    
+    const existingIndex = newItems.findIndex((inv: any) => inv.id === itemId);
+    if (existingIndex >= 0) {
+      newItems[existingIndex].quantity = (newItems[existingIndex].quantity || 1) + quantity;
+    } else {
+      newItems.push({
+        id: itemId,
+        quantity,
+        customData: {}
+      });
     }
 
-    const view = buildInventoryViewFromManager(inventoryManager);
+    char.inventory = {
+      ...char.inventory,
+      items: newItems,
+      currencyInChips: newCurrency
+    };
 
+    console.log(`[Equipment] Purchase: Character ${characterId} bought ${quantity}x ${item.name} for ${cost}`);
+
+    // Save
+    await saveCharacter(char);
+
+    const result = await getEquipmentByCharacterId(characterId);
     return {
       success: true,
-      inventory: serialized,
-      inventoryItems: view.items,
-      currency: view.currency,
+      inventory: char.inventory,
+      inventoryItems: result.inventoryItems,
+      currency: newCurrency,
       message: `Purchased ${quantity}x ${item.name}`
     };
   } catch (error) {
@@ -160,35 +179,52 @@ export async function applyStartingKitForCharacter(
       };
     }
 
-    // Create inventory manager and apply kit
-    const inventoryManager = new InventoryManager();
-    const applyResult = inventoryManager.applyStartingKit(kitId);
-
-    if (!applyResult) {
+    // Load character
+    const char = await loadCharacter(characterId);
+    if (!char) {
       return {
         success: false,
-        error: 'Failed to apply starting kit'
+        error: 'Character not found'
       };
     }
 
-    // Log action
-    console.log(`[Equipment] Applied kit '${kit.name}' to character ${characterId}`);
-
-    // Save new inventory
-    const serialized = inventoryManager.serialize();
-    const saveResult = await inventoryRepository.save(characterId, serialized);
-
-    if (!saveResult.success) {
-      throw new Error(saveResult.error || 'Failed to save inventory');
+    // Apply kit items
+    const newItems = [...(char.inventory?.items ?? [])];
+    if (kit.equipment) {
+      for (const { itemId, quantity } of kit.equipment) {
+        const existingIndex = newItems.findIndex((inv: any) => inv.id === itemId);
+        if (existingIndex >= 0) {
+          newItems[existingIndex].quantity = (newItems[existingIndex].quantity || 1) + quantity;
+        } else {
+          newItems.push({
+            id: itemId,
+            quantity,
+            customData: {}
+          });
+        }
+      }
     }
 
-    const view = buildInventoryViewFromManager(inventoryManager);
+    // Add kit currency
+    const kitCurrency = kit.currency ?? 0;
 
+    char.inventory = {
+      ...char.inventory,
+      items: newItems,
+      currencyInChips: (char.inventory?.currencyInChips ?? 0) + kitCurrency
+    };
+
+    console.log(`[Equipment] Applied kit '${kit.name}' to character ${characterId}`);
+
+    // Save
+    await saveCharacter(char);
+
+    const result = await getEquipmentByCharacterId(characterId);
     return {
       success: true,
-      inventory: serialized,
-      inventoryItems: view.items,
-      currency: view.currency,
+      inventory: char.inventory,
+      inventoryItems: result.inventoryItems,
+      currency: char.inventory.currencyInChips,
       message: `Applied ${kit.name}`
     };
   } catch (error) {
@@ -214,27 +250,33 @@ export async function refundStartingKitForCharacter(
   error?: string;
 }> {
   try {
-    // Create empty inventory manager
-    const inventoryManager = new InventoryManager();
-    // Currency starts at 0 by default
+    // Load character
+    const char = await loadCharacter(characterId);
+    if (!char) {
+      return {
+        success: false,
+        error: 'Character not found'
+      };
+    }
+
+    // Clear inventory
+    char.inventory = {
+      items: [],
+      equippedItems: [],
+      currencyInChips: 0
+    };
 
     console.log(`[Equipment] Refunded starting kit for character ${characterId}`);
 
-    // Save empty inventory
-    const serialized = inventoryManager.serialize();
-    const saveResult = await inventoryRepository.save(characterId, serialized);
+    // Save
+    await saveCharacter(char);
 
-    if (!saveResult.success) {
-      throw new Error(saveResult.error || 'Failed to save inventory');
-    }
-
-    const view = buildInventoryViewFromManager(inventoryManager);
-
+    const result = await getEquipmentByCharacterId(characterId);
     return {
       success: true,
-      inventory: serialized,
-      inventoryItems: view.items,
-      currency: view.currency,
+      inventory: char.inventory,
+      inventoryItems: result.inventoryItems,
+      currency: 0,
       message: 'Starting kit refunded'
     };
   } catch (error) {

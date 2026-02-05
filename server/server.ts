@@ -1090,9 +1090,11 @@ app.get('/api/characters/load/:id', async (req, res) => {
         currencyInChips: 0
       },
       radiantPath: character.radiantPath || {
+        boundOrder: null,
         currentIdeal: 1,
-        currentOath: null,
-        hasSpren: false
+        idealSpoken: false,
+        surgePair: null,
+        sprenType: null
       },
       sessionNotes: character.sessionNotes || '',
       lastModified: character.lastModified || new Date().toISOString(),
@@ -1844,25 +1846,40 @@ io.on('connection', (socket) => {
     console.log(`[Store] Transaction at ${storeId} by ${characterId}: ${totalCost}mk`);
     
     try {
-      // Process each item purchase
-      for (const item of items) {
-        const { itemId, price, quantity } = item;
-        
-        // Load character
-        const character = await loadCharacterData(characterId);
-        if (!character) {
-          console.error(`[Store] Character ${characterId} not found`);
-          socket.emit('store-transaction-error', {
-            characterId,
-            error: 'Character not found'
-          });
-          return;
-        }
+      // Load character once
+      const character = await loadCharacterData(characterId);
+      if (!character) {
+        console.error(`[Store] Character ${characterId} not found`);
+        socket.emit('store-transaction-error', {
+          characterId,
+          error: 'Character not found'
+        });
+        return;
+      }
 
+      // Get current currency
+      let currentCurrency = character.inventory?.currencyInChips ?? 0;
+      
+      // Check if player can afford all items
+      if (currentCurrency < totalCost) {
+        socket.emit('store-transaction-error', {
+          characterId,
+          error: 'Cannot afford items'
+        });
+        return;
+      }
+
+      // Deduct currency
+      const newCurrency = currentCurrency - totalCost;
+
+      // Add purchased items to inventory
+      const newItems = [...(character.inventory?.items ?? [])];
+      for (const item of items) {
+        const { itemId, quantity } = item;
+        
         // Validate item exists
         const itemDef = itemDefinitions.getItemById(itemId);
         if (!itemDef) {
-          console.error(`[Store] Item ${itemId} not found`);
           socket.emit('store-transaction-error', {
             characterId,
             error: `Item ${itemId} not found`
@@ -1870,47 +1887,34 @@ io.on('connection', (socket) => {
           return;
         }
 
-        // Instantiate inventory manager and restore from character data
-        const inventoryManager = new InventoryManager();
-        if (character.inventory) {
-          inventoryManager.deserialize(character.inventory);
-        }
-
-        // Attempt purchase
-        if (!inventoryManager.purchaseItem(itemId, price, quantity)) {
-          console.error(`[Store] Purchase failed - insufficient funds for ${characterId}`);
-          socket.emit('store-transaction-error', {
-            characterId,
-            error: 'Cannot afford item'
+        // Check if item already exists in inventory
+        const existingIndex = newItems.findIndex((inv: any) => inv.id === itemId);
+        if (existingIndex >= 0) {
+          newItems[existingIndex].quantity = (newItems[existingIndex].quantity || 1) + quantity;
+        } else {
+          newItems.push({
+            id: itemId,
+            quantity,
+            customData: {}
           });
-          return;
         }
 
-        // Log transaction
-        const conversion = inventoryManager.convertToMixedDenominations(price * quantity);
-        console.log(`[Store] Purchase: Character ${characterId} bought ${quantity}x ${itemDef.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`);
-
-        // Save character with updated inventory
-        character.inventory = inventoryManager.serialize();
-        await saveCharacterData(character);
-        
-        // Save to database
-        try {
-          await saveCharacter(character);
-          console.log(`[Store] Saved purchase to database for ${character.name} (${character.id})`);
-        } catch (dbError) {
-          console.warn(`[Store] Warning: Failed to save purchase to database: ${dbError.message}`);
-        }
+        console.log(`[Store] Purchase: Character ${characterId} bought ${quantity}x ${itemDef.name}`);
       }
+
+      // Update character inventory
+      character.inventory = {
+        ...character.inventory,
+        items: newItems,
+        currencyInChips: newCurrency
+      };
+
+      // Save to database
+      await saveCharacter(character);
+      console.log(`[Store] Saved purchase to database for ${character.name} (${character.id})`);
 
       // Broadcast to all GM clients for tracking
       io.emit('store-transaction', data);
-
-      // Emit character-state-update to notify client of inventory change
-      io.to(socket.id).emit('character-updated', {
-        characterId,
-        timestamp: new Date().toISOString()
-      });
 
       // Immediately acknowledge acceptance back to sender
       const ackId = `${Date.now()}-${Math.random()}`;

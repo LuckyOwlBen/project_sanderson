@@ -77,13 +77,16 @@ export class RadiantPathManager {
     private idealSpoken: boolean = false;
     private surgePair: [SkillType, SkillType] | null = null;
     private sprenType: string | null = null;
+    private philosophy: string | null = null;
 
     constructor() {}
 
     /**
-     * Grant a spren bond to the character, unlocking the Radiant Order's tier 0 talent
+     * Grant a spren bond to the character with optional custom data from GM
+     * @param order - The Radiant Order name
+     * @param customData - Optional custom surgePair and philosophy from GM grant
      */
-    grantSpren(order: string): void {
+    grantSpren(order: string, customData?: { surgePair?: string[]; philosophy?: string }): void {
         if (!RADIANT_ORDERS[order]) {
             throw new Error(`Invalid Radiant Order: ${order}`);
         }
@@ -91,7 +94,16 @@ export class RadiantPathManager {
         const orderInfo = RADIANT_ORDERS[order];
         this.boundOrder = order;
         this.sprenType = orderInfo.sprenType;
-        this.surgePair = orderInfo.surgePair;
+        
+        // Use custom surgePair if provided by GM, otherwise use default
+        if (customData?.surgePair && customData.surgePair.length === 2) {
+            this.surgePair = [customData.surgePair[0] as SkillType, customData.surgePair[1] as SkillType];
+        } else {
+            this.surgePair = orderInfo.surgePair;
+        }
+        
+        // Use custom philosophy if provided by GM, otherwise use default
+        this.philosophy = customData?.philosophy || orderInfo.philosophy;
         this.idealSpoken = false;
     }
 
@@ -159,7 +171,12 @@ export class RadiantPathManager {
         if (!this.boundOrder) {
             return null;
         }
-        return RADIANT_ORDERS[this.boundOrder];
+        const baseInfo = RADIANT_ORDERS[this.boundOrder];
+        // Return custom philosophy if it differs from the default
+        return {
+            ...baseInfo,
+            philosophy: this.philosophy || baseInfo.philosophy
+        };
     }
 
     /**
@@ -178,7 +195,8 @@ export class RadiantPathManager {
             boundOrder: this.boundOrder,
             idealSpoken: this.idealSpoken,
             surgePair: this.surgePair,
-            sprenType: this.sprenType
+            sprenType: this.sprenType,
+            philosophy: this.philosophy
         };
     }
 
@@ -190,6 +208,7 @@ export class RadiantPathManager {
         this.idealSpoken = data.idealSpoken || false;
         this.surgePair = data.surgePair || null;
         this.sprenType = data.sprenType || null;
+        this.philosophy = data.philosophy || null;
     }
 
     /**

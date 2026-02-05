@@ -352,6 +352,7 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
     const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
     const paths = await db.all('SELECT pathName FROM PathSelection WHERE characterId = ?', characterId);
     const cultures = await db.all('SELECT name FROM CultureSelection WHERE characterId = ?', characterId);
+    const radiantPath = await db.get('SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType FROM RadiantPath WHERE characterId = ?', characterId);
 
     // Serialize to character format
     return {
@@ -377,7 +378,11 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       unlockedTalents: talents.map((t: any) => t.talentId),
       selectedExpertises: expertises,
       inventory: {
-        items: items,
+        items: items.map((item: any) => ({
+          id: item.itemId,
+          quantity: item.quantity,
+          customData: {}
+        })),
         equippedItems: [],
         currencyInChips: char.currencyInChips ?? 0
       },
@@ -391,7 +396,14 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
         }
       } : undefined,
       paths: paths.map((p: any) => p.pathName),
-      cultures: cultures.map((c: any) => c.name)
+      cultures: cultures.map((c: any) => c.name),
+      radiantPath: radiantPath ? {
+        boundOrder: radiantPath.boundOrder,
+        currentIdeal: radiantPath.currentIdeal,
+        idealSpoken: radiantPath.idealSpoken === 1,
+        surgePair: radiantPath.surgePair,
+        sprenType: radiantPath.sprenType
+      } : undefined
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -1010,6 +1022,28 @@ export async function saveCharacter(
           );
         }
       }
+    }
+
+    // Save radiant path
+    if (character.radiantPath) {
+      await db.run(`
+        INSERT INTO RadiantPath (id, characterId, boundOrder, currentIdeal, idealSpoken, surgePair, sprenType)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(characterId) DO UPDATE SET
+          boundOrder = excluded.boundOrder,
+          currentIdeal = excluded.currentIdeal,
+          idealSpoken = excluded.idealSpoken,
+          surgePair = excluded.surgePair,
+          sprenType = excluded.sprenType
+      `,
+        `radiant-${character.id}`,
+        character.id,
+        character.radiantPath.boundOrder || null,
+        character.radiantPath.currentIdeal ?? 1,
+        character.radiantPath.idealSpoken ? 1 : 0,
+        Array.isArray(character.radiantPath.surgePair) ? character.radiantPath.surgePair.join('/') : null,
+        character.radiantPath.sprenType || null
+      );
     }
 
     // Track spent points if provided

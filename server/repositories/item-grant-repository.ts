@@ -2,8 +2,7 @@
  * ItemGrantRepository - Manages item grants with database persistence
  */
 
-import InventoryManager from '../inventory-manager';
-import { characterRepository } from './character-repository';
+import { loadCharacter, saveCharacter } from '../database';
 
 export interface ItemGrantPayload {
   characterId: string;
@@ -29,61 +28,40 @@ export class ItemGrantRepository {
     try {
       console.log(`[Item] 📦 Adding ${quantity}x ${itemId} to character ${characterId}`);
 
-      // Load inventory from database via module repository
-      const inventoryDTO = await characterRepository.inventory.load(characterId);
-      if (!inventoryDTO) {
+      // Load character from database
+      const character = await loadCharacter(characterId);
+      if (!character) {
         const error = `Character ${characterId} not found`;
         console.error(`[Item] ❌ ${error}`);
         return { success: false, error };
       }
 
-      // Create inventory manager and load from database format
-      const inventoryManager = new InventoryManager();
+      // Get current inventory items
+      const items = character.inventory?.items ?? [];
       
-      // Convert DTO to InventoryManager format and deserialize
-      if (inventoryDTO.items && Array.isArray(inventoryDTO.items)) {
-        const serializedFormat = {
-          items: inventoryDTO.items.map(item => ({
-            id: item.itemId,
-            quantity: item.quantity,
-            customData: { fabrialCharges: 0, properties: {} }
-          })),
-          equippedItems: [],
-          currencyInChips: 0
-        };
-        inventoryManager.deserialize(serializedFormat);
+      // Check if item already exists
+      const existingIndex = items.findIndex((item: any) => item.id === itemId);
+      if (existingIndex >= 0) {
+        items[existingIndex].quantity = (items[existingIndex].quantity || 1) + quantity;
+      } else {
+        items.push({
+          id: itemId,
+          quantity,
+          customData: {}
+        });
       }
 
-      // Add the new item using InventoryManager
-      const added = inventoryManager.addItem(itemId, quantity);
-      if (!added) {
-        const error = `Failed to add item ${itemId} to inventory`;
-        console.warn(`[Item] ⚠️ ${error}`);
-        return { success: false, error };
-      }
+      // Update character inventory
+      character.inventory = {
+        ...character.inventory,
+        items,
+        currencyInChips: character.inventory?.currencyInChips ?? 0
+      };
 
       console.log(`[Item] ✅ Item ${itemId} added to character ${characterId}`);
 
-      // Serialize back to DTO format for database
-      const serialized = inventoryManager.serialize();
-      const updatedDTO = {
-        items: serialized.items.map(item => ({
-          itemId: item.id,
-          quantity: item.quantity,
-          equipped: false
-        })),
-        equipped: {
-          armor: null,
-          weapons: []
-        }
-      };
-
-      // Persist via module repository
-      const saveResult = await characterRepository.inventory.save(characterId, updatedDTO);
-      if (!saveResult.success) {
-        console.error(`[Item] ❌ Failed to save inventory: ${saveResult.error}`);
-        return { success: false, error: saveResult.error };
-      }
+      // Save to database
+      await saveCharacter(character);
 
       console.log(`[Item] 💾 Inventory for ${characterId} saved to database`);
       return { success: true };
