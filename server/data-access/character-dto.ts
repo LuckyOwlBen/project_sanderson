@@ -107,6 +107,7 @@ export interface CharacterDTO {
   // ============================================================================
   level: number;
   pendingLevelPoints: number;
+  pendingLevel: boolean;
 
   // ============================================================================
   // MODULE 3: ANCESTRY/CULTURE - Character background and heritage

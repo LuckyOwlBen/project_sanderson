@@ -68,6 +68,47 @@ export class LevelUpManager {
         return this.TALENT_POINTS_PER_LEVEL[level - 1] || 0;
     }
 
+    /**
+     * Find the first unfinalzed category during level-up
+     * Checks in order: attributes → skills → talents → expertise
+     * Returns the route to navigate to, or null if all are finalized
+     * 
+     * @param character - The character object with state flags
+     * @returns The first unfinalzed step route, or null if all finalized
+     */
+    getFirstUnfinalizedLevelUpStep(character: any): string | null {
+        if (!character) {
+            return null;
+        }
+
+        // Check attributes
+        if (character.attributes && character.attributes.finalized === false) {
+            return 'attributes';
+        }
+
+        // Check skills
+        if (character.skills && character.skills.finalized === false) {
+            return 'skills';
+        }
+
+        // Check talents
+        if (character.talents && character.talents.finalized === false) {
+            return 'talents';
+        }
+
+        // Check expertise/expertises
+        if (character.expertises && character.expertises.finalized === false) {
+            return 'expertise';
+        }
+        if (character.expertise && character.expertise.finalized === false) {
+            return 'expertise';
+        }
+
+        // All finalized - this shouldn't happen, but if it does, return null
+        console.warn('[LevelUpManager] All categories finalized - this is unexpected during level-up!');
+        return null;
+    }
+
     // Trigger a recalculation event for all listening components
     notifyPointsChanged(): void {
         this.pointsChangedSubject.next();

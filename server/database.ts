@@ -63,6 +63,7 @@ export interface CharacterData {
   name: string;
   level: number;
   pendingLevelPoints: number;
+  pendingLevel: boolean;
   ancestry: string | null;
   sessionNotes: string;
   lastModified: string;
@@ -820,12 +821,13 @@ export async function saveCharacter(
     }
     // Upsert character
     await db.run(`
-      INSERT INTO Character (id, name, level, pendingLevelPoints, ancestry, sessionNotes, currencyInChips, lastModified)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, lastModified)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         level = excluded.level,
         pendingLevelPoints = excluded.pendingLevelPoints,
+        pendingLevel = excluded.pendingLevel,
         ancestry = excluded.ancestry,
         sessionNotes = excluded.sessionNotes,
         currencyInChips = excluded.currencyInChips,
@@ -835,6 +837,7 @@ export async function saveCharacter(
       character.name,
       character.level ?? 1,
       character.pendingLevelPoints ?? 0,
+      (character as any).pendingLevel ? 1 : 0,
       character.ancestry ?? null,
       character.sessionNotes ?? '',
       getCurrencyFromInventory(character.inventory) ?? 0,

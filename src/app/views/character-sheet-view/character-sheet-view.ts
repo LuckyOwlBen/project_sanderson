@@ -11,11 +11,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
+import { LevelUpStatusService } from '../../services/level-up-status.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { CharacterPortraitUpload } from '../../components/shared/character-portrait-upload/character-portrait-upload';
 import { InventoryView } from '../../components/inventory-view/inventory-view';
 import { RadiantPathNotifications } from '../../components/shared/radiant-path-notifications/radiant-path-notifications';
@@ -87,6 +90,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private characterState: CharacterStateService,
     private websocketService: WebsocketService,
     private combatService: CombatService,
+    private levelUpStatusService: LevelUpStatusService,
+    private characterIdentity: CharacterIdentityService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
@@ -253,6 +258,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           console.log('[Character Sheet] 🆙 Applying level increment from', this.character.level, 'to', event.newLevel);
           this.character.level = event.newLevel;
           this.character.pendingLevelPoints += 1;
+          this.character.pendingLevel = true;
           this.saveCharacter();
           this.cdr.detectChanges();
 
@@ -273,7 +279,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         console.log('[Character Sheet] ⚡ Highstorm event:', event);
         if (event) {
           this.isHighstormActive = event.active;
-          setTimeout(() => this.cdr.detectChanges(), 0);
+          this.cdr.markForCheck();
         }
       });
     console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
@@ -339,6 +345,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           });
           this.character = character;
           this.characterId = id; // Ensure characterId is set from route
+          this.characterIdentity.setCurrentCharacterId(id); // Set identity in service for API calls
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.sessionNotes = (character as any).sessionNotes || '';
@@ -369,16 +376,16 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     const { resourceName, newValue } = event;
     const oldHealth = this.character.resources.health.current;
 
+    // Use spend/restore methods to adjust resource values
     switch (resourceName) {
       case 'Health':
-        // Direct assignment since we can't call restore with negative values easily
-        (this.character.resources.health as any).currentValue = newValue;
+        this.adjustResource(this.character.resources.health, newValue);
         break;
       case 'Focus':
-        (this.character.resources.focus as any).currentValue = newValue;
+        this.adjustResource(this.character.resources.focus, newValue);
         break;
       case 'Investiture':
-        (this.character.resources.investiture as any).currentValue = newValue;
+        this.adjustResource(this.character.resources.investiture, newValue);
         break;
     }
 
@@ -390,7 +397,18 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       this.resourceUpdateSubject.next();
     }
 
-    this.autoSave();
+    this.saveCharacter();
+  }
+
+  private adjustResource(resource: any, targetValue: number): void {
+    const current = resource.current;
+    const diff = targetValue - current;
+
+    if (diff > 0) {
+      resource.restore(diff);
+    } else if (diff < 0) {
+      resource.spend(Math.abs(diff));
+    }
   }
 
   saveCharacter(): void {
@@ -414,18 +432,17 @@ export class CharacterSheetView implements OnInit, OnDestroy {
 
     this.characterStorage.saveCharacter(this.character)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((result: { success: boolean; id: string }) => {
-        if (result.success) {
-          console.log('Character saved successfully:', result.id);
-          this.characterId = result.id;
+      .subscribe({
+        next: (result: { success: boolean; id: string }) => {
+          if (result.success) {
+            console.log('Character saved successfully:', result.id);
+            this.characterId = result.id;
+          }
+        },
+        error: (error: unknown) => {
+          console.error('[Character Sheet] Error saving character:', error);
         }
       });
-  }
-
-  private autoSave(): void {
-    // Debounced auto-save could be implemented here
-    // For now, just save immediately
-    this.saveCharacter();
   }
 
   exportCharacter(): void {
@@ -504,7 +521,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       this.portraitUrl = null;
     }
     this.characterState.updateCharacter(this.character);
-    this.autoSave();
+    this.saveCharacter();
   }
 
   private emitPlayerJoin(): void {
@@ -514,7 +531,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     }
 
     const joinData = {
-      characterId: this.characterId || (this.character as any).id,
+      characterId: this.characterId,
       name: this.character.name || 'Unknown',
       level: this.character.level || 1,
       ancestry: this.character.ancestry,
@@ -540,7 +557,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     if (!this.character || !this.characterId) return;
 
     this.websocketService.emitResourceUpdate({
-      characterId: this.characterId || (this.character as any).id,
+      characterId: this.characterId,
       health: {
         current: this.character.resources.health.current,
         max: this.character.resources.health.max
@@ -593,25 +610,49 @@ export class CharacterSheetView implements OnInit, OnDestroy {
   }
 
   navigateToLevelUp(): void {
-    if (!this.character || this.character.pendingLevelPoints <= 0) {
+    if (!this.character || !this.character.pendingLevel) {
+      console.log('[Character Sheet] No pending level-up, cannot navigate');
       return;
     }
     
-    console.log('[Character Sheet] Navigating to level-up screen');
+    const characterId = this.characterIdentity.getCurrentCharacterId();
+    if (!characterId) {
+      console.log('[Character Sheet] Character ID not set, cannot navigate to level-up');
+      return;
+    }
+    
+    console.log('[Character Sheet] Fetching level-up status...');
     // Save character before navigating
     this.saveCharacter();
     
-    // Determine the first valid level-up step
-    const levelUpManager = new LevelUpManager();
-    const attributePoints = levelUpManager.getAttributePointsForLevel(this.character.level || 1);
-    
-    // Start with skills if no attribute points, otherwise start with attributes
-    const firstStep = attributePoints > 0 ? 'attributes' : 'skills';
-    
-    // Navigate to character creator with level-up mode
-    this.router.navigate([`/character-creator-view/${firstStep}`], {
-      queryParams: { levelUp: 'true' }
-    });
+    // Fetch level-up status from backend
+    this.levelUpStatusService.getLevelUpStatus(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          if (!status.success) {
+            console.error('[Character Sheet] Failed to fetch level-up status:', status.error);
+            return;
+          }
+          
+          console.log('[Character Sheet] Level-up status:', status);
+          
+          // Navigate to first unfinalzed step, or attributes if all finalized
+          const targetStep = status.firstUnfinalizedStep || 'attributes';
+          console.log('[Character Sheet] Navigating to:', targetStep);
+          
+          this.router.navigate([`/character-creator-view/${targetStep}`], {
+            queryParams: { levelUp: 'true' }
+          });
+        },
+        error: (error) => {
+          console.error('[Character Sheet] Error fetching level-up status:', error);
+          // Fallback to attributes if API call fails
+          this.router.navigate(['/character-creator-view/attributes'], {
+            queryParams: { levelUp: 'true' }
+          });
+        }
+      });
   }
 
   getEquippedPet(): InventoryItem | null {

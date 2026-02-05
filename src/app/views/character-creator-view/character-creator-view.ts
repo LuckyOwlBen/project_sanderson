@@ -3,7 +3,7 @@ import { NavigationEnd, Router, RouterOutlet, ActivatedRoute } from '@angular/ro
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { StepValidationService } from '../../services/step-validation.service';
-import { LevelUpManager } from '../../levelup/levelUpManager';
+import { LevelUpStatusService } from '../../services/level-up-status.service';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
@@ -44,7 +44,8 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     public characterState: CharacterStateService,
     public flowService: CharacterCreationFlowService,
-    private validationService: StepValidationService
+    private validationService: StepValidationService,
+    private levelUpStatusService: LevelUpStatusService
   ) {
     this.steps = this.flowService.getSteps();
   }
@@ -183,24 +184,14 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
 
   /**
    * Get the next step that applies to level-up
-   * Steps during level-up: attributes (if points available), skills, talents, review
+   * Checks finalized flags to skip categories that don't need updating
    */
   private getNextLevelUpStep(fromIndex: number): string | null {
-    const levelUpSteps = ['attributes', 'skills', 'talents', 'review'];
-    const character = this.characterState.getCharacter();
-    const levelUpManager = new LevelUpManager();
+    const levelUpSteps = ['attributes', 'skills', 'talents', 'expertise', 'review'];
     
     for (let i = fromIndex; i < this.steps.length; i++) {
       const step = this.steps[i];
       if (levelUpSteps.includes(step.route)) {
-        // For attributes, check if there are points to spend at this level
-        if (step.route === 'attributes' && character) {
-          const attributePoints = levelUpManager.getAttributePointsForLevel(character.level || 1);
-          if (attributePoints === 0) {
-            // Skip attributes if no points available
-            continue;
-          }
-        }
         return step.route;
       }
     }

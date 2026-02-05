@@ -21,6 +21,7 @@ export class Character {
   name: string = '';
   level: number = 1;
   pendingLevelPoints: number = 0; // Track levels that haven't been spent yet
+  pendingLevel: boolean = false; // Flag indicating user needs to complete level-up flow
   paths: string[] = [];
   ancestry: Ancestry | null = null;
   attributes: Attributes;

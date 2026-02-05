@@ -87,10 +87,11 @@ export class CharacterStorageService {
     // Prefer server load; fallback to localStorage on error
     return this.http.get<any>(`${this.apiUrl}/load/${characterId}`).pipe(
       map((data) => this.deserializeCharacter(data)),
-      catchError((error: HttpErrorResponse) => {
-        console.warn('Failed to load from server, trying localStorage', error);
-        return this.loadFromLocalStorage(characterId);
-      })
+      // catchError((error: HttpErrorResponse) => {
+      //   console.warn('Failed to load from server, trying localStorage', error);
+      //   //return this.loadFromLocalStorage(characterId);
+      //
+      // })
     );
   }
 
@@ -177,6 +178,7 @@ export class CharacterStorageService {
     (character as any).id = data.id;
     character.level = data.level || 1;
     character.pendingLevelPoints = data.pendingLevelPoints || 0;
+    character.pendingLevel = data.pendingLevel ?? false;
     character.name = data.name || '';
     character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];

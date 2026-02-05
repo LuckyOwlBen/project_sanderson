@@ -131,6 +131,7 @@ export class CharacterRepository {
     // MODULE 2: PROGRESSION
     character.level = dto.level;
     character.pendingLevelPoints = dto.pendingLevelPoints;
+    character.pendingLevel = dto.pendingLevel ?? false;
 
     // MODULE 3: ANCESTRY/CULTURE
     character.ancestry = dto.ancestry as any; // TODO: Hydrate from ancestry ID if needed
@@ -209,6 +210,7 @@ export class CharacterRepository {
       // MODULE 2: PROGRESSION
       level: character.level,
       pendingLevelPoints: character.pendingLevelPoints,
+      pendingLevel: character.pendingLevel,
 
       // MODULE 3: ANCESTRY/CULTURE
       ancestry: character.ancestry || null,

@@ -10,6 +10,7 @@ import { attributesFinalizationService } from './attributes-finalization';
 import { finalizeSkillsForCharacter } from './skills-service';
 import TalentService from './talent-service';
 import { finalizeExpertisesForCharacter } from './expertise-service';
+import { characterRepository } from '../repositories/character-repository';
 
 export class CharacterFinalizationService {
   private talentService: TalentService;
@@ -51,6 +52,15 @@ export class CharacterFinalizationService {
 
       await finalizeExpertisesForCharacter(characterId);
       console.log(`[CharacterFinalization] ✓ Expertises finalized`);
+
+      // Clear the pending level flag and points on finalization
+      const character = await characterRepository.load(characterId);
+      if (character) {
+        character.pendingLevel = false;
+        character.pendingLevelPoints = 0;
+        await characterRepository.save(character);
+        console.log(`[CharacterFinalization] ✓ Cleared pendingLevel flag and pendingLevelPoints`);
+      }
 
       console.log(`[CharacterFinalization] ✅ Character ${characterId} finalized successfully`);
       

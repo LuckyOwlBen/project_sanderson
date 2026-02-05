@@ -237,16 +237,26 @@ function determineAvailableTrees(
     });
   } else {
     console.log('[TalentsService] Processing non-level-1 or non-human/singer character');
-    // For other ancestries or higher levels, only add chosen specialization
-    if (specializationName) {
-      const treeId = specializationName.toLowerCase();
-      console.log('[TalentsService] Adding specialization tree:', treeId);
-      if (!addedTreeNames.has(treeId)) {
-        treeIds.push(treeId);
-        addedTreeNames.add(treeId);
+    // For other ancestries or higher levels, still add all specializations from the main path
+    if (mainPathName) {
+      console.log('[TalentsService] Getting main path:', mainPathName);
+      const talentPath = getTalentPath(mainPathName);
+      console.log('[TalentsService] talentPath for', mainPathName, ':', talentPath ? 'FOUND' : 'NOT FOUND');
+      if (talentPath?.paths) {
+        console.log('[TalentsService] Found specialization trees:', talentPath.paths.map(p => p.pathName));
+        talentPath.paths.forEach(specTree => {
+          const treeId = specTree.pathName.toLowerCase();
+          if (!addedTreeNames.has(treeId)) {
+            console.log('[TalentsService] Adding tree:', treeId);
+            treeIds.push(treeId);
+            addedTreeNames.add(treeId);
+          }
+        });
+      } else {
+        console.log('[TalentsService] No specialization trees found for:', mainPathName);
       }
     } else {
-      console.log('[TalentsService] No specializationName provided');
+      console.log('[TalentsService] No mainPathName provided');
     }
   }
 

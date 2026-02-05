@@ -6,10 +6,12 @@
 export class ProgressionModule {
   level: number = 1;
   pendingLevelPoints: number = 0;
+  pendingLevel: boolean = false;
 
-  constructor(level: number = 1, pendingLevelPoints: number = 0) {
+  constructor(level: number = 1, pendingLevelPoints: number = 0, pendingLevel: boolean = false) {
     this.level = level;
     this.pendingLevelPoints = pendingLevelPoints;
+    this.pendingLevel = pendingLevel;
   }
 
   /**

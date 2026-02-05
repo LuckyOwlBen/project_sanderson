@@ -38,6 +38,7 @@ import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
 import { SprenGrantService } from './services/spren-grant-service';
 import { ItemGrantRepository } from './repositories/item-grant-repository';
+import { levelUpManager } from './services/levelup-manager';
 
 import {
   initDatabase,
@@ -1079,6 +1080,9 @@ app.get('/api/characters/load/:id', async (req, res) => {
     const response = {
       ...character,
       // Ensure expected DTO fields exist
+      level: character.level,
+      pendingLevelPoints: character.pendingLevelPoints,
+      pendingLevel: character.pendingLevel ?? false,
       unlockedTalents: character.unlockedTalents || [],
       baselineUnlockedTalents: character.baselineUnlockedTalents || [],
       selectedExpertises: character.selectedExpertises || [],
@@ -1170,6 +1174,29 @@ app.get('/api/characters/:id/level/summary', async (req, res) => {
     }
     console.error('Error loading level summary:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get level-up status: checks which category states are finalized
+app.get('/api/characters/:id/level-up-status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const status = await levelUpManager.getLevelUpStatus(id);
+    
+    if (!status.success) {
+      return res.status(500).json({ 
+        success: false, 
+        error: status.error || 'Failed to fetch level-up status' 
+      });
+    }
+    
+    res.json(status);
+  } catch (error) {
+    console.error('Error fetching level-up status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
   }
 });
 
@@ -2065,7 +2092,7 @@ io.on('connection', (socket) => {
   });
 
   // GM grants a level-up to a player
-  socket.on('gm-grant-level-up', (data) => {
+  socket.on('gm-grant-level-up', async (data) => {
     const { characterId, timestamp } = data;
     console.log(`[GM Action] 🆙 Granting level-up to character ${characterId}`);
     
@@ -2073,6 +2100,21 @@ io.on('connection', (socket) => {
     const player = targetSocket ? activePlayers.get(targetSocket) : null;
     
     if (player) {
+      // Process level-up in database: increment level, award points, set finalized: false
+      const levelUpResult = await levelUpManager.processLevelUp(characterId);
+      if (!levelUpResult.success) {
+        console.error(`[LevelUp] ❌ Failed to process level-up for ${characterId}: ${levelUpResult.error}`);
+        return;
+      }
+
+      console.log(
+        `[LevelUp] ✅ Awarded points - Attributes: ${levelUpResult.attributePointsAwarded}, ` +
+        `Skills: ${levelUpResult.skillPointsAwarded}, Talents: ${levelUpResult.talentPointsAwarded}`
+      );
+
+      // Broadcast character update so UI sees pendingLevel: true
+      socketBroadcaster.scheduleCharacterUpdate(characterId);
+
       const queue = pendingLevelUps.get(characterId) || [];
       const baseLevel = queue.length > 0 ? queue[queue.length - 1].newLevel : player.level;
       const newLevel = baseLevel + 1;

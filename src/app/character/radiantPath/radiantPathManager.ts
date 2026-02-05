@@ -206,9 +206,17 @@ export class RadiantPathManager {
     fromJSON(data: any): void {
         this.boundOrder = data.boundOrder || null;
         this.idealSpoken = data.idealSpoken || false;
-        this.surgePair = data.surgePair || null;
         this.sprenType = data.sprenType || null;
-        this.philosophy = data.philosophy || null;
+        
+        // Parse surgePair from string (e.g., "Adhesion/Gravitation") to array
+        if (typeof data.surgePair === 'string' && data.surgePair.length > 0) {
+            const surges = data.surgePair.split('/').map((s: string) => s.trim());
+            this.surgePair = (surges.length === 2) ? [surges[0], surges[1]] : null;
+        } else if (Array.isArray(data.surgePair) && data.surgePair.length === 2) {
+            this.surgePair = [data.surgePair[0], data.surgePair[1]];
+        } else {
+            this.surgePair = null;
+        }
     }
 
     /**

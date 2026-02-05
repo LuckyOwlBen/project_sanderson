@@ -16,6 +16,7 @@ model Character {
   name             String
   level            Int       @default(1)
   pendingLevelPoints Int      @default(0)
+  pendingLevel     Boolean   @default(false)
   ancestry         String?
   sessionNotes     String    @default("")
   currencyInChips  Float     @default(0)

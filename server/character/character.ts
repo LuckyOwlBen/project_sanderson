@@ -51,6 +51,8 @@ export class Character {
   set level(value: number) { this.progression.level = value; }
   get pendingLevelPoints(): number { return this.progression.pendingLevelPoints; }
   set pendingLevelPoints(value: number) { this.progression.pendingLevelPoints = value; }
+  get pendingLevel(): boolean { return this.progression.pendingLevel; }
+  set pendingLevel(value: boolean) { this.progression.pendingLevel = value; }
 
   // ============================================================================
   // MODULE 3: ANCESTRY/CULTURE - Character background and heritage
