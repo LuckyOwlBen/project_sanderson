@@ -395,7 +395,11 @@ export const ModelName = {
   CharacterResources: 'CharacterResources',
   RadiantPath: 'RadiantPath',
   UnlockedSingerForm: 'UnlockedSingerForm',
-  SpentPoints: 'SpentPoints'
+  SpentPoints: 'SpentPoints',
+  SkillsState: 'SkillsState',
+  CharacterTalents: 'CharacterTalents',
+  ExpertiseState: 'ExpertiseState',
+  PendingGrantQueue: 'PendingGrantQueue'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -411,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "character" | "cultureSelection" | "pathSelection" | "attributes" | "skill" | "unlockedTalent" | "selectedExpertise" | "inventoryItem" | "characterResources" | "radiantPath" | "unlockedSingerForm" | "spentPoints"
+    modelProps: "character" | "cultureSelection" | "pathSelection" | "attributes" | "skill" | "unlockedTalent" | "selectedExpertise" | "inventoryItem" | "characterResources" | "radiantPath" | "unlockedSingerForm" | "spentPoints" | "skillsState" | "characterTalents" | "expertiseState" | "pendingGrantQueue"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1303,6 +1307,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SkillsState: {
+      payload: Prisma.$SkillsStatePayload<ExtArgs>
+      fields: Prisma.SkillsStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SkillsStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SkillsStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        findFirst: {
+          args: Prisma.SkillsStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SkillsStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        findMany: {
+          args: Prisma.SkillsStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>[]
+        }
+        create: {
+          args: Prisma.SkillsStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        createMany: {
+          args: Prisma.SkillsStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SkillsStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>[]
+        }
+        delete: {
+          args: Prisma.SkillsStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        update: {
+          args: Prisma.SkillsStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.SkillsStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SkillsStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SkillsStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.SkillsStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillsStatePayload>
+        }
+        aggregate: {
+          args: Prisma.SkillsStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSkillsState>
+        }
+        groupBy: {
+          args: Prisma.SkillsStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillsStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SkillsStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillsStateCountAggregateOutputType> | number
+        }
+      }
+    }
+    CharacterTalents: {
+      payload: Prisma.$CharacterTalentsPayload<ExtArgs>
+      fields: Prisma.CharacterTalentsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CharacterTalentsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CharacterTalentsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        findFirst: {
+          args: Prisma.CharacterTalentsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CharacterTalentsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        findMany: {
+          args: Prisma.CharacterTalentsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>[]
+        }
+        create: {
+          args: Prisma.CharacterTalentsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        createMany: {
+          args: Prisma.CharacterTalentsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CharacterTalentsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>[]
+        }
+        delete: {
+          args: Prisma.CharacterTalentsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        update: {
+          args: Prisma.CharacterTalentsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        deleteMany: {
+          args: Prisma.CharacterTalentsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CharacterTalentsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CharacterTalentsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>[]
+        }
+        upsert: {
+          args: Prisma.CharacterTalentsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CharacterTalentsPayload>
+        }
+        aggregate: {
+          args: Prisma.CharacterTalentsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCharacterTalents>
+        }
+        groupBy: {
+          args: Prisma.CharacterTalentsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CharacterTalentsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CharacterTalentsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CharacterTalentsCountAggregateOutputType> | number
+        }
+      }
+    }
+    ExpertiseState: {
+      payload: Prisma.$ExpertiseStatePayload<ExtArgs>
+      fields: Prisma.ExpertiseStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ExpertiseStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ExpertiseStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        findFirst: {
+          args: Prisma.ExpertiseStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ExpertiseStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        findMany: {
+          args: Prisma.ExpertiseStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>[]
+        }
+        create: {
+          args: Prisma.ExpertiseStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        createMany: {
+          args: Prisma.ExpertiseStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ExpertiseStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>[]
+        }
+        delete: {
+          args: Prisma.ExpertiseStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        update: {
+          args: Prisma.ExpertiseStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.ExpertiseStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ExpertiseStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ExpertiseStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.ExpertiseStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ExpertiseStatePayload>
+        }
+        aggregate: {
+          args: Prisma.ExpertiseStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateExpertiseState>
+        }
+        groupBy: {
+          args: Prisma.ExpertiseStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpertiseStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ExpertiseStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ExpertiseStateCountAggregateOutputType> | number
+        }
+      }
+    }
+    PendingGrantQueue: {
+      payload: Prisma.$PendingGrantQueuePayload<ExtArgs>
+      fields: Prisma.PendingGrantQueueFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PendingGrantQueueFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PendingGrantQueueFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        findFirst: {
+          args: Prisma.PendingGrantQueueFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PendingGrantQueueFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        findMany: {
+          args: Prisma.PendingGrantQueueFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>[]
+        }
+        create: {
+          args: Prisma.PendingGrantQueueCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        createMany: {
+          args: Prisma.PendingGrantQueueCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PendingGrantQueueCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>[]
+        }
+        delete: {
+          args: Prisma.PendingGrantQueueDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        update: {
+          args: Prisma.PendingGrantQueueUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        deleteMany: {
+          args: Prisma.PendingGrantQueueDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PendingGrantQueueUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PendingGrantQueueUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>[]
+        }
+        upsert: {
+          args: Prisma.PendingGrantQueueUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PendingGrantQueuePayload>
+        }
+        aggregate: {
+          args: Prisma.PendingGrantQueueAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePendingGrantQueue>
+        }
+        groupBy: {
+          args: Prisma.PendingGrantQueueGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PendingGrantQueueGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PendingGrantQueueCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PendingGrantQueueCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1344,8 +1644,10 @@ export const CharacterScalarFieldEnum = {
   name: 'name',
   level: 'level',
   pendingLevelPoints: 'pendingLevelPoints',
+  pendingLevel: 'pendingLevel',
   ancestry: 'ancestry',
   sessionNotes: 'sessionNotes',
+  currencyInChips: 'currencyInChips',
   lastModified: 'lastModified'
 } as const
 
@@ -1367,7 +1669,8 @@ export type CultureSelectionScalarFieldEnum = (typeof CultureSelectionScalarFiel
 export const PathSelectionScalarFieldEnum = {
   id: 'id',
   characterId: 'characterId',
-  pathName: 'pathName'
+  pathName: 'pathName',
+  tier0TalentId: 'tier0TalentId'
 } as const
 
 export type PathSelectionScalarFieldEnum = (typeof PathSelectionScalarFieldEnum)[keyof typeof PathSelectionScalarFieldEnum]
@@ -1376,12 +1679,16 @@ export type PathSelectionScalarFieldEnum = (typeof PathSelectionScalarFieldEnum)
 export const AttributesScalarFieldEnum = {
   id: 'id',
   characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
   strength: 'strength',
   speed: 'speed',
   intellect: 'intellect',
   willpower: 'willpower',
   awareness: 'awareness',
-  presence: 'presence'
+  presence: 'presence',
+  finalized: 'finalized'
 } as const
 
 export type AttributesScalarFieldEnum = (typeof AttributesScalarFieldEnum)[keyof typeof AttributesScalarFieldEnum]
@@ -1452,7 +1759,8 @@ export const RadiantPathScalarFieldEnum = {
   currentIdeal: 'currentIdeal',
   idealSpoken: 'idealSpoken',
   surgePair: 'surgePair',
-  sprenType: 'sprenType'
+  sprenType: 'sprenType',
+  radiantTier0TalentId: 'radiantTier0TalentId'
 } as const
 
 export type RadiantPathScalarFieldEnum = (typeof RadiantPathScalarFieldEnum)[keyof typeof RadiantPathScalarFieldEnum]
@@ -1477,6 +1785,57 @@ export const SpentPointsScalarFieldEnum = {
 } as const
 
 export type SpentPointsScalarFieldEnum = (typeof SpentPointsScalarFieldEnum)[keyof typeof SpentPointsScalarFieldEnum]
+
+
+export const SkillsStateScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized'
+} as const
+
+export type SkillsStateScalarFieldEnum = (typeof SkillsStateScalarFieldEnum)[keyof typeof SkillsStateScalarFieldEnum]
+
+
+export const CharacterTalentsScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized',
+  totalTalents: 'totalTalents',
+  pendingTalents: 'pendingTalents'
+} as const
+
+export type CharacterTalentsScalarFieldEnum = (typeof CharacterTalentsScalarFieldEnum)[keyof typeof CharacterTalentsScalarFieldEnum]
+
+
+export const ExpertiseStateScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized'
+} as const
+
+export type ExpertiseStateScalarFieldEnum = (typeof ExpertiseStateScalarFieldEnum)[keyof typeof ExpertiseStateScalarFieldEnum]
+
+
+export const PendingGrantQueueScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  grantType: 'grantType',
+  grantData: 'grantData',
+  socketId: 'socketId',
+  createdAt: 'createdAt',
+  attempts: 'attempts'
+} as const
+
+export type PendingGrantQueueScalarFieldEnum = (typeof PendingGrantQueueScalarFieldEnum)[keyof typeof PendingGrantQueueScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1516,13 +1875,6 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
 
 
 /**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -1533,6 +1885,13 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 /**
@@ -1642,6 +2001,10 @@ export type GlobalOmitConfig = {
   radiantPath?: Prisma.RadiantPathOmit
   unlockedSingerForm?: Prisma.UnlockedSingerFormOmit
   spentPoints?: Prisma.SpentPointsOmit
+  skillsState?: Prisma.SkillsStateOmit
+  characterTalents?: Prisma.CharacterTalentsOmit
+  expertiseState?: Prisma.ExpertiseStateOmit
+  pendingGrantQueue?: Prisma.PendingGrantQueueOmit
 }
 
 /* Types for Logging */

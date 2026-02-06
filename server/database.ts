@@ -351,9 +351,9 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
     const expertises = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
     const items = await db.all('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?', characterId);
     const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
-    const paths = await db.all('SELECT pathName FROM PathSelection WHERE characterId = ?', characterId);
+    const paths = await db.all('SELECT pathName, tier0TalentId FROM PathSelection WHERE characterId = ?', characterId);
     const cultures = await db.all('SELECT name FROM CultureSelection WHERE characterId = ?', characterId);
-    const radiantPath = await db.get('SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType FROM RadiantPath WHERE characterId = ?', characterId);
+    const radiantPath = await db.get('SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId FROM RadiantPath WHERE characterId = ?', characterId);
 
     // Serialize to character format
     return {
@@ -397,14 +397,17 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
         }
       } : undefined,
       paths: paths.map((p: any) => p.pathName),
+      mainPathTier0TalentId: paths.length > 0 ? paths[0].tier0TalentId || null : null,
       cultures: cultures.map((c: any) => c.name),
       radiantPath: radiantPath ? {
         boundOrder: radiantPath.boundOrder,
         currentIdeal: radiantPath.currentIdeal,
         idealSpoken: radiantPath.idealSpoken === 1,
         surgePair: radiantPath.surgePair,
-        sprenType: radiantPath.sprenType
-      } : undefined
+        sprenType: radiantPath.sprenType,
+        radiantTier0TalentId: radiantPath.radiantTier0TalentId || null
+      } : undefined,
+      radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -682,10 +685,15 @@ export async function getSkillRanks(characterId: string): Promise<Record<string,
 
 export async function replaceSkillRanks(characterId: string, skills: Record<string, number>): Promise<void> {
   if (!db) throw new Error('Database not initialized');
-  await db.run('DELETE FROM Skill WHERE characterId = ?', characterId);
+  // Use UPSERT to handle concurrent updates safely
   for (const [skillName, value] of Object.entries(skills)) {
-    await db.run('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)',
-      `skill-${characterId}-${skillName}`, characterId, skillName, value);
+    await db.run(
+      `INSERT INTO Skill (id, characterId, skillName, value) 
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(characterId, skillName) DO UPDATE SET
+         value = excluded.value`,
+      `skill-${characterId}-${skillName}`, characterId, skillName, value
+    );
   }
 }
 
@@ -877,22 +885,29 @@ export async function saveCharacter(
       // If no existing record, do nothing - let character-service handle creation
     }
 
-    // Save skills
+    // Save skills using UPSERT to handle concurrent updates safely
     if (character.skills) {
-      await db.run('DELETE FROM Skill WHERE characterId = ?', character.id);
       for (const [skillName, value] of Object.entries(character.skills)) {
-        await db.run('INSERT INTO Skill (id, characterId, skillName, value) VALUES (?, ?, ?, ?)',
-          `skill-${character.id}-${skillName}`, character.id, skillName, value);
+        await db.run(
+          `INSERT INTO Skill (id, characterId, skillName, value) 
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(characterId, skillName) DO UPDATE SET
+             value = excluded.value`,
+          `skill-${character.id}-${skillName}`, character.id, skillName, value
+        );
       }
     }
 
-    // Save expertises (replace all if provided, even if empty)
+    // Save expertises using UPSERT to handle concurrent updates safely
     if (character.selectedExpertises !== undefined) {
-      await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', character.id);
       if (Array.isArray(character.selectedExpertises) && character.selectedExpertises.length > 0) {
         for (const exp of character.selectedExpertises) {
           await db.run(
-            'INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) VALUES (?, ?, ?, ?, ?)',
+            `INSERT INTO SelectedExpertise (id, characterId, name, source, sourceId) 
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(characterId, name) DO UPDATE SET
+               source = excluded.source,
+               sourceId = excluded.sourceId`,
             `expertise-${character.id}-${exp.name}`,
             character.id,
             exp.name,
@@ -900,17 +915,22 @@ export async function saveCharacter(
             exp.sourceId || ''
           );
         }
+      } else {
+        // Clear expertises if empty list provided
+        await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', character.id);
       }
     }
 
-    // Save unlocked talents (replace all if provided)
+    // Save unlocked talents using UPSERT to handle concurrent updates safely
     if (character.unlockedTalents !== undefined) {
-      await db.run('DELETE FROM UnlockedTalent WHERE characterId = ?', character.id);
       if (Array.isArray(character.unlockedTalents) && character.unlockedTalents.length > 0) {
         const now = new Date().toISOString();
         for (const talentId of character.unlockedTalents) {
           await db.run(
-            'INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level) VALUES (?, ?, ?, ?, ?)',
+            `INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level) 
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(characterId, talentId) DO UPDATE SET
+               level = excluded.level`,
             `talent-${character.id}-${talentId}`,
             character.id,
             talentId,
@@ -918,24 +938,38 @@ export async function saveCharacter(
             character.level ?? 1
           );
         }
+      } else {
+        // Clear talents if empty list provided
+        await db.run('DELETE FROM UnlockedTalent WHERE characterId = ?', character.id);
       }
     }
 
-    // Save paths
+    // Save paths using UPSERT to handle concurrent updates safely
     if (character.paths && character.paths.length > 0) {
-      await db.run('DELETE FROM PathSelection WHERE characterId = ?', character.id);
-      for (const pathName of character.paths) {
-        await db.run('INSERT INTO PathSelection (id, characterId, pathName) VALUES (?, ?, ?)',
-          `path-${character.id}-${pathName}`, character.id, pathName);
+      for (let i = 0; i < character.paths.length; i++) {
+        const pathName = character.paths[i];
+        const tier0TalentId = i === 0 ? character.mainPathTier0TalentId : null;
+        await db.run(
+          `INSERT INTO PathSelection (id, characterId, pathName, tier0TalentId) 
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(characterId, pathName) DO UPDATE SET
+             tier0TalentId = excluded.tier0TalentId`,
+          `path-${character.id}-${pathName}`, character.id, pathName, tier0TalentId
+        );
       }
     }
 
-    // Save cultures
+    // Save cultures using UPSERT to handle concurrent updates safely
     if (character.cultures !== undefined) {
-      await db.run('DELETE FROM CultureSelection WHERE characterId = ?', character.id);
       if (Array.isArray(character.cultures) && character.cultures.length > 0) {
         for (const cultureName of character.cultures) {
-          await db.run('INSERT INTO CultureSelection (id, characterId, name, description, expertise, suggestedNames) VALUES (?, ?, ?, ?, ?, ?)',
+          await db.run(
+            `INSERT INTO CultureSelection (id, characterId, name, description, expertise, suggestedNames) 
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON CONFLICT(characterId, name) DO UPDATE SET
+               description = excluded.description,
+               expertise = excluded.expertise,
+               suggestedNames = excluded.suggestedNames`,
             `culture-${character.id}-${cultureName}`,
             character.id,
             cultureName,
@@ -944,6 +978,9 @@ export async function saveCharacter(
             '[]' // suggestedNames as empty JSON array
           );
         }
+      } else {
+        // Clear cultures if empty list provided
+        await db.run('DELETE FROM CultureSelection WHERE characterId = ?', character.id);
       }
     }
 
@@ -973,14 +1010,17 @@ export async function saveCharacter(
       );
     }
 
-    // Save inventory
+    // Save inventory using UPSERT to handle concurrent updates safely
     if (character.inventory) {
-      await db.run('DELETE FROM InventoryItem WHERE characterId = ?', character.id);
-
       // Legacy format: array of items
       if (Array.isArray(character.inventory)) {
         for (const item of character.inventory) {
-          await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
+          await db.run(
+            `INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) 
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(characterId, itemId) DO UPDATE SET
+               quantity = excluded.quantity,
+               equipped = excluded.equipped`,
             `inv-${character.id}-${item.itemId}`,
             character.id,
             item.itemId,
@@ -1016,7 +1056,12 @@ export async function saveCharacter(
         for (const item of character.inventory.items) {
           const itemId = item.itemId || item.id;
           if (!itemId) continue;
-          await db.run('INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) VALUES (?, ?, ?, ?, ?)',
+          await db.run(
+            `INSERT INTO InventoryItem (id, characterId, itemId, quantity, equipped) 
+             VALUES (?, ?, ?, ?, ?)
+             ON CONFLICT(characterId, itemId) DO UPDATE SET
+               quantity = excluded.quantity,
+               equipped = excluded.equipped`,
             `inv-${character.id}-${itemId}`,
             character.id,
             itemId,
@@ -1030,14 +1075,15 @@ export async function saveCharacter(
     // Save radiant path
     if (character.radiantPath) {
       await db.run(`
-        INSERT INTO RadiantPath (id, characterId, boundOrder, currentIdeal, idealSpoken, surgePair, sprenType)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO RadiantPath (id, characterId, boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(characterId) DO UPDATE SET
           boundOrder = excluded.boundOrder,
           currentIdeal = excluded.currentIdeal,
           idealSpoken = excluded.idealSpoken,
           surgePair = excluded.surgePair,
-          sprenType = excluded.sprenType
+          sprenType = excluded.sprenType,
+          radiantTier0TalentId = excluded.radiantTier0TalentId
       `,
         `radiant-${character.id}`,
         character.id,
@@ -1045,7 +1091,8 @@ export async function saveCharacter(
         character.radiantPath.currentIdeal ?? 1,
         character.radiantPath.idealSpoken ? 1 : 0,
         Array.isArray(character.radiantPath.surgePair) ? character.radiantPath.surgePair.join('/') : null,
-        character.radiantPath.sprenType || null
+        character.radiantPath.sprenType || null,
+        character.radiantTier0TalentId || null
       );
     }
 

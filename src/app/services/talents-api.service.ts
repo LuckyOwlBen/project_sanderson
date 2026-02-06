@@ -15,7 +15,6 @@ export interface TalentsState {
   requiresSingerSelection: boolean;
   ancestry: string | null;
   level: number;
-  tier0TalentId?: string | null;
 }
 
 interface TalentsResponse {

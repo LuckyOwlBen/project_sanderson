@@ -368,16 +368,17 @@ export class TalentView implements OnInit, OnDestroy {
 
           const totalTalents = state.totalTalents ?? [];
           const pendingTalents = state.pendingTalents ?? [];
-          const tier0TalentId = state.tier0TalentId ?? null;
 
           this.baseTalentPoints = state.totalPoints ?? 0;
           this.availableTalentPoints = state.pointsRemaining ?? 0;
           this.lockedTalents = new Set(totalTalents);
           this.unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
-          if (tier0TalentId) {
-            this.unlockedTalents.add(tier0TalentId);
-          }
           this.requiresSingerSelection = state.requiresSingerSelection ?? false;
+
+          // Sync API talent state back to character object
+          if (this.character) {
+            this.character.unlockedTalents = new Set(this.unlockedTalents);
+          }
 
           // Load trees from backend-provided tree IDs
           const availableTreeIds = state.availableTrees ?? [];
@@ -1206,15 +1207,6 @@ export class TalentView implements OnInit, OnDestroy {
 
     // Grant the spren to the character
     this.character.radiantPath.grantSpren(this.pendingSprenGrant.order);
-    
-    // Unlock the tier 0 radiant talent
-    const orderPath = getTalentPath(this.pendingSprenGrant.order.toLowerCase());
-    if (orderPath?.talentNodes) {
-      const keyTalent = orderPath.talentNodes.find(t => t.tier === 0);
-      if (keyTalent) {
-        this.unlockTalent(keyTalent);
-      }
-    }
 
     // Clear the pending grant
     this.pendingSprenGrant = null;

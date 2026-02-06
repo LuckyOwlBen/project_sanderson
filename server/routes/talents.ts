@@ -28,11 +28,10 @@ export function createTalentRoutes(talentService: TalentService): Router {
    * Response includes:
    * - talentPoints: Number of points available to spend
    * - previouslySelectedTalents: Talents from previous levels (locked during level-up)
-   * - unlockedTalents: All currently unlocked talents
+   * - unlockedTalents: All currently unlocked talents (includes tier 0 if path is set)
    * - spentPoints: Tracking of how many points spent per level
    * - lockedTalents: Talents that cannot be removed (non-empty only in level-up)
    * - requiresSingerSelection: Whether character must select from Singer tree
-   * - tier0TalentId: The free tier 0 talent for this character's path
    */
   router.get('/characters/:id/talents/forLevel', (req: Request, res: Response) => {
     try {
@@ -54,8 +53,7 @@ export function createTalentRoutes(talentService: TalentService): Router {
         unlockedTalents: state.unlockedTalents,
         spentPoints: state.spentPoints,
         lockedTalents: state.lockedTalents,
-        requiresSingerSelection: state.requiresSingerSelection,
-        tier0TalentId: state.tier0TalentId
+        requiresSingerSelection: state.requiresSingerSelection
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -93,7 +91,6 @@ export function createTalentRoutes(talentService: TalentService): Router {
         spentPoints: state.spentPoints,
         lockedTalents: state.lockedTalents,
         requiresSingerSelection: state.requiresSingerSelection,
-        tier0TalentId: state.tier0TalentId,
         isLevelUp: true
       });
     } catch (error) {

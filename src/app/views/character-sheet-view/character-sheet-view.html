@@ -48,12 +48,12 @@
   </div>
 
   <!-- Level-Up Warning -->
-  <div class="level-up-warning-notification" *ngIf="character.pendingLevel">
+  <div class="level-up-warning-notification" *ngIf="character && character.pendingLevel">
     <mat-card class="notification-card level-up-warning">
       <mat-card-header>
         <mat-icon mat-card-avatar class="notification-icon warning-icon">warning</mat-icon>
         <mat-card-title>Pending Level-Up!</mat-card-title>
-        <mat-card-subtitle>You have {{ character.pendingLevelPoints }} unspent level{{ character.pendingLevelPoints > 1 ? 's' : '' }}</mat-card-subtitle>
+        <mat-card-subtitle>You have {{ character!.pendingLevelPoints }} unspent level{{ character!.pendingLevelPoints > 1 ? 's' : '' }}</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <div class="level-up-warning-content">

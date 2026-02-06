@@ -11,14 +11,17 @@ export class PathsModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param type - Main path type (e.g., "warrior")
    * @param sub - Specialization (e.g., "Soldier")
+   * @param tier0TalentId - The tier 0 talent ID for the main path
    */
   async save(
     characterId: string,
     type: string,
-    sub: string
+    sub: string,
+    tier0TalentId: string | null = null
   ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
-      paths: [type, sub]
+      paths: [type, sub],
+      mainPathTier0TalentId: tier0TalentId
     });
   }
 

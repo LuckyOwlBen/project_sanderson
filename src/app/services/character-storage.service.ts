@@ -134,6 +134,7 @@ export class CharacterStorageService {
       name: character.name,
       level: character.level,
       pendingLevelPoints: character.pendingLevelPoints ?? 0,
+      pendingLevel: character.pendingLevel ?? false,
       ancestry: character.ancestry,
       cultures: character.cultures,
       paths: character.paths,
@@ -179,6 +180,13 @@ export class CharacterStorageService {
     character.level = data.level || 1;
     character.pendingLevelPoints = data.pendingLevelPoints || 0;
     character.pendingLevel = data.pendingLevel ?? false;
+    console.log('[CharacterStorage] Deserialized character:', {
+      id: data.id,
+      name: data.name,
+      level: character.level,
+      pendingLevel: character.pendingLevel,
+      pendingLevelPoints: character.pendingLevelPoints
+    });
     character.name = data.name || '';
     character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];

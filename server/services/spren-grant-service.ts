@@ -10,6 +10,7 @@
 
 import { Server, Socket } from 'socket.io';
 import { RadiantPathModuleRepository } from '../repositories/modules/radiant-path-repository';
+import { RADIANT_TIER0_TALENTS } from './paths-service';
 
 export interface SprenGrantPayload {
   characterId: string;
@@ -122,13 +123,17 @@ export class SprenGrantService {
         if (confirmed && confirmed.order === order) {
           console.log(`[Spren] ✔️ Removed ${order} from queue for ${characterId}`);
           
+          // Look up tier 0 talent ID for this radiant order
+          const tier0TalentId = RADIANT_TIER0_TALENTS[confirmed.order.toLowerCase()] || null;
+          
           // Persist spren to database
           await this.radiantPathRepository.addSpren(
             characterId,
             confirmed.order,
             confirmed.sprenType,
             confirmed.surgePair,
-            confirmed.philosophy
+            confirmed.philosophy,
+            tier0TalentId
           );
           console.log(`[Spren] 💾 Persisted spren to database for ${characterId}`);
         }

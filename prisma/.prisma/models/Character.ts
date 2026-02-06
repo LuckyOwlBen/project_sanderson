@@ -29,11 +29,13 @@ export type AggregateCharacter = {
 export type CharacterAvgAggregateOutputType = {
   level: number | null
   pendingLevelPoints: number | null
+  currencyInChips: number | null
 }
 
 export type CharacterSumAggregateOutputType = {
   level: number | null
   pendingLevelPoints: number | null
+  currencyInChips: number | null
 }
 
 export type CharacterMinAggregateOutputType = {
@@ -41,8 +43,10 @@ export type CharacterMinAggregateOutputType = {
   name: string | null
   level: number | null
   pendingLevelPoints: number | null
+  pendingLevel: boolean | null
   ancestry: string | null
   sessionNotes: string | null
+  currencyInChips: number | null
   lastModified: Date | null
 }
 
@@ -51,8 +55,10 @@ export type CharacterMaxAggregateOutputType = {
   name: string | null
   level: number | null
   pendingLevelPoints: number | null
+  pendingLevel: boolean | null
   ancestry: string | null
   sessionNotes: string | null
+  currencyInChips: number | null
   lastModified: Date | null
 }
 
@@ -61,8 +67,10 @@ export type CharacterCountAggregateOutputType = {
   name: number
   level: number
   pendingLevelPoints: number
+  pendingLevel: number
   ancestry: number
   sessionNotes: number
+  currencyInChips: number
   lastModified: number
   _all: number
 }
@@ -71,11 +79,13 @@ export type CharacterCountAggregateOutputType = {
 export type CharacterAvgAggregateInputType = {
   level?: true
   pendingLevelPoints?: true
+  currencyInChips?: true
 }
 
 export type CharacterSumAggregateInputType = {
   level?: true
   pendingLevelPoints?: true
+  currencyInChips?: true
 }
 
 export type CharacterMinAggregateInputType = {
@@ -83,8 +93,10 @@ export type CharacterMinAggregateInputType = {
   name?: true
   level?: true
   pendingLevelPoints?: true
+  pendingLevel?: true
   ancestry?: true
   sessionNotes?: true
+  currencyInChips?: true
   lastModified?: true
 }
 
@@ -93,8 +105,10 @@ export type CharacterMaxAggregateInputType = {
   name?: true
   level?: true
   pendingLevelPoints?: true
+  pendingLevel?: true
   ancestry?: true
   sessionNotes?: true
+  currencyInChips?: true
   lastModified?: true
 }
 
@@ -103,8 +117,10 @@ export type CharacterCountAggregateInputType = {
   name?: true
   level?: true
   pendingLevelPoints?: true
+  pendingLevel?: true
   ancestry?: true
   sessionNotes?: true
+  currencyInChips?: true
   lastModified?: true
   _all?: true
 }
@@ -200,8 +216,10 @@ export type CharacterGroupByOutputType = {
   name: string
   level: number
   pendingLevelPoints: number
+  pendingLevel: boolean
   ancestry: string | null
   sessionNotes: string
+  currencyInChips: number
   lastModified: Date
   _count: CharacterCountAggregateOutputType | null
   _avg: CharacterAvgAggregateOutputType | null
@@ -233,12 +251,17 @@ export type CharacterWhereInput = {
   name?: Prisma.StringFilter<"Character"> | string
   level?: Prisma.IntFilter<"Character"> | number
   pendingLevelPoints?: Prisma.IntFilter<"Character"> | number
+  pendingLevel?: Prisma.BoolFilter<"Character"> | boolean
   ancestry?: Prisma.StringNullableFilter<"Character"> | string | null
   sessionNotes?: Prisma.StringFilter<"Character"> | string
+  currencyInChips?: Prisma.FloatFilter<"Character"> | number
   lastModified?: Prisma.DateTimeFilter<"Character"> | Date | string
   cultures?: Prisma.CultureSelectionListRelationFilter
   paths?: Prisma.PathSelectionListRelationFilter
   attributes?: Prisma.XOR<Prisma.AttributesNullableScalarRelationFilter, Prisma.AttributesWhereInput> | null
+  skillsState?: Prisma.XOR<Prisma.SkillsStateNullableScalarRelationFilter, Prisma.SkillsStateWhereInput> | null
+  talentsState?: Prisma.XOR<Prisma.CharacterTalentsNullableScalarRelationFilter, Prisma.CharacterTalentsWhereInput> | null
+  expertiseState?: Prisma.XOR<Prisma.ExpertiseStateNullableScalarRelationFilter, Prisma.ExpertiseStateWhereInput> | null
   skills?: Prisma.SkillListRelationFilter
   inventory?: Prisma.InventoryItemListRelationFilter
   talents?: Prisma.UnlockedTalentListRelationFilter
@@ -247,6 +270,7 @@ export type CharacterWhereInput = {
   radiantPath?: Prisma.XOR<Prisma.RadiantPathNullableScalarRelationFilter, Prisma.RadiantPathWhereInput> | null
   singerForms?: Prisma.UnlockedSingerFormListRelationFilter
   spentPoints?: Prisma.XOR<Prisma.SpentPointsNullableScalarRelationFilter, Prisma.SpentPointsWhereInput> | null
+  pendingGrants?: Prisma.PendingGrantQueueListRelationFilter
 }
 
 export type CharacterOrderByWithRelationInput = {
@@ -254,12 +278,17 @@ export type CharacterOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  pendingLevel?: Prisma.SortOrder
   ancestry?: Prisma.SortOrderInput | Prisma.SortOrder
   sessionNotes?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
   lastModified?: Prisma.SortOrder
   cultures?: Prisma.CultureSelectionOrderByRelationAggregateInput
   paths?: Prisma.PathSelectionOrderByRelationAggregateInput
   attributes?: Prisma.AttributesOrderByWithRelationInput
+  skillsState?: Prisma.SkillsStateOrderByWithRelationInput
+  talentsState?: Prisma.CharacterTalentsOrderByWithRelationInput
+  expertiseState?: Prisma.ExpertiseStateOrderByWithRelationInput
   skills?: Prisma.SkillOrderByRelationAggregateInput
   inventory?: Prisma.InventoryItemOrderByRelationAggregateInput
   talents?: Prisma.UnlockedTalentOrderByRelationAggregateInput
@@ -268,6 +297,7 @@ export type CharacterOrderByWithRelationInput = {
   radiantPath?: Prisma.RadiantPathOrderByWithRelationInput
   singerForms?: Prisma.UnlockedSingerFormOrderByRelationAggregateInput
   spentPoints?: Prisma.SpentPointsOrderByWithRelationInput
+  pendingGrants?: Prisma.PendingGrantQueueOrderByRelationAggregateInput
 }
 
 export type CharacterWhereUniqueInput = Prisma.AtLeast<{
@@ -278,12 +308,17 @@ export type CharacterWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Character"> | string
   level?: Prisma.IntFilter<"Character"> | number
   pendingLevelPoints?: Prisma.IntFilter<"Character"> | number
+  pendingLevel?: Prisma.BoolFilter<"Character"> | boolean
   ancestry?: Prisma.StringNullableFilter<"Character"> | string | null
   sessionNotes?: Prisma.StringFilter<"Character"> | string
+  currencyInChips?: Prisma.FloatFilter<"Character"> | number
   lastModified?: Prisma.DateTimeFilter<"Character"> | Date | string
   cultures?: Prisma.CultureSelectionListRelationFilter
   paths?: Prisma.PathSelectionListRelationFilter
   attributes?: Prisma.XOR<Prisma.AttributesNullableScalarRelationFilter, Prisma.AttributesWhereInput> | null
+  skillsState?: Prisma.XOR<Prisma.SkillsStateNullableScalarRelationFilter, Prisma.SkillsStateWhereInput> | null
+  talentsState?: Prisma.XOR<Prisma.CharacterTalentsNullableScalarRelationFilter, Prisma.CharacterTalentsWhereInput> | null
+  expertiseState?: Prisma.XOR<Prisma.ExpertiseStateNullableScalarRelationFilter, Prisma.ExpertiseStateWhereInput> | null
   skills?: Prisma.SkillListRelationFilter
   inventory?: Prisma.InventoryItemListRelationFilter
   talents?: Prisma.UnlockedTalentListRelationFilter
@@ -292,6 +327,7 @@ export type CharacterWhereUniqueInput = Prisma.AtLeast<{
   radiantPath?: Prisma.XOR<Prisma.RadiantPathNullableScalarRelationFilter, Prisma.RadiantPathWhereInput> | null
   singerForms?: Prisma.UnlockedSingerFormListRelationFilter
   spentPoints?: Prisma.XOR<Prisma.SpentPointsNullableScalarRelationFilter, Prisma.SpentPointsWhereInput> | null
+  pendingGrants?: Prisma.PendingGrantQueueListRelationFilter
 }, "id">
 
 export type CharacterOrderByWithAggregationInput = {
@@ -299,8 +335,10 @@ export type CharacterOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  pendingLevel?: Prisma.SortOrder
   ancestry?: Prisma.SortOrderInput | Prisma.SortOrder
   sessionNotes?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
   lastModified?: Prisma.SortOrder
   _count?: Prisma.CharacterCountOrderByAggregateInput
   _avg?: Prisma.CharacterAvgOrderByAggregateInput
@@ -317,8 +355,10 @@ export type CharacterScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Character"> | string
   level?: Prisma.IntWithAggregatesFilter<"Character"> | number
   pendingLevelPoints?: Prisma.IntWithAggregatesFilter<"Character"> | number
+  pendingLevel?: Prisma.BoolWithAggregatesFilter<"Character"> | boolean
   ancestry?: Prisma.StringNullableWithAggregatesFilter<"Character"> | string | null
   sessionNotes?: Prisma.StringWithAggregatesFilter<"Character"> | string
+  currencyInChips?: Prisma.FloatWithAggregatesFilter<"Character"> | number
   lastModified?: Prisma.DateTimeWithAggregatesFilter<"Character"> | Date | string
 }
 
@@ -327,12 +367,17 @@ export type CharacterCreateInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -341,6 +386,7 @@ export type CharacterCreateInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateInput = {
@@ -348,12 +394,17 @@ export type CharacterUncheckedCreateInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -362,6 +413,7 @@ export type CharacterUncheckedCreateInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUpdateInput = {
@@ -369,12 +421,17 @@ export type CharacterUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -383,6 +440,7 @@ export type CharacterUpdateInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateInput = {
@@ -390,12 +448,17 @@ export type CharacterUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -404,6 +467,7 @@ export type CharacterUncheckedUpdateInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateManyInput = {
@@ -411,8 +475,10 @@ export type CharacterCreateManyInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
 }
 
@@ -421,8 +487,10 @@ export type CharacterUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -431,8 +499,10 @@ export type CharacterUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -441,14 +511,17 @@ export type CharacterCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  pendingLevel?: Prisma.SortOrder
   ancestry?: Prisma.SortOrder
   sessionNotes?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
   lastModified?: Prisma.SortOrder
 }
 
 export type CharacterAvgOrderByAggregateInput = {
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
 }
 
 export type CharacterMaxOrderByAggregateInput = {
@@ -456,8 +529,10 @@ export type CharacterMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  pendingLevel?: Prisma.SortOrder
   ancestry?: Prisma.SortOrder
   sessionNotes?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
   lastModified?: Prisma.SortOrder
 }
 
@@ -466,14 +541,17 @@ export type CharacterMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  pendingLevel?: Prisma.SortOrder
   ancestry?: Prisma.SortOrder
   sessionNotes?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
   lastModified?: Prisma.SortOrder
 }
 
 export type CharacterSumOrderByAggregateInput = {
   level?: Prisma.SortOrder
   pendingLevelPoints?: Prisma.SortOrder
+  currencyInChips?: Prisma.SortOrder
 }
 
 export type CharacterScalarRelationFilter = {
@@ -493,8 +571,20 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -655,16 +745,77 @@ export type CharacterUpdateOneRequiredWithoutSpentPointsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CharacterUpdateToOneWithWhereWithoutSpentPointsInput, Prisma.CharacterUpdateWithoutSpentPointsInput>, Prisma.CharacterUncheckedUpdateWithoutSpentPointsInput>
 }
 
+export type CharacterCreateNestedOneWithoutSkillsStateInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutSkillsStateInput, Prisma.CharacterUncheckedCreateWithoutSkillsStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutSkillsStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+}
+
+export type CharacterUpdateOneRequiredWithoutSkillsStateNestedInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutSkillsStateInput, Prisma.CharacterUncheckedCreateWithoutSkillsStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutSkillsStateInput
+  upsert?: Prisma.CharacterUpsertWithoutSkillsStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CharacterUpdateToOneWithWhereWithoutSkillsStateInput, Prisma.CharacterUpdateWithoutSkillsStateInput>, Prisma.CharacterUncheckedUpdateWithoutSkillsStateInput>
+}
+
+export type CharacterCreateNestedOneWithoutTalentsStateInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutTalentsStateInput, Prisma.CharacterUncheckedCreateWithoutTalentsStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutTalentsStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+}
+
+export type CharacterUpdateOneRequiredWithoutTalentsStateNestedInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutTalentsStateInput, Prisma.CharacterUncheckedCreateWithoutTalentsStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutTalentsStateInput
+  upsert?: Prisma.CharacterUpsertWithoutTalentsStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CharacterUpdateToOneWithWhereWithoutTalentsStateInput, Prisma.CharacterUpdateWithoutTalentsStateInput>, Prisma.CharacterUncheckedUpdateWithoutTalentsStateInput>
+}
+
+export type CharacterCreateNestedOneWithoutExpertiseStateInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutExpertiseStateInput, Prisma.CharacterUncheckedCreateWithoutExpertiseStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutExpertiseStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+}
+
+export type CharacterUpdateOneRequiredWithoutExpertiseStateNestedInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutExpertiseStateInput, Prisma.CharacterUncheckedCreateWithoutExpertiseStateInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutExpertiseStateInput
+  upsert?: Prisma.CharacterUpsertWithoutExpertiseStateInput
+  connect?: Prisma.CharacterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CharacterUpdateToOneWithWhereWithoutExpertiseStateInput, Prisma.CharacterUpdateWithoutExpertiseStateInput>, Prisma.CharacterUncheckedUpdateWithoutExpertiseStateInput>
+}
+
+export type CharacterCreateNestedOneWithoutPendingGrantsInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutPendingGrantsInput, Prisma.CharacterUncheckedCreateWithoutPendingGrantsInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutPendingGrantsInput
+  connect?: Prisma.CharacterWhereUniqueInput
+}
+
+export type CharacterUpdateOneRequiredWithoutPendingGrantsNestedInput = {
+  create?: Prisma.XOR<Prisma.CharacterCreateWithoutPendingGrantsInput, Prisma.CharacterUncheckedCreateWithoutPendingGrantsInput>
+  connectOrCreate?: Prisma.CharacterCreateOrConnectWithoutPendingGrantsInput
+  upsert?: Prisma.CharacterUpsertWithoutPendingGrantsInput
+  connect?: Prisma.CharacterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CharacterUpdateToOneWithWhereWithoutPendingGrantsInput, Prisma.CharacterUpdateWithoutPendingGrantsInput>, Prisma.CharacterUncheckedUpdateWithoutPendingGrantsInput>
+}
+
 export type CharacterCreateWithoutCulturesInput = {
   id: string
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -673,6 +824,7 @@ export type CharacterCreateWithoutCulturesInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutCulturesInput = {
@@ -680,11 +832,16 @@ export type CharacterUncheckedCreateWithoutCulturesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -693,6 +850,7 @@ export type CharacterUncheckedCreateWithoutCulturesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutCulturesInput = {
@@ -716,11 +874,16 @@ export type CharacterUpdateWithoutCulturesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -729,6 +892,7 @@ export type CharacterUpdateWithoutCulturesInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutCulturesInput = {
@@ -736,11 +900,16 @@ export type CharacterUncheckedUpdateWithoutCulturesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -749,6 +918,7 @@ export type CharacterUncheckedUpdateWithoutCulturesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutPathsInput = {
@@ -756,11 +926,16 @@ export type CharacterCreateWithoutPathsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -769,6 +944,7 @@ export type CharacterCreateWithoutPathsInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutPathsInput = {
@@ -776,11 +952,16 @@ export type CharacterUncheckedCreateWithoutPathsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -789,6 +970,7 @@ export type CharacterUncheckedCreateWithoutPathsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutPathsInput = {
@@ -812,11 +994,16 @@ export type CharacterUpdateWithoutPathsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -825,6 +1012,7 @@ export type CharacterUpdateWithoutPathsInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutPathsInput = {
@@ -832,11 +1020,16 @@ export type CharacterUncheckedUpdateWithoutPathsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -845,6 +1038,7 @@ export type CharacterUncheckedUpdateWithoutPathsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutAttributesInput = {
@@ -852,11 +1046,16 @@ export type CharacterCreateWithoutAttributesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -865,6 +1064,7 @@ export type CharacterCreateWithoutAttributesInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutAttributesInput = {
@@ -872,11 +1072,16 @@ export type CharacterUncheckedCreateWithoutAttributesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -885,6 +1090,7 @@ export type CharacterUncheckedCreateWithoutAttributesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutAttributesInput = {
@@ -908,11 +1114,16 @@ export type CharacterUpdateWithoutAttributesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -921,6 +1132,7 @@ export type CharacterUpdateWithoutAttributesInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutAttributesInput = {
@@ -928,11 +1140,16 @@ export type CharacterUncheckedUpdateWithoutAttributesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -941,6 +1158,7 @@ export type CharacterUncheckedUpdateWithoutAttributesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutSkillsInput = {
@@ -948,12 +1166,17 @@ export type CharacterCreateWithoutSkillsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
@@ -961,6 +1184,7 @@ export type CharacterCreateWithoutSkillsInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutSkillsInput = {
@@ -968,12 +1192,17 @@ export type CharacterUncheckedCreateWithoutSkillsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
@@ -981,6 +1210,7 @@ export type CharacterUncheckedCreateWithoutSkillsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutSkillsInput = {
@@ -1004,12 +1234,17 @@ export type CharacterUpdateWithoutSkillsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
@@ -1017,6 +1252,7 @@ export type CharacterUpdateWithoutSkillsInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutSkillsInput = {
@@ -1024,12 +1260,17 @@ export type CharacterUncheckedUpdateWithoutSkillsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1037,6 +1278,7 @@ export type CharacterUncheckedUpdateWithoutSkillsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutTalentsInput = {
@@ -1044,12 +1286,17 @@ export type CharacterCreateWithoutTalentsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
@@ -1057,6 +1304,7 @@ export type CharacterCreateWithoutTalentsInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutTalentsInput = {
@@ -1064,12 +1312,17 @@ export type CharacterUncheckedCreateWithoutTalentsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
@@ -1077,6 +1330,7 @@ export type CharacterUncheckedCreateWithoutTalentsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutTalentsInput = {
@@ -1100,12 +1354,17 @@ export type CharacterUpdateWithoutTalentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
@@ -1113,6 +1372,7 @@ export type CharacterUpdateWithoutTalentsInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutTalentsInput = {
@@ -1120,12 +1380,17 @@ export type CharacterUncheckedUpdateWithoutTalentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1133,6 +1398,7 @@ export type CharacterUncheckedUpdateWithoutTalentsInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutExpertisesInput = {
@@ -1140,12 +1406,17 @@ export type CharacterCreateWithoutExpertisesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -1153,6 +1424,7 @@ export type CharacterCreateWithoutExpertisesInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutExpertisesInput = {
@@ -1160,12 +1432,17 @@ export type CharacterUncheckedCreateWithoutExpertisesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -1173,6 +1450,7 @@ export type CharacterUncheckedCreateWithoutExpertisesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutExpertisesInput = {
@@ -1196,12 +1474,17 @@ export type CharacterUpdateWithoutExpertisesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -1209,6 +1492,7 @@ export type CharacterUpdateWithoutExpertisesInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutExpertisesInput = {
@@ -1216,12 +1500,17 @@ export type CharacterUncheckedUpdateWithoutExpertisesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1229,6 +1518,7 @@ export type CharacterUncheckedUpdateWithoutExpertisesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutInventoryInput = {
@@ -1236,12 +1526,17 @@ export type CharacterCreateWithoutInventoryInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
@@ -1249,6 +1544,7 @@ export type CharacterCreateWithoutInventoryInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutInventoryInput = {
@@ -1256,12 +1552,17 @@ export type CharacterUncheckedCreateWithoutInventoryInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
   expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
@@ -1269,6 +1570,7 @@ export type CharacterUncheckedCreateWithoutInventoryInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutInventoryInput = {
@@ -1292,12 +1594,17 @@ export type CharacterUpdateWithoutInventoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
@@ -1305,6 +1612,7 @@ export type CharacterUpdateWithoutInventoryInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutInventoryInput = {
@@ -1312,12 +1620,17 @@ export type CharacterUncheckedUpdateWithoutInventoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
   expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1325,6 +1638,7 @@ export type CharacterUncheckedUpdateWithoutInventoryInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutResourcesInput = {
@@ -1332,12 +1646,17 @@ export type CharacterCreateWithoutResourcesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -1345,6 +1664,7 @@ export type CharacterCreateWithoutResourcesInput = {
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutResourcesInput = {
@@ -1352,12 +1672,17 @@ export type CharacterUncheckedCreateWithoutResourcesInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -1365,6 +1690,7 @@ export type CharacterUncheckedCreateWithoutResourcesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutResourcesInput = {
@@ -1388,12 +1714,17 @@ export type CharacterUpdateWithoutResourcesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -1401,6 +1732,7 @@ export type CharacterUpdateWithoutResourcesInput = {
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutResourcesInput = {
@@ -1408,12 +1740,17 @@ export type CharacterUncheckedUpdateWithoutResourcesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1421,6 +1758,7 @@ export type CharacterUncheckedUpdateWithoutResourcesInput = {
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutRadiantPathInput = {
@@ -1428,12 +1766,17 @@ export type CharacterCreateWithoutRadiantPathInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -1441,6 +1784,7 @@ export type CharacterCreateWithoutRadiantPathInput = {
   resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutRadiantPathInput = {
@@ -1448,12 +1792,17 @@ export type CharacterUncheckedCreateWithoutRadiantPathInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -1461,6 +1810,7 @@ export type CharacterUncheckedCreateWithoutRadiantPathInput = {
   resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutRadiantPathInput = {
@@ -1484,12 +1834,17 @@ export type CharacterUpdateWithoutRadiantPathInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -1497,6 +1852,7 @@ export type CharacterUpdateWithoutRadiantPathInput = {
   resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutRadiantPathInput = {
@@ -1504,12 +1860,17 @@ export type CharacterUncheckedUpdateWithoutRadiantPathInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1517,6 +1878,7 @@ export type CharacterUncheckedUpdateWithoutRadiantPathInput = {
   resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutSingerFormsInput = {
@@ -1524,12 +1886,17 @@ export type CharacterCreateWithoutSingerFormsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -1537,6 +1904,7 @@ export type CharacterCreateWithoutSingerFormsInput = {
   resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutSingerFormsInput = {
@@ -1544,12 +1912,17 @@ export type CharacterUncheckedCreateWithoutSingerFormsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -1557,6 +1930,7 @@ export type CharacterUncheckedCreateWithoutSingerFormsInput = {
   resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutSingerFormsInput = {
@@ -1580,12 +1954,17 @@ export type CharacterUpdateWithoutSingerFormsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -1593,6 +1972,7 @@ export type CharacterUpdateWithoutSingerFormsInput = {
   resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutSingerFormsInput = {
@@ -1600,12 +1980,17 @@ export type CharacterUncheckedUpdateWithoutSingerFormsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1613,6 +1998,7 @@ export type CharacterUncheckedUpdateWithoutSingerFormsInput = {
   resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterCreateWithoutSpentPointsInput = {
@@ -1620,12 +2006,17 @@ export type CharacterCreateWithoutSpentPointsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
@@ -1633,6 +2024,7 @@ export type CharacterCreateWithoutSpentPointsInput = {
   resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
   radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterUncheckedCreateWithoutSpentPointsInput = {
@@ -1640,12 +2032,17 @@ export type CharacterUncheckedCreateWithoutSpentPointsInput = {
   name: string
   level?: number
   pendingLevelPoints?: number
+  pendingLevel?: boolean
   ancestry?: string | null
   sessionNotes?: string
+  currencyInChips?: number
   lastModified?: Date | string
   cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
   paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
   attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
   talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
@@ -1653,6 +2050,7 @@ export type CharacterUncheckedCreateWithoutSpentPointsInput = {
   resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
   radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
 }
 
 export type CharacterCreateOrConnectWithoutSpentPointsInput = {
@@ -1676,12 +2074,17 @@ export type CharacterUpdateWithoutSpentPointsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
@@ -1689,6 +2092,7 @@ export type CharacterUpdateWithoutSpentPointsInput = {
   resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
   radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
 }
 
 export type CharacterUncheckedUpdateWithoutSpentPointsInput = {
@@ -1696,12 +2100,17 @@ export type CharacterUncheckedUpdateWithoutSpentPointsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.IntFieldUpdateOperationsInput | number
   pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
   lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
   attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
   talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
@@ -1709,6 +2118,487 @@ export type CharacterUncheckedUpdateWithoutSpentPointsInput = {
   resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
   radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
   singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterCreateWithoutSkillsStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterUncheckedCreateWithoutSkillsStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterCreateOrConnectWithoutSkillsStateInput = {
+  where: Prisma.CharacterWhereUniqueInput
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutSkillsStateInput, Prisma.CharacterUncheckedCreateWithoutSkillsStateInput>
+}
+
+export type CharacterUpsertWithoutSkillsStateInput = {
+  update: Prisma.XOR<Prisma.CharacterUpdateWithoutSkillsStateInput, Prisma.CharacterUncheckedUpdateWithoutSkillsStateInput>
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutSkillsStateInput, Prisma.CharacterUncheckedCreateWithoutSkillsStateInput>
+  where?: Prisma.CharacterWhereInput
+}
+
+export type CharacterUpdateToOneWithWhereWithoutSkillsStateInput = {
+  where?: Prisma.CharacterWhereInput
+  data: Prisma.XOR<Prisma.CharacterUpdateWithoutSkillsStateInput, Prisma.CharacterUncheckedUpdateWithoutSkillsStateInput>
+}
+
+export type CharacterUpdateWithoutSkillsStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterUncheckedUpdateWithoutSkillsStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterCreateWithoutTalentsStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterUncheckedCreateWithoutTalentsStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterCreateOrConnectWithoutTalentsStateInput = {
+  where: Prisma.CharacterWhereUniqueInput
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutTalentsStateInput, Prisma.CharacterUncheckedCreateWithoutTalentsStateInput>
+}
+
+export type CharacterUpsertWithoutTalentsStateInput = {
+  update: Prisma.XOR<Prisma.CharacterUpdateWithoutTalentsStateInput, Prisma.CharacterUncheckedUpdateWithoutTalentsStateInput>
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutTalentsStateInput, Prisma.CharacterUncheckedCreateWithoutTalentsStateInput>
+  where?: Prisma.CharacterWhereInput
+}
+
+export type CharacterUpdateToOneWithWhereWithoutTalentsStateInput = {
+  where?: Prisma.CharacterWhereInput
+  data: Prisma.XOR<Prisma.CharacterUpdateWithoutTalentsStateInput, Prisma.CharacterUncheckedUpdateWithoutTalentsStateInput>
+}
+
+export type CharacterUpdateWithoutTalentsStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterUncheckedUpdateWithoutTalentsStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterCreateWithoutExpertiseStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterUncheckedCreateWithoutExpertiseStateInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedCreateNestedManyWithoutCharacterInput
+}
+
+export type CharacterCreateOrConnectWithoutExpertiseStateInput = {
+  where: Prisma.CharacterWhereUniqueInput
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutExpertiseStateInput, Prisma.CharacterUncheckedCreateWithoutExpertiseStateInput>
+}
+
+export type CharacterUpsertWithoutExpertiseStateInput = {
+  update: Prisma.XOR<Prisma.CharacterUpdateWithoutExpertiseStateInput, Prisma.CharacterUncheckedUpdateWithoutExpertiseStateInput>
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutExpertiseStateInput, Prisma.CharacterUncheckedCreateWithoutExpertiseStateInput>
+  where?: Prisma.CharacterWhereInput
+}
+
+export type CharacterUpdateToOneWithWhereWithoutExpertiseStateInput = {
+  where?: Prisma.CharacterWhereInput
+  data: Prisma.XOR<Prisma.CharacterUpdateWithoutExpertiseStateInput, Prisma.CharacterUncheckedUpdateWithoutExpertiseStateInput>
+}
+
+export type CharacterUpdateWithoutExpertiseStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterUncheckedUpdateWithoutExpertiseStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
+  pendingGrants?: Prisma.PendingGrantQueueUncheckedUpdateManyWithoutCharacterNestedInput
+}
+
+export type CharacterCreateWithoutPendingGrantsInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsCreateNestedOneWithoutCharacterInput
+}
+
+export type CharacterUncheckedCreateWithoutPendingGrantsInput = {
+  id: string
+  name: string
+  level?: number
+  pendingLevelPoints?: number
+  pendingLevel?: boolean
+  ancestry?: string | null
+  sessionNotes?: string
+  currencyInChips?: number
+  lastModified?: Date | string
+  cultures?: Prisma.CultureSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  paths?: Prisma.PathSelectionUncheckedCreateNestedManyWithoutCharacterInput
+  attributes?: Prisma.AttributesUncheckedCreateNestedOneWithoutCharacterInput
+  skillsState?: Prisma.SkillsStateUncheckedCreateNestedOneWithoutCharacterInput
+  talentsState?: Prisma.CharacterTalentsUncheckedCreateNestedOneWithoutCharacterInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedCreateNestedOneWithoutCharacterInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCharacterInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutCharacterInput
+  talents?: Prisma.UnlockedTalentUncheckedCreateNestedManyWithoutCharacterInput
+  expertises?: Prisma.SelectedExpertiseUncheckedCreateNestedManyWithoutCharacterInput
+  resources?: Prisma.CharacterResourcesUncheckedCreateNestedOneWithoutCharacterInput
+  radiantPath?: Prisma.RadiantPathUncheckedCreateNestedOneWithoutCharacterInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedCreateNestedManyWithoutCharacterInput
+  spentPoints?: Prisma.SpentPointsUncheckedCreateNestedOneWithoutCharacterInput
+}
+
+export type CharacterCreateOrConnectWithoutPendingGrantsInput = {
+  where: Prisma.CharacterWhereUniqueInput
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutPendingGrantsInput, Prisma.CharacterUncheckedCreateWithoutPendingGrantsInput>
+}
+
+export type CharacterUpsertWithoutPendingGrantsInput = {
+  update: Prisma.XOR<Prisma.CharacterUpdateWithoutPendingGrantsInput, Prisma.CharacterUncheckedUpdateWithoutPendingGrantsInput>
+  create: Prisma.XOR<Prisma.CharacterCreateWithoutPendingGrantsInput, Prisma.CharacterUncheckedCreateWithoutPendingGrantsInput>
+  where?: Prisma.CharacterWhereInput
+}
+
+export type CharacterUpdateToOneWithWhereWithoutPendingGrantsInput = {
+  where?: Prisma.CharacterWhereInput
+  data: Prisma.XOR<Prisma.CharacterUpdateWithoutPendingGrantsInput, Prisma.CharacterUncheckedUpdateWithoutPendingGrantsInput>
+}
+
+export type CharacterUpdateWithoutPendingGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUpdateOneWithoutCharacterNestedInput
+}
+
+export type CharacterUncheckedUpdateWithoutPendingGrantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevelPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pendingLevel?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ancestry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionNotes?: Prisma.StringFieldUpdateOperationsInput | string
+  currencyInChips?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastModified?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cultures?: Prisma.CultureSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  paths?: Prisma.PathSelectionUncheckedUpdateManyWithoutCharacterNestedInput
+  attributes?: Prisma.AttributesUncheckedUpdateOneWithoutCharacterNestedInput
+  skillsState?: Prisma.SkillsStateUncheckedUpdateOneWithoutCharacterNestedInput
+  talentsState?: Prisma.CharacterTalentsUncheckedUpdateOneWithoutCharacterNestedInput
+  expertiseState?: Prisma.ExpertiseStateUncheckedUpdateOneWithoutCharacterNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutCharacterNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput
+  talents?: Prisma.UnlockedTalentUncheckedUpdateManyWithoutCharacterNestedInput
+  expertises?: Prisma.SelectedExpertiseUncheckedUpdateManyWithoutCharacterNestedInput
+  resources?: Prisma.CharacterResourcesUncheckedUpdateOneWithoutCharacterNestedInput
+  radiantPath?: Prisma.RadiantPathUncheckedUpdateOneWithoutCharacterNestedInput
+  singerForms?: Prisma.UnlockedSingerFormUncheckedUpdateManyWithoutCharacterNestedInput
+  spentPoints?: Prisma.SpentPointsUncheckedUpdateOneWithoutCharacterNestedInput
 }
 
 
@@ -1724,6 +2614,7 @@ export type CharacterCountOutputType = {
   talents: number
   expertises: number
   singerForms: number
+  pendingGrants: number
 }
 
 export type CharacterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1734,6 +2625,7 @@ export type CharacterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   talents?: boolean | CharacterCountOutputTypeCountTalentsArgs
   expertises?: boolean | CharacterCountOutputTypeCountExpertisesArgs
   singerForms?: boolean | CharacterCountOutputTypeCountSingerFormsArgs
+  pendingGrants?: boolean | CharacterCountOutputTypeCountPendingGrantsArgs
 }
 
 /**
@@ -1795,18 +2687,30 @@ export type CharacterCountOutputTypeCountSingerFormsArgs<ExtArgs extends runtime
   where?: Prisma.UnlockedSingerFormWhereInput
 }
 
+/**
+ * CharacterCountOutputType without action
+ */
+export type CharacterCountOutputTypeCountPendingGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PendingGrantQueueWhereInput
+}
+
 
 export type CharacterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
   level?: boolean
   pendingLevelPoints?: boolean
+  pendingLevel?: boolean
   ancestry?: boolean
   sessionNotes?: boolean
+  currencyInChips?: boolean
   lastModified?: boolean
   cultures?: boolean | Prisma.Character$culturesArgs<ExtArgs>
   paths?: boolean | Prisma.Character$pathsArgs<ExtArgs>
   attributes?: boolean | Prisma.Character$attributesArgs<ExtArgs>
+  skillsState?: boolean | Prisma.Character$skillsStateArgs<ExtArgs>
+  talentsState?: boolean | Prisma.Character$talentsStateArgs<ExtArgs>
+  expertiseState?: boolean | Prisma.Character$expertiseStateArgs<ExtArgs>
   skills?: boolean | Prisma.Character$skillsArgs<ExtArgs>
   inventory?: boolean | Prisma.Character$inventoryArgs<ExtArgs>
   talents?: boolean | Prisma.Character$talentsArgs<ExtArgs>
@@ -1815,6 +2719,7 @@ export type CharacterSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   radiantPath?: boolean | Prisma.Character$radiantPathArgs<ExtArgs>
   singerForms?: boolean | Prisma.Character$singerFormsArgs<ExtArgs>
   spentPoints?: boolean | Prisma.Character$spentPointsArgs<ExtArgs>
+  pendingGrants?: boolean | Prisma.Character$pendingGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.CharacterCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["character"]>
 
@@ -1823,8 +2728,10 @@ export type CharacterSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   level?: boolean
   pendingLevelPoints?: boolean
+  pendingLevel?: boolean
   ancestry?: boolean
   sessionNotes?: boolean
+  currencyInChips?: boolean
   lastModified?: boolean
 }, ExtArgs["result"]["character"]>
 
@@ -1833,8 +2740,10 @@ export type CharacterSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   level?: boolean
   pendingLevelPoints?: boolean
+  pendingLevel?: boolean
   ancestry?: boolean
   sessionNotes?: boolean
+  currencyInChips?: boolean
   lastModified?: boolean
 }, ExtArgs["result"]["character"]>
 
@@ -1843,16 +2752,21 @@ export type CharacterSelectScalar = {
   name?: boolean
   level?: boolean
   pendingLevelPoints?: boolean
+  pendingLevel?: boolean
   ancestry?: boolean
   sessionNotes?: boolean
+  currencyInChips?: boolean
   lastModified?: boolean
 }
 
-export type CharacterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "level" | "pendingLevelPoints" | "ancestry" | "sessionNotes" | "lastModified", ExtArgs["result"]["character"]>
+export type CharacterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "level" | "pendingLevelPoints" | "pendingLevel" | "ancestry" | "sessionNotes" | "currencyInChips" | "lastModified", ExtArgs["result"]["character"]>
 export type CharacterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cultures?: boolean | Prisma.Character$culturesArgs<ExtArgs>
   paths?: boolean | Prisma.Character$pathsArgs<ExtArgs>
   attributes?: boolean | Prisma.Character$attributesArgs<ExtArgs>
+  skillsState?: boolean | Prisma.Character$skillsStateArgs<ExtArgs>
+  talentsState?: boolean | Prisma.Character$talentsStateArgs<ExtArgs>
+  expertiseState?: boolean | Prisma.Character$expertiseStateArgs<ExtArgs>
   skills?: boolean | Prisma.Character$skillsArgs<ExtArgs>
   inventory?: boolean | Prisma.Character$inventoryArgs<ExtArgs>
   talents?: boolean | Prisma.Character$talentsArgs<ExtArgs>
@@ -1861,6 +2775,7 @@ export type CharacterInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   radiantPath?: boolean | Prisma.Character$radiantPathArgs<ExtArgs>
   singerForms?: boolean | Prisma.Character$singerFormsArgs<ExtArgs>
   spentPoints?: boolean | Prisma.Character$spentPointsArgs<ExtArgs>
+  pendingGrants?: boolean | Prisma.Character$pendingGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.CharacterCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CharacterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1872,6 +2787,9 @@ export type $CharacterPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     cultures: Prisma.$CultureSelectionPayload<ExtArgs>[]
     paths: Prisma.$PathSelectionPayload<ExtArgs>[]
     attributes: Prisma.$AttributesPayload<ExtArgs> | null
+    skillsState: Prisma.$SkillsStatePayload<ExtArgs> | null
+    talentsState: Prisma.$CharacterTalentsPayload<ExtArgs> | null
+    expertiseState: Prisma.$ExpertiseStatePayload<ExtArgs> | null
     skills: Prisma.$SkillPayload<ExtArgs>[]
     inventory: Prisma.$InventoryItemPayload<ExtArgs>[]
     talents: Prisma.$UnlockedTalentPayload<ExtArgs>[]
@@ -1880,14 +2798,17 @@ export type $CharacterPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     radiantPath: Prisma.$RadiantPathPayload<ExtArgs> | null
     singerForms: Prisma.$UnlockedSingerFormPayload<ExtArgs>[]
     spentPoints: Prisma.$SpentPointsPayload<ExtArgs> | null
+    pendingGrants: Prisma.$PendingGrantQueuePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     level: number
     pendingLevelPoints: number
+    pendingLevel: boolean
     ancestry: string | null
     sessionNotes: string
+    currencyInChips: number
     lastModified: Date
   }, ExtArgs["result"]["character"]>
   composites: {}
@@ -2286,6 +3207,9 @@ export interface Prisma__CharacterClient<T, Null = never, ExtArgs extends runtim
   cultures<T extends Prisma.Character$culturesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$culturesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CultureSelectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   paths<T extends Prisma.Character$pathsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$pathsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PathSelectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attributes<T extends Prisma.Character$attributesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$attributesArgs<ExtArgs>>): Prisma.Prisma__AttributesClient<runtime.Types.Result.GetResult<Prisma.$AttributesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  skillsState<T extends Prisma.Character$skillsStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$skillsStateArgs<ExtArgs>>): Prisma.Prisma__SkillsStateClient<runtime.Types.Result.GetResult<Prisma.$SkillsStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  talentsState<T extends Prisma.Character$talentsStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$talentsStateArgs<ExtArgs>>): Prisma.Prisma__CharacterTalentsClient<runtime.Types.Result.GetResult<Prisma.$CharacterTalentsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  expertiseState<T extends Prisma.Character$expertiseStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$expertiseStateArgs<ExtArgs>>): Prisma.Prisma__ExpertiseStateClient<runtime.Types.Result.GetResult<Prisma.$ExpertiseStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   skills<T extends Prisma.Character$skillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inventory<T extends Prisma.Character$inventoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InventoryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   talents<T extends Prisma.Character$talentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$talentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UnlockedTalentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2294,6 +3218,7 @@ export interface Prisma__CharacterClient<T, Null = never, ExtArgs extends runtim
   radiantPath<T extends Prisma.Character$radiantPathArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$radiantPathArgs<ExtArgs>>): Prisma.Prisma__RadiantPathClient<runtime.Types.Result.GetResult<Prisma.$RadiantPathPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   singerForms<T extends Prisma.Character$singerFormsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$singerFormsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UnlockedSingerFormPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   spentPoints<T extends Prisma.Character$spentPointsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$spentPointsArgs<ExtArgs>>): Prisma.Prisma__SpentPointsClient<runtime.Types.Result.GetResult<Prisma.$SpentPointsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  pendingGrants<T extends Prisma.Character$pendingGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Character$pendingGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PendingGrantQueuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2327,8 +3252,10 @@ export interface CharacterFieldRefs {
   readonly name: Prisma.FieldRef<"Character", 'String'>
   readonly level: Prisma.FieldRef<"Character", 'Int'>
   readonly pendingLevelPoints: Prisma.FieldRef<"Character", 'Int'>
+  readonly pendingLevel: Prisma.FieldRef<"Character", 'Boolean'>
   readonly ancestry: Prisma.FieldRef<"Character", 'String'>
   readonly sessionNotes: Prisma.FieldRef<"Character", 'String'>
+  readonly currencyInChips: Prisma.FieldRef<"Character", 'Float'>
   readonly lastModified: Prisma.FieldRef<"Character", 'DateTime'>
 }
     
@@ -2783,6 +3710,63 @@ export type Character$attributesArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * Character.skillsState
+ */
+export type Character$skillsStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SkillsState
+   */
+  select?: Prisma.SkillsStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SkillsState
+   */
+  omit?: Prisma.SkillsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SkillsStateInclude<ExtArgs> | null
+  where?: Prisma.SkillsStateWhereInput
+}
+
+/**
+ * Character.talentsState
+ */
+export type Character$talentsStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CharacterTalents
+   */
+  select?: Prisma.CharacterTalentsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CharacterTalents
+   */
+  omit?: Prisma.CharacterTalentsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CharacterTalentsInclude<ExtArgs> | null
+  where?: Prisma.CharacterTalentsWhereInput
+}
+
+/**
+ * Character.expertiseState
+ */
+export type Character$expertiseStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ExpertiseState
+   */
+  select?: Prisma.ExpertiseStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ExpertiseState
+   */
+  omit?: Prisma.ExpertiseStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpertiseStateInclude<ExtArgs> | null
+  where?: Prisma.ExpertiseStateWhereInput
+}
+
+/**
  * Character.skills
  */
 export type Character$skillsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2957,6 +3941,30 @@ export type Character$spentPointsArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.SpentPointsInclude<ExtArgs> | null
   where?: Prisma.SpentPointsWhereInput
+}
+
+/**
+ * Character.pendingGrants
+ */
+export type Character$pendingGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PendingGrantQueue
+   */
+  select?: Prisma.PendingGrantQueueSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PendingGrantQueue
+   */
+  omit?: Prisma.PendingGrantQueueOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PendingGrantQueueInclude<ExtArgs> | null
+  where?: Prisma.PendingGrantQueueWhereInput
+  orderBy?: Prisma.PendingGrantQueueOrderByWithRelationInput | Prisma.PendingGrantQueueOrderByWithRelationInput[]
+  cursor?: Prisma.PendingGrantQueueWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PendingGrantQueueScalarFieldEnum | Prisma.PendingGrantQueueScalarFieldEnum[]
 }
 
 /**

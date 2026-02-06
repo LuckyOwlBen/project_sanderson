@@ -24,7 +24,7 @@ CREATE TABLE "new_Character" (
     "currencyInChips" REAL NOT NULL DEFAULT 0,
     "lastModified" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO "new_Character" ("ancestry", "currencyInChips", "id", "lastModified", "level", "name", "pendingLevelPoints", "sessionNotes") SELECT "ancestry", "currencyInChips", "id", "lastModified", "level", "name", "pendingLevelPoints", "sessionNotes" FROM "Character";
+INSERT INTO "new_Character" ("ancestry", "currencyInChips", "id", "lastModified", "level", "name", "pendingLevel", "pendingLevelPoints", "sessionNotes") SELECT "ancestry", "currencyInChips", "id", "lastModified", "level", "name", false, "pendingLevelPoints", "sessionNotes" FROM "Character";
 DROP TABLE "Character";
 ALTER TABLE "new_Character" RENAME TO "Character";
 CREATE INDEX "Character_name_idx" ON "Character"("name");

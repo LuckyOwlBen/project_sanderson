@@ -919,79 +919,6 @@ app.get('/api/store/items', (req, res) => {
   }
 });
 
-// Submit path selection and auto-unlock tier 0 talent
-app.post('/api/characters/:id/paths', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { mainPath, specialization } = req.body;
-
-    if (!mainPath || typeof mainPath !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'mainPath is required and must be a string'
-      });
-    }
-
-    const character = await loadCharacterData(id);
-    const currentTalents = character.unlockedTalents || [];
-
-    // Ensure tier-0 talent is unlocked (SINGLE LOCATION FOR THIS)
-    const tier0Result = talentService.ensureTier0Unlocked(id, mainPath, currentTalents);
-
-    // If tier 0 needs to be unlocked, add it
-    if (tier0Result.needsUnlock && tier0Result.talentId) {
-      if (!character.unlockedTalents) {
-        character.unlockedTalents = [];
-      }
-      if (!character.unlockedTalents.includes(tier0Result.talentId)) {
-        character.unlockedTalents.push(tier0Result.talentId);
-      }
-    }
-
-    // Update main path
-    character.mainPath = mainPath;
-    if (!character.paths) {
-      character.paths = [];
-    }
-    if (!character.paths.includes(mainPath)) {
-      character.paths.unshift(mainPath);
-    }
-    
-    // Add specialization if provided
-    if (specialization && !character.paths.includes(specialization)) {
-      character.paths.push(specialization);
-    }
-    
-    character.lastModified = new Date().toISOString();
-    
-    // Save to database
-    try {
-      await saveCharacter(character);
-      console.log(`[Paths] Saved paths to database for ${character.name} (${character.id})`);
-    } catch (dbError) {
-      console.warn(`[Paths] Warning: Failed to save paths to database: ${dbError.message}`);
-      // Continue anyway - JSON save succeeded
-    }
-
-    res.json({
-      success: true,
-      id,
-      mainPath,
-      unlockedTalent: tier0Result.talentId || undefined,
-      paths: character.paths,
-      tier0Unlocked: tier0Result.unlocked,
-      tier0TalentId: tier0Result.talentId,
-      message: tier0Result.unlocked ? 'Path selected and tier-0 talent unlocked' : 'Path selected'
-    });
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      return res.status(404).json({ success: false, error: 'Character not found' });
-    }
-    console.error('[Paths] Error selecting path:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // Load character by ID
 app.get('/api/characters/load/:id', async (req, res) => {
   try {
@@ -1109,7 +1036,12 @@ app.get('/api/characters/load/:id', async (req, res) => {
       investiture: resources.investiture
     };
 
-    console.log(`Loaded character: ${response.name} (${id})`);
+    console.log(`Loaded character: ${response.name} (${id})`, {
+      level: response.level,
+      pendingLevelPoints: response.pendingLevelPoints,
+      pendingLevel: response.pendingLevel,
+      pendingLevelType: typeof response.pendingLevel
+    });
     console.log(`Character skills:`, response.skills || {});
 
     res.json(response);
@@ -1326,7 +1258,6 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       unlockedTalents: state.unlockedTalents,
       spentPoints: state.spentPoints,
       requiresSingerSelection: state.requiresSingerSelection,
-      tier0TalentId: state.tier0TalentId,
       ancestry: character.ancestry || null,
       level,
       mainPath,

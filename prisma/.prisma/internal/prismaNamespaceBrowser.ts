@@ -62,7 +62,11 @@ export const ModelName = {
   CharacterResources: 'CharacterResources',
   RadiantPath: 'RadiantPath',
   UnlockedSingerForm: 'UnlockedSingerForm',
-  SpentPoints: 'SpentPoints'
+  SpentPoints: 'SpentPoints',
+  SkillsState: 'SkillsState',
+  CharacterTalents: 'CharacterTalents',
+  ExpertiseState: 'ExpertiseState',
+  PendingGrantQueue: 'PendingGrantQueue'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -83,8 +87,10 @@ export const CharacterScalarFieldEnum = {
   name: 'name',
   level: 'level',
   pendingLevelPoints: 'pendingLevelPoints',
+  pendingLevel: 'pendingLevel',
   ancestry: 'ancestry',
   sessionNotes: 'sessionNotes',
+  currencyInChips: 'currencyInChips',
   lastModified: 'lastModified'
 } as const
 
@@ -106,7 +112,8 @@ export type CultureSelectionScalarFieldEnum = (typeof CultureSelectionScalarFiel
 export const PathSelectionScalarFieldEnum = {
   id: 'id',
   characterId: 'characterId',
-  pathName: 'pathName'
+  pathName: 'pathName',
+  tier0TalentId: 'tier0TalentId'
 } as const
 
 export type PathSelectionScalarFieldEnum = (typeof PathSelectionScalarFieldEnum)[keyof typeof PathSelectionScalarFieldEnum]
@@ -115,12 +122,16 @@ export type PathSelectionScalarFieldEnum = (typeof PathSelectionScalarFieldEnum)
 export const AttributesScalarFieldEnum = {
   id: 'id',
   characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
   strength: 'strength',
   speed: 'speed',
   intellect: 'intellect',
   willpower: 'willpower',
   awareness: 'awareness',
-  presence: 'presence'
+  presence: 'presence',
+  finalized: 'finalized'
 } as const
 
 export type AttributesScalarFieldEnum = (typeof AttributesScalarFieldEnum)[keyof typeof AttributesScalarFieldEnum]
@@ -191,7 +202,8 @@ export const RadiantPathScalarFieldEnum = {
   currentIdeal: 'currentIdeal',
   idealSpoken: 'idealSpoken',
   surgePair: 'surgePair',
-  sprenType: 'sprenType'
+  sprenType: 'sprenType',
+  radiantTier0TalentId: 'radiantTier0TalentId'
 } as const
 
 export type RadiantPathScalarFieldEnum = (typeof RadiantPathScalarFieldEnum)[keyof typeof RadiantPathScalarFieldEnum]
@@ -216,6 +228,57 @@ export const SpentPointsScalarFieldEnum = {
 } as const
 
 export type SpentPointsScalarFieldEnum = (typeof SpentPointsScalarFieldEnum)[keyof typeof SpentPointsScalarFieldEnum]
+
+
+export const SkillsStateScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized'
+} as const
+
+export type SkillsStateScalarFieldEnum = (typeof SkillsStateScalarFieldEnum)[keyof typeof SkillsStateScalarFieldEnum]
+
+
+export const CharacterTalentsScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized',
+  totalTalents: 'totalTalents',
+  pendingTalents: 'pendingTalents'
+} as const
+
+export type CharacterTalentsScalarFieldEnum = (typeof CharacterTalentsScalarFieldEnum)[keyof typeof CharacterTalentsScalarFieldEnum]
+
+
+export const ExpertiseStateScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  totalPoints: 'totalPoints',
+  pointsSpent: 'pointsSpent',
+  pointsRemaining: 'pointsRemaining',
+  finalized: 'finalized'
+} as const
+
+export type ExpertiseStateScalarFieldEnum = (typeof ExpertiseStateScalarFieldEnum)[keyof typeof ExpertiseStateScalarFieldEnum]
+
+
+export const PendingGrantQueueScalarFieldEnum = {
+  id: 'id',
+  characterId: 'characterId',
+  grantType: 'grantType',
+  grantData: 'grantData',
+  socketId: 'socketId',
+  createdAt: 'createdAt',
+  attempts: 'attempts'
+} as const
+
+export type PendingGrantQueueScalarFieldEnum = (typeof PendingGrantQueueScalarFieldEnum)[keyof typeof PendingGrantQueueScalarFieldEnum]
 
 
 export const SortOrder = {

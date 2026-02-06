@@ -63,6 +63,7 @@ model PathSelection {
   characterId String
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   pathName    String
+  tier0TalentId String?  // The tier 0 talent unlocked for this path (e.g., "vigilant_stance")
 
   @@unique([characterId, pathName])
 }
@@ -173,6 +174,7 @@ model RadiantPath {
   idealSpoken     Boolean  @default(false)
   surgePair       String?  // e.g., "Adhesion/Gravitation"
   sprenType       String?  // Type of spren bonded
+  radiantTier0TalentId String?  // The tier 0 talent for this radiant order (e.g., "windrunner_key_talent")
 }
 
 // ===== SINGER FORMS =====

@@ -27,6 +27,9 @@ export type AggregateAttributes = {
 }
 
 export type AttributesAvgAggregateOutputType = {
+  totalPoints: number | null
+  pointsSpent: number | null
+  pointsRemaining: number | null
   strength: number | null
   speed: number | null
   intellect: number | null
@@ -36,6 +39,9 @@ export type AttributesAvgAggregateOutputType = {
 }
 
 export type AttributesSumAggregateOutputType = {
+  totalPoints: number | null
+  pointsSpent: number | null
+  pointsRemaining: number | null
   strength: number | null
   speed: number | null
   intellect: number | null
@@ -47,39 +53,54 @@ export type AttributesSumAggregateOutputType = {
 export type AttributesMinAggregateOutputType = {
   id: string | null
   characterId: string | null
+  totalPoints: number | null
+  pointsSpent: number | null
+  pointsRemaining: number | null
   strength: number | null
   speed: number | null
   intellect: number | null
   willpower: number | null
   awareness: number | null
   presence: number | null
+  finalized: boolean | null
 }
 
 export type AttributesMaxAggregateOutputType = {
   id: string | null
   characterId: string | null
+  totalPoints: number | null
+  pointsSpent: number | null
+  pointsRemaining: number | null
   strength: number | null
   speed: number | null
   intellect: number | null
   willpower: number | null
   awareness: number | null
   presence: number | null
+  finalized: boolean | null
 }
 
 export type AttributesCountAggregateOutputType = {
   id: number
   characterId: number
+  totalPoints: number
+  pointsSpent: number
+  pointsRemaining: number
   strength: number
   speed: number
   intellect: number
   willpower: number
   awareness: number
   presence: number
+  finalized: number
   _all: number
 }
 
 
 export type AttributesAvgAggregateInputType = {
+  totalPoints?: true
+  pointsSpent?: true
+  pointsRemaining?: true
   strength?: true
   speed?: true
   intellect?: true
@@ -89,6 +110,9 @@ export type AttributesAvgAggregateInputType = {
 }
 
 export type AttributesSumAggregateInputType = {
+  totalPoints?: true
+  pointsSpent?: true
+  pointsRemaining?: true
   strength?: true
   speed?: true
   intellect?: true
@@ -100,34 +124,46 @@ export type AttributesSumAggregateInputType = {
 export type AttributesMinAggregateInputType = {
   id?: true
   characterId?: true
+  totalPoints?: true
+  pointsSpent?: true
+  pointsRemaining?: true
   strength?: true
   speed?: true
   intellect?: true
   willpower?: true
   awareness?: true
   presence?: true
+  finalized?: true
 }
 
 export type AttributesMaxAggregateInputType = {
   id?: true
   characterId?: true
+  totalPoints?: true
+  pointsSpent?: true
+  pointsRemaining?: true
   strength?: true
   speed?: true
   intellect?: true
   willpower?: true
   awareness?: true
   presence?: true
+  finalized?: true
 }
 
 export type AttributesCountAggregateInputType = {
   id?: true
   characterId?: true
+  totalPoints?: true
+  pointsSpent?: true
+  pointsRemaining?: true
   strength?: true
   speed?: true
   intellect?: true
   willpower?: true
   awareness?: true
   presence?: true
+  finalized?: true
   _all?: true
 }
 
@@ -220,12 +256,16 @@ export type AttributesGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type AttributesGroupByOutputType = {
   id: string
   characterId: string
+  totalPoints: number
+  pointsSpent: number
+  pointsRemaining: number
   strength: number
   speed: number
   intellect: number
   willpower: number
   awareness: number
   presence: number
+  finalized: boolean
   _count: AttributesCountAggregateOutputType | null
   _avg: AttributesAvgAggregateOutputType | null
   _sum: AttributesSumAggregateOutputType | null
@@ -254,24 +294,32 @@ export type AttributesWhereInput = {
   NOT?: Prisma.AttributesWhereInput | Prisma.AttributesWhereInput[]
   id?: Prisma.StringFilter<"Attributes"> | string
   characterId?: Prisma.StringFilter<"Attributes"> | string
+  totalPoints?: Prisma.IntFilter<"Attributes"> | number
+  pointsSpent?: Prisma.IntFilter<"Attributes"> | number
+  pointsRemaining?: Prisma.IntFilter<"Attributes"> | number
   strength?: Prisma.IntFilter<"Attributes"> | number
   speed?: Prisma.IntFilter<"Attributes"> | number
   intellect?: Prisma.IntFilter<"Attributes"> | number
   willpower?: Prisma.IntFilter<"Attributes"> | number
   awareness?: Prisma.IntFilter<"Attributes"> | number
   presence?: Prisma.IntFilter<"Attributes"> | number
+  finalized?: Prisma.BoolFilter<"Attributes"> | boolean
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }
 
 export type AttributesOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   characterId?: Prisma.SortOrder
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
   willpower?: Prisma.SortOrder
   awareness?: Prisma.SortOrder
   presence?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
   character?: Prisma.CharacterOrderByWithRelationInput
 }
 
@@ -281,24 +329,32 @@ export type AttributesWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AttributesWhereInput | Prisma.AttributesWhereInput[]
   OR?: Prisma.AttributesWhereInput[]
   NOT?: Prisma.AttributesWhereInput | Prisma.AttributesWhereInput[]
+  totalPoints?: Prisma.IntFilter<"Attributes"> | number
+  pointsSpent?: Prisma.IntFilter<"Attributes"> | number
+  pointsRemaining?: Prisma.IntFilter<"Attributes"> | number
   strength?: Prisma.IntFilter<"Attributes"> | number
   speed?: Prisma.IntFilter<"Attributes"> | number
   intellect?: Prisma.IntFilter<"Attributes"> | number
   willpower?: Prisma.IntFilter<"Attributes"> | number
   awareness?: Prisma.IntFilter<"Attributes"> | number
   presence?: Prisma.IntFilter<"Attributes"> | number
+  finalized?: Prisma.BoolFilter<"Attributes"> | boolean
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }, "id" | "characterId">
 
 export type AttributesOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   characterId?: Prisma.SortOrder
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
   willpower?: Prisma.SortOrder
   awareness?: Prisma.SortOrder
   presence?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
   _count?: Prisma.AttributesCountOrderByAggregateInput
   _avg?: Prisma.AttributesAvgOrderByAggregateInput
   _max?: Prisma.AttributesMaxOrderByAggregateInput
@@ -312,88 +368,120 @@ export type AttributesScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AttributesScalarWhereWithAggregatesInput | Prisma.AttributesScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Attributes"> | string
   characterId?: Prisma.StringWithAggregatesFilter<"Attributes"> | string
+  totalPoints?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
+  pointsSpent?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
+  pointsRemaining?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   strength?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   speed?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   intellect?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   willpower?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   awareness?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
   presence?: Prisma.IntWithAggregatesFilter<"Attributes"> | number
+  finalized?: Prisma.BoolWithAggregatesFilter<"Attributes"> | boolean
 }
 
 export type AttributesCreateInput = {
   id?: string
+  totalPoints?: number
+  pointsSpent?: number
+  pointsRemaining?: number
   strength?: number
   speed?: number
   intellect?: number
   willpower?: number
   awareness?: number
   presence?: number
+  finalized?: boolean
   character: Prisma.CharacterCreateNestedOneWithoutAttributesInput
 }
 
 export type AttributesUncheckedCreateInput = {
   id?: string
   characterId: string
+  totalPoints?: number
+  pointsSpent?: number
+  pointsRemaining?: number
   strength?: number
   speed?: number
   intellect?: number
   willpower?: number
   awareness?: number
   presence?: number
+  finalized?: boolean
 }
 
 export type AttributesUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   character?: Prisma.CharacterUpdateOneRequiredWithoutAttributesNestedInput
 }
 
 export type AttributesUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   characterId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type AttributesCreateManyInput = {
   id?: string
   characterId: string
+  totalPoints?: number
+  pointsSpent?: number
+  pointsRemaining?: number
   strength?: number
   speed?: number
   intellect?: number
   willpower?: number
   awareness?: number
   presence?: number
+  finalized?: boolean
 }
 
 export type AttributesUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type AttributesUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   characterId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type AttributesNullableScalarRelationFilter = {
@@ -404,15 +492,22 @@ export type AttributesNullableScalarRelationFilter = {
 export type AttributesCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   characterId?: Prisma.SortOrder
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
   willpower?: Prisma.SortOrder
   awareness?: Prisma.SortOrder
   presence?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type AttributesAvgOrderByAggregateInput = {
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
@@ -424,26 +519,37 @@ export type AttributesAvgOrderByAggregateInput = {
 export type AttributesMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   characterId?: Prisma.SortOrder
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
   willpower?: Prisma.SortOrder
   awareness?: Prisma.SortOrder
   presence?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type AttributesMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   characterId?: Prisma.SortOrder
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
   willpower?: Prisma.SortOrder
   awareness?: Prisma.SortOrder
   presence?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type AttributesSumOrderByAggregateInput = {
+  totalPoints?: Prisma.SortOrder
+  pointsSpent?: Prisma.SortOrder
+  pointsRemaining?: Prisma.SortOrder
   strength?: Prisma.SortOrder
   speed?: Prisma.SortOrder
   intellect?: Prisma.SortOrder
@@ -486,22 +592,30 @@ export type AttributesUncheckedUpdateOneWithoutCharacterNestedInput = {
 
 export type AttributesCreateWithoutCharacterInput = {
   id?: string
+  totalPoints?: number
+  pointsSpent?: number
+  pointsRemaining?: number
   strength?: number
   speed?: number
   intellect?: number
   willpower?: number
   awareness?: number
   presence?: number
+  finalized?: boolean
 }
 
 export type AttributesUncheckedCreateWithoutCharacterInput = {
   id?: string
+  totalPoints?: number
+  pointsSpent?: number
+  pointsRemaining?: number
   strength?: number
   speed?: number
   intellect?: number
   willpower?: number
   awareness?: number
   presence?: number
+  finalized?: boolean
 }
 
 export type AttributesCreateOrConnectWithoutCharacterInput = {
@@ -522,22 +636,30 @@ export type AttributesUpdateToOneWithWhereWithoutCharacterInput = {
 
 export type AttributesUpdateWithoutCharacterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type AttributesUncheckedUpdateWithoutCharacterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsSpent?: Prisma.IntFieldUpdateOperationsInput | number
+  pointsRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   strength?: Prisma.IntFieldUpdateOperationsInput | number
   speed?: Prisma.IntFieldUpdateOperationsInput | number
   intellect?: Prisma.IntFieldUpdateOperationsInput | number
   willpower?: Prisma.IntFieldUpdateOperationsInput | number
   awareness?: Prisma.IntFieldUpdateOperationsInput | number
   presence?: Prisma.IntFieldUpdateOperationsInput | number
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -545,51 +667,67 @@ export type AttributesUncheckedUpdateWithoutCharacterInput = {
 export type AttributesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   characterId?: boolean
+  totalPoints?: boolean
+  pointsSpent?: boolean
+  pointsRemaining?: boolean
   strength?: boolean
   speed?: boolean
   intellect?: boolean
   willpower?: boolean
   awareness?: boolean
   presence?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attributes"]>
 
 export type AttributesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   characterId?: boolean
+  totalPoints?: boolean
+  pointsSpent?: boolean
+  pointsRemaining?: boolean
   strength?: boolean
   speed?: boolean
   intellect?: boolean
   willpower?: boolean
   awareness?: boolean
   presence?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attributes"]>
 
 export type AttributesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   characterId?: boolean
+  totalPoints?: boolean
+  pointsSpent?: boolean
+  pointsRemaining?: boolean
   strength?: boolean
   speed?: boolean
   intellect?: boolean
   willpower?: boolean
   awareness?: boolean
   presence?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attributes"]>
 
 export type AttributesSelectScalar = {
   id?: boolean
   characterId?: boolean
+  totalPoints?: boolean
+  pointsSpent?: boolean
+  pointsRemaining?: boolean
   strength?: boolean
   speed?: boolean
   intellect?: boolean
   willpower?: boolean
   awareness?: boolean
   presence?: boolean
+  finalized?: boolean
 }
 
-export type AttributesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "strength" | "speed" | "intellect" | "willpower" | "awareness" | "presence", ExtArgs["result"]["attributes"]>
+export type AttributesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "totalPoints" | "pointsSpent" | "pointsRemaining" | "strength" | "speed" | "intellect" | "willpower" | "awareness" | "presence" | "finalized", ExtArgs["result"]["attributes"]>
 export type AttributesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }
@@ -608,12 +746,16 @@ export type $AttributesPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     characterId: string
+    totalPoints: number
+    pointsSpent: number
+    pointsRemaining: number
     strength: number
     speed: number
     intellect: number
     willpower: number
     awareness: number
     presence: number
+    finalized: boolean
   }, ExtArgs["result"]["attributes"]>
   composites: {}
 }
@@ -1040,12 +1182,16 @@ export interface Prisma__AttributesClient<T, Null = never, ExtArgs extends runti
 export interface AttributesFieldRefs {
   readonly id: Prisma.FieldRef<"Attributes", 'String'>
   readonly characterId: Prisma.FieldRef<"Attributes", 'String'>
+  readonly totalPoints: Prisma.FieldRef<"Attributes", 'Int'>
+  readonly pointsSpent: Prisma.FieldRef<"Attributes", 'Int'>
+  readonly pointsRemaining: Prisma.FieldRef<"Attributes", 'Int'>
   readonly strength: Prisma.FieldRef<"Attributes", 'Int'>
   readonly speed: Prisma.FieldRef<"Attributes", 'Int'>
   readonly intellect: Prisma.FieldRef<"Attributes", 'Int'>
   readonly willpower: Prisma.FieldRef<"Attributes", 'Int'>
   readonly awareness: Prisma.FieldRef<"Attributes", 'Int'>
   readonly presence: Prisma.FieldRef<"Attributes", 'Int'>
+  readonly finalized: Prisma.FieldRef<"Attributes", 'Boolean'>
 }
     
 

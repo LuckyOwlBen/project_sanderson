@@ -55,7 +55,6 @@ export interface TalentSelectionResponse {
   spentPoints: { talents: Record<string, number> };
   lockedTalents: string[];
   requiresSingerSelection: boolean;
-  tier0TalentId: string | null;
 }
 
 // ============================================================================
@@ -232,8 +231,12 @@ export class TalentService {
     }
 
     const mainPath = character.paths?.[0] || null;
-    const unlockedTalents = character.unlockedTalents || [];
-    const tier0TalentId = this.getTier0TalentForPath(mainPath);
+    let unlockedTalents = character.unlockedTalents || [];
+    
+    // Ensure mainPathTier0TalentId is included in unlockedTalents
+    if (character.mainPathTier0TalentId && !unlockedTalents.includes(character.mainPathTier0TalentId)) {
+      unlockedTalents = [...unlockedTalents, character.mainPathTier0TalentId];
+    }
 
     // Get previously selected talents (baseline = all except tier 0)
     const previouslySelected = this.getBaselineTalents(unlockedTalents, mainPath);
@@ -259,8 +262,7 @@ export class TalentService {
       unlockedTalents,
       spentPoints: { talents: spentTalents },
       lockedTalents: isCreationMode ? [] : previouslySelected,
-      requiresSingerSelection: this.requiresSingerSelection(character.ancestry, level),
-      tier0TalentId
+      requiresSingerSelection: this.requiresSingerSelection(character.ancestry, level)
     };
   }
 

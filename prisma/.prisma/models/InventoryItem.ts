@@ -409,10 +409,6 @@ export type InventoryItemUncheckedUpdateManyWithoutCharacterNestedInput = {
   deleteMany?: Prisma.InventoryItemScalarWhereInput | Prisma.InventoryItemScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type InventoryItemCreateWithoutCharacterInput = {
   id?: string
   itemId: string

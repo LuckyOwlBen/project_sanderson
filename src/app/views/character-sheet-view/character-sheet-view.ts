@@ -117,6 +117,8 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         if (params['id']) {
           this.characterId = params['id'];
           this.loadCharacter(this.characterId);
+          // Set up event listeners AFTER characterId is known (moved from top of ngOnInit)
+          this.setupEventListeners();
         }
       });
 
@@ -134,185 +136,6 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     // Individual module changes (ancestry, skills, etc.) save via their own APIs
     // Character reloads automatically when backend updates occur
     // Only save manually when GM grants occur (items, expertise, level-ups)
-
-    // Listen for item grants
-    this.websocketService.itemGrant$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        if (event && this.character && event.characterId === this.characterId) {
-          console.log('[Character Sheet] 🎁 Item granted:', event.itemId, 'x', event.quantity);
-          
-          // Add item (inventory.addItem is already idempotent - it stacks or adds new instance)
-          const added = this.character.inventory.addItem(event.itemId, event.quantity);
-          
-          if (added) {
-            this.saveCharacter();
-            // Trigger change detection in inventory view component
-            if (this.inventoryViewComponent) {
-              this.inventoryViewComponent.refreshInventoryView();
-            }
-            console.log('[Character Sheet] 🎁 Sending ack for item:', event.itemId, 'x', event.quantity);
-            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
-          } else {
-            console.warn('[Character Sheet] 🎁 Failed to add item:', event.itemId);
-            // Still ack to prevent infinite retry of invalid items
-            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
-          }
-        }
-      });
-
-    // Listen for spren grants
-    console.log('[Character Sheet] 🔔 Setting up spren grant listener...');
-    this.websocketService.sprenGrant$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(grant => {
-        console.log('[Character Sheet] ⭐⭐⭐ SPREN GRANT RECEIVED IN CHARACTER SHEET ⭐⭐⭐');
-        console.log('[Character Sheet] ⭐ Spren grant received:', grant);
-        console.log('[Character Sheet] ⭐ Current character ID:', this.characterId);
-        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
-          // Check if already has spren (idempotency)
-          if (this.character.radiantPath.hasSpren()) {
-            console.log('[Character Sheet] ⭐ Character already has spren - ignoring duplicate grant');
-            // Still ack to clear from server queue
-            this.websocketService.ackSprenGrant(this.characterId, grant.order);
-            return;
-          }
-
-          console.log('[Character Sheet] ⭐ Match! Showing spren notification');
-          this.pendingSprenGrant = grant;
-          // Auto-dismiss after 30 seconds
-          setTimeout(() => {
-            if (this.pendingSprenGrant === grant) {
-              this.pendingSprenGrant = null;
-              this.cdr.detectChanges();
-            }
-          }, 30000);
-          this.cdr.detectChanges();
-        } else {
-          console.log('[Character Sheet] ⭐ No match - character ID mismatch');
-        }
-      });
-
-    // Listen for expertise grants
-    console.log('[Character Sheet] 📚 Setting up expertise grant listener...');
-    console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
-    this.websocketService.expertiseGrant$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(grant => {
-        console.log('[Character Sheet] 📚📚📚 EXPERTISE GRANT RECEIVED IN SUBSCRIBE 📚📚📚');
-        console.log('[Character Sheet] 📚 Expertise grant received:', grant);
-        console.log('[Character Sheet] 📚 Current character ID:', this.characterId);
-        console.log('[Character Sheet] 📚 Grant character ID:', grant?.characterId);
-        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
-          // Check if already has expertise (idempotency)
-          const existingExpertises = this.characterState.getSelectedExpertises();
-          if (existingExpertises.includes(grant.expertiseName)) {
-            console.log('[Character Sheet] 📚 Character already has expertise:', grant.expertiseName, '- ignoring duplicate');
-            // Still ack to clear from server queue
-            this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
-            return;
-          }
-
-          console.log('[Character Sheet] 📚 Match! Adding expertise:', grant.expertiseName);
-          this.pendingExpertiseGrant = grant;
-          
-          // Auto-add expertise and save
-          this.characterState.addExpertise(grant.expertiseName, 'gm', undefined);
-          this.saveCharacter();
-
-          // Send acknowledgment
-          console.log('[Character Sheet] 📚 Sending ack for expertise:', grant.expertiseName);
-          this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
-          
-          // Auto-dismiss notification after 10 seconds
-          setTimeout(() => {
-            if (this.pendingExpertiseGrant === grant) {
-              this.pendingExpertiseGrant = null;
-              this.cdr.detectChanges();
-            }
-          }, 10000);
-          this.cdr.detectChanges();
-        } else {
-          console.log('[Character Sheet] 📚 No match - character ID mismatch or missing');
-        }
-      });
-    console.log('[Character Sheet] 📚 Expertise grant listener subscription complete');
-
-    // Listen for level-up grants
-    console.log('[Character Sheet] 🆙 Setting up level-up listener...');
-    this.websocketService.levelUp$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
-        console.log('[Character Sheet] 🆙 Level-up event:', event);
-        if (event && this.characterId && event.characterId === this.characterId && this.character) {
-          // Defensive guard: only accept level-up if newLevel is exactly current + 1
-          // This prevents burst grants from a mismatched queue state
-          const expectedNextLevel = this.character.level + 1;
-          if (event.newLevel !== expectedNextLevel) {
-            console.warn('[Character Sheet] 🆙 Rejecting level-up: expected level', expectedNextLevel, 'but got', event.newLevel);
-            this.websocketService.ackLevelUp(this.characterId, event.newLevel);
-            return;
-          }
-
-          console.log('[Character Sheet] 🆙 Applying level increment from', this.character.level, 'to', event.newLevel);
-          this.character.level = event.newLevel;
-          this.character.pendingLevelPoints += 1;
-          this.character.pendingLevel = true;
-          this.saveCharacter();
-          this.cdr.detectChanges();
-
-          // Acknowledge receipt
-          console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
-          this.websocketService.ackLevelUp(this.characterId, event.newLevel);
-        } else {
-          console.log('[Character Sheet] 🆙 Ignoring duplicate/old level-up event (current:', this.character?.level, 'event:', event?.newLevel, ')');
-        }
-      });
-    console.log('[Character Sheet] 🆙 Level-up listener subscription complete');
-    
-    // Set up highstorm listener
-    console.log('[Character Sheet] ⚡ Setting up highstorm listener...');
-    this.websocketService.highstorm$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[Character Sheet] ⚡ Highstorm event:', event);
-        if (event) {
-          this.isHighstormActive = event.active;
-          this.cdr.markForCheck();
-        }
-      });
-    console.log('[Character Sheet] ⚡ Highstorm listener subscription complete');
-
-    // Set up character-updated listener (sync with backend changes)
-    console.log('[Character Sheet] 🔄 Setting up character-updated listener...');
-    this.websocketService.characterUpdated$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[Character Sheet] 🔄 Character updated event received:', event);
-        if (event && event.characterId === this.characterId) {
-          console.log('[Character Sheet] 🔄 Match! Reloading character from backend...');
-          this.loadCharacter(this.characterId);
-        }
-      });
-    console.log('[Character Sheet] 🔄 Character-updated listener subscription complete');
-
-    // Set up combat start listener
-    console.log('[Character Sheet] ⚔️ Setting up combat start listener...');
-    const combatStartStream = (this.websocketService as any)?.combatStart$;
-    if (combatStartStream && typeof combatStartStream.pipe === 'function') {
-      combatStartStream
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((event: any) => {
-          console.log('[Character Sheet] ⚔️ Combat started event received:', event);
-          if (this.characterId) {
-            // Register this character for combat
-            this.combatService.registerPlayer(this.characterId);
-            console.log('[Character Sheet] ⚔️ Player registered for combat:', this.characterId);
-          }
-        });
-    }
-    console.log('[Character Sheet] ⚔️ Combat start listener subscription complete');
   }
 
   ngOnDestroy(): void {
@@ -332,8 +155,160 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private setupEventListeners(): void {
+    console.log('[Character Sheet] 🔄 Setting up event listeners for characterId:', this.characterId);
+
+    // Listen for item grants
+    this.websocketService.itemGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (event && this.character && event.characterId === this.characterId) {
+          console.log('[Character Sheet] 🎁 Item granted:', event.itemId, 'x', event.quantity);
+          const added = this.character.inventory.addItem(event.itemId, event.quantity);
+          if (added) {
+            this.saveCharacter();
+            if (this.inventoryViewComponent) {
+              this.inventoryViewComponent.refreshInventoryView();
+            }
+            console.log('[Character Sheet] 🎁 Sending ack for item:', event.itemId, 'x', event.quantity);
+            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
+          } else {
+            console.warn('[Character Sheet] 🎁 Failed to add item:', event.itemId);
+            this.websocketService.ackItemGrant(this.characterId!, event.itemId, event.quantity);
+          }
+        }
+      });
+
+    // Listen for spren grants
+    this.websocketService.sprenGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(grant => {
+        console.log('[Character Sheet] ⭐⭐⭐ SPREN GRANT RECEIVED ⭐⭐⭐');
+        console.log('[Character Sheet] ⭐ Spren grant received:', grant);
+        console.log('[Character Sheet] ⭐ Current characterId:', this.characterId, 'Grant characterId:', grant?.characterId);
+        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
+          if (this.character.radiantPath.hasSpren()) {
+            console.log('[Character Sheet] ⭐ Character already has spren - ignoring duplicate grant');
+            this.websocketService.ackSprenGrant(this.characterId, grant.order);
+            return;
+          }
+          console.log('[Character Sheet] ⭐ Match! Showing spren notification');
+          this.pendingSprenGrant = grant;
+          setTimeout(() => {
+            if (this.pendingSprenGrant === grant) {
+              this.pendingSprenGrant = null;
+              this.cdr.detectChanges();
+            }
+          }, 30000);
+          this.cdr.detectChanges();
+        } else {
+          console.log('[Character Sheet] ⭐ No match - ID mismatch');
+        }
+      });
+
+    // Listen for expertise grants
+    this.websocketService.expertiseGrant$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(grant => {
+        console.log('[Character Sheet] 📚 Expertise grant received:', grant);
+        if (grant && this.characterId && grant.characterId === this.characterId && this.character) {
+          const existingExpertises = this.characterState.getSelectedExpertises();
+          if (existingExpertises.includes(grant.expertiseName)) {
+            console.log('[Character Sheet] 📚 Already has expertise:', grant.expertiseName);
+            this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
+            return;
+          }
+          console.log('[Character Sheet] 📚 Match! Adding expertise:', grant.expertiseName);
+          this.pendingExpertiseGrant = grant;
+          this.characterState.addExpertise(grant.expertiseName, 'gm', undefined);
+          this.saveCharacter();
+          this.websocketService.ackExpertiseGrant(this.characterId, grant.expertiseName);
+          setTimeout(() => {
+            if (this.pendingExpertiseGrant === grant) {
+              this.pendingExpertiseGrant = null;
+              this.cdr.detectChanges();
+            }
+          }, 10000);
+          this.cdr.detectChanges();
+        } else {
+          console.log('[Character Sheet] 📚 No match - ID mismatch or missing');
+        }
+      });
+
+    // Listen for level-up grants
+    console.log('[Character Sheet] 🆙 Setting up level-up listener for characterId:', this.characterId);
+    this.websocketService.levelUp$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] 🆙🆙🆙 LEVEL-UP EVENT RECEIVED 🆙🆙🆙');
+        console.log('[Character Sheet] 🆙 Level-up event:', event);
+        console.log('[Character Sheet] 🆙 Current characterId:', this.characterId, 'Event characterId:', event?.characterId);
+        if (event && this.characterId && event.characterId === this.characterId && this.character) {
+          const expectedNextLevel = this.character.level + 1;
+          if (event.newLevel !== expectedNextLevel) {
+            console.warn('[Character Sheet] 🆙 Rejecting level-up: expected', expectedNextLevel, 'but got', event.newLevel);
+            this.websocketService.ackLevelUp(this.characterId, event.newLevel);
+            return;
+          }
+          console.log('[Character Sheet] 🆙 Applying level-up from', this.character.level, 'to', event.newLevel);
+          this.character.level = event.newLevel;
+          this.character.pendingLevelPoints += 1;
+          this.character.pendingLevel = true;
+          console.log('[Character Sheet] 🆙 Set pendingLevel=true, pendingLevelPoints=', this.character.pendingLevelPoints);
+          this.saveCharacter();
+          this.cdr.detectChanges();
+          console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
+          this.websocketService.ackLevelUp(this.characterId, event.newLevel);
+        } else {
+          console.log('[Character Sheet] 🆙 Ignoring: current level:', this.character?.level, '| event level:', event?.newLevel);
+        }
+      });
+
+    // Set up highstorm listener
+    this.websocketService.highstorm$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] ⚡ Highstorm event:', event);
+        if (event) {
+          this.isHighstormActive = event.active;
+          this.cdr.markForCheck();
+        }
+      });
+
+    // Set up character-updated listener
+    this.websocketService.characterUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        console.log('[Character Sheet] 🔄 Character updated event received:', event);
+        if (event && event.characterId === this.characterId) {
+          console.log('[Character Sheet] 🔄 Match! Reloading character from backend...');
+          this.loadCharacter(this.characterId);
+        }
+      });
+
+    // Set up combat start listener
+    const combatStartStream = (this.websocketService as any)?.combatStart$;
+    if (combatStartStream && typeof combatStartStream.pipe === 'function') {
+      combatStartStream
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((event: any) => {
+          console.log('[Character Sheet] ⚔️ Combat started:', event);
+          if (this.characterId) {
+            this.combatService.registerPlayer(this.characterId);
+            console.log('[Character Sheet] ⚔️ Player registered:', this.characterId);
+          }
+        });
+    }
+
+    console.log('[Character Sheet] ✅ Event listeners configured for characterId:', this.characterId);
+  }
+
   private loadCharacter(id: string): void {
     console.log('[Character Sheet] Loading character with ID:', id);
+    // CRITICAL: Always set characterId immediately so event listeners have it
+    // even if async operations haven't completed yet
+    this.characterId = id;
+    
     this.characterStorage.loadCharacter(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe((character: Character | null) => {
@@ -341,14 +316,21 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           console.log('[Character Sheet] Character loaded:', {
             name: character.name,
             level: character.level,
+            pendingLevel: character.pendingLevel,
+            pendingLevelPoints: character.pendingLevelPoints,
             ancestry: character.ancestry
           });
           this.character = character;
-          this.characterId = id; // Ensure characterId is set from route
           this.characterIdentity.setCurrentCharacterId(id); // Set identity in service for API calls
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.sessionNotes = (character as any).sessionNotes || '';
+          
+          // Clear pendingLevel when backend confirms level-up is complete (pendingLevelPoints returned to 0)
+          if (character.pendingLevel && character.pendingLevelPoints === 0) {
+            console.log('[Character Sheet] 🆙 Level-up complete - clearing pendingLevel flag');
+            character.pendingLevel = false;
+          }
           
           // Explicitly trigger change detection after loading
           this.cdr.detectChanges();
@@ -436,7 +418,11 @@ export class CharacterSheetView implements OnInit, OnDestroy {
         next: (result: { success: boolean; id: string }) => {
           if (result.success) {
             console.log('Character saved successfully:', result.id);
-            this.characterId = result.id;
+            // CRITICAL: Only update characterId if result.id is defined
+            // Avoid overwriting characterId with undefined, which breaks event listeners
+            if (result.id) {
+              this.characterId = result.id;
+            }
           }
         },
         error: (error: unknown) => {

@@ -11,6 +11,7 @@ export interface RadiantPathData {
   idealSpoken: boolean;
   surgePair: string | null;
   sprenType: string | null;
+  radiantTier0TalentId?: string | null;
 }
 
 export class RadiantPathModuleRepository extends BaseModuleRepository {
@@ -52,13 +53,15 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
    * @param sprenType - Type of spren (e.g., "Honorspren")
    * @param surgePair - The surges (e.g., "Adhesion/Gravitation")
    * @param philosophy - First ideal philosophy
+   * @param radiantTier0TalentId - The tier 0 talent ID for this radiant order
    */
   async addSpren(
     characterId: string,
     order: string,
     sprenType: string,
     surgePair: string[],
-    philosophy: string
+    philosophy: string,
+    radiantTier0TalentId?: string | null
   ): Promise<SaveResult> {
     const surgePairString = surgePair.join('/');
     
@@ -68,8 +71,10 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
         sprenType,
         surgePair: surgePairString,
         currentIdeal: 1,
-        idealSpoken: false
-      }
+        idealSpoken: false,
+        radiantTier0TalentId: radiantTier0TalentId || null
+      },
+      radiantTier0TalentId: radiantTier0TalentId || null
     });
   }
 

@@ -20,7 +20,6 @@ export interface TalentsStateDTO {
   requiresSingerSelection: boolean;
   ancestry: string | null;
   level: number;
-  tier0TalentId?: string | null;
 }
 
 export function createEmptyTalentsDTO(characterId: string): TalentsStateDTO {
@@ -36,8 +35,7 @@ export function createEmptyTalentsDTO(characterId: string): TalentsStateDTO {
     selectedTreeId: null,
     requiresSingerSelection: false,
     ancestry: null,
-    level: 1,
-    tier0TalentId: null
+    level: 1
   };
 }
 
@@ -84,8 +82,30 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
   const mainPath = mainPathName ? getTalentPath(mainPathName) : null;
   const tier0TalentId = mainPath?.talentNodes?.find(node => node.tier === 0)?.id ?? null;
 
-  const totalTalents = state.totalTalents ?? [];
+  let totalTalents = state.totalTalents ?? [];
   const pendingTalents = state.pendingTalents ?? [];
+  
+  // Include main path tier 0 talent in totalTalents if it's set and not already there
+  if (tier0TalentId && !totalTalents.includes(tier0TalentId)) {
+    totalTalents = [...totalTalents, tier0TalentId];
+  }
+  
+  // Include radiant tier 0 talent in totalTalents if bonded and not already there
+  if (character.radiantTier0TalentId && !totalTalents.includes(character.radiantTier0TalentId)) {
+    totalTalents = [...totalTalents, character.radiantTier0TalentId];
+  }
+  
+  // Include singer tier 0 talents in totalTalents if character is a singer and not already there
+  // Singers have two tier 0 talents: singer_ancestry and singer_change_form
+  if (character.ancestry?.toLowerCase() === 'singer') {
+    if (!totalTalents.includes('singer_ancestry')) {
+      totalTalents = [...totalTalents, 'singer_ancestry'];
+    }
+    if (!totalTalents.includes('singer_change_form')) {
+      totalTalents = [...totalTalents, 'singer_change_form'];
+    }
+  }
+  
   const unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
 
   const { availableTrees, selectedTreeId, requiresSingerSelection } = 
@@ -105,8 +125,7 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
     selectedTreeId,
     requiresSingerSelection,
     ancestry: character.ancestry || null,
-    level: character.level || 1,
-    tier0TalentId
+    level: character.level || 1
   };
 }
 

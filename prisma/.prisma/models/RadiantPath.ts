@@ -42,6 +42,7 @@ export type RadiantPathMinAggregateOutputType = {
   idealSpoken: boolean | null
   surgePair: string | null
   sprenType: string | null
+  radiantTier0TalentId: string | null
 }
 
 export type RadiantPathMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type RadiantPathMaxAggregateOutputType = {
   idealSpoken: boolean | null
   surgePair: string | null
   sprenType: string | null
+  radiantTier0TalentId: string | null
 }
 
 export type RadiantPathCountAggregateOutputType = {
@@ -62,6 +64,7 @@ export type RadiantPathCountAggregateOutputType = {
   idealSpoken: number
   surgePair: number
   sprenType: number
+  radiantTier0TalentId: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type RadiantPathMinAggregateInputType = {
   idealSpoken?: true
   surgePair?: true
   sprenType?: true
+  radiantTier0TalentId?: true
 }
 
 export type RadiantPathMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type RadiantPathMaxAggregateInputType = {
   idealSpoken?: true
   surgePair?: true
   sprenType?: true
+  radiantTier0TalentId?: true
 }
 
 export type RadiantPathCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type RadiantPathCountAggregateInputType = {
   idealSpoken?: true
   surgePair?: true
   sprenType?: true
+  radiantTier0TalentId?: true
   _all?: true
 }
 
@@ -199,6 +205,7 @@ export type RadiantPathGroupByOutputType = {
   idealSpoken: boolean
   surgePair: string | null
   sprenType: string | null
+  radiantTier0TalentId: string | null
   _count: RadiantPathCountAggregateOutputType | null
   _avg: RadiantPathAvgAggregateOutputType | null
   _sum: RadiantPathSumAggregateOutputType | null
@@ -232,6 +239,7 @@ export type RadiantPathWhereInput = {
   idealSpoken?: Prisma.BoolFilter<"RadiantPath"> | boolean
   surgePair?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
   sprenType?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
+  radiantTier0TalentId?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }
 
@@ -243,6 +251,7 @@ export type RadiantPathOrderByWithRelationInput = {
   idealSpoken?: Prisma.SortOrder
   surgePair?: Prisma.SortOrderInput | Prisma.SortOrder
   sprenType?: Prisma.SortOrderInput | Prisma.SortOrder
+  radiantTier0TalentId?: Prisma.SortOrderInput | Prisma.SortOrder
   character?: Prisma.CharacterOrderByWithRelationInput
 }
 
@@ -257,6 +266,7 @@ export type RadiantPathWhereUniqueInput = Prisma.AtLeast<{
   idealSpoken?: Prisma.BoolFilter<"RadiantPath"> | boolean
   surgePair?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
   sprenType?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
+  radiantTier0TalentId?: Prisma.StringNullableFilter<"RadiantPath"> | string | null
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }, "id" | "characterId">
 
@@ -268,6 +278,7 @@ export type RadiantPathOrderByWithAggregationInput = {
   idealSpoken?: Prisma.SortOrder
   surgePair?: Prisma.SortOrderInput | Prisma.SortOrder
   sprenType?: Prisma.SortOrderInput | Prisma.SortOrder
+  radiantTier0TalentId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.RadiantPathCountOrderByAggregateInput
   _avg?: Prisma.RadiantPathAvgOrderByAggregateInput
   _max?: Prisma.RadiantPathMaxOrderByAggregateInput
@@ -286,6 +297,7 @@ export type RadiantPathScalarWhereWithAggregatesInput = {
   idealSpoken?: Prisma.BoolWithAggregatesFilter<"RadiantPath"> | boolean
   surgePair?: Prisma.StringNullableWithAggregatesFilter<"RadiantPath"> | string | null
   sprenType?: Prisma.StringNullableWithAggregatesFilter<"RadiantPath"> | string | null
+  radiantTier0TalentId?: Prisma.StringNullableWithAggregatesFilter<"RadiantPath"> | string | null
 }
 
 export type RadiantPathCreateInput = {
@@ -295,6 +307,7 @@ export type RadiantPathCreateInput = {
   idealSpoken?: boolean
   surgePair?: string | null
   sprenType?: string | null
+  radiantTier0TalentId?: string | null
   character: Prisma.CharacterCreateNestedOneWithoutRadiantPathInput
 }
 
@@ -306,6 +319,7 @@ export type RadiantPathUncheckedCreateInput = {
   idealSpoken?: boolean
   surgePair?: string | null
   sprenType?: string | null
+  radiantTier0TalentId?: string | null
 }
 
 export type RadiantPathUpdateInput = {
@@ -315,6 +329,7 @@ export type RadiantPathUpdateInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   character?: Prisma.CharacterUpdateOneRequiredWithoutRadiantPathNestedInput
 }
 
@@ -326,6 +341,7 @@ export type RadiantPathUncheckedUpdateInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RadiantPathCreateManyInput = {
@@ -336,6 +352,7 @@ export type RadiantPathCreateManyInput = {
   idealSpoken?: boolean
   surgePair?: string | null
   sprenType?: string | null
+  radiantTier0TalentId?: string | null
 }
 
 export type RadiantPathUpdateManyMutationInput = {
@@ -345,6 +362,7 @@ export type RadiantPathUpdateManyMutationInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RadiantPathUncheckedUpdateManyInput = {
@@ -355,6 +373,7 @@ export type RadiantPathUncheckedUpdateManyInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RadiantPathNullableScalarRelationFilter = {
@@ -370,6 +389,7 @@ export type RadiantPathCountOrderByAggregateInput = {
   idealSpoken?: Prisma.SortOrder
   surgePair?: Prisma.SortOrder
   sprenType?: Prisma.SortOrder
+  radiantTier0TalentId?: Prisma.SortOrder
 }
 
 export type RadiantPathAvgOrderByAggregateInput = {
@@ -384,6 +404,7 @@ export type RadiantPathMaxOrderByAggregateInput = {
   idealSpoken?: Prisma.SortOrder
   surgePair?: Prisma.SortOrder
   sprenType?: Prisma.SortOrder
+  radiantTier0TalentId?: Prisma.SortOrder
 }
 
 export type RadiantPathMinOrderByAggregateInput = {
@@ -394,6 +415,7 @@ export type RadiantPathMinOrderByAggregateInput = {
   idealSpoken?: Prisma.SortOrder
   surgePair?: Prisma.SortOrder
   sprenType?: Prisma.SortOrder
+  radiantTier0TalentId?: Prisma.SortOrder
 }
 
 export type RadiantPathSumOrderByAggregateInput = {
@@ -439,6 +461,7 @@ export type RadiantPathCreateWithoutCharacterInput = {
   idealSpoken?: boolean
   surgePair?: string | null
   sprenType?: string | null
+  radiantTier0TalentId?: string | null
 }
 
 export type RadiantPathUncheckedCreateWithoutCharacterInput = {
@@ -448,6 +471,7 @@ export type RadiantPathUncheckedCreateWithoutCharacterInput = {
   idealSpoken?: boolean
   surgePair?: string | null
   sprenType?: string | null
+  radiantTier0TalentId?: string | null
 }
 
 export type RadiantPathCreateOrConnectWithoutCharacterInput = {
@@ -473,6 +497,7 @@ export type RadiantPathUpdateWithoutCharacterInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RadiantPathUncheckedUpdateWithoutCharacterInput = {
@@ -482,6 +507,7 @@ export type RadiantPathUncheckedUpdateWithoutCharacterInput = {
   idealSpoken?: Prisma.BoolFieldUpdateOperationsInput | boolean
   surgePair?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sprenType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radiantTier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -494,6 +520,7 @@ export type RadiantPathSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   idealSpoken?: boolean
   surgePair?: boolean
   sprenType?: boolean
+  radiantTier0TalentId?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radiantPath"]>
 
@@ -505,6 +532,7 @@ export type RadiantPathSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   idealSpoken?: boolean
   surgePair?: boolean
   sprenType?: boolean
+  radiantTier0TalentId?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radiantPath"]>
 
@@ -516,6 +544,7 @@ export type RadiantPathSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   idealSpoken?: boolean
   surgePair?: boolean
   sprenType?: boolean
+  radiantTier0TalentId?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radiantPath"]>
 
@@ -527,9 +556,10 @@ export type RadiantPathSelectScalar = {
   idealSpoken?: boolean
   surgePair?: boolean
   sprenType?: boolean
+  radiantTier0TalentId?: boolean
 }
 
-export type RadiantPathOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "boundOrder" | "currentIdeal" | "idealSpoken" | "surgePair" | "sprenType", ExtArgs["result"]["radiantPath"]>
+export type RadiantPathOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "boundOrder" | "currentIdeal" | "idealSpoken" | "surgePair" | "sprenType" | "radiantTier0TalentId", ExtArgs["result"]["radiantPath"]>
 export type RadiantPathInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }
@@ -553,6 +583,7 @@ export type $RadiantPathPayload<ExtArgs extends runtime.Types.Extensions.Interna
     idealSpoken: boolean
     surgePair: string | null
     sprenType: string | null
+    radiantTier0TalentId: string | null
   }, ExtArgs["result"]["radiantPath"]>
   composites: {}
 }
@@ -984,6 +1015,7 @@ export interface RadiantPathFieldRefs {
   readonly idealSpoken: Prisma.FieldRef<"RadiantPath", 'Boolean'>
   readonly surgePair: Prisma.FieldRef<"RadiantPath", 'String'>
   readonly sprenType: Prisma.FieldRef<"RadiantPath", 'String'>
+  readonly radiantTier0TalentId: Prisma.FieldRef<"RadiantPath", 'String'>
 }
     
 

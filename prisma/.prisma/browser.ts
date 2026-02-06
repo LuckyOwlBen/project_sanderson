@@ -77,3 +77,23 @@ export type UnlockedSingerForm = Prisma.UnlockedSingerFormModel
  * 
  */
 export type SpentPoints = Prisma.SpentPointsModel
+/**
+ * Model SkillsState
+ * 
+ */
+export type SkillsState = Prisma.SkillsStateModel
+/**
+ * Model CharacterTalents
+ * 
+ */
+export type CharacterTalents = Prisma.CharacterTalentsModel
+/**
+ * Model ExpertiseState
+ * 
+ */
+export type ExpertiseState = Prisma.ExpertiseStateModel
+/**
+ * Model PendingGrantQueue
+ * 
+ */
+export type PendingGrantQueue = Prisma.PendingGrantQueueModel

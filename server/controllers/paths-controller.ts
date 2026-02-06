@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { getPathsByCharacterId, setPathsByCharacterId } from '../services/paths-service';
+import TalentService from '../services/talent-service';
 import { SocketBroadcaster } from '../socket-broadcaster';
+
+const talentService = new TalentService();
 
 export async function getPaths(req: Request, res: Response): Promise<void> {
   try {
@@ -37,6 +40,9 @@ export async function setPaths(req: Request, res: Response, broadcaster: SocketB
     }
 
     const updated = await setPathsByCharacterId(id, type, sub);
+    
+    // Ensure tier 0 talent is unlocked in the UnlockedTalent table
+    talentService.ensureTier0Unlocked(id, type);
     
     // Broadcast character update via WebSocket
     broadcaster.scheduleCharacterUpdate(id);
