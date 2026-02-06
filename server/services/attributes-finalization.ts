@@ -29,18 +29,15 @@ export class AttributesFinalizationService {
       );
     }
 
-    // Move spent points to total and reset spent/remaining
-    const newTotalPoints = existing.totalPoints + existing.pointsSpent;
-    
+    // Finalize: lock in the allocated values
+    // totalPoints stays the same (don't double it), pointsRemaining becomes 0
     await updateAttributesRecord(characterId, {
-      totalPoints: newTotalPoints,
-      pointsSpent: 0,
       pointsRemaining: 0,
       finalized: true
     });
 
     console.log(
-      `[AttributesFinalization] Finalized attributes for character: ${characterId} (moved ${existing.pointsSpent} points to total)`
+      `[AttributesFinalization] Finalized attributes for character: ${characterId} with ${existing.pointsSpent} points allocated`
     );
   }
 

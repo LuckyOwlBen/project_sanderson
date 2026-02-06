@@ -64,34 +64,14 @@ export function createEmptyAttributesDTO(characterId: string): AttributesStateDT
 export async function getAttributesByCharacterId(characterId: string): Promise<AttributesStateDTO> {
   console.log(`[Attributes] Getting attributes for character: ${characterId}`);
   
-  // Get character level to determine correct point allocation
-  const level = await getCharacterLevel(characterId);
-  console.log(`[Attributes] Character level: ${level}`);
-  
-  const totalPoints = pointAllocationService.getTotalAttributePointsAvailable(level);
-  console.log(`[Attributes] Total points available for level ${level}: ${totalPoints}`);
-
-  // Load or create attributes record from database
+  // Load attributes record from database (created during character creation)
   let attributesRecord = await getAttributesRecord(characterId);
   console.log(`[Attributes] Loaded attributes record:`, attributesRecord);
 
-  // If no record exists, create one with defaults
+  // Record must exist (created during character creation at level 1)
+  // Trust the database values - levelup-manager has already set pointsRemaining correctly
   if (!attributesRecord) {
-    console.log(`[Attributes] No record found, creating with totalPoints: ${totalPoints}`);
-    attributesRecord = await createAttributesRecord({
-      characterId,
-      totalPoints,
-      pointsSpent: 0,
-      pointsRemaining: totalPoints,
-      strength: 0,
-      speed: 0,
-      intellect: 0,
-      willpower: 0,
-      awareness: 0,
-      presence: 0,
-      finalized: false
-    });
-    console.log(`[Attributes] Created attributes record:`, attributesRecord);
+    throw new Error(`Attributes record not found for character ${characterId}. Character may not have completed creation flow.`);
   }
 
   // Calculate derived attributes
@@ -145,26 +125,10 @@ export async function setAttributesByCharacterId(
     throw new Error(validation.errors.join(', '));
   }
 
-  // Get character level to determine correct point allocation
-  const level = await getCharacterLevel(characterId);
-  const totalPoints = pointAllocationService.getTotalAttributePointsAvailable(level);
-
-  // Load or create attribute record
+  // Load attribute record (must exist from character creation)
   let attributesRecord = await getAttributesRecord(characterId);
   if (!attributesRecord) {
-    attributesRecord = await createAttributesRecord({
-      characterId,
-      totalPoints,
-      pointsSpent: 0,
-      pointsRemaining: totalPoints,
-      strength: 0,
-      speed: 0,
-      intellect: 0,
-      willpower: 0,
-      awareness: 0,
-      presence: 0,
-      finalized: false
-    });
+    throw new Error(`Attributes record not found for character ${characterId}`);
   }
 
   // Check if finalized

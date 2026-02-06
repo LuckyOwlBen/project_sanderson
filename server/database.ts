@@ -79,6 +79,15 @@ export interface CharacterData {
     focus: { current: number; max: number };
     investiture: { current: number; max: number; isActive: boolean };
   };
+  radiantPath?: {
+    boundOrder: string | null;
+    currentIdeal: number;
+    idealSpoken: boolean;
+    surgePair: string | null;
+    sprenType: string | null;
+    radiantTier0TalentId?: string | null;
+  };
+  radiantTier0TalentId?: string | null;
 }
 
 export interface AttributesRecord {

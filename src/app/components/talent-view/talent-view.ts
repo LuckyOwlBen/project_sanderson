@@ -97,6 +97,7 @@ export class TalentView implements OnInit, OnDestroy {
   private characterLevel: number = 1;
   private requiresSingerSelection = false;
   private baseTalentPoints = 0;
+  private characterRadiantPath: { boundOrder: string | null; currentIdeal: number; idealSpoken: boolean; surgePair: string | null; sprenType: string | null } | null = null;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -361,9 +362,11 @@ export class TalentView implements OnInit, OnDestroy {
         next: ([state, paths]) => {
           console.log('[TalentView] Talent state loaded:', state);
           console.log('[TalentView] Paths loaded:', paths);
+          console.log('[TalentView] Radiant path from API:', (state as any).radiantPath);
           this.characterPaths = this.normalizePaths(paths);
           this.characterAncestry = state.ancestry ?? null;
           this.characterLevel = state.level ?? 1;
+          this.characterRadiantPath = (state as any).radiantPath ?? null;
           this.isLoadingTalentData = false;
 
           const totalTalents = state.totalTalents ?? [];
@@ -378,32 +381,19 @@ export class TalentView implements OnInit, OnDestroy {
           // Sync API talent state back to character object
           if (this.character) {
             this.character.unlockedTalents = new Set(this.unlockedTalents);
+            // Note: character.radiantPath is already loaded from storage with correct state
+            // The API radiantPath is for informational purposes only
           }
 
           // Load trees from backend-provided tree IDs
-          const availableTreeIds = state.availableTrees ?? [];
-          console.log('[TalentView] Available tree IDs from API:', availableTreeIds);
+          // Note: We don't directly load trees from the API response because:
+          // - Radiant sub-trees need special handling (paths[0] extraction)
+          // - Surge trees need to be loaded from API radiant path data
+          // Instead, let loadAvailableTrees() handle the full tree build logic
           
-          this.availableTrees = availableTreeIds
-            .map(treeId => getTalentTree(treeId))
-            .filter(tree => tree !== undefined) as TalentTree[];
-          
-          console.log('[TalentView] Resolved trees:', this.availableTrees.map(t => t.pathName));
-
-          // Set selected tree from API or default to first
-          if (state.selectedTreeId) {
-            const selectedTree = getTalentTree(state.selectedTreeId);
-            if (selectedTree) {
-              this.selectedTree = selectedTree;
-            } else if (this.availableTrees.length > 0) {
-              this.selectedTree = this.availableTrees[0];
-            }
-          } else if (this.availableTrees.length > 0) {
-            this.selectedTree = this.availableTrees[0];
-          }
-
           this.sliceLoaded = true;
           this.loadCorePathOptions();
+          this.loadAvailableTrees();  // This loads all trees including surges
           this.calculateAvailablePoints();
           this.updateValidation();
 
@@ -652,14 +642,19 @@ export class TalentView implements OnInit, OnDestroy {
     }
 
     // Include Surge trees if First Ideal is spoken
-    if (this.character.radiantPath.hasSpokenIdeal()) {
-      const surgeTrees = this.character.radiantPath.getSurgeTrees();
-      surgeTrees.forEach(surgeTreeId => {
-        const surgeTree = getTalentTree(surgeTreeId);
-        if (surgeTree && !addedTreeNames.has(surgeTree.pathName.toLowerCase())) {
+    // Use the radiant path data from API to determine surge trees
+    if (this.characterRadiantPath?.idealSpoken && this.characterRadiantPath?.surgePair) {
+      console.log('[TalentView] Loading surge trees from API data:', this.characterRadiantPath.surgePair);
+      // surgePair is stored with "/" separators like "DIVISION/ABRASION"
+      const surgePairs = this.characterRadiantPath.surgePair.split('/').filter(s => s.trim());
+      surgePairs.forEach(surgeName => {
+        const treeId = surgeName.toLowerCase().trim();
+        const surgeTree = getTalentTree(treeId);
+        if (surgeTree && !addedTreeNames.has(treeId)) {
+          console.log('[TalentView] Adding surge tree from API radiantPath:', treeId);
           this.autoUnlockTier0Talents(surgeTree);
           tempTrees.push(surgeTree);
-          addedTreeNames.add(surgeTree.pathName.toLowerCase());
+          addedTreeNames.add(treeId);
         }
       });
     }
@@ -768,8 +763,10 @@ export class TalentView implements OnInit, OnDestroy {
     // Base points provided by server for this level
     const totalPoints = this.baseTalentPoints ?? 0;
     
-    // Only main path tier 0 talent is free
+    // Tier 0 talents that are free (don't cost points)
     const tier0Talents = new Set<string>();
+    
+    // Main path tier 0 talent is free
     const mainPath = this.characterPaths?.type;
     if (mainPath) {
       const mainPathDef = getTalentPath(mainPath);
@@ -777,6 +774,35 @@ export class TalentView implements OnInit, OnDestroy {
       if (coreTier0) {
         tier0Talents.add(coreTier0.id);
       }
+    }
+
+    // Radiant key talent is free
+    if (this.character.radiantPath.hasSpren()) {
+      const orderTreeId = this.character.radiantPath.getOrderTree();
+      if (orderTreeId) {
+        const orderPath = getTalentPath(orderTreeId);
+        if (orderPath?.paths?.[0]) {
+          const radiantTier0 = orderPath.paths[0].nodes.find(t => t.tier === 0);
+          if (radiantTier0) {
+            tier0Talents.add(radiantTier0.id);
+          }
+        }
+      }
+    }
+
+    // Surge tree tier 0 talents are free
+    if (this.characterRadiantPath?.idealSpoken && this.characterRadiantPath?.surgePair) {
+      const surgePairs = this.characterRadiantPath.surgePair.split('/').filter(s => s.trim());
+      surgePairs.forEach(surgeName => {
+        const treeId = surgeName.toLowerCase().trim();
+        const surgeTree = getTalentTree(treeId);
+        if (surgeTree) {
+          const surgeTier0 = surgeTree.nodes.find(t => t.tier === 0);
+          if (surgeTier0) {
+            tier0Talents.add(surgeTier0.id);
+          }
+        }
+      });
     }
 
     let newTalents = 0;

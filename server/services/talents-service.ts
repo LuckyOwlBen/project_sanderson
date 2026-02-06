@@ -6,6 +6,15 @@ import {
 } from '../database';
 import { getTalentPath } from '../character/talents/talentTrees/talentTrees';
 import { getPathsByCharacterId } from './paths-service';
+import { RADIANT_TIER0_TALENTS } from './paths-service';
+
+export interface RadiantPathData {
+  boundOrder: string | null;
+  currentIdeal: number;
+  idealSpoken: boolean;
+  surgePair: string | null;
+  sprenType: string | null;
+}
 
 export interface TalentsStateDTO {
   characterId: string;
@@ -20,6 +29,7 @@ export interface TalentsStateDTO {
   requiresSingerSelection: boolean;
   ancestry: string | null;
   level: number;
+  radiantPath?: RadiantPathData;
 }
 
 export function createEmptyTalentsDTO(characterId: string): TalentsStateDTO {
@@ -91,8 +101,14 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
   }
   
   // Include radiant tier 0 talent in totalTalents if bonded and not already there
-  if (character.radiantTier0TalentId && !totalTalents.includes(character.radiantTier0TalentId)) {
-    totalTalents = [...totalTalents, character.radiantTier0TalentId];
+  // Use the stored ID if available, otherwise derive from boundOrder
+  let radiantTier0TalentId: string | null = character.radiantTier0TalentId || null;
+  if (!radiantTier0TalentId && character.radiantPath?.boundOrder) {
+    radiantTier0TalentId = RADIANT_TIER0_TALENTS[character.radiantPath.boundOrder.toLowerCase()] || null;
+  }
+  if (radiantTier0TalentId && !totalTalents.includes(radiantTier0TalentId)) {
+    totalTalents = [...totalTalents, radiantTier0TalentId];
+    console.log('[TalentsService] Added radiant tier 0 talent to totalTalents:', radiantTier0TalentId);
   }
   
   // Include singer tier 0 talents in totalTalents if character is a singer and not already there
@@ -113,6 +129,18 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
   
   console.log('[TalentsService] Determined trees:', { availableTrees, selectedTreeId, requiresSingerSelection });
 
+  // Build radiant path data for response
+  let radiantPathData: RadiantPathData | undefined;
+  if (character.radiantPath) {
+    radiantPathData = {
+      boundOrder: character.radiantPath.boundOrder || null,
+      currentIdeal: character.radiantPath.currentIdeal || 1,
+      idealSpoken: character.radiantPath.idealSpoken || false,
+      surgePair: character.radiantPath.surgePair || null,
+      sprenType: character.radiantPath.sprenType || null
+    };
+  }
+
   return {
     characterId,
     totalPoints: state.totalPoints,
@@ -125,7 +153,8 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
     selectedTreeId,
     requiresSingerSelection,
     ancestry: character.ancestry || null,
-    level: character.level || 1
+    level: character.level || 1,
+    radiantPath: radiantPathData
   };
 }
 
@@ -287,6 +316,24 @@ function determineAvailableTrees(
       addedTreeNames.add('singer');
     }
   }
+
+  // Add Radiant Order tree if spren is bound
+  if (character.radiantPath?.boundOrder) {
+    console.log('[TalentsService] Character has radiant order:', character.radiantPath.boundOrder);
+    const orderTree = getTalentPath(character.radiantPath.boundOrder);
+    if (orderTree?.paths && orderTree.paths.length > 0) {
+      const radiantOrderTree = orderTree.paths[0];
+      const treeId = radiantOrderTree.pathName.toLowerCase();
+      if (!addedTreeNames.has(treeId)) {
+        console.log('[TalentsService] Adding radiant order tree:', treeId);
+        treeIds.push(treeId);
+        addedTreeNames.add(treeId);
+      }
+    }
+  }
+
+  // NOTE: Surge trees will be added by the frontend based on radiantPath.idealSpoken and radiantPath.surgePair
+  // This allows the frontend access to its talent tree registry
 
   // Determine selected tree (singer tree for singers, otherwise first available)
   let selectedTreeId: string | null = null;

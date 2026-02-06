@@ -128,17 +128,14 @@ export async function finalizeSkillsForCharacter(characterId: string): Promise<v
     );
   }
 
-  // Move spent points to total and reset spent/remaining
-  const newTotalPoints = existing.totalPoints + existing.pointsSpent;
-  
+  // Finalize: lock in the allocated values
+  // totalPoints stays the same (don't double it), pointsRemaining becomes 0
   await updateSkillsStateRecord(characterId, {
-    totalPoints: newTotalPoints,
-    pointsSpent: 0,
     pointsRemaining: 0,
     finalized: true
   });
 
   console.log(
-    `[SkillsFinalization] Finalized skills for character: ${characterId} (moved ${existing.pointsSpent} points to total)`
+    `[SkillsFinalization] Finalized skills for character: ${characterId} with ${existing.pointsSpent} points allocated`
   );
 }

@@ -214,11 +214,12 @@ export class LevelUpManager {
         }
       }
 
-      // Update CharacterTalents: add points to pointsRemaining, set finalized: false
+      // Update CharacterTalents: add points to both totalPoints and pointsRemaining, set finalized: false
       if (talentPoints > 0) {
         const talentsRecord = await getTalentsStateRecord(characterId);
         if (talentsRecord) {
           await updateTalentsStateRecord(characterId, {
+            totalPoints: (talentsRecord.totalPoints || 0) + talentPoints,
             pointsRemaining: (talentsRecord.pointsRemaining || 0) + talentPoints,
             finalized: false
           });
