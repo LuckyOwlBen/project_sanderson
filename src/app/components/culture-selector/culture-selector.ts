@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CulturalInterface } from '../../character/culture/culturalInterface';
+import { Ancestry } from '../../character/ancestry/ancestry';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -42,6 +43,7 @@ export class CultureSelector implements OnInit, OnDestroy {
   selectedCultureNames: string[] = [];
   availableCultureInfos: CultureInfo[] = [];
   selectedCultureInfos: CultureInfo[] = [];
+  currentAncestry: string | null = null;
   showValidation = false;
   isLoading = false;
   isWaitingForIdentity = false;
@@ -72,12 +74,23 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   private updateCultureLists(): void {
+    // Filter by both selection status and ancestry restrictions
     this.availableCultureInfos = this.allCultureInfos.filter(info => 
-      !this.selectedCultureNames.includes(info.culture.name)
+      !this.selectedCultureNames.includes(info.culture.name) &&
+      this.isCultureAvailable(info.culture)
     );
     this.selectedCultureInfos = this.allCultureInfos.filter(info => 
       this.selectedCultureNames.includes(info.culture.name)
     );
+  }
+
+  private isCultureAvailable(culture: CulturalInterface): boolean {
+    // If culture has ancestry restriction, only show if it matches current ancestry
+    if (culture.restrictedToAncestry) {
+      return culture.restrictedToAncestry === this.currentAncestry;
+    }
+    // If no restriction, culture is available to all
+    return true;
   }
 
   ngOnInit(): void {
@@ -106,12 +119,14 @@ export class CultureSelector implements OnInit, OnDestroy {
     this.cultureApiService.getCultures(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (cultureNames) => {
-          console.log('[CultureSelector] Received cultures from API:', cultureNames);
-          this.selectedCultureNames = cultureNames || [];
+        next: (response) => {
+          console.log('[CultureSelector] Received cultures from API:', response);
+          this.currentAncestry = response.ancestry;
+          this.selectedCultureNames = response.cultures || [];
           this.updateCultureLists();
           this.updateValidation();
           this.isWaitingForIdentity = false;
+          console.log('[CultureSelector] Current ancestry:', this.currentAncestry);
           console.log('[CultureSelector] Updated selectedCultureNames:', this.selectedCultureNames);
           console.log('[CultureSelector] Available cultures:', this.availableCultureInfos.length);
           console.log('[CultureSelector] Selected cultures:', this.selectedCultureInfos.length);
@@ -119,6 +134,7 @@ export class CultureSelector implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('[CultureSelector] Failed to load cultures:', err);
+          this.currentAncestry = null;
           this.selectedCultureNames = [];
           this.updateCultureLists();
           this.updateValidation();

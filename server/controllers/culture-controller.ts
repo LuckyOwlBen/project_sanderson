@@ -9,6 +9,7 @@ export async function getCultures(req: Request, res: Response): Promise<void> {
 
     res.json({
       success: true,
+      ancestry: result.ancestry ?? null,
       cultures: result.cultures ?? []
     });
   } catch (error) {
@@ -42,6 +43,7 @@ export async function setCultures(req: Request, res: Response, broadcaster: Sock
 
     res.json({
       success: true,
+      ancestry: updated.ancestry ?? null,
       cultures: updated.cultures ?? []
     });
   } catch (error) {
