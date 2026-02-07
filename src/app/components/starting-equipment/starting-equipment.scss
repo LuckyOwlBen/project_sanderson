@@ -457,6 +457,75 @@
   }
 }
 
+// Kit Selector Dropdown Styles
+.kit-selector {
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  ::ng-deep {
+    // Style the form field outline
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+
+    // Style the select trigger
+    .mat-mdc-select-trigger {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    // Style the label
+    .mat-mdc-form-field-label {
+      color: #bbb;
+    }
+
+    // Style focused state
+    .mat-focused .mat-mdc-form-field-label {
+      color: #5dade2;
+    }
+  }
+}
+
+// Kit option styling in dropdown
+.kit-option-name {
+  font-weight: 600;
+  display: inline-block;
+  min-width: 150px;
+  color: #fff;
+}
+
+.kit-option-currency {
+  color: #bbb;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+// No Kit Selected Message
+.no-kit-selected {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--gpSystemDarkerGrey);
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+  margin-bottom: 1rem;
+  color: #fff;
+
+  mat-icon {
+    color: #ff9800;
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 768px) {
   .starting-equipment-container {
     padding-bottom: 6rem;

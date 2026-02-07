@@ -3,6 +3,7 @@ import {
   getEquipment,
   setEquipment,
   purchaseItem,
+  sellItem,
   applyStartingKit,
   refundStartingKit,
   getAvailableKits,
@@ -40,6 +41,15 @@ export default function createEquipmentRoute(app: Express, broadcaster: SocketBr
    * @returns { success: boolean, inventory: InventoryDTO, currency: number }
    */
   app.post('/api/characters/:id/equipment/purchase', (req, res) => purchaseItem(req, res, broadcaster));
+
+  /**
+   * POST /api/characters/:id/equipment/sell
+   * Sell an item for a character
+   *
+   * @body { itemId: string, quantity: number }
+   * @returns { success: boolean, inventory: InventoryDTO, currency: number }
+   */
+  app.post('/api/characters/:id/equipment/sell', (req, res) => sellItem(req, res, broadcaster));
 
   /**
    * POST /api/characters/:id/equipment/apply-kit

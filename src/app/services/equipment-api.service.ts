@@ -106,6 +106,11 @@ export class EquipmentApiService {
       .post<PurchaseResponse>(`${this.charactersUrl}/${characterId}/equipment/purchase`, { itemId, quantity });
   }
 
+  sellItem(characterId: string, itemId: string, quantity?: number): Observable<PurchaseResponse> {
+    return this.http
+      .post<PurchaseResponse>(`${this.charactersUrl}/${characterId}/equipment/sell`, { itemId, quantity });
+  }
+
   applyStartingKit(characterId: string, kitId: string): Observable<KitResponse> {
     return this.http
       .post<KitResponse>(`${this.charactersUrl}/${characterId}/equipment/apply-kit`, { kitId });

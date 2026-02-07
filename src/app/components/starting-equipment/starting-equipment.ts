@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +10,9 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject, takeUntil, filter, take } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { Subject, takeUntil, filter, take, switchMap } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
 import { EquipmentApiService, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem, EquipmentResponse } from '../../services/equipment-api.service';
@@ -20,6 +23,7 @@ import { ItemType } from '../../character/inventory/inventoryItem';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -28,6 +32,8 @@ import { ItemType } from '../../character/inventory/inventoryItem';
     MatDividerModule,
     MatTooltipModule,
     MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
   templateUrl: './starting-equipment.html',
   styleUrls: ['./starting-equipment.scss']
@@ -48,7 +54,6 @@ export class StartingEquipment implements OnInit, OnDestroy {
   startingKit: StartingKitDTO | null = null;
   hasRefundedKit = false;
   private defaultKitId: string | null = null;
-  private autoAppliedDefaultKit = false;
   
   availableItems: InventoryItem[] = [];
   filteredItems: InventoryItem[] = [];
@@ -89,7 +94,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
         }
       });
 
-    // Load available kits
+    // Load available kits (no auto-apply, user must choose)
     this.loadAvailableKits();
 
     // Load store items
@@ -108,7 +113,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
           }
           this.updateValidation();
           this.isWaitingForIdentity = false;
-          this.tryAutoApplyDefaultKit();
+          // No auto-apply - user must choose a kit
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -125,15 +130,10 @@ export class StartingEquipment implements OnInit, OnDestroy {
         next: (kits) => {
           this.availableKits = kits;
           const militaryKit = kits.find((kit) => kit.id === 'military-kit');
-          const defaultKit = militaryKit ?? kits[0] ?? null;
-          this.defaultKitId = defaultKit?.id ?? null;
-
-          if (defaultKit && !this.startingKit) {
-            this.startingKit = defaultKit;
-            this.selectedKitId = defaultKit.id;
-          }
-
-          this.tryAutoApplyDefaultKit();
+          this.defaultKitId = militaryKit?.id ?? kits[0]?.id ?? null;
+          // Do NOT auto-select a kit - let user choose
+          this.selectedKitId = null;
+          this.startingKit = null;
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -167,22 +167,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private tryAutoApplyDefaultKit(): void {
-    if (this.autoAppliedDefaultKit) return;
-    if (!this.currentCharacterId || !this.defaultKitId) return;
 
-    const hasItems = this.inventoryItems.length > 0 || (this.currentInventory?.items?.length ?? 0) > 0;
-    if (hasItems) {
-      this.autoAppliedDefaultKit = true;
-      return;
-    }
-
-    const kit = this.availableKits.find((k) => k.id === this.defaultKitId);
-    if (!kit) return;
-
-    this.autoAppliedDefaultKit = true;
-    this.applyKitForCharacter(this.currentCharacterId, kit.id, kit);
-  }
 
   private applyKitForCharacter(characterId: string, kitId: string, kit: StartingKitDTO): void {
     this.equipmentApi.applyStartingKit(characterId, kitId)
@@ -210,10 +195,41 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   applyKit(kitId: string): void {
     const kit = this.availableKits.find(k => k.id === kitId);
-    if (!kit) return;
+    if (!kit || !this.currentCharacterId) return;
 
-    if (!this.currentCharacterId) return;
-    this.applyKitForCharacter(this.currentCharacterId, kitId, kit);
+    // If a kit is already applied, refund it first (clean slate)
+    if (this.selectedKitId && this.selectedKitId !== kitId) {
+      this.equipmentApi.refundStartingKit(this.currentCharacterId)
+        .pipe(
+          takeUntil(this.destroy$),
+          switchMap(() => {
+            // After refund completes, apply the new kit
+            return this.equipmentApi.applyStartingKit(this.currentCharacterId!, kitId);
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.inventory) {
+              this.currentInventory = response.inventory;
+              this.inventoryItems = response.inventoryItems ?? [];
+              this.currentCurrency = response.currency ?? 0;
+              this.selectedKitId = kitId;
+              this.startingKit = kit;
+              this.hasRefundedKit = false;
+              console.log('Kit switched successfully (refunded old kit, applied new kit)');
+              this.cdr.markForCheck();
+            } else {
+              console.error('Failed to switch kit:', response.error);
+            }
+          },
+          error: (err) => {
+            console.error('Error switching kit:', err);
+          }
+        });
+    } else {
+      // No existing kit, just apply the new one
+      this.applyKitForCharacter(this.currentCharacterId, kitId, kit);
+    }
   }
 
   refundStartingKit(): void {
@@ -312,10 +328,12 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   getAllInventoryItems(): { item: InventoryItem; quantity: number }[] {
-    return this.inventoryItems.map((item) => ({
-      item,
-      quantity: item.quantity
-    }));
+    return this.inventoryItems
+      .filter(item => item && item.id && item.name && item.price !== undefined)
+      .map((item) => ({
+        item,
+        quantity: item.quantity
+      }));
   }
 
   getItemIcon(item: InventoryItem): string {
@@ -368,7 +386,30 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   sellItem(itemId: string): void {
-    console.warn('Selling items is not yet implemented');
+    this.identityService.currentCharacterId$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(characterId => {
+        if (!characterId) return;
+
+        this.equipmentApi.sellItem(characterId, itemId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success && response.inventory) {
+                this.currentInventory = response.inventory;
+                this.inventoryItems = response.inventoryItems ?? [];
+                this.currentCurrency = response.currency ?? 0;
+                console.log('Item sold successfully');
+                this.cdr.markForCheck();
+              } else {
+                console.error('Failed to sell item:', response.error);
+              }
+            },
+            error: (err) => {
+              console.error('Error selling item:', err);
+            }
+          });
+      });
   }
 
   getStartingKitItems(): { item: InventoryItem; quantity: number }[] {
@@ -393,6 +434,10 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   previousStep(): void {
     this.router.navigate(['/character-creator-view/talents']);
+  }
+
+  compareKits(k1: string | null, k2: string | null): boolean {
+    return k1 === k2;
   }
 
   // Persist hook for CharacterCreatorView

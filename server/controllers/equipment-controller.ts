@@ -3,6 +3,7 @@ import {
   getEquipmentByCharacterId,
   setEquipmentByCharacterId,
   purchaseItemForCharacter,
+  sellItemForCharacter,
   applyStartingKitForCharacter,
   refundStartingKitForCharacter,
   getAllStartingKits,
@@ -112,6 +113,54 @@ export async function purchaseItem(req: Request, res: Response, broadcaster: Soc
     });
   } catch (error) {
     console.error('Error purchasing item:', error);
+    res.status(500).json({
+      success: false,
+      error: typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error)
+    });
+  }
+}
+
+/**
+ * POST /api/characters/:id/equipment/sell
+ * Sell an item for a character (remove from inventory, gain currency)
+ */
+export async function sellItem(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { itemId, quantity } = req.body ?? {};
+
+    if (!itemId) {
+      res.status(400).json({
+        success: false,
+        error: 'itemId is required'
+      });
+      return;
+    }
+
+    const result = await sellItemForCharacter(id, itemId, quantity ?? 1);
+
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        error: result.error || 'Failed to sell item'
+      });
+      return;
+    }
+    
+    // Broadcast character update via WebSocket
+    broadcaster.scheduleCharacterUpdate(id);
+
+    res.json({
+      success: true,
+      inventory: result.inventory,
+      inventoryItems: result.inventoryItems,
+      currency: result.currency,
+      message: result.message
+    });
+  } catch (error) {
+    console.error('Error selling item:', error);
     res.status(500).json({
       success: false,
       error: typeof error === 'object' && error !== null && 'message' in error
