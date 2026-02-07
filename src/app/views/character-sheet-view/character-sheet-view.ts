@@ -31,8 +31,9 @@ import { CharacterResourcesBar } from '../../components/shared/character-resourc
 import { CharacterSkillsCard } from '../../components/shared/character-skills-card/character-skills-card';
 import { CraftingView } from '../../components/crafting-view/crafting-view';
 import { FormSelectorComponent } from '../../components/shared/form-selector/form-selector';
-import { PetDisplayComponent } from '../../components/shared/pet-display/pet-display.component';
+import { CompanionDetailComponent } from '../../components/shared/companion-detail/companion-detail.component';
 import { InventoryItem } from '../../character/inventory/inventoryItem';
+import { PetCompanion } from '../../character/companions/petCompanion';
 import { SkillType } from '../../character/skills/skillTypes';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
@@ -63,7 +64,7 @@ import { CombatService } from "../../services/combat.service";
     CharacterSkillsCard,
     CraftingView,
     FormSelectorComponent,
-    PetDisplayComponent,
+    CompanionDetailComponent,
     CombatTurnSpeedSelectorComponent
 ],
   templateUrl: './character-sheet-view.html',
@@ -666,5 +667,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
       return equippedAccessory;
     }
     return null;
+  }
+
+  getActivePetCompanion(): PetCompanion | undefined {
+    if (!this.character) return undefined;
+    return this.character.getActivePet();
   }
 }

@@ -235,6 +235,20 @@ export const ALL_ITEMS: InventoryItem[] = [
     properties: { species: 'Training Creature', behavior: 'Friendly', intelligence: 'animal', movementSpeed: 30 }
   },
   {
+    id: 'larkin',
+    name: 'Larkin',
+    type: 'pet',
+    description: 'A small insectoid companion that can drain Investiture. Found in high places acting as a scout and warrior.',
+    rarity: 'reward-only',
+    price: 0, // Cannot be purchased
+    weight: 15,
+    quantity: 0,
+    stackable: false,
+    equipable: true,
+    slot: 'accessory',
+    properties: { species: 'Larkin', behavior: 'Alert and efficient', intelligence: 'animal', flyingSpeed: 20, movementSpeed: 30 }
+  },
+  {
     id: 'leather',
     name: 'Leather',
     type: 'equipment',

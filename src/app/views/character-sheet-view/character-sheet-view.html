@@ -153,13 +153,16 @@
                 <h3>Active Companion</h3>
               </div>
               <div class="companions-content">
-                <ng-container *ngIf="getEquippedPet(); else noPet">
-                  <app-pet-display [pet]="getEquippedPet()!" [character]="character"></app-pet-display>
+                <ng-container *ngIf="getActivePetCompanion(); else noPet">
+                  <app-companion-detail 
+                    [companion]="getActivePetCompanion()!" 
+                    [isActive]="true">
+                  </app-companion-detail>
                 </ng-container>
                 <ng-template #noPet>
                   <div class="no-companion-message">
                     <mat-icon>sentiment_satisfied_alt</mat-icon>
-                    <p>No active companion. Grant yourself a pet from the GM dashboard!</p>
+                    <p>No active companion. Equip a pet from your inventory to bond with it!</p>
                   </div>
                 </ng-template>
               </div>

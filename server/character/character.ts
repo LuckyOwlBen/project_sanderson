@@ -15,6 +15,7 @@ import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
 import { TalentNode } from './talents/talentInterface';
+import { PetCompanion } from './companions/petCompanion';
 
 // Import new character modules
 import {
@@ -152,6 +153,12 @@ export class Character {
   set sessionNotes(value: string) { this.metadataModule.sessionNotes = value; }
   get lastModified(): string { return this.metadataModule.lastModified; }
   set lastModified(value: string) { this.metadataModule.lastModified = value; }
+
+  // ============================================================================
+  // MODULE 16: COMPANIONS - Pet and companion management
+  // ============================================================================
+  private companions: Map<string, PetCompanion> = new Map();
+  private activePetId: string | undefined;
 
   // ============================================================================
   // INTERNAL MANAGERS (supporting calculations)
@@ -446,4 +453,83 @@ export class Character {
     this.combatModule.clearStanceBonuses();
   }
 
+  // ============================================================================
+  // COMPANIONS MODULE - Pet and companion management
+  // ============================================================================
+
+  /**
+   * Add or bond a companion by pet ID
+   * Creates a new PetCompanion instance from the stat block
+   */
+  addCompanion(petId: string): PetCompanion | undefined {
+    const { createPetCompanion } = require('./inventory/petDefinitions');
+    const companion = createPetCompanion(petId);
+    if (companion) {
+      this.companions.set(petId, companion);
+    }
+    return companion;
+  }
+
+  /**
+   * Get a bonded companion by pet ID
+   */
+  getCompanion(petId: string): PetCompanion | undefined {
+    return this.companions.get(petId);
+  }
+
+  /**
+   * Get all bonded companions
+   */
+  getAllCompanions(): PetCompanion[] {
+    return Array.from(this.companions.values());
+  }
+
+  /**
+   * Summon a companion to active status (equipped)
+   * Only one companion can be active at a time
+   */
+  summonCompanion(petId: string): PetCompanion | undefined {
+    let companion = this.companions.get(petId);
+    if (!companion) {
+      companion = this.addCompanion(petId);
+    }
+    if (companion) {
+      this.activePetId = petId;
+    }
+    return companion;
+  }
+
+  /**
+   * Dismiss the active companion
+   */
+  dismissCompanion(): void {
+    this.activePetId = undefined;
+  }
+
+  /**
+   * Get the currently active/summoned companion
+   */
+  getActivePet(): PetCompanion | undefined {
+    if (!this.activePetId) return undefined;
+    return this.companions.get(this.activePetId);
+  }
+
+  /**
+   * Get the ID of the active pet
+   */
+  getActivePetId(): string | undefined {
+    return this.activePetId;
+  }
+
+  /**
+   * Remove a bonded companion entirely
+   */
+  removeCompanion(petId: string): void {
+    if (this.activePetId === petId) {
+      this.dismissCompanion();
+    }
+    this.companions.delete(petId);
+  }
+
 }
+

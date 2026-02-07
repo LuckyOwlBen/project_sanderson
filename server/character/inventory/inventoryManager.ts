@@ -147,6 +147,11 @@ export class InventoryManager {
       });
     }
 
+    // Special handling for pets
+    if (item.type === 'pet' && item.slot === 'accessory' && this.character) {
+      this.character.summonCompanion(itemId);
+    }
+
     return true;
   }
 
@@ -249,6 +254,11 @@ export class InventoryManager {
       // Remove bonuses
       if (this.bonusManager) {
         this.bonusManager.bonuses.removeBonus(`equipment:${itemId}`);
+      }
+
+      // Special handling for pets
+      if (item.type === 'pet' && item.slot === 'accessory' && this.character) {
+        this.character.dismissCompanion();
       }
 
       return true;

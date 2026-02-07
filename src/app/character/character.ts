@@ -14,6 +14,8 @@ import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilit
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
+import { PetCompanion } from './companions/petCompanion';
+import { getPetStatBlock } from './inventory/petDefinitions';
 
 
 export class Character {
@@ -47,6 +49,10 @@ export class Character {
   private radiantPathManager = new RadiantPathManager();
   private inventoryManager = new InventoryManager();
   private craftingManager: CraftingManager;
+  
+  // Companions
+  private companions: Map<string, PetCompanion> = new Map();
+  private activePetId: string | undefined;
   
   /**
    * Performance cache: Set of expertise names for O(1) lookup
@@ -545,6 +551,84 @@ export class Character {
       const source = `stance:${this.activeStanceId}`;
       this.bonusManager.bonuses.removeBonus(source);
     }
+  }
+
+  // ============================================================================
+  // COMPANIONS - Pet and companion management
+  // ============================================================================
+
+  /**
+   * Add or bond a companion by pet ID
+   * Creates a new PetCompanion instance from the stat block
+   */
+  addCompanion(petId: string): PetCompanion | undefined {
+    const statBlock = getPetStatBlock(petId);
+    if (!statBlock) return undefined;
+    
+    const companion = new PetCompanion(statBlock);
+    this.companions.set(petId, companion);
+    return companion;
+  }
+
+  /**
+   * Get a bonded companion by pet ID
+   */
+  getCompanion(petId: string): PetCompanion | undefined {
+    return this.companions.get(petId);
+  }
+
+  /**
+   * Get all bonded companions
+   */
+  getAllCompanions(): PetCompanion[] {
+    return Array.from(this.companions.values());
+  }
+
+  /**
+   * Summon a companion to active status (equipped)
+   * Only one companion can be active at a time
+   */
+  summonCompanion(petId: string): PetCompanion | undefined {
+    let companion = this.companions.get(petId);
+    if (!companion) {
+      companion = this.addCompanion(petId);
+    }
+    if (companion) {
+      this.activePetId = petId;
+    }
+    return companion;
+  }
+
+  /**
+   * Dismiss the active companion
+   */
+  dismissCompanion(): void {
+    this.activePetId = undefined;
+  }
+
+  /**
+   * Get the currently active/summoned companion
+   */
+  getActivePet(): PetCompanion | undefined {
+    if (!this.activePetId) return undefined;
+    return this.companions.get(this.activePetId);
+  }
+
+  /**
+   * Get the ID of the active pet
+   */
+  getActivePetId(): string | undefined {
+    return this.activePetId;
+  }
+
+  /**
+   * Remove a bonded companion entirely
+   */
+  removeCompanion(petId: string): void {
+    if (this.activePetId === petId) {
+      this.dismissCompanion();
+    }
+    this.companions.delete(petId);
   }
 
 }
