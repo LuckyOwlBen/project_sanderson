@@ -11,6 +11,7 @@ export interface PlayerJoinedEvent {
   health: { current: number; max: number };
   focus: { current: number; max: number };
   investiture: { current: number; max: number };
+  currencyInChips?: number;
   joinedAt: string;
   socketId: string;
 }
@@ -468,6 +469,22 @@ export class WebsocketService implements OnDestroy {
       timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 📤 gm-grant-expertise event emitted');
+  }
+
+  grantMoney(characterId: string, amount: number, operation: 'add' | 'set'): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot grant money: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 💰 Granting money:', { characterId, amount, operation });
+    this.socket.emit('gm-grant-money', {
+      characterId,
+      amount,
+      operation,
+      timestamp: new Date().toISOString()
+    });
+    console.log('[WebSocket] 💰 gm-grant-money event emitted');
   }
 
   grantLevelUp(characterId: string): void {

@@ -1554,3 +1554,7 @@ export function getItemsByRarity(rarity: ItemRarity): InventoryItem[] {
 export function getEquipableItems(): InventoryItem[] {
   return ALL_ITEMS.filter(item => item.equipable);
 }
+
+export function getKitById(kitId: string): StartingKit | undefined {
+  return STARTING_KITS.find(kit => kit.id === kitId);
+}

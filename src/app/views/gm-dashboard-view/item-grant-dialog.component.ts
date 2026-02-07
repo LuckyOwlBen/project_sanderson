@@ -453,6 +453,7 @@ export class ItemGrantDialogComponent implements OnInit {
   showRewardOnly: boolean = true;
   showTalentOnly: boolean = true;
   filteredItems: InventoryItem[] = [];
+  private allItems: InventoryItem[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<ItemGrantDialogComponent>,
@@ -469,18 +470,19 @@ export class ItemGrantDialogComponent implements OnInit {
   private loadItems(): void {
     this.http.get<any>('/api/items').subscribe({
       next: (response) => {
-        this.filteredItems = response.items || [];
+        this.allItems = response.items || [];
         this.filterItems();
       },
       error: (err) => {
         console.error('Failed to load items:', err);
+        this.allItems = [];
         this.filteredItems = [];
       }
     });
   }
 
   filterItems(): void {
-    this.filteredItems = this.filteredItems.filter(item => {
+    this.filteredItems = this.allItems.filter(item => {
       // Category filter
       if (this.selectedCategory !== 'all' && item.type !== this.selectedCategory) {
         return false;

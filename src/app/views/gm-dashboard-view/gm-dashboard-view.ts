@@ -15,6 +15,7 @@ import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
 import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 import { ItemGrantDialogComponent } from './item-grant-dialog.component';
 import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.component';
+import { MoneyGrantDialogComponent } from './money-grant-dialog.component';
 import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
 
 @Component({
@@ -287,6 +288,25 @@ export class GmDashboardView implements OnInit, OnDestroy {
         this.websocketService.grantExpertise(
           player.characterId,
           result.expertiseName
+        );
+      }
+    });
+  }
+
+  openMoneyGrantDialog(player: PlayerJoinedEvent): void {
+    const dialogRef = this.dialog.open(MoneyGrantDialogComponent, {
+      width: '500px',
+      maxHeight: '90vh',
+      data: { player }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('[GM Dashboard] Granting money:', result);
+        this.websocketService.grantMoney(
+          player.characterId,
+          result.amount,
+          result.operation
         );
       }
     });

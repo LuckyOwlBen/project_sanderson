@@ -11,7 +11,7 @@ import talentRules from './talent-rules';
 import talentService from './talent-service';
 import attributeAllocator from './services/attribute-allocator';
 import InventoryManager from './inventory-manager';
-import itemDefinitions from './item-definitions';
+import { ALL_ITEMS, getItemById, getKitById } from './character/inventory/itemDefinitions';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { SocketBroadcaster } from './socket-broadcaster';
@@ -390,7 +390,7 @@ app.post('/api/characters/:id/inventory/purchase', async (req, res) => {
     }
 
     // Validate item exists
-    const item = itemDefinitions.getItemById(itemId);
+    const item = getItemById(itemId);
     if (!item) {
       return res.status(400).json({
         success: false,
@@ -458,7 +458,7 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     }
 
     // Validate kit exists
-    const kit = itemDefinitions.getKitById(kitId);
+    const kit = getKitById(kitId);
     if (!kit) {
       return res.status(400).json({
         success: false,
@@ -524,7 +524,7 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     }
 
     // Validate item exists
-    const item = itemDefinitions.getItemById(itemId);
+    const item = getItemById(itemId);
     if (!item) {
       return res.status(400).json({
         success: false,
@@ -677,7 +677,7 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     }
 
     // Get item definition for expertise validation
-    const item = itemDefinitions.getItemById(itemId);
+    const item = getItemById(itemId);
     if (item) {
       // Check weapon expertise requirements
       if (item.weaponProperties?.expertTraits && item.weaponProperties.expertTraits.length > 0) {
@@ -878,7 +878,7 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
 app.get('/api/items', (req, res) => {
   try {
     const { type, rarity } = req.query;
-    let items = itemDefinitions.ALL_ITEMS;
+    let items = ALL_ITEMS;
 
     if (type) {
       items = items.filter(item => item.type === type);
@@ -906,7 +906,7 @@ app.get('/api/items', (req, res) => {
 app.get('/api/store/items', (req, res) => {
   try {
     // Filter to common rarity items only
-    const storeItems = itemDefinitions.ALL_ITEMS.filter(item => item.rarity === 'common');
+    const storeItems = ALL_ITEMS.filter(item => item.rarity === 'common');
 
     res.json({
       success: true,
@@ -954,7 +954,7 @@ app.get('/api/characters/load/:id', async (req, res) => {
       const equippedItems: [string, string][] = [];
       inventory.forEach((item: any) => {
         if (item?.equipped) {
-          const itemDef = itemDefinitions.getItemById(item.itemId);
+          const itemDef = getItemById(item.itemId);
           const slot = itemDef?.slot || 'mainHand';
           equippedItems.push([slot, item.itemId]);
         }
@@ -974,7 +974,7 @@ app.get('/api/characters/load/:id', async (req, res) => {
     if (inventory?.items && Array.isArray(inventory.items)) {
       inventory.items = inventory.items.map((item: any) => {
         const itemId = item.id || item.itemId;
-        const itemDef = itemDefinitions.getItemById(itemId);
+        const itemDef = getItemById(itemId);
         if (!itemDef) return item;
         return {
           id: itemId,
@@ -1687,6 +1687,17 @@ io.on('connection', (socket) => {
     // Fallback to 'Unknown' if null/undefined
     const ancestryName = ancestry || 'Unknown';
     let effectiveLevel = level;
+    let currencyInChips = 0;
+
+    // Load character to get currency info
+    try {
+      const character = await loadCharacter(characterId);
+      if (character && character.inventory) {
+        currencyInChips = character.inventory.currencyInChips || 0;
+      }
+    } catch (error) {
+      console.warn(`[Session] Could not load character currency for ${characterId}:`, error);
+    }
 
     const confirmedLevel = lastConfirmedLevels.get(characterId);
     const existingQueue = pendingLevelUps.get(characterId) || [];
@@ -1713,6 +1724,7 @@ io.on('connection', (socket) => {
       health: health || { current: 0, max: 0 },
       focus: focus || { current: 0, max: 0 },
       investiture: investiture || { current: 0, max: 0 },
+      currencyInChips,
       joinedAt: new Date().toISOString(),
       socketId: socket.id
     });
@@ -1840,7 +1852,7 @@ io.on('connection', (socket) => {
         const { itemId, quantity } = item;
         
         // Validate item exists
-        const itemDef = itemDefinitions.getItemById(itemId);
+        const itemDef = getItemById(itemId);
         if (!itemDef) {
           socket.emit('store-transaction-error', {
             characterId,
@@ -2023,6 +2035,86 @@ io.on('connection', (socket) => {
       sendPendingExpertiseGrants(characterId);
     } else {
       console.warn(`[GM Action] ⚠️ Player ${characterId} offline - will send on reconnect`);
+    }
+  });
+
+  // GM grants money to a player
+  socket.on('gm-grant-money', async (data) => {
+    const { characterId, amount, operation, timestamp } = data;
+    console.log(`[GM Action] 💰 Granting money: ${amount} (${operation}) to character ${characterId}`);
+
+    try {
+      // Load character
+      const character = await loadCharacter(characterId);
+      if (!character) {
+        console.error(`[GM Action] ❌ Character ${characterId} not found`);
+        socket.emit('gm-grant-error', {
+          type: 'money',
+          characterId,
+          error: 'Character not found'
+        });
+        return;
+      }
+
+      // Initialize inventory if needed
+      if (!character.inventory) {
+        character.inventory = {
+          items: [],
+          currencyInChips: 0
+        };
+      }
+
+      // Get current balance
+      const currentBalance = character.inventory.currencyInChips || 0;
+      let newBalance = currentBalance;
+
+      // Apply operation
+      if (operation === 'add') {
+        newBalance = currentBalance + amount;
+      } else if (operation === 'set') {
+        newBalance = amount;
+      }
+
+      // Update character
+      character.inventory.currencyInChips = newBalance;
+      await saveCharacter(character);
+
+      console.log(`[GM Action] ✅ Money updated for ${characterId}: ${currentBalance} → ${newBalance}`);
+
+      // Find player's socket and notify them
+      const targetSocketId = findSocketIdByCharacterId(characterId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('money-granted', {
+          amount: operation === 'add' ? amount : 0,
+          newBalance,
+          operation,
+          timestamp: timestamp || new Date().toISOString()
+        });
+        console.log(`[GM Action] 💬 Notified player of money grant`);
+      } else {
+        console.warn(`[GM Action] ⚠️ Player ${characterId} offline - money still saved to character`);
+      }
+
+      // Update active players cache
+      const targetPlayer = Array.from(activePlayers.values()).find(p => p.characterId === characterId);
+      if (targetPlayer) {
+        targetPlayer.currencyInChips = newBalance;
+      }
+
+      socket.emit('gm-grant-success', {
+        type: 'money',
+        characterId,
+        amount,
+        operation,
+        newBalance
+      });
+    } catch (error) {
+      console.error(`[GM Action] ❌ Error in gm-grant-money handler:`, error);
+      socket.emit('gm-grant-error', {
+        type: 'money',
+        characterId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
