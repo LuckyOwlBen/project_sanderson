@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CharacterPowersTab } from './character-powers-tab';
 import { Character } from '../../../character/character';
 import { By } from '@angular/platform-browser';
-import { ActionCostCode } from '../../../character/talents/talentInterface';
+import { ActionCostCode } from '../../../../../shared/types/talents';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
 

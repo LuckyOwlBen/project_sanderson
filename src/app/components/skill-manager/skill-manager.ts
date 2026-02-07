@@ -14,8 +14,8 @@ import { StepValidationService } from '../../services/step-validation.service';
 import { SkillsApiService, SkillsState } from '../../services/skills-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
-import { SkillType } from '../../character/skills/skillTypes';
-import { SkillAssociationTable } from '../../character/skills/skillAssociationTable';
+import { SkillType } from '../../../../shared/data/skills/skillTypes';
+import { SkillAssociationTable } from '../../../../shared/data/skills/skillAssociationTable';
 
 interface SkillConfig {
   name: string;
@@ -94,7 +94,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
       .subscribe({
         next: (state: SkillsState) => {
           this.isFetchingSlice = false;
-          this.serverSkillPoints = state.totalPoints;
+          this.serverSkillPoints = state.pointsRemaining;
           if (this.character && state.skills) {
             this.mapSkillsFromSlice(state.skills);
           }

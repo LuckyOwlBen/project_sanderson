@@ -1,4 +1,4 @@
-import { SkillType } from '../character/skills/skillTypes';
+import { SkillType } from 'shared/data/skills/skillTypes';
 
 export interface SkillsCategoryList {
   physical: SkillType[];

@@ -6,9 +6,9 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 import { AttributesApiService, AttributesState } from '../../services/attributes-api.service';
 import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
-import { DerivedAttributesManager } from '../../character/attributes/derivedAttributes/derivedAttributesManager';
+import { DerivedAttributesManager } from '../../../../shared/character/attributes/derivedAttributes/derivedAttributesManager';
 import { ResourceManager } from '../../character/resources/resourceManager';
-import { Attributes } from '../../character/attributes/attributes';
+import { Attributes } from '../../../../shared/character/attributes/attributes';
 
 type AttributeKey = 'strength' | 'speed' | 'awareness' | 'intellect' | 'willpower' | 'presence';
 
@@ -110,8 +110,9 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       { name: 'Presence', key: 'presence', currentValue: state.presence }
     ];
 
-    // Initialize with data and ensure values aren''t reset
-    this.initialize(attributes, state.totalPoints, false);
+    // Initialize with pointsRemaining as total available (includes level bonuses)
+    this.initialize(attributes, state.pointsRemaining, false);
+    this.initialize(attributes, state.pointsRemaining, false);
     
     // Initialize resource manager with base attributes
     const attrs = new Attributes();

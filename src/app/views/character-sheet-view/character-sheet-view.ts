@@ -32,11 +32,11 @@ import { CharacterSkillsCard } from '../../components/shared/character-skills-ca
 import { CraftingView } from '../../components/crafting-view/crafting-view';
 import { FormSelectorComponent } from '../../components/shared/form-selector/form-selector';
 import { CompanionDetailComponent } from '../../components/shared/companion-detail/companion-detail.component';
-import { InventoryItem } from '../../character/inventory/inventoryItem';
+import { InventoryItem } from '../../../../shared/types/inventory';
 import { PetCompanion } from '../../character/companions/petCompanion';
-import { SkillType } from '../../character/skills/skillTypes';
-import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
-import { TalentTree, TalentNode, ActionCostCode } from '../../character/talents/talentInterface';
+import { SkillType } from '../../../../shared/data/skills/skillTypes';
+import { ALL_TALENT_PATHS, getTalentTree } from '../../../../shared/data/talents/talentTrees';
+import { TalentTree, TalentNode, ActionCostCode } from '../../../../shared/types/talents';
 import { CombatTurnSpeedSelectorComponent } from "../../components/combat-turn-speed-selector/combat-turn-speed-selector.component";
 import { CombatService } from "../../services/combat.service";
 

@@ -153,6 +153,81 @@ export class LevelUpManager {
   }
 
   /**
+   * Assign creation-time level bonuses when a character is created at a level > 1
+   * Calculates cumulative points for levels 2 through selectedLevel and assigns to database
+   * 
+   * @param characterId - The character to assign bonuses to
+   * @param selectedLevel - The selected creation level (must be > 1 for bonuses to apply)
+   */
+  async getCreationLevelBonuses(characterId: string, selectedLevel: number): Promise<void> {
+    // Only apply bonuses if creating at level > 1
+    if (selectedLevel <= 1) {
+      console.log(`[LevelUp] Character ${characterId} at level ${selectedLevel} - skipping bonuses (level 1)`);
+      return;
+    }
+
+    console.log(`[LevelUp] Applying creation bonuses for character ${characterId} at level ${selectedLevel}`);
+
+    try {
+      // Calculate cumulative bonuses from level 2 to selected level
+      const attributePoints = this.getAttributePointsRange(2, selectedLevel);
+      const skillPoints = this.getSkillPointsRange(2, selectedLevel);
+      const talentPoints = this.getTalentPointsRange(2, selectedLevel);
+
+      console.log(`[LevelUp] Calculated bonuses - Attributes: ${attributePoints}, Skills: ${skillPoints}, Talents: ${talentPoints}`);
+
+      // Update Attributes state: add bonus points to pointsRemaining
+      if (attributePoints > 0) {
+        const attrRecord = await getAttributesRecord(characterId);
+        console.log(`[LevelUp] Attributes record before update:`, attrRecord);
+        if (attrRecord) {
+          const newPointsRemaining = (attrRecord.pointsRemaining || 0) + attributePoints;
+          console.log(`[LevelUp] Updating attributes: ${attrRecord.pointsRemaining} + ${attributePoints} = ${newPointsRemaining}`);
+          await updateAttributesRecord(characterId, {
+            pointsRemaining: newPointsRemaining
+          });
+          console.log(`[LevelUp] Attributes updated successfully`);
+        }
+      }
+
+      // Update SkillsState: add bonus points to pointsRemaining
+      if (skillPoints > 0) {
+        const skillsRecord = await getSkillsStateRecord(characterId);
+        console.log(`[LevelUp] Skills record before update:`, skillsRecord);
+        if (skillsRecord) {
+          const newPointsRemaining = (skillsRecord.pointsRemaining || 0) + skillPoints;
+          console.log(`[LevelUp] Updating skills: ${skillsRecord.pointsRemaining} + ${skillPoints} = ${newPointsRemaining}`);
+          await updateSkillsStateRecord(characterId, {
+            pointsRemaining: newPointsRemaining
+          });
+          console.log(`[LevelUp] Skills updated successfully`);
+        }
+      }
+
+      // Update CharacterTalents: add bonus points to both totalPoints and pointsRemaining
+      if (talentPoints > 0) {
+        const talentsRecord = await getTalentsStateRecord(characterId);
+        console.log(`[LevelUp] Talents record before update:`, talentsRecord);
+        if (talentsRecord) {
+          const newTotalPoints = (talentsRecord.totalPoints || 0) + talentPoints;
+          const newPointsRemaining = (talentsRecord.pointsRemaining || 0) + talentPoints;
+          console.log(`[LevelUp] Updating talents: totalPoints ${talentsRecord.totalPoints} + ${talentPoints} = ${newTotalPoints}, pointsRemaining ${talentsRecord.pointsRemaining} + ${talentPoints} = ${newPointsRemaining}`);
+          await updateTalentsStateRecord(characterId, {
+            totalPoints: newTotalPoints,
+            pointsRemaining: newPointsRemaining
+          });
+          console.log(`[LevelUp] Talents updated successfully`);
+        }
+      }
+
+      console.log(`[LevelUp] Completed bonuses application for character ${characterId}`);
+    } catch (error) {
+      console.error(`[LevelUp] Failed to assign creation level bonuses for character ${characterId}:`, error);
+      // Don't throw - allow character creation to proceed even if bonus assignment fails
+    }
+  }
+
+  /**
    * Process a single level-up for a character
    * - Increments level by 1
    * - Awards points to pointsRemaining (available points)

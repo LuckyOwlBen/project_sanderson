@@ -1,5 +1,5 @@
 import { InventoryModuleRepository, InventoryDTO, InventoryItemDTO } from '../repositories/modules/inventory-repository';
-import { getItemById, STARTING_KITS, ALL_ITEMS } from '../character/inventory/itemDefinitions';
+import { getItemById, STARTING_KITS, ALL_ITEMS } from 'shared/data/items/item-definitions';
 import { loadCharacter, saveCharacter } from '../database';
 
 export interface InventoryViewItem {

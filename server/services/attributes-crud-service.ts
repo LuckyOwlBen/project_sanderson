@@ -145,9 +145,9 @@ export async function setAttributesByCharacterId(
     Number(attributes.awareness) +
     Number(attributes.presence);
 
-  if (pointsSpent > attributesRecord.totalPoints) {
+  if (pointsSpent > attributesRecord.pointsRemaining) {
     throw new Error(
-      `Attribute allocation exceeded. Total points: ${attributesRecord.totalPoints}, attempted ${pointsSpent}.`
+      `Attribute allocation exceeded. Available points: ${attributesRecord.pointsRemaining}, attempted ${pointsSpent}.`
     );
   }
 

@@ -18,29 +18,6 @@
     <span>{{ validationMessage }}</span>
   </div>
 
-  <!-- Spren Grant Notification -->
-  <mat-card class="spren-notification" *ngIf="pendingSprenGrant">
-    <mat-card-header>
-      <mat-icon class="spren-icon">auto_awesome</mat-icon>
-      <mat-card-title>A Spren Approaches!</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <p class="spren-message">
-        A <strong>{{ pendingSprenGrant.sprenType }}</strong> has offered to bond with you, 
-        granting you the powers of a <strong>{{ pendingSprenGrant.order }}</strong>.
-      </p>
-      <p class="philosophy-text">
-        <em>"{{ pendingSprenGrant.philosophy }}"</em>
-      </p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="acceptSpren()">
-        <mat-icon>check_circle</mat-icon>
-        Accept Bond
-      </button>
-    </mat-card-actions>
-  </mat-card>
-
   <div class="tree-selector" *ngIf="availableTrees.length > 1">
     <mat-chip-set>
       <mat-chip 
@@ -138,7 +115,7 @@
         *ngFor="let pathOption of availableCorePaths"
         class="core-path-card"
         [class.selected]="pathOption.isSelected"
-        (click)="selectCorePath(pathOption)">
+        (click)="pathOption.isSelected ? removeBonusPath(pathOption.id) : selectBonusPath(pathOption.id)">
         <mat-card-header>
           <mat-card-title>{{ pathOption.name }}</mat-card-title>
         </mat-card-header>
@@ -152,7 +129,7 @@
           <button 
             mat-raised-button 
             [color]="pathOption.isSelected ? 'warn' : 'primary'"
-            (click)="selectCorePath(pathOption)">
+            (click)="pathOption.isSelected ? removeBonusPath(pathOption.id) : selectBonusPath(pathOption.id)">
             <mat-icon>{{ pathOption.isSelected ? 'remove_circle' : 'add_circle' }}</mat-icon>
             {{ pathOption.isSelected ? 'Remove' : 'Select' }}
           </button>

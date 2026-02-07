@@ -33,10 +33,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, filter, forkJoin, take } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { TalentUIService } from '../../services/talent-ui.service';
 import { Character } from '../../character/character';
-import { TalentTree, TalentNode, TalentPath } from '../../character/talents/talentInterface';
+import { TalentTree, TalentNode, TalentPath } from '../../../../shared/types/talents';
 import { TalentPrerequisiteChecker } from '../../character/talents/talentPrerequesite';
-import { getTalentTree, getTalentPath } from '../../character/talents/talentTrees/talentTrees';
+import { getTalentTree, getTalentPath } from '../../../../shared/data/talents/talentTrees';
 import { StepValidationService } from '../../services/step-validation.service';
 import { WebsocketService, SprenGrantEvent } from '../../services/websocket.service';
 import { LevelUpApiService, LevelTables } from '../../services/levelup-api.service';
@@ -98,6 +99,7 @@ export class TalentView implements OnInit, OnDestroy {
   private requiresSingerSelection = false;
   private baseTalentPoints = 0;
   private characterRadiantPath: { boundOrder: string | null; currentIdeal: number; idealSpoken: boolean; surgePair: string | null; sprenType: string | null } | null = null;
+  private pendingBonusTrees = new Set<string>();  // Bonus paths selected (removable until finalized)
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -110,6 +112,7 @@ export class TalentView implements OnInit, OnDestroy {
     private pathsApi: PathsApiService,
     private identityService: CharacterIdentityService,
     private characterStorage: CharacterStorageService,
+    private talentUIService: TalentUIService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -163,9 +166,8 @@ export class TalentView implements OnInit, OnDestroy {
                   this.isInitialized = true;
                   
                   // Render the page first with loading state, then fetch talent data
-                  this.loadCorePathOptions();
+                  this.loadBonusPathOptions();
                   // Don't load trees here - wait for lazy load trigger when paths are ready
-                  this.calculateAvailablePoints();
                   this.updateValidation();
                   
                   // Paths are now loaded via API, so no timeout needed
@@ -180,12 +182,11 @@ export class TalentView implements OnInit, OnDestroy {
                   this.unlockedTalents = new Set(this.character.unlockedTalents);
 
                   // Always render immediately
-                  this.loadCorePathOptions();
+                  this.loadBonusPathOptions();
                   // Reload trees if paths are loaded
                   if (this.pathsLoaded) {
                     this.loadAvailableTrees();
                   }
-                  this.calculateAvailablePoints();
                   this.updateValidation();
                   
                   // Fetch updated talent state from API
@@ -225,60 +226,134 @@ export class TalentView implements OnInit, OnDestroy {
       });
   }
 
-  private loadCorePathOptions(): void {
-    if (!this.character) return;
+  private loadBonusPathOptions(): void {
+    if (!this.character || !this.characterPaths?.type) return;
 
-    // Show core path selector for humans and singers at level 1 or during level-up
-    // Use ancestry and level from API data, not from character object
-    this.showCorePathSelector = (this.characterAncestry != null && 
-                    ['human', 'singer'].includes(this.characterAncestry)) && 
-                    (this.characterLevel === 1 || this.isInLevelUpMode());
-    
-    console.log('[TalentView] loadCorePathOptions: showCorePathSelector =', this.showCorePathSelector, 
-                'ancestry:', this.characterAncestry, 'level:', this.characterLevel,
-                'characterPaths:', this.characterPaths);
-    
-    if (!this.showCorePathSelector) {
-      this.availableCorePaths = [];
-      return;
-    }
+    // Get available bonus paths from service
+    const available = this.talentUIService.getAvailableBonusClasses(
+      this.characterPaths.type,
+      this.characterPaths.sub
+    );
 
-    const mainPathName = this.characterPaths?.type;
-    const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
-    
-    this.availableCorePaths = allPaths
-      .filter(pathId => pathId !== mainPathName) // Exclude main path
+    // Map to display objects
+    this.availableCorePaths = available
       .map(pathId => {
         const talentPath = getTalentPath(pathId);
         if (!talentPath || !talentPath.talentNodes || talentPath.talentNodes.length === 0) {
           return null;
         }
-        
+
         const keyTalent = talentPath.talentNodes.find(t => t.tier === 0);
         if (!keyTalent) return null;
-        
+
         return {
           id: pathId,
           name: talentPath.name,
           keyTalent: keyTalent,
-          isSelected: this.unlockedTalents.has(keyTalent.id)
+          isSelected: this.pendingBonusTrees.has(pathId)
         };
       })
       .filter(p => p !== null) as PathOption[];
-    
-    console.log('[TalentView] loadCorePathOptions: availableCorePaths =', this.availableCorePaths);
+
+    this.showCorePathSelector = this.availableCorePaths.length > 0;
+    console.log('[TalentView] loadBonusPathOptions: availableCorePaths =', this.availableCorePaths);
   }
 
-  selectCorePath(pathOption: PathOption): void {
-    if (pathOption.isSelected) {
-      // Deselect - remove the talent
-      this.removeTalent(pathOption.keyTalent.id);
-    } else {
-      // Select - unlock the key talent
-      this.unlockTalent(pathOption.keyTalent);
+  selectBonusPath(pathId: string): void {
+    if (!this.characterId) return;
+    
+    this.pendingBonusTrees.add(pathId);
+    
+    // Unlock the tier 0 talent (key talent) for this path
+    // This will also auto-unlock all tier 1 talents and deduct points via applyTalentUnlock()
+    const talentPath = getTalentPath(pathId);
+    if (talentPath?.talentNodes) {
+      const keyTalent = talentPath.talentNodes.find(t => t.tier === 0);
+      if (keyTalent && !this.unlockedTalents.has(keyTalent.id)) {
+        this.unlockTalent(keyTalent);
+      }
     }
-    // Reload core path options to update selected state
-    this.loadCorePathOptions();
+    
+    // Persist the bonus path selection to backend
+    const totalTalents = Array.from(this.lockedTalents);
+    const pendingTalents = Array.from(this.unlockedTalents).filter(
+      (talentId) => !this.lockedTalents.has(talentId)
+    );
+    const pendingTrees = Array.from(this.pendingBonusTrees);
+
+    const payload = {
+      totalPoints: this.baseTalentPoints ?? 0,
+      totalTalents,
+      pendingTalents,
+      pendingTrees,
+      finalized: false
+    };
+
+    this.talentsApi.saveTalents(this.characterId, payload)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          // After persisting, fetch the updated talent state from backend
+          // The backend will recalculate availableTrees including bonus path specializations
+          this.fetchTalentsState(this.characterId!);
+        },
+        error: (err) => {
+          console.error('[TalentView] Failed to save bonus path selection:', err);
+        }
+      });
+  }
+
+  removeBonusPath(pathId: string): void {
+    if (!this.characterId) return;
+    
+    this.pendingBonusTrees.delete(pathId);
+    
+    // Remove the tier 0 talent (key talent) for this path
+    // This will refund points via removeTalent()
+    const talentPath = getTalentPath(pathId);
+    if (talentPath?.talentNodes) {
+      const keyTalent = talentPath.talentNodes.find(t => t.tier === 0);
+      if (keyTalent && this.unlockedTalents.has(keyTalent.id)) {
+        this.removeTalent(keyTalent.id);
+      }
+      
+      // Also remove all tier 1 talents that were auto-unlocked by this bonus path
+      // Only remove if they're not in lockedTalents (weren't pre-selected)
+      const tier1Talents = talentPath.talentNodes.filter(t => t.tier === 1);
+      tier1Talents.forEach(t1 => {
+        if (this.unlockedTalents.has(t1.id) && !this.lockedTalents.has(t1.id)) {
+          this.removeTalent(t1.id);
+        }
+      });
+    }
+    
+    // Persist the bonus path removal to backend
+    const totalTalents = Array.from(this.lockedTalents);
+    const pendingTalents = Array.from(this.unlockedTalents).filter(
+      (talentId) => !this.lockedTalents.has(talentId)
+    );
+    const pendingTrees = Array.from(this.pendingBonusTrees);
+
+    const payload = {
+      totalPoints: this.baseTalentPoints ?? 0,
+      totalTalents,
+      pendingTalents,
+      pendingTrees,
+      finalized: false
+    };
+
+    this.talentsApi.saveTalents(this.characterId, payload)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          // After persisting, fetch the updated talent state from backend
+          // The backend will recalculate availableTrees without the removed bonus path
+          this.fetchTalentsState(this.characterId!);
+        },
+        error: (err) => {
+          console.error('[TalentView] Failed to save bonus path removal:', err);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -324,9 +399,8 @@ export class TalentView implements OnInit, OnDestroy {
 
           // Mark as loaded and update UI with the fetched data
           this.sliceLoaded = true;
-          this.loadCorePathOptions();
+          this.loadBonusPathOptions();
           this.loadAvailableTrees();
-          this.calculateAvailablePoints();
           this.updateValidation();
           
           // Defer change detection to next cycle to avoid ExpressionChangedAfterItHasBeenCheckedError
@@ -362,39 +436,60 @@ export class TalentView implements OnInit, OnDestroy {
         next: ([state, paths]) => {
           console.log('[TalentView] Talent state loaded:', state);
           console.log('[TalentView] Paths loaded:', paths);
-          console.log('[TalentView] Radiant path from API:', (state as any).radiantPath);
+          
+          // Store character state
           this.characterPaths = this.normalizePaths(paths);
           this.characterAncestry = state.ancestry ?? null;
           this.characterLevel = state.level ?? 1;
-          this.characterRadiantPath = (state as any).radiantPath ?? null;
-          this.isLoadingTalentData = false;
-
+          this.characterRadiantPath = state.radiantPath ?? null;
+          
+          // Store talent point data
           const totalTalents = state.totalTalents ?? [];
           const pendingTalents = state.pendingTalents ?? [];
-
+          
           this.baseTalentPoints = state.totalPoints ?? 0;
           this.availableTalentPoints = state.pointsRemaining ?? 0;
           this.lockedTalents = new Set(totalTalents);
           this.unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
           this.requiresSingerSelection = state.requiresSingerSelection ?? false;
-
+          
+          // BACKEND CORRECTION: The backend counts all talents equally in pointsRemaining.
+          // However, tier 0 talents (key talents) cost 0 points, not 1.
+          // We need to refund the points for any locked tier 0 talents.
+          let tier0LockedCount = 0;
+          totalTalents.forEach(talentId => {
+            if (this.isKeyTalentId(talentId)) {
+              tier0LockedCount++;
+            }
+          });
+          this.availableTalentPoints += tier0LockedCount;
+          
+          if (tier0LockedCount > 0) {
+            console.log('[TalentView] Corrected for tier 0 locked talents:', {
+              tier0LockedCount,
+              beforeCorrection: state.pointsRemaining,
+              afterCorrection: this.availableTalentPoints
+            });
+          }
+          
+          // Track bonus trees selection from API
+          this.pendingBonusTrees = new Set(state.pendingTrees ?? []);
+          
           // Sync API talent state back to character object
           if (this.character) {
             this.character.unlockedTalents = new Set(this.unlockedTalents);
-            // Note: character.radiantPath is already loaded from storage with correct state
-            // The API radiantPath is for informational purposes only
           }
 
-          // Load trees from backend-provided tree IDs
-          // Note: We don't directly load trees from the API response because:
-          // - Radiant sub-trees need special handling (paths[0] extraction)
-          // - Surge trees need to be loaded from API radiant path data
-          // Instead, let loadAvailableTrees() handle the full tree build logic
+          // Use TalentUIService to load trees and add radiant trees
+          let trees = this.talentUIService.loadTreesForIds(state.availableTrees ?? []);
+          trees = this.talentUIService.addRadiantTrees(trees, state.radiantPath);
           
+          this.availableTrees = trees;
+          this.selectedTree = this.talentUIService.getDefaultSelectedTree(trees, this.characterAncestry);
+          
+          this.isLoadingTalentData = false;
           this.sliceLoaded = true;
-          this.loadCorePathOptions();
-          this.loadAvailableTrees();  // This loads all trees including surges
-          this.calculateAvailablePoints();
+          this.loadBonusPathOptions();
           this.updateValidation();
 
           // Trigger change detection immediately
@@ -403,8 +498,6 @@ export class TalentView implements OnInit, OnDestroy {
         error: (err) => {
           console.error('[TalentView] Failed to load talent state:', err);
           this.isLoadingTalentData = false;
-
-          // Trigger change detection even on error
           this.cdr.markForCheck();
         }
       });
@@ -431,15 +524,6 @@ export class TalentView implements OnInit, OnDestroy {
     return { type, sub };
   }
 
-  private lazyLoadTrees(): void {
-    console.log('[TalentView] Lazy loading trees now that paths are ready');
-    this.loadCorePathOptions();
-    this.loadAvailableTrees();
-    this.calculateAvailablePoints();
-    this.updateValidation();
-    this.cdr.markForCheck();
-  }
-
   private persistTalents(): void {
     if (!this.character || !this.characterId) {
       return;
@@ -449,11 +533,13 @@ export class TalentView implements OnInit, OnDestroy {
     const pendingTalents = Array.from(this.unlockedTalents).filter(
       (talentId) => !this.lockedTalents.has(talentId)
     );
+    const pendingTrees = Array.from(this.pendingBonusTrees);
 
     const payload = {
       totalPoints: this.baseTalentPoints ?? 0,
       totalTalents,
       pendingTalents,
+      pendingTrees,
       finalized: false
     };
 
@@ -487,249 +573,10 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   private loadAvailableTrees(): void {
-    if (!this.character) return;
-    // Guard: defer if paths not yet loaded from server
-    if (!this.characterPaths?.type) {
-      console.log('[TalentView] Deferring loadAvailableTrees - paths not yet loaded');
-      return;
-    }
-
-    const tempTrees: TalentTree[] = [];
-    const addedTreeNames = new Set<string>(); // Track to prevent duplicates
-    
-    // Load paths from characterPaths which is populated from API
-    const mainPathName = this.characterPaths.type;
-    const specializationName = this.characterPaths.sub;
-    
-    console.log('[TalentView] loadAvailableTrees - mainPath:', mainPathName, 'spec:', specializationName, 'ancestry:', this.characterAncestry, 'level:', this.characterLevel);
-    
-    // For humans and singers at level 1 or during level-up, load their chosen path, all sub trees, and bonus path logic
-    if ((this.characterAncestry != null && ['human','singer'].includes(this.characterAncestry)) &&
-      (this.characterLevel === 1 || this.isInLevelUpMode())) {
-      console.log('[TalentView] Taking human/singer branch');
-      // Helper to check if a path's key talent is unlocked
-      const hasPathKeyTalent = (pathId: string): boolean => {
-        const talentPath = getTalentPath(pathId);
-        if (!talentPath || !talentPath.talentNodes) return false;
-        return talentPath.talentNodes.some(node => 
-          node.tier === 0 && this.unlockedTalents.has(node.id)
-        );
-      };
-      // Load the character's chosen main path (key talent auto-unlocked)
-      if (mainPathName) {
-        const talentPath = getTalentPath(mainPathName);
-        if (talentPath) {
-          // Always auto-unlock tier 0 for main path core tree
-          if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
-            const coreTree = {
-              pathName: `${talentPath.name} - Core`,
-              nodes: talentPath.talentNodes
-            };
-            this.autoUnlockTier0Talents(coreTree);
-            tempTrees.push(coreTree);
-            addedTreeNames.add(coreTree.pathName.toLowerCase());
-          }
-          // Add specializations from this path (these are unlocked by the key talent)
-          talentPath.paths.forEach(specTree => {
-            if (!addedTreeNames.has(specTree.pathName.toLowerCase())) {
-              this.autoUnlockTier0Talents(specTree);
-              tempTrees.push(specTree);
-              addedTreeNames.add(specTree.pathName.toLowerCase());
-            }
-          });
-        }
-      }
-      // Check all paths for unlocked key talents and add their specialties
-      const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
-      allPaths.forEach(pathId => {
-        const talentPath = getTalentPath(pathId);
-        if (!talentPath) return;
-        // If this path's key talent is unlocked, add its specialties
-        if (hasPathKeyTalent(pathId)) {
-          talentPath.paths.forEach(specTree => {
-            if (!addedTreeNames.has(specTree.pathName.toLowerCase())) {
-              this.autoUnlockTier0Talents(specTree);
-              tempTrees.push(specTree);
-              addedTreeNames.add(specTree.pathName.toLowerCase());
-            }
-          });
-        } else if (pathId !== mainPathName) {
-          // If key talent not unlocked and not main path, show core tree so they can pick the key talent
-          if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
-            const coreTree = {
-              pathName: `${talentPath.name} - Core`,
-              nodes: talentPath.talentNodes
-            };
-            // Don't auto-unlock tier 0 talents from other paths - they must choose them
-            if (!addedTreeNames.has(coreTree.pathName.toLowerCase())) {
-              tempTrees.push(coreTree);
-              addedTreeNames.add(coreTree.pathName.toLowerCase());
-            }
-          }
-        }
-      });
-    } else {
-      // For non-humans or higher levels, load only the character's chosen path
-      console.log('[TalentView] Taking non-human/higher-level branch');
-      if (mainPathName) {
-        console.log('[TalentView] Getting talent path for:', mainPathName);
-        const talentPath = getTalentPath(mainPathName);
-        console.log('[TalentView] getTalentPath result:', talentPath);
-        if (talentPath) {
-          // Add the core/shared talent nodes as a tree
-          if (talentPath.talentNodes && talentPath.talentNodes.length > 0) {
-            const coreTree = {
-              pathName: `${talentPath.name} - Core`,
-              nodes: talentPath.talentNodes
-            };
-            this.autoUnlockTier0Talents(coreTree);
-            tempTrees.push(coreTree);
-            addedTreeNames.add(coreTree.pathName.toLowerCase());
-          }
-          
-          // If specialization specified, only load that tree
-          if (specializationName) {
-            const specializationTree = talentPath.paths.find(
-              tree => tree.pathName.toLowerCase() === specializationName.toLowerCase()
-            );
-            if (specializationTree && !addedTreeNames.has(specializationTree.pathName.toLowerCase())) {
-              this.autoUnlockTier0Talents(specializationTree);
-              tempTrees.push(specializationTree);
-              addedTreeNames.add(specializationTree.pathName.toLowerCase());
-            }
-          }
-        }
-      }
-      
-      // Also load specialization as direct tree if not found above
-      if (specializationName && !addedTreeNames.has(specializationName.toLowerCase())) {
-        const tree = getTalentTree(specializationName);
-        if (tree) {
-          this.autoUnlockTier0Talents(tree);
-          tempTrees.push(tree);
-          addedTreeNames.add(tree.pathName.toLowerCase());
-        }
-      }
-    }
-
-    // Also include ancestry/culture specific trees if they exist
-    if (this.characterAncestry) {
-      const ancestryTree = getTalentTree(this.characterAncestry);
-      if (ancestryTree && !addedTreeNames.has(ancestryTree.pathName.toLowerCase())) {
-        this.autoUnlockTier0Talents(ancestryTree);
-        tempTrees.push(ancestryTree);
-        addedTreeNames.add(ancestryTree.pathName.toLowerCase());
-      }
-    }
-
-    // Include Radiant Order tree if spren is bound
-    if (this.character.radiantPath.hasSpren()) {
-      const orderTreeId = this.character.radiantPath.getOrderTree();
-      if (orderTreeId) {
-        const orderPath = getTalentPath(orderTreeId);
-        if (orderPath) {
-          // Radiant orders have their talents in paths[0], not talentNodes
-          if (orderPath.paths && orderPath.paths.length > 0) {
-            const radiantTree = orderPath.paths[0];
-            this.autoUnlockTier0Talents(radiantTree);
-            if (!addedTreeNames.has(radiantTree.pathName.toLowerCase())) {
-              tempTrees.push(radiantTree);
-              addedTreeNames.add(radiantTree.pathName.toLowerCase());
-            }
-          }
-        }
-      }
-    }
-
-    // Include Surge trees if First Ideal is spoken
-    // Use the radiant path data from API to determine surge trees
-    if (this.characterRadiantPath?.idealSpoken && this.characterRadiantPath?.surgePair) {
-      console.log('[TalentView] Loading surge trees from API data:', this.characterRadiantPath.surgePair);
-      // surgePair is stored with "/" separators like "DIVISION/ABRASION"
-      const surgePairs = this.characterRadiantPath.surgePair.split('/').filter(s => s.trim());
-      surgePairs.forEach(surgeName => {
-        const treeId = surgeName.toLowerCase().trim();
-        const surgeTree = getTalentTree(treeId);
-        if (surgeTree && !addedTreeNames.has(treeId)) {
-          console.log('[TalentView] Adding surge tree from API radiantPath:', treeId);
-          this.autoUnlockTier0Talents(surgeTree);
-          tempTrees.push(surgeTree);
-          addedTreeNames.add(treeId);
-        }
-      });
-    }
-
-    // If no trees loaded, try to load based on cultures
-    if (tempTrees.length === 0 && this.character.cultures.length > 0) {
-      console.log('[TalentView] No trees loaded, trying cultures fallback');
-      this.character.cultures.forEach(culture => {
-        const cultureTree = getTalentTree(culture.name);
-        if (cultureTree && !addedTreeNames.has(cultureTree.pathName.toLowerCase())) {
-          this.autoUnlockTier0Talents(cultureTree);
-          tempTrees.push(cultureTree);
-          addedTreeNames.add(cultureTree.pathName.toLowerCase());
-        }
-      });
-    }
-
-    console.log('[TalentView] tempTrees before filtering:', tempTrees.length, tempTrees.map(t => t.pathName));
-
-    // For singers, do not filter out core trees, and ensure all sub trees and core tree are present
-    // For both humans and singers, filter out core trees from the chip selector, but keep them for display if needed
-    this.availableTrees = tempTrees.filter(tree => {
-      const isCoreTree = tree.pathName.toLowerCase().includes('core');
-      // Only show core trees if they're the only option (shouldn't happen, but fallback)
-      if (isCoreTree && tempTrees.length > 1) {
-        return false;
-      }
-      // Only keep trees that have tier 1+ talents
-      const visibleTalents = tree.nodes.filter(talent => talent.tier > 0);
-      return visibleTalents.length > 0;
-    });
-    
-    console.log('[TalentView] availableTrees after filtering:', this.availableTrees.length, this.availableTrees.map(t => t.pathName));
-    
-    // Strip " - Core" from any remaining tree names for display (shouldn't be needed now)
-    this.availableTrees = this.availableTrees.map(tree => ({
-      ...tree,
-      pathName: tree.pathName.replace(/ - Core$/i, '')
-    }));
-    // Sort trees to prioritize the character's chosen path or Singer tree for singers
-    if (this.characterAncestry != null && ['human', 'singer'].includes(this.characterAncestry) && specializationName) {
-      this.availableTrees.sort((a, b) => {
-        // For singers, show Singer tree first if present
-        if (this.character?.ancestry === 'singer') {
-          const aIsSinger = a.pathName.toLowerCase().includes('singer');
-          const bIsSinger = b.pathName.toLowerCase().includes('singer');
-          if (aIsSinger && !bIsSinger) return -1;
-          if (!aIsSinger && bIsSinger) return 1;
-        }
-        // For both, show chosen specialization first
-        const aIsChosen = a.pathName.toLowerCase() === specializationName.toLowerCase();
-        const bIsChosen = b.pathName.toLowerCase() === specializationName.toLowerCase();
-        if (aIsChosen && !bIsChosen) return -1;
-        if (!aIsChosen && bIsChosen) return 1;
-        return 0;
-      });
-    }
-    // If previously selected tree no longer exists, clear selection
-    if (this.selectedTree) {
-      const selectedName = this.selectedTree.pathName.toLowerCase();
-      const stillAvailable = this.availableTrees.some(tree => tree.pathName.toLowerCase() === selectedName);
-      if (!stillAvailable) {
-        this.selectedTree = null;
-      }
-    }
-    // Default selected tree: Singer tree for singers, otherwise first available
-    if (this.availableTrees.length > 0 && !this.selectedTree) {
-      if (this.characterAncestry === 'singer') {
-        const singerTree = this.availableTrees.find(tree => tree.pathName.toLowerCase().includes('singer'));
-        this.selectedTree = singerTree || this.availableTrees[0];
-      } else {
-        this.selectedTree = this.availableTrees[0];
-      }
-    }
-      // ...existing code...
+    // Trees are now loaded and determined by the backend via fetchTalentsState()
+    // This method is kept for legacy call sites but does nothing since the backend
+    // returns the correct availableTrees based on character state (including bonus paths from pendingTrees)
+    console.log('[TalentView] loadAvailableTrees called - backend handles tree determination');
   }
 
   private isKeyTalentId(talentId: string): boolean {
@@ -760,59 +607,10 @@ export class TalentView implements OnInit, OnDestroy {
       return;
     }
 
-    // Base points provided by server for this level
-    const totalPoints = this.baseTalentPoints ?? 0;
-    
-    // Tier 0 talents that are free (don't cost points)
-    const tier0Talents = new Set<string>();
-    
-    // Main path tier 0 talent is free
-    const mainPath = this.characterPaths?.type;
-    if (mainPath) {
-      const mainPathDef = getTalentPath(mainPath);
-      const coreTier0 = mainPathDef?.talentNodes?.find(node => node.tier === 0);
-      if (coreTier0) {
-        tier0Talents.add(coreTier0.id);
-      }
-    }
-
-    // Radiant key talent is free
-    if (this.character.radiantPath.hasSpren()) {
-      const orderTreeId = this.character.radiantPath.getOrderTree();
-      if (orderTreeId) {
-        const orderPath = getTalentPath(orderTreeId);
-        if (orderPath?.paths?.[0]) {
-          const radiantTier0 = orderPath.paths[0].nodes.find(t => t.tier === 0);
-          if (radiantTier0) {
-            tier0Talents.add(radiantTier0.id);
-          }
-        }
-      }
-    }
-
-    // Surge tree tier 0 talents are free
-    if (this.characterRadiantPath?.idealSpoken && this.characterRadiantPath?.surgePair) {
-      const surgePairs = this.characterRadiantPath.surgePair.split('/').filter(s => s.trim());
-      surgePairs.forEach(surgeName => {
-        const treeId = surgeName.toLowerCase().trim();
-        const surgeTree = getTalentTree(treeId);
-        if (surgeTree) {
-          const surgeTier0 = surgeTree.nodes.find(t => t.tier === 0);
-          if (surgeTier0) {
-            tier0Talents.add(surgeTier0.id);
-          }
-        }
-      });
-    }
-
-    let newTalents = 0;
-    this.unlockedTalents.forEach(talentId => {
-      if (!this.lockedTalents.has(talentId) && !tier0Talents.has(talentId)) {
-        newTalents++;
-      }
-    });
-
-    this.availableTalentPoints = Math.max(0, totalPoints - newTalents);
+    // Use the API's pointsRemaining directly (already includes bonuses)
+    // This is set during fetchTalentsState from the server response
+    // Don't recalculate - trust the server value
+    // The availableTalentPoints represents unspent points after level bonuses applied
   }
 
   selectTree(tree: TalentTree): void {
@@ -830,13 +628,17 @@ export class TalentView implements OnInit, OnDestroy {
 
     // Special handling for tier 0 talents (key talents)
     if (talent.tier === 0) {
-      // At level 1, humans and singers can select tier 0 talents from other paths as their bonus talent
-      // During level-up or multi-level creation, they can also select tier 0 talents if they have points
-      // isInLevelUpMode covers both explicit level-up AND multi-level creation scenarios
-      if ((this.characterAncestry === 'human' || this.characterAncestry === 'singer') && 
-          (this.characterLevel === 1 || this.isInLevelUpMode())) {
-        // Allow if they still have points available
-        return true;
+      // For humans and singers: allow tier 0 talent selection during character creation at any level
+      // Also allow during actual level-up mode at level 1 or when pending points exist
+      if (this.characterAncestry === 'human' || this.characterAncestry === 'singer') {
+        // During character creation (any level), allow selecting bonus paths
+        if (!this.isLevelUpMode) {
+          return true;
+        }
+        // During explicit level-up mode, allow at level 1 or when pending points exist
+        if (this.characterLevel === 1 || this.isInLevelUpMode()) {
+          return true;
+        }
       }
       // Otherwise, tier 0 talents shouldn't be manually unlockable (they're auto-unlocked)
       return false;
@@ -928,10 +730,19 @@ export class TalentView implements OnInit, OnDestroy {
   private applyTalentUnlock(talent: TalentNode): void {
     if (!this.character) return;
 
+    // Check if this is a NEW talent (not in lockedTalents)
+    const isNewTalent = !this.lockedTalents.has(talent.id);
+
     // Update local state
     this.unlockedTalents.add(talent.id);
     this.character.unlockedTalents.add(talent.id);
-    this.calculateAvailablePoints();
+    
+    // If this is a new talent, deduct its cost from available points
+    // Tier 0 talents (key talents) cost 0 points - only tier 1+ talents cost 1 point
+    if (isNewTalent && talent.tier > 0) {
+      this.availableTalentPoints = Math.max(0, this.availableTalentPoints - 1);
+      console.log('[TalentView] Unlocked talent:', talent.id, '- Points remaining:', this.availableTalentPoints);
+    }
     
     // Apply talent effects using BonusManager
     this.character.bonuses.unlockTalent(talent.id, talent);
@@ -939,12 +750,44 @@ export class TalentView implements OnInit, OnDestroy {
     // Apply special talent effects (e.g., grant Singer forms)
     applyTalentEffects(this.character, talent.id);
 
+    // If a tier 0 talent (bonus path) was selected, auto-unlock all tier 1 talents in that path
+    if (talent.tier === 0) {
+      // Find which path this tier 0 talent belongs to
+      const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+      for (const pathId of allPaths) {
+        const talentPath = getTalentPath(pathId);
+        if (!talentPath || !talentPath.talentNodes) continue;
+        
+        const keyTalent = talentPath.talentNodes.find(t => t.tier === 0);
+        if (keyTalent && keyTalent.id === talent.id) {
+          // Found the path - auto-unlock all tier 1 talents
+          // Note: Do NOT deduct points here for tier 1 talents - the backend will count them in the array
+          // and calculate the correct pointsRemaining when we persist/fetch
+          const tier1Talents = talentPath.talentNodes.filter(t => t.tier === 1);
+          tier1Talents.forEach(t1 => {
+            if (!this.unlockedTalents.has(t1.id)) {
+              this.unlockedTalents.add(t1.id);
+              this.character!.unlockedTalents.add(t1.id);
+              this.character!.bonuses.unlockTalent(t1.id, t1);
+              applyTalentEffects(this.character!, t1.id);
+              
+              // Point deduction for tier 1 talents is handled by backend calculation
+              // when we persist and fetch the updated availableTalentPoints
+            }
+          });
+          break;
+        }
+      }
+    }
+
     // Don't auto-persist on every change - only persist when Next is clicked
     
     // If a tier 0 talent (key talent) was selected from another path, reload trees to show its specialties
-    if (talent.tier === 0 && (this.characterAncestry === 'human' || this.characterAncestry === 'singer') && 
-        (this.characterLevel === 1 || this.isInLevelUpMode())) {
-      this.loadAvailableTrees();
+    if (talent.tier === 0 && (this.characterAncestry === 'human' || this.characterAncestry === 'singer')) {
+      // Reload trees during character creation or during level-up mode
+      if (!this.isLevelUpMode || this.characterLevel === 1 || this.isInLevelUpMode()) {
+        this.loadAvailableTrees();
+      }
     }
     
     this.updateValidation();
@@ -977,10 +820,8 @@ export class TalentView implements OnInit, OnDestroy {
         remainingUnlocked: this.unlockedTalents.size
       });
       
-      // Reload core path options to update selected state
-      this.loadCorePathOptions();
-      
-      this.calculateAvailablePoints();
+      // Reload bonus path options to update selected state
+      this.loadBonusPathOptions();
       
       // Remove talent bonuses using the source format that matches unlockTalent
       this.character.bonuses.bonuses.removeBonus(`talent:${talentId}`);
@@ -993,9 +834,37 @@ export class TalentView implements OnInit, OnDestroy {
         this.loadAvailableTrees();
       }
       
-      // Don't auto-persist on every change - only persist when Next is clicked
-      
-      this.updateValidation();
+      // Persist removal immediately and fetch fresh state from backend
+      // This ensures availableTalentPoints and validation message are always in sync
+      if (this.characterId) {
+        const totalTalents = Array.from(this.lockedTalents);
+        const pendingTalents = Array.from(this.unlockedTalents).filter(
+          (talentId) => !this.lockedTalents.has(talentId)
+        );
+        const pendingTrees = Array.from(this.pendingBonusTrees);
+
+        const payload = {
+          totalPoints: this.baseTalentPoints ?? 0,
+          totalTalents,
+          pendingTalents,
+          pendingTrees,
+          finalized: false
+        };
+
+        this.talentsApi.saveTalents(this.characterId, payload)
+          .pipe(take(1))
+          .subscribe({
+            next: () => {
+              // After persisting, fetch the updated talent state from backend
+              this.fetchTalentsState(this.characterId!);
+            },
+            error: (err) => {
+              console.error('[TalentView] Failed to save talent removal:', err);
+            }
+          });
+      } else {
+        this.updateValidation();
+      }
     }
   }
 

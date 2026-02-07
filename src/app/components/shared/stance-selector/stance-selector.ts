@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Character } from '../../../character/character';
-import { Stance } from '../../../character/attacks/attackInterfaces';
+import { Stance } from '../../../../../shared/types/attacks';
 
 /**
  * Stance Selector Component

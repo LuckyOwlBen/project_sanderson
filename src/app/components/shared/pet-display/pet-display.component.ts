@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { Character } from '../../../character/character';
-import { InventoryItem } from '../../../character/inventory/inventoryItem';
+import { InventoryItem } from '../../../../../shared/types/inventory';
 import { getPetProperties, PetProperties } from '../../../character/inventory/petDefinitions';
 
 @Component({

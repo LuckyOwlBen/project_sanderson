@@ -2,118 +2,36 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { Ancestry } from '../character/ancestry/ancestry';
+import {
+  PlayerJoinedEvent as SharedPlayerJoinedEvent,
+  PlayerLeftEvent,
+  PlayerResourceUpdateEvent,
+  PlayerCriticalEvent,
+  SprenGrantEvent,
+  ItemTransaction,
+  StoreTransactionEvent,
+  ItemGrantEvent,
+  StoreToggleEvent,
+  ExpertiseGrantEvent,
+  LevelUpEvent,
+  HighstormEvent,
+  CombatStartEvent,
+  TurnSpeedSelectionEvent,
+  TurnGroupsUpdateEvent,
+  CharacterUpdatedEvent
+} from '../../../shared/types/websocket-events';
 
-export interface PlayerJoinedEvent {
-  characterId: string;
-  name: string;
-  level: number;
+// Extend shared PlayerJoinedEvent to use local Ancestry type
+export interface PlayerJoinedEvent extends Omit<SharedPlayerJoinedEvent, 'ancestry'> {
   ancestry: Ancestry | null;
-  health: { current: number; max: number };
-  focus: { current: number; max: number };
-  investiture: { current: number; max: number };
-  currencyInChips?: number;
-  joinedAt: string;
-  socketId: string;
 }
 
-export interface PlayerLeftEvent {
-  characterId: string;
-  socketId: string;
-}
-
-export interface PlayerResourceUpdateEvent {
-  characterId: string;
-  socketId: string;
-  health: { current: number; max: number };
-  focus: { current: number; max: number };
-  investiture: { current: number; max: number };
-}
-
-export interface PlayerCriticalEvent {
-  characterId: string;
-  playerName: string;
-  message: string;
-}
-
-export interface SprenGrantEvent {
-  characterId: string;
-  order: string;
-  sprenType: string;
-  surgePair: [string, string];
-  philosophy: string;
-}
-
-export interface ItemTransaction {
-  itemId: string;
-  quantity: number;
-  price: number;
-  type: 'buy' | 'sell';
-}
-
-export interface StoreTransactionEvent {
-  storeId: string;
-  characterId: string;
-  items: ItemTransaction[];
-  totalCost: number;
-  timestamp: string;
-}
-
-export interface ItemGrantEvent {
-  characterId: string;
-  itemId: string;
-  quantity: number;
-  grantedBy: string;
-  timestamp: string;
-}
-
-export interface StoreToggleEvent {
-  storeId: string;
-  enabled: boolean;
-  toggledBy: string;
-}
-
-export interface ExpertiseGrantEvent {
-  characterId: string;
-  expertiseName: string;
-  grantedBy: string;
-  timestamp: string;
-}
-
-export interface LevelUpEvent {
-  characterId: string;
-  newLevel: number;
-  grantedBy: string;
-  timestamp: string;
-}
-
-export interface HighstormEvent {
-  active: boolean;
-  triggeredBy: string;
-  timestamp: string;
-}
-
-export interface CombatStartEvent {
-  timestamp: string;
-}
-
-export interface TurnSpeedSelectionEvent {
-  characterId: string;
-  turnSpeed: 'fast' | 'slow';
-  timestamp: string;
-}
-
-export interface TurnGroupsUpdateEvent {
-  fastPC: string[];
-  fastNPC: string[];
-  slowPC: string[];
-  slowNPC: string[];
-  timestamp: string;
-}
-
-export interface CharacterUpdatedEvent {
-  characterId: string;
-  timestamp: string;
-}
+// Re-export shared event types
+export type { PlayerLeftEvent, PlayerResourceUpdateEvent, PlayerCriticalEvent, SprenGrantEvent };
+export type { ItemTransaction, StoreTransactionEvent, ItemGrantEvent };
+export type { StoreToggleEvent, ExpertiseGrantEvent, LevelUpEvent };
+export type { HighstormEvent, CombatStartEvent, TurnSpeedSelectionEvent };
+export type { TurnGroupsUpdateEvent, CharacterUpdatedEvent };
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Character } from '../../../character/character';
-import { Attack } from '../../../character/attacks/attackInterfaces';
+import { Attack } from '../../../../../shared/types/attacks';
 
 @Component({
   selector: 'app-character-attacks',

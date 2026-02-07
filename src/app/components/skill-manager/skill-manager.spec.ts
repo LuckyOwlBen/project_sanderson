@@ -24,7 +24,7 @@ import { LevelUpManager } from '../../levelup/levelUpManager';
 import { LevelUpApiService, SkillSlice } from '../../services/levelup-api.service';
 import { StepValidationService } from '../../services/step-validation.service';
 import { Character } from '../../character/character';
-import { SkillType } from '../../character/skills/skillTypes';
+import { SkillType } from '../../../../shared/data/skills/skillTypes';
 
 describe('SkillManager - Fresh Backend Data on Route Change', () => {
   let component: SkillManager;

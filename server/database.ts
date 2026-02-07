@@ -120,6 +120,7 @@ export interface TalentsStateRecord {
   finalized: boolean;
   totalTalents: string[];
   pendingTalents: string[];
+  pendingTrees: string[];  // Selected bonus path trees (removable until finalized)
 }
 
 export interface SaveResult {
@@ -614,6 +615,7 @@ export async function getTalentsStateRecord(characterId: string): Promise<Talent
 
   const totalTalents = record.totalTalents ? JSON.parse(record.totalTalents) : [];
   const pendingTalents = record.pendingTalents ? JSON.parse(record.pendingTalents) : [];
+  const pendingTrees = record.pendingTrees ? JSON.parse(record.pendingTrees) : [];
 
   return {
     characterId: record.characterId,
@@ -622,7 +624,8 @@ export async function getTalentsStateRecord(characterId: string): Promise<Talent
     pointsRemaining: record.pointsRemaining ?? 0,
     finalized: (record.finalized ?? 0) === 1,
     totalTalents: Array.isArray(totalTalents) ? totalTalents : [],
-    pendingTalents: Array.isArray(pendingTalents) ? pendingTalents : []
+    pendingTalents: Array.isArray(pendingTalents) ? pendingTalents : [],
+    pendingTrees: Array.isArray(pendingTrees) ? pendingTrees : []
   };
 }
 
@@ -630,8 +633,8 @@ export async function createTalentsStateRecord(record: TalentsStateRecord): Prom
   if (!db) throw new Error('Database not initialized');
   await db.run(`
     INSERT INTO CharacterTalents (
-      id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized, totalTalents, pendingTalents
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized, totalTalents, pendingTalents, pendingTrees
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
     `talents-${record.characterId}`,
     record.characterId,
@@ -640,7 +643,8 @@ export async function createTalentsStateRecord(record: TalentsStateRecord): Prom
     record.pointsRemaining,
     record.finalized ? 1 : 0,
     JSON.stringify(record.totalTalents ?? []),
-    JSON.stringify(record.pendingTalents ?? [])
+    JSON.stringify(record.pendingTalents ?? []),
+    JSON.stringify(record.pendingTrees ?? [])
   );
   return record;
 }
@@ -668,7 +672,8 @@ export async function updateTalentsStateRecord(
       pointsRemaining = ?,
       finalized = ?,
       totalTalents = ?,
-      pendingTalents = ?
+      pendingTalents = ?,
+      pendingTrees = ?
     WHERE characterId = ?
   `,
     merged.totalPoints,
@@ -677,6 +682,7 @@ export async function updateTalentsStateRecord(
     merged.finalized ? 1 : 0,
     JSON.stringify(merged.totalTalents ?? []),
     JSON.stringify(merged.pendingTalents ?? []),
+    JSON.stringify(merged.pendingTrees ?? []),
     characterId
   );
 

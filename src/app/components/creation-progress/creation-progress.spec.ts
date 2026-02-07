@@ -20,7 +20,7 @@ import { Router } from '@angular/router';
 import { CreationProgressComponent } from './creation-progress';
 import { CharacterCreationFlowService } from '../../services/character-creation-flow-service';
 import { Character } from '../../character/character';
-import { SkillType } from '../../character/skills/skillTypes';
+import { SkillType } from '../../../../shared/data/skills/skillTypes';
 import { BehaviorSubject } from 'rxjs';
 
 describe('CreationProgressComponent', () => {

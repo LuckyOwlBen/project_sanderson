@@ -233,6 +233,7 @@ model CharacterTalents {
   // JSON arrays stored as strings for SQLite
   totalTalents    String   @default("[]")
   pendingTalents  String   @default("[]")
+  pendingTrees    String   @default("[]")  // Selected bonus path trees (removable until finalized)
 
   @@index([characterId])
 }

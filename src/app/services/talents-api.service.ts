@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 
+export interface RadiantPathData {
+  boundOrder: string | null;
+  currentIdeal: number;
+  idealSpoken: boolean;
+  surgePair: string | null;
+  sprenType: string | null;
+}
+
 export interface TalentsState {
   characterId: string;
   totalPoints: number;
@@ -10,11 +18,13 @@ export interface TalentsState {
   finalized: boolean;
   totalTalents: string[];
   pendingTalents: string[];
+  pendingTrees: string[];  // Selected bonus path trees (removable until finalized)
   availableTrees: string[];
   selectedTreeId: string | null;
   requiresSingerSelection: boolean;
   ancestry: string | null;
   level: number;
+  radiantPath?: RadiantPathData;
 }
 
 interface TalentsResponse {

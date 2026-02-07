@@ -1,4 +1,4 @@
-const { getItemById, STARTING_KITS } = require('./item-definitions');
+const { getItemById, STARTING_KITS } = require('../shared/data/items/item-definitions');
 
 class InventoryManager {
   constructor() {

@@ -11,6 +11,7 @@
 const path = require('path');
 const fsPromises = require('fs').promises;
 const { attributesService } = require('../services/attributes-service');
+const { levelUpManager } = require('../services/levelup-manager');
 const {
   getAttributesRecord,
   updateAttributesRecord,
@@ -143,6 +144,12 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         console.log(`[Name] Saved name to database for ${character.name} (${id})`);
       } catch (dbError) {
         console.warn(`[Name] Warning: Failed to save to database: ${dbError.message}`);
+      }
+
+      // Apply level bonuses if level > 1
+      if (level && level > 1) {
+        console.log(`[Name] Calling getCreationLevelBonuses for character ${id} at level ${level}`);
+        await levelUpManager.getCreationLevelBonuses(id, level);
       }
 
       console.log(`[Name] Updated character (${id}) name to: ${trimmedName}`);

@@ -1,48 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import {
+  InventoryItemDTO,
+  InventoryDTO,
+  InventoryItem,
+  InventoryViewItem,
+  StartingKitDTO
+} from '../../../shared/types/inventory';
 
-export interface InventoryItemDTO {
-  itemId: string;
-  quantity: number;
-  equipped: boolean;
-}
-
-export interface InventoryDTO {
-  items: InventoryItemDTO[];
-  equipped: {
-    armor: InventoryItemDTO | null;
-    weapons: InventoryItemDTO[];
-  };
-}
-
-export interface InventoryItem {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  rarity: string;
-  price: number;
-  weight?: number;
-  quantity?: number;
-}
-
-export interface InventoryViewItem extends InventoryItem {
-  baseId: string;
-  quantity: number;
-}
-
-export interface StartingKitDTO {
-  id: string;
-  name: string;
-  description: string;
-  weapons: { itemId: string; quantity: number }[];
-  armor: { itemId: string; quantity: number }[];
-  equipment: { itemId: string; quantity: number }[];
-  currency: number;
-  additionalExpertise?: string;
-  connection?: string;
-}
+// Re-export shared types for backward compatibility
+export type { InventoryItemDTO, InventoryDTO, InventoryItem, InventoryViewItem, StartingKitDTO };
 
 export interface EquipmentResponse {
   success: boolean;

@@ -4,7 +4,7 @@ import {
   updateTalentsStateRecord,
   loadCharacter
 } from '../database';
-import { getTalentPath } from '../character/talents/talentTrees/talentTrees';
+import { getTalentPath } from 'shared/data/talents/talentTrees';
 import { getPathsByCharacterId } from './paths-service';
 import { RADIANT_TIER0_TALENTS } from './paths-service';
 
@@ -24,6 +24,7 @@ export interface TalentsStateDTO {
   finalized: boolean;
   totalTalents: string[];
   pendingTalents: string[];
+  pendingTrees: string[];  // Selected bonus tree paths (removable until finalized)
   availableTrees: string[];
   selectedTreeId: string | null;
   requiresSingerSelection: boolean;
@@ -41,6 +42,7 @@ export function createEmptyTalentsDTO(characterId: string): TalentsStateDTO {
     finalized: false,
     totalTalents: [],
     pendingTalents: [],
+    pendingTrees: [],
     availableTrees: [],
     selectedTreeId: null,
     requiresSingerSelection: false,
@@ -123,9 +125,10 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
   }
   
   const unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
+  const pendingTreesArray = state.pendingTrees ?? [];
 
   const { availableTrees, selectedTreeId, requiresSingerSelection } = 
-    determineAvailableTrees(character, paths, unlockedTalents);
+    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray);
   
   console.log('[TalentsService] Determined trees:', { availableTrees, selectedTreeId, requiresSingerSelection });
 
@@ -149,6 +152,7 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
     finalized: state.finalized,
     totalTalents,
     pendingTalents,
+    pendingTrees: state.pendingTrees ?? [],
     availableTrees,
     selectedTreeId,
     requiresSingerSelection,
@@ -170,6 +174,9 @@ export async function setTalentsByCharacterId(
   let pendingTalents = Array.isArray(talents.pendingTalents)
     ? talents.pendingTalents
     : existing?.pendingTalents ?? [];
+  let pendingTrees = Array.isArray(talents.pendingTrees)
+    ? talents.pendingTrees
+    : existing?.pendingTrees ?? [];
   const finalized = typeof talents.finalized === 'boolean'
     ? talents.finalized
     : existing?.finalized ?? false;
@@ -178,11 +185,16 @@ export async function setTalentsByCharacterId(
     const merged = new Set<string>([...totalTalents, ...pendingTalents]);
     totalTalents = Array.from(merged);
     pendingTalents = [];
+    // Note: pendingTrees are kept as-is; finalization doesn't merge them into another structure
+    // They represent selected bonus paths that remain available to the character
   }
 
   const totalPoints = typeof talents.totalPoints === 'number'
     ? talents.totalPoints
     : existing?.totalPoints ?? 0;
+
+  // Total points spent = locked talents + pending talents
+  // NOTE: Bonus path tier 0 talents should be in pendingTalents, not counted separately
   const pointsSpent = totalTalents.length + pendingTalents.length;
   const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
 
@@ -193,7 +205,8 @@ export async function setTalentsByCharacterId(
     pointsRemaining,
     finalized,
     totalTalents,
-    pendingTalents
+    pendingTalents,
+    pendingTrees
   };
 
   const updated = existing
@@ -206,7 +219,8 @@ export async function setTalentsByCharacterId(
 function determineAvailableTrees(
   character: any,
   paths: { type: string | null; sub: string | null },
-  unlockedTalents: Set<string>
+  unlockedTalents: Set<string>,
+  pendingTrees: string[] = []
 ): { availableTrees: string[]; selectedTreeId: string | null; requiresSingerSelection: boolean } {
   const treeIds: string[] = [];
   const addedTreeNames = new Set<string>();
@@ -283,6 +297,8 @@ function determineAvailableTrees(
         }
       }
     });
+
+    // Bonus tree processing moved outside level check - applies to ALL characters
   } else {
     console.log('[TalentsService] Processing non-level-1 or non-human/singer character');
     // For other ancestries or higher levels, still add all specializations from the main path
@@ -307,6 +323,28 @@ function determineAvailableTrees(
       console.log('[TalentsService] No mainPathName provided');
     }
   }
+
+  // Add specializations for bonus paths selected (pendingTrees) - applies to ALL characters
+  console.log('[TalentsService] Processing bonus paths from pendingTrees:', pendingTrees);
+  pendingTrees.forEach(bonusPathId => {
+    const normalizedPathId = bonusPathId.toLowerCase();
+    // Skip if it's the main path
+    if (normalizedPathId === mainPathName?.toLowerCase()) {
+      return;
+    }
+    const talentPath = getTalentPath(normalizedPathId);
+    if (talentPath?.paths) {
+      console.log('[TalentsService] Adding bonus path specializations:', normalizedPathId);
+      talentPath.paths.forEach(specTree => {
+        const treeId = specTree.pathName.toLowerCase();
+        if (!addedTreeNames.has(treeId)) {
+          treeIds.push(treeId);
+          addedTreeNames.add(treeId);
+        }
+      });
+    }
+  });
+
 
   // Add ancestry-specific trees
   if (ancestry === 'singer') {
@@ -348,4 +386,66 @@ function determineAvailableTrees(
   console.log('[TalentsService] determineAvailableTrees END -', { availableTrees: treeIds, selectedTreeId, requiresSingerSelection });
 
   return { availableTrees: treeIds, selectedTreeId, requiresSingerSelection };
+}
+/**
+ * Find the parent core path for a specialization tree ID.
+ * e.g., findParentPath('duelist') => 'warrior'
+ * e.g., findParentPath('diplomat') => 'envoy'
+ */
+export function findParentPath(treeId: string): string | null {
+  const allPaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+  const normalizedTreeId = treeId.toLowerCase();
+  
+  for (const pathId of allPaths) {
+    const talentPath = getTalentPath(pathId);
+    if (talentPath?.paths?.some(tree => tree.pathName.toLowerCase() === normalizedTreeId)) {
+      return pathId;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Get specializations (sub-trees) for a given core path.
+ * e.g., getSpecializationsForPath('warrior') => ['duelist', 'shardbearer', 'soldier']
+ */
+export function getSpecializationsForPath(pathId: string): string[] {
+  const talentPath = getTalentPath(pathId);
+  if (!talentPath?.paths) return [];
+  return talentPath.paths.map(tree => tree.pathName.toLowerCase());
+}
+
+/**
+ * Get available bonus class core paths.
+ * Returns all 6 core paths except the main path and specialty.
+ * e.g., getAvailableBonusClasses('warrior', 'scholar') => ['hunter', 'leader', 'envoy', 'agent']
+ */
+export function getAvailableBonusClasses(mainPath: string | null, specialty: string | null): string[] {
+  const allCorePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+  const normalizedMain = mainPath?.toLowerCase() || null;
+  const normalizedSpecialty = specialty?.toLowerCase() || null;
+  
+  return allCorePaths.filter(path => 
+    path !== normalizedMain && path !== normalizedSpecialty
+  );
+}
+
+/**
+ * Finalize talents for a character (called by finalization step).
+ * Merges pendingTalents into totalTalents and clears pending state.
+ * pendingTrees are preserved as they represent permanent bonus class selections.
+ */
+export async function finalizeTalentsByCharacterId(characterId: string): Promise<TalentsStateDTO> {
+  const state = await getTalentsStateRecord(characterId);
+  if (!state) {
+    return createEmptyTalentsDTO(characterId);
+  }
+
+  // Merge pending into total and finalize
+  return await setTalentsByCharacterId(characterId, {
+    totalTalents: Array.from(new Set([...state.totalTalents, ...state.pendingTalents])),
+    pendingTalents: [],
+    finalized: true
+  });
 }

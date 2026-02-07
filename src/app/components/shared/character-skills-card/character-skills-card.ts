@@ -4,8 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { Character } from '../../../character/character';
-import { SkillType, isSurgeSkill } from '../../../character/skills/skillTypes';
-import { SkillAssociationTable } from '../../../character/skills/skillAssociationTable';
+import { SkillType, isSurgeSkill } from '../../../../../shared/data/skills/skillTypes';
+import { SkillAssociationTable } from '../../../../../shared/data/skills/skillAssociationTable';
 
 interface SkillDisplay {
   name: string;

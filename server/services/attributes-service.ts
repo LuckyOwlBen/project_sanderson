@@ -1,6 +1,6 @@
-import { Attributes as AttributesModel } from '../character/attributes/attributes';
-import { MovementRateCalculator } from '../character/attributes/derivedAttributes/movementRate';
-import { RecoveryDieCalculator } from '../character/attributes/derivedAttributes/recoveryDie';
+import { Attributes as AttributesModel } from 'shared/character/attributes/attributes';
+import { MovementRateCalculator } from 'shared/character/attributes/derivedAttributes/movementRate';
+import { RecoveryDieCalculator } from 'shared/character/attributes/derivedAttributes/recoveryDie';
 import { HealthManager } from '../character/resources/healthManager';
 import { FocusManager } from '../character/resources/focusManager';
 

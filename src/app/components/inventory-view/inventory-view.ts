@@ -9,7 +9,7 @@
   import { MatProgressBarModule } from '@angular/material/progress-bar';
   import { MatExpansionModule } from '@angular/material/expansion';
   import { Character } from '../../character/character';
-  import { InventoryItem } from '../../character/inventory/inventoryItem';
+  import { InventoryItem } from '../../../../shared/types/inventory';
 
   @Component({
     selector: 'app-inventory-view',

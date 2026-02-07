@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { Character } from '../../character/character';
-import { InventoryItem, ItemType, CurrencyConversion } from '../../character/inventory/inventoryItem';
+import { InventoryItem, ItemType, CurrencyConversion } from '../../../../shared/types/inventory';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { WebsocketService } from '../../services/websocket.service';

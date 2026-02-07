@@ -5,8 +5,8 @@ import { CharacterCreationFlowService, CreationStep } from '../../services/chara
 import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpStatusService } from '../../services/level-up-status.service';
 import { NavFinalizedService } from '../../services/nav-finalized.service';
-import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
-import { TalentTree } from '../../character/talents/talentInterface';
+import { ALL_TALENT_PATHS, getTalentTree } from '../../../../shared/data/talents/talentTrees';
+import { TalentTree } from '../../../../shared/types/talents';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';

@@ -11,7 +11,7 @@ import talentRules from './talent-rules';
 import talentService from './talent-service';
 import attributeAllocator from './services/attribute-allocator';
 import InventoryManager from './inventory-manager';
-import { ALL_ITEMS, getItemById, getKitById } from './character/inventory/itemDefinitions';
+import { ALL_ITEMS, getItemById, getKitById } from 'shared/data/items/item-definitions';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { SocketBroadcaster } from './socket-broadcaster';

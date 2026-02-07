@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
-import { InventoryItem, ItemType } from '../../character/inventory/inventoryItem';
+import { InventoryItem, ItemType } from '../../../../shared/types/inventory';
 import { PlayerJoinedEvent } from '../../services/websocket.service';
 
 @Component({

@@ -15,8 +15,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { Subject, takeUntil, filter, take, switchMap } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
-import { EquipmentApiService, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem, EquipmentResponse } from '../../services/equipment-api.service';
-import { ItemType } from '../../character/inventory/inventoryItem';
+import { EquipmentApiService, EquipmentResponse } from '../../services/equipment-api.service';
+import { ItemType, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem } from '../../../../shared/types/inventory';
 
 @Component({
   selector: 'app-starting-equipment',

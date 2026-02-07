@@ -21,7 +21,7 @@ import {
   deleteCharacter,
   unlockTalent
 } from '../database';
-import { Attributes } from '../character/attributes/attributes';
+import { Attributes } from 'shared/character/attributes/attributes';
 
 // Import all module repositories
 import {
