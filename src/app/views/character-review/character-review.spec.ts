@@ -16,51 +16,83 @@ try {
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CharacterReview } from './character-review';
-import { CharacterStateService } from '../../character/characterStateService';
-import { CharacterStorageService } from '../../services/character-storage.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
+import { FinalizeApiService, CompleteCharacterView } from '../../services/finalize-api.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { of, BehaviorSubject } from 'rxjs';
-import { Character } from '../../character/character';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('CharacterReview', () => {
   let component: CharacterReview;
   let fixture: ComponentFixture<CharacterReview>;
-  let mockCharacterState: any;
-  let mockCharacterStorage: any;
+  let mockIdentityService: any;
+  let mockFinalizeApi: any;
+  let mockNavFinalized: any;
   let mockRouter: any;
-  let mockDialog: any;
   let activatedRouteSubject: BehaviorSubject<any>;
+  let identityServiceSubject: BehaviorSubject<string | null>;
 
   beforeEach(async () => {
-    // Create mock character
-    const mockCharacter = new Character();
-    (mockCharacter as any).id = 'test-character-id';
-    mockCharacter.name = 'Test Character';
-
-    // Create mock services using vitest
-    mockCharacterState = {
-      getCharacter: vi.fn(() => mockCharacter),
-      updateCharacter: vi.fn()
+    // Create mock character view
+    const mockCompleteCharacter: CompleteCharacterView = {
+      id: 'test-character-id',
+      name: 'Test Character',
+      level: 1,
+      ancestry: 'Human',
+      cultures: ['test-culture'],
+      paths: {
+        main: 'Radiant',
+        specialization: 'Windrunner'
+      },
+      attributes: {
+        strength: 10,
+        speed: 10,
+        intellect: 10,
+        willpower: 10,
+        awareness: 10,
+        presence: 10
+      },
+      skills: {
+        total: 5,
+        allocated: 5
+      },
+      talents: {
+        total: 2,
+        selected: ['talent1', 'talent2']
+      },
+      expertises: {
+        total: 1,
+        selected: ['expertise1']
+      }
     };
 
-    mockCharacterStorage = {
-      loadCharacter: vi.fn(() => of(mockCharacter)),
-      saveCharacter: vi.fn(() => of({ success: true, id: 'test-character-id' }))
+    identityServiceSubject = new BehaviorSubject<string | null>('test-character-id');
+
+    mockIdentityService = {
+      getCurrentCharacterId: vi.fn(() => 'test-character-id'),
+      setCurrentCharacterId: vi.fn(),
+      clearCurrentCharacterId: vi.fn(),
+      currentCharacterId$: identityServiceSubject.asObservable(),
+      waitingForIdentity$: of(false)
+    };
+
+    mockFinalizeApi = {
+      getCompleteCharacter: vi.fn(() => of(mockCompleteCharacter)),
+      finalizeCharacter: vi.fn(() => of(true))
+    };
+
+    mockNavFinalized = {
+      loadNavFinalized: vi.fn(() => of({}))
     };
 
     mockRouter = {
       navigate: vi.fn()
-    };
-
-    mockDialog = {
-      open: vi.fn()
     };
 
     activatedRouteSubject = new BehaviorSubject({});
@@ -72,13 +104,13 @@ describe('CharacterReview', () => {
         MatButtonModule,
         MatIconModule,
         MatDividerModule,
-        MatDialogModule
+        MatProgressSpinnerModule
       ],
       providers: [
-        { provide: CharacterStateService, useValue: mockCharacterState },
-        { provide: CharacterStorageService, useValue: mockCharacterStorage },
+        { provide: CharacterIdentityService, useValue: mockIdentityService },
+        { provide: FinalizeApiService, useValue: mockFinalizeApi },
+        { provide: NavFinalizedService, useValue: mockNavFinalized },
         { provide: Router, useValue: mockRouter },
-        { provide: MatDialog, useValue: mockDialog },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -96,12 +128,12 @@ describe('CharacterReview', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load character from API on init', () => {
+  it('should load complete character from API on init using synchronously available ID', () => {
     fixture.detectChanges();
 
-    expect(mockCharacterStorage.loadCharacter).toHaveBeenCalledWith('test-character-id');
-    expect(component.character).toBeTruthy();
-    expect(component.character?.name).toBe('Test Character');
+    expect(mockFinalizeApi.getCompleteCharacter).toHaveBeenCalledWith('test-character-id');
+    expect(component.completeCharacter).toBeTruthy();
+    expect(component.completeCharacter?.name).toBe('Test Character');
   });
 
   it('should set level-up mode based on query params', () => {
@@ -118,7 +150,8 @@ describe('CharacterReview', () => {
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    expect(mockCharacterStorage.saveCharacter).toHaveBeenCalledWith(component.character);
+    expect(mockFinalizeApi.finalizeCharacter).toHaveBeenCalledWith('test-character-id');
+    expect(mockNavFinalized.loadNavFinalized).toHaveBeenCalledWith('test-character-id');
     expect(mockRouter.navigate).toHaveBeenCalledWith(
       ['/character-sheet', 'test-character-id'],
       expect.objectContaining({
@@ -128,9 +161,7 @@ describe('CharacterReview', () => {
   });
 
   it('should handle finalization error gracefully', async () => {
-    mockCharacterStorage.saveCharacter.mockReturnValue(
-      of({ success: false, id: '' })
-    );
+    mockFinalizeApi.finalizeCharacter.mockReturnValue(of(false));
 
     fixture.detectChanges();
     component.finalizeCharacter();
@@ -140,13 +171,19 @@ describe('CharacterReview', () => {
     expect(component.characterLoadError).toContain('Failed to finalize');
   });
 
-  it('should sync to local state if no character ID in route params', () => {
-    mockCharacterState.getCharacter.mockReturnValue(
-      new Character() // Default empty character
-    );
+  it('should load asynchronously arriving character ID', async () => {
+    // Start with no ID synchronously
+    mockIdentityService.getCurrentCharacterId.mockReturnValueOnce(null);
+    mockIdentityService.getCurrentCharacterId.mockReturnValueOnce('test-character-id');
 
     fixture.detectChanges();
 
-    expect(component.character).toBeTruthy();
+    // Simulate ID arriving asynchronously
+    identityServiceSubject.next('test-character-id');
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    expect(mockFinalizeApi.getCompleteCharacter).toHaveBeenCalledWith('test-character-id');
+    expect(component.completeCharacter).toBeTruthy();
   });
 });

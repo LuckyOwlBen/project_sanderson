@@ -34,6 +34,7 @@ import createTalentsRoute from './routes/talents-route';
 import createPathsRoute from './routes/paths';
 import createEquipmentRoute from './routes/equipment-route';
 import createCharacterFinalizationRoute from './routes/character-finalization-route';
+import createCharacterNavFinalizedRoute from './routes/character-nav-finalized-route';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
 import { SprenGrantService } from './services/spren-grant-service';
@@ -262,6 +263,9 @@ createEquipmentRoute(app, socketBroadcaster);
 
 // Register character finalization route (finalize character creation)
 createCharacterFinalizationRoute(app, socketBroadcaster);
+
+// Register character navigation finalized route (get finalized status for sidenav)
+createCharacterNavFinalizedRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {

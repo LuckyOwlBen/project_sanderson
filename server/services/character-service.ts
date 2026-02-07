@@ -4,7 +4,7 @@ import { Character } from '../character/character';
 import { createEmptyCharacterDTO } from '../data-access/character-dto';
 import { characterRepository } from '../repositories/character-repository';
 import { pointAllocationService } from './point-allocation-service';
-import { createAttributesRecord, createSkillsStateRecord, createTalentsStateRecord } from '../database';
+import { createAttributesRecord, createSkillsStateRecord, createTalentsStateRecord, createExpertiseStateRecord } from '../database';
 import { getTotalTalentPointsUpToLevel } from './calculation-constants';
 
 /**
@@ -98,6 +98,24 @@ export async function createCharacter(charactersDir: string): Promise<{ success:
       console.log(`[Create] Successfully created talents state record for character: ${id} with ${startingTalentPoints} points`);
     } catch (talentsError) {
       console.warn(`[Create] Warning: Failed to create talents state record:`, talentsError);
+      // Continue anyway - character was saved successfully
+    }
+
+    // Create expertise state record with starting expertise points
+    try {
+      // Expertise points = intellect attribute, which defaults to 2
+      const startingExpertisePoints = character.attributes.intellect || 2;
+      console.log(`[Create] Creating expertise state record with totalPoints: ${startingExpertisePoints}`);
+      await createExpertiseStateRecord({
+        characterId: id,
+        totalPoints: startingExpertisePoints,
+        pointsSpent: 0,
+        pointsRemaining: startingExpertisePoints,
+        finalized: false
+      });
+      console.log(`[Create] Successfully created expertise state record for character: ${id} with ${startingExpertisePoints} points`);
+    } catch (expertiseError) {
+      console.warn(`[Create] Warning: Failed to create expertise state record:`, expertiseError);
       // Continue anyway - character was saved successfully
     }
     

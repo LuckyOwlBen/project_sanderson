@@ -8,8 +8,6 @@
         <app-creation-progress 
             *ngIf="shouldShowInlineProgress() && character"
             [displayMode]="'inline-progress'"
-            [character]="character"
-            [isLevelUpMode]="isLevelUpMode"
             class="toolbar-progress">
         </app-creation-progress>
 
@@ -17,8 +15,6 @@
         <app-creation-progress 
             *ngIf="shouldShowNavigationGrid() && character"
             [displayMode]="'navigation-grid'"
-            [character]="character"
-            [isLevelUpMode]="false"
             class="toolbar-navigation">
         </app-creation-progress>
     </mat-toolbar-row>

@@ -4,6 +4,7 @@ import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterCreationFlowService, CreationStep } from '../../services/character-creation-flow-service';
 import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpStatusService } from '../../services/level-up-status.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../character/talents/talentTrees/talentTrees';
 import { TalentTree } from '../../character/talents/talentInterface';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
@@ -12,15 +13,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
-import { CreationProgressComponent } from '../../components/creation-progress/creation-progress';
 
 @Component({
   selector: 'app-character-creator-view',
   imports: [
     MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardContent,
     CommonModule,
     RouterOutlet,
     MatButtonModule,
@@ -30,7 +27,6 @@ import { CreationProgressComponent } from '../../components/creation-progress/cr
   styleUrl: './character-creator-view.scss',
 })
 export class CharacterCreatorView implements OnInit, OnDestroy {
-  @ViewChild(CreationProgressComponent) creationProgress?: CreationProgressComponent;
   @ViewChild(RouterOutlet) outlet?: RouterOutlet;
   
   private destroy$ = new Subject<void>();
@@ -45,7 +41,8 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     public characterState: CharacterStateService,
     public flowService: CharacterCreationFlowService,
     private validationService: StepValidationService,
-    private levelUpStatusService: LevelUpStatusService
+    private levelUpStatusService: LevelUpStatusService,
+    private navFinalized: NavFinalizedService
   ) {
     this.steps = this.flowService.getSteps();
   }
@@ -98,6 +95,11 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     ).subscribe(character => {
       // Validate all steps whenever character changes
       this.validationService.validateAllSteps(character);
+      
+      // Load finalized status from backend
+      if (character && character.id) {
+        this.navFinalized.loadNavFinalized(character.id).subscribe();
+      }
     });
   }
 
@@ -363,12 +365,6 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       'gm': 'GM Grant'
     };
     return badges[source] || source;
-  }
-
-  onStepPendingChange(stepNumber: number, hasPending: boolean): void {
-    if (this.creationProgress) {
-      this.creationProgress.updateStepPending(stepNumber, hasPending);
-    }
   }
 }
 

@@ -16,6 +16,7 @@ import { Character } from '../../character/character';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { CharacterStateService } from '../../character/characterStateService';
 import { WebsocketService } from '../../services/websocket.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { LevelUpStatusService } from '../../services/level-up-status.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
@@ -89,6 +90,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     private characterStorage: CharacterStorageService,
     private characterState: CharacterStateService,
     private websocketService: WebsocketService,
+    private navFinalized: NavFinalizedService,
     private combatService: CombatService,
     private levelUpStatusService: LevelUpStatusService,
     private characterIdentity: CharacterIdentityService,
@@ -259,10 +261,20 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.cdr.detectChanges();
           console.log('[Character Sheet] 🆙 Sending ack for level', event.newLevel);
           this.websocketService.ackLevelUp(this.characterId, event.newLevel);
+          
+          // Update nav finalized status after level-up ack
+          // Level-up resets finalized flags, so reload them from the backend
+          this.navFinalized.loadNavFinalized(this.characterId).subscribe(() => {
+            console.log('[Character Sheet] 🆙 Updated finalized status from backend after level-up');
+          });
         } else {
           console.log('[Character Sheet] 🆙 Ignoring: current level:', this.character?.level, '| event level:', event?.newLevel);
         }
       });
+
+    // Listen for level-up completion and update finalized status
+    // We listen for the level-up-ack to know when finalized flags need reset
+    // (When level-up completes, finalized flags are reset by backend)
 
     // Set up highstorm listener
     this.websocketService.highstorm$
@@ -325,6 +337,11 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           this.portraitUrl = (character as any).portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.sessionNotes = (character as any).sessionNotes || '';
+          
+          // Refresh finalized status from backend so sidenav shows current step indicators
+          this.navFinalized.loadNavFinalized(id).subscribe(() => {
+            console.log('[Character Sheet] Refreshed finalized status from backend');
+          });
           
           // Clear pendingLevel when backend confirms level-up is complete (pendingLevelPoints returned to 0)
           if (character.pendingLevel && character.pendingLevelPoints === 0) {

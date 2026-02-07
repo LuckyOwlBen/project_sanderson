@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { FinalizeApiService, CompleteCharacterView } from '../../services/finalize-api.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { CharacterImage } from '../../components/shared/character-image/character-image';
 
 @Component({
@@ -41,6 +42,7 @@ export class CharacterReview implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private identityService: CharacterIdentityService,
     private finalizeApi: FinalizeApiService,
+    private navFinalized: NavFinalizedService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -60,14 +62,23 @@ export class CharacterReview implements OnInit, OnDestroy {
         this.isWaitingForIdentity = waiting;
       });
 
-    // Wait for character ID, then load complete character
+    // Try to get character ID immediately (synchronously)
+    const existingCharacterId = this.identityService.getCurrentCharacterId();
+    if (existingCharacterId) {
+      console.log('[CharacterReview] Character ID found synchronously:', existingCharacterId);
+      this.characterId = existingCharacterId;
+      this.loadCompleteCharacterFromApi(existingCharacterId);
+    }
+
+    // Also subscribe to character ID changes for cases where ID is created asynchronously
     this.identityService.currentCharacterId$
       .pipe(
         takeUntil(this.destroy$),
-        filter((id) => id !== null)
+        filter((id) => id !== null && id !== existingCharacterId) // Only load if ID is new/different
       )
       .subscribe((characterId) => {
         if (characterId) {
+          console.log('[CharacterReview] Character ID changed:', characterId);
           this.characterId = characterId;
           this.loadCompleteCharacterFromApi(characterId);
         }
@@ -124,12 +135,25 @@ export class CharacterReview implements OnInit, OnDestroy {
           
           if (success) {
             console.log('[CharacterReview] ✅ Character finalized successfully:', this.characterId);
-            // Navigate to character sheet
-            this.router.navigate(['/character-sheet', this.characterId], {
-              queryParams: {
-                created: 'true' // Flag indicating character was just created
-              }
-            });
+            
+            // Update nav finalized status
+            if (this.characterId) {
+              this.navFinalized.loadNavFinalized(this.characterId).subscribe(() => {
+                // Navigate to character sheet
+                this.router.navigate(['/character-sheet', this.characterId], {
+                  queryParams: {
+                    created: 'true' // Flag indicating character was just created
+                  }
+                });
+              });
+            } else {
+              // Fallback navigation if characterId is missing
+              this.router.navigate(['/character-sheet'], {
+                queryParams: {
+                  created: 'true'
+                }
+              });
+            }
           } else {
             console.error('[CharacterReview] Finalize returned success=false');
             this.characterLoadError = 'Failed to finalize character. Please try again.';

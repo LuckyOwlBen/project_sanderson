@@ -3,9 +3,8 @@
   <div
     *ngFor="let step of steps"
     class="nav-card"
-    [class.completed]="step.completed"
+    [class.finalized]="step.finalized"
     [class.has-pending]="step.hasPending"
-    [class.current]="isCurrentStep(step)"
     (click)="navigateToStep(step)">
     
     <div class="card-icon-wrapper">
@@ -23,8 +22,7 @@
     <div
       *ngFor="let step of steps; let i = index"
       class="progress-step"
-      [class.completed]="step.completed"
-      [class.current]="isCurrentStep(step)"
+      [class.finalized]="step.finalized"
       [class.has-pending]="step.hasPending">
       
       <div class="step-indicator">

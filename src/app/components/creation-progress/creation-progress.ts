@@ -2,17 +2,15 @@ import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetection
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { Character } from '../../character/character';
-import { CharacterCreationFlowService } from '../../services/character-creation-flow-service';
-import { CharacterStateService } from '../../character/characterStateService';
-import { LevelUpManager } from '../../levelup/levelUpManager';
+import { NavFinalizedService, NavigationFinalized } from '../../services/nav-finalized.service';
 
 export interface CreationStepStatus {
   label: string;
   icon: string;
   route: string;
   stepNumber: number;
-  completed: boolean;
+  stepKey: keyof NavigationFinalized;
+  finalized: boolean;
   hasPending: boolean;
 }
 
@@ -26,38 +24,25 @@ export interface CreationStepStatus {
 })
 export class CreationProgressComponent implements OnInit, OnDestroy {
   @Input() displayMode: 'inline-progress' | 'navigation-grid' = 'navigation-grid';
-  @Input() character: Character | null = null;
-  @Input() isLevelUpMode: boolean = false;
 
   private destroy$ = new Subject<void>();
   
   steps: CreationStepStatus[] = [];
-  currentStepIndex: number = 0;
 
   constructor(
     private router: Router,
-    private flowService: CharacterCreationFlowService,
-    private characterState: CharacterStateService,
-    private cdr: ChangeDetectorRef,
-    private levelUpManager: LevelUpManager
+    private navFinalized: NavFinalizedService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.initializeSteps();
     
-    this.flowService.currentStep$
+    // Single source of truth: navFinalized service
+    this.navFinalized.getNavigationFinalized()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(index => {
-        this.currentStepIndex = index;
-        this.cdr.markForCheck();
-      });
-
-    // Subscribe to character changes to update step completion statuses
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        this.character = character;
-        this.updateStepStatuses();
+      .subscribe(navStatus => {
+        this.updateStepFinalizedStatus(navStatus);
         this.cdr.markForCheck();
       });
   }
@@ -69,98 +54,29 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
 
   private initializeSteps(): void {
     this.steps = [
-      { label: 'Ancestry', icon: 'groups', route: 'ancestry', stepNumber: 0, completed: false, hasPending: false },
-      { label: 'Culture', icon: 'public', route: 'culture', stepNumber: 1, completed: false, hasPending: false },
-      { label: 'Name', icon: 'badge', route: 'name', stepNumber: 2, completed: false, hasPending: false },
-      { label: 'Attributes', icon: 'fitness_center', route: 'attributes', stepNumber: 3, completed: false, hasPending: false },
-      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 4, completed: false, hasPending: false },
-      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 5, completed: false, hasPending: false },
-      { label: 'Path', icon: 'explore', route: 'paths', stepNumber: 6, completed: false, hasPending: false },
-      { label: 'Talents', icon: 'stars', route: 'talents', stepNumber: 7, completed: false, hasPending: false },
-      { label: 'Equipment', icon: 'inventory_2', route: 'equipment', stepNumber: 8, completed: false, hasPending: false },
-      { label: 'Review', icon: 'check_circle', route: 'review', stepNumber: 9, completed: false, hasPending: false },
+      { label: 'Ancestry', icon: 'groups', route: 'ancestry', stepNumber: 0, stepKey: 'ancestry', finalized: false, hasPending: true },
+      { label: 'Culture', icon: 'public', route: 'culture', stepNumber: 1, stepKey: 'culture', finalized: false, hasPending: true },
+      { label: 'Name', icon: 'badge', route: 'name', stepNumber: 2, stepKey: 'name', finalized: false, hasPending: true },
+      { label: 'Attributes', icon: 'fitness_center', route: 'attributes', stepNumber: 3, stepKey: 'attributes', finalized: false, hasPending: true },
+      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 4, stepKey: 'expertises', finalized: false, hasPending: true },
+      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 5, stepKey: 'skills', finalized: false, hasPending: true },
+      { label: 'Path', icon: 'explore', route: 'paths', stepNumber: 6, stepKey: 'paths', finalized: false, hasPending: true },
+      { label: 'Talents', icon: 'stars', route: 'talents', stepNumber: 7, stepKey: 'talents', finalized: false, hasPending: true },
+      { label: 'Equipment', icon: 'inventory_2', route: 'equipment', stepNumber: 8, stepKey: 'equipment', finalized: false, hasPending: true },
+      { label: 'Review', icon: 'check_circle', route: 'review', stepNumber: 9, stepKey: 'equipment', finalized: false, hasPending: true },
     ];
-
-    this.updateStepStatuses();
   }
 
-  private updateStepStatuses(): void {
-    if (!this.character) {
-      return;
-    }
-
-    // Update completion status
-    this.steps[0].completed = !!this.character.ancestry;
-    this.steps[1].completed = this.character.cultures && this.character.cultures.length > 0;
-    this.steps[2].completed = !!(this.character.name && this.character.name.length > 0);
-    this.steps[3].completed = this.hasAttributesAllocated();
-    this.steps[4].completed = (this.character.selectedExpertises?.length ?? 0) > 0;
-    this.steps[5].completed = this.hasSkillsAllocated();
-    this.steps[6].completed = !!this.character.radiantPath;
-    this.steps[7].completed = (this.character.unlockedTalents?.size ?? 0) > 0;
-    this.steps[8].completed = true; // Equipment is optional
-    this.steps[9].completed = false; // Review is never "completed"
-    
-    // Update pending status (for character sheet view)
-    this.updatePendingStatuses();
-  }
-  
-  private updatePendingStatuses(): void {
-    if (!this.character) {
-      return;
-    }
-    
-    // Check if character has pending level points to spend
-    const hasPendingLevels = (this.character.pendingLevelPoints ?? 0) > 0;
-    
-    if (hasPendingLevels) {
-      const currentLevel = this.character.level;
-      
-      // Check each step to see if there are actually points to allocate at this level
-      // Attributes (step 3): only show pending if this level has attribute points
-      const attributePointsThisLevel = this.levelUpManager.getAttributePointsForLevel(currentLevel);
-      this.steps[3].hasPending = attributePointsThisLevel > 0;
-      
-      // Skills (step 5): always available (every level has skill points)
-      const skillPointsThisLevel = this.levelUpManager.getSkillPointsForLevel(currentLevel);
-      this.steps[5].hasPending = skillPointsThisLevel > 0;
-      
-      // Talents (step 7): always available (every level has at least 1 talent point)
-      const talentPointsThisLevel = this.levelUpManager.getTalentPointsForLevel(currentLevel);
-      this.steps[7].hasPending = talentPointsThisLevel > 0;
-      
-      // Note: Expertises are only gained at specific levels, would need more complex logic
-    } else {
-      // Clear all pending flags
-      this.steps.forEach(step => step.hasPending = false);
-    }
-  }
-
-  private hasAttributesAllocated(): boolean {
-    if (!this.character) return false;
-    const attrs = this.character.attributes;
-    return attrs.strength > 0 || attrs.speed > 0 || attrs.awareness > 0 ||
-           attrs.intellect > 0 || attrs.willpower > 0 || attrs.presence > 0;
-  }
-
-  private hasSkillsAllocated(): boolean {
-    if (!this.character?.skills) return false;
-    const skillRanks = this.character.skills.getAllSkillRanks();
-    return Object.values(skillRanks).some(rank => rank > 0);
-  }
-
-  updateStepPending(stepNumber: number, hasPending: boolean): void {
-    const step = this.steps.find(s => s.stepNumber === stepNumber);
-    if (step) {
-      step.hasPending = hasPending;
-    }
+  private updateStepFinalizedStatus(navStatus: NavigationFinalized): void {
+    // Update finalized status from the backend service
+    this.steps.forEach(step => {
+      step.finalized = navStatus[step.stepKey];
+      // Gold boxes show for any step that isn't finalized yet
+      step.hasPending = !step.finalized;
+    });
   }
 
   navigateToStep(step: CreationStepStatus): void {
     this.router.navigate(['/character-creator-view', step.route]);
-  }
-
-  isCurrentStep(step: CreationStepStatus): boolean {
-    return step.stepNumber === this.currentStepIndex;
   }
 }
