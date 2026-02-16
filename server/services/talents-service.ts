@@ -4,7 +4,7 @@ import {
   updateTalentsStateRecord,
   loadCharacter
 } from '../database';
-import { getTalentPath } from 'shared/data/talents/talentTrees';
+import { getTalentPath, getTalentTree } from 'shared/data/talents/talentTrees';
 import { getPathsByCharacterId } from './paths-service';
 import { RADIANT_TIER0_TALENTS } from './paths-service';
 
@@ -429,6 +429,183 @@ export function getAvailableBonusClasses(mainPath: string | null, specialty: str
   return allCorePaths.filter(path => 
     path !== normalizedMain && path !== normalizedSpecialty
   );
+}
+
+/**
+ * Extract expertise keywords from a TalentNode
+ * Returns simple list of expertise names (no structure)
+ */
+function extractExpertiseKeywords(talentNode: any): string[] {
+  const keywords: string[] = [];
+  
+  if (talentNode.expertiseGrants && Array.isArray(talentNode.expertiseGrants)) {
+    talentNode.expertiseGrants.forEach((grant: any) => {
+      if (grant.type === 'fixed' && grant.expertises) {
+        keywords.push(...grant.expertises);
+      } else if (grant.type === 'choice' && grant.options) {
+        keywords.push(...grant.options);
+      } else if (grant.type === 'category' && grant.category) {
+        // Just add the category name for UI display
+        keywords.push(grant.category);
+      }
+    });
+  }
+  
+  return keywords;
+}
+
+/**
+ * Build talent keywords map for all available talents
+ * Returns { [talentId]: { name, description, tier, expertiseKeywords, pathId } }
+ */
+function buildTalentKeywordsMap(availableTreeIds: string[], mainPathName?: string, bonusTreeIds?: string[]): { [talentId: string]: any } {
+  const keywords: { [talentId: string]: any } = {};
+  const bonusSet = new Set(bonusTreeIds || []);
+  
+  // Add talents from each available tree
+  availableTreeIds.forEach(treeId => {
+    const tree = getTalentTree(treeId);
+    if (tree && tree.nodes) {
+      // Determine the main path for this tree:
+      // - If it's a bonus tree, use the treeId itself
+      // - Otherwise it's a specialization, use mainPathName
+      const isBonus = bonusSet.has(treeId);
+      const lookupPathId = isBonus ? treeId : (mainPathName || treeId);
+      
+      tree.nodes.forEach((node: any) => {
+        keywords[node.id] = {
+          name: node.name,
+          description: node.description,
+          tier: node.tier,
+          expertiseKeywords: extractExpertiseKeywords(node),
+          pathId: tree.pathName?.toLowerCase() || treeId,  // Specialization name for display
+          mainPathId: lookupPathId    // The actual path ID to use with getTalentPath()
+        };
+      });
+    }
+  });
+  
+  return keywords;
+}
+
+/**
+ * Get available talent IDs that character can select
+ * Based on unlocked talents and tree availability
+ */
+function getAvailableTalentIds(
+  availableTreeIds: string[],
+  unlockedTalents: Set<string>,
+  _requiresSingerSelection: boolean
+): string[] {
+  const talentIds = new Set<string>();
+  
+  availableTreeIds.forEach(treeId => {
+    const tree = getTalentTree(treeId);
+    if (tree && tree.nodes) {
+      tree.nodes.forEach((node: any) => {
+        // Include all tier 1 talents (always available to start with)
+        // Include any unlocked talents
+        // Tier 0 talents are handled separately in bonusPathIds
+        if (node.tier >= 1) {
+          talentIds.add(node.id);
+        }
+      });
+    }
+  });
+  
+  return Array.from(talentIds);
+}
+
+/**
+ * Get minimal UI response for talent view
+ * Returns only data needed for UI: points, unlocked talents, available talents, keywords
+ */
+export async function getTalentUIResponseForCharacterId(characterId: string) {
+  const state = await getTalentsStateRecord(characterId);
+  const character = await loadCharacter(characterId);
+  const paths = await getPathsByCharacterId(characterId);
+
+  if (!state || !character) {
+    return {
+      characterId,
+      pointsAvailable: 0,
+      unlockedTalentIds: [],
+      availableTalentIds: [],
+      selectedTreeId: null,
+      requiresSingerSelection: false,
+      ancestry: null,
+      bonusPathIds: [],
+      selectedBonusPathIds: [],
+      talentKeywords: {}
+    };
+  }
+
+  const { mainPathName } = normalizePaths(paths);
+  const mainPath = mainPathName ? getTalentPath(mainPathName) : null;
+  const tier0TalentId = mainPath?.talentNodes?.find(node => node.tier === 0)?.id ?? null;
+
+  let totalTalents = state.totalTalents ?? [];
+  const pendingTalents = state.pendingTalents ?? [];
+  
+  // Include tier 0 talents
+  if (tier0TalentId && !totalTalents.includes(tier0TalentId)) {
+    totalTalents = [...totalTalents, tier0TalentId];
+  }
+  
+  let radiantTier0TalentId: string | null = character.radiantTier0TalentId || null;
+  if (!radiantTier0TalentId && character.radiantPath?.boundOrder) {
+    radiantTier0TalentId = RADIANT_TIER0_TALENTS[character.radiantPath.boundOrder.toLowerCase()] || null;
+  }
+  if (radiantTier0TalentId && !totalTalents.includes(radiantTier0TalentId)) {
+    totalTalents = [...totalTalents, radiantTier0TalentId];
+  }
+  
+  if (character.ancestry?.toLowerCase() === 'singer') {
+    if (!totalTalents.includes('singer_ancestry')) {
+      totalTalents = [...totalTalents, 'singer_ancestry'];
+    }
+    if (!totalTalents.includes('singer_change_form')) {
+      totalTalents = [...totalTalents, 'singer_change_form'];
+    }
+  }
+  
+  const unlockedTalents = new Set([...totalTalents, ...pendingTalents]);
+  const pendingTreesArray = state.pendingTrees ?? [];
+  
+  console.log('[TalentsService] Building response for getTalentUI:', {
+    characterId,
+    totalTalents,
+    pendingTalents,
+    unlockedTalentsSet: Array.from(unlockedTalents),
+    pendingTreesArray
+  });
+  
+  const { availableTrees, selectedTreeId, requiresSingerSelection } = 
+    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray);
+  
+  // Get bonus path options
+  const availableBonusClasses = getAvailableBonusClasses(mainPathName, null);
+  const selectedBonusPathIds = pendingTreesArray;
+
+  // Build talent keywords map
+  const talentKeywords = buildTalentKeywordsMap(availableTrees, mainPathName, pendingTreesArray);
+  
+  // Get available talent IDs
+  const availableTalentIds = getAvailableTalentIds(availableTrees, unlockedTalents, requiresSingerSelection);
+  
+  return {
+    characterId,
+    pointsAvailable: state.pointsRemaining || 0,
+    unlockedTalentIds: Array.from(unlockedTalents),
+    pendingTalentIds: pendingTalents,
+    availableTalentIds,
+    selectedTreeId,
+    requiresSingerSelection,
+    ancestry: character.ancestry || null,
+    bonusPathIds: availableBonusClasses,
+    selectedBonusPathIds,
+    talentKeywords
+  };
 }
 
 /**

@@ -262,3 +262,31 @@ export interface TalentsState {
   talentTiersByTree: { [treeId: string]: number[] }; // max tier reached by tree
   unspentPoints: number;
 }
+
+/**
+ * Minimal response sent to UI containing only what's needed to display and collect talent choices
+ * All processing and validation happens on backend
+ */
+export interface TalentUIResponse {
+  characterId: string;
+  pointsAvailable: number;                    // How many talent points left to spend
+  unlockedTalentIds: string[];               // IDs of talents already unlocked (total + pending)
+  pendingTalentIds: string[];                // IDs of talents pending selection (this session only)
+  availableTalentIds: string[];              // IDs of talents that can be selected
+  selectedTreeId: string | null;             // Default selected tree for display
+  requiresSingerSelection: boolean;           // Server rule: must pick singer first
+  ancestry: string | null;                   // For display/validation hints
+  bonusPathIds: string[];                    // Available bonus paths to select
+  selectedBonusPathIds: string[];            // Already-selected bonus paths
+  // Keywords/metadata for each talent the UI needs to display
+  talentKeywords: {
+    [talentId: string]: {
+      name: string;
+      description: string;
+      tier: number;
+      expertiseKeywords?: string[];          // Just the expertise names (list)
+      pathId?: string;                       // Which path this talent belongs to (specialization name)
+      mainPathId?: string;                   // Main path ID for getTalentPath() calls
+    }
+  }
+}

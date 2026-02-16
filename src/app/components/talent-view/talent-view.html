@@ -38,7 +38,7 @@
 
     <div class="talent-grid">
       <mat-card 
-        *ngFor="let talent of getVisibleTalents()"
+        *ngFor="let talent of cachedVisibleTalents"
         class="talent-node"
         [class.unlocked]="isTalentUnlocked(talent.id)"
         [class.baseline-locked]="isTalentUnlocked(talent.id) && !canRemoveTalent(talent.id)"
@@ -52,7 +52,7 @@
         <mat-card-content>
           <p>{{ talent.description }}</p>
           
-          <div class="prerequisites" *ngIf="talent.prerequisites.length > 0">
+          <div class="prerequisites" *ngIf="talent.prerequisites?.length > 0">
             <span class="prereq-label">Requires:</span>
             <ul>
               <li *ngFor="let prereq of talent.prerequisites">
@@ -120,7 +120,7 @@
           <mat-card-title>{{ pathOption.name }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="key-talent-info">
+          <div class="key-talent-info" *ngIf="pathOption.keyTalent">
             <strong>{{ pathOption.keyTalent.name }}</strong>
             <p>{{ pathOption.keyTalent.description }}</p>
           </div>

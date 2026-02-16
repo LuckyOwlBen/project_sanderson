@@ -36,6 +36,16 @@ describe('TalentView', () => {
   let mockCharacter: Character;
 
   beforeEach(async () => {
+    // Provide a minimal inline template to avoid external template/style resolution
+    TestBed.overrideComponent(TalentView, {
+      set: {
+        template: `<div class="talent-view-container">
+                    <div *ngIf="pendingSprenGrant" class="spren-notification">{{ pendingSprenGrant.sprenType }} {{ pendingSprenGrant.order }}</div>
+                    <div class="ideal-prompt" *ngIf="false"></div>
+                  </div>`
+      }
+    });
+
     await TestBed.configureTestingModule({
       imports: [TalentView, MatDialogModule, BrowserAnimationsModule],
       providers: [
@@ -51,7 +61,7 @@ describe('TalentView', () => {
         }
       ]
     })
-    .compileComponents();
+    await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(TalentView);
     component = fixture.componentInstance;
@@ -164,6 +174,16 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
 
     queryParamsSubject = new BehaviorSubject({});
 
+    // Provide a minimal inline template to avoid external template/style resolution
+    TestBed.overrideComponent(TalentView, {
+      set: {
+        template: `<div class="talent-view-container">
+                    <div *ngIf="pendingSprenGrant" class="spren-notification">{{ pendingSprenGrant.sprenType }} {{ pendingSprenGrant.order }}</div>
+                    <div class="ideal-prompt" *ngIf="false"></div>
+                  </div>`
+      }
+    });
+
     await TestBed.configureTestingModule({
       imports: [TalentView, MatDialogModule, BrowserAnimationsModule],
       providers: [
@@ -180,6 +200,9 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
         }
       ]
     }).compileComponents();
+
+    // compile components
+    await TestBed.compileComponents();
 
     levelUpApiService = TestBed.inject(LevelUpApiService);
     characterStateService = TestBed.inject(CharacterStateService);

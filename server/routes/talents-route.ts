@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { getTalents, setTalents, getTalentParent, getBonusClasses, finalizeTalents } from '../controllers/talents-controller';
+import { getTalents, setTalents, getTalentParent, getBonusClasses, finalizeTalents, getTalentUI } from '../controllers/talents-controller';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
@@ -17,6 +17,15 @@ export default function createTalentsRoute(app: Express, broadcaster: SocketBroa
    * @returns { success: boolean, data: TalentsStateDTO }
    */
   app.get('/api/characters/:id/talents', getTalents);
+
+  /**
+   * GET /api/characters/:id/talents/ui
+   * Load minimal talent UI response (keywords, points, unlocked talents only)
+   * Frontend uses this for display and input collection
+   *
+   * @returns { success: boolean, data: TalentUIResponse }
+   */
+  app.get('/api/characters/:id/talents/ui', getTalentUI);
 
   /**
    * POST /api/characters/:id/talents

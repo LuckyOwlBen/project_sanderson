@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { 
-  getTalentsByCharacterId, 
+  getTalentsByCharacterId,
+  getTalentUIResponseForCharacterId,
   setTalentsByCharacterId, 
   findParentPath, 
   getAvailableBonusClasses,
@@ -19,6 +20,31 @@ export async function getTalents(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Error loading talents:', error);
+    res.status(500).json({
+      success: false,
+      error: typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error)
+    });
+  }
+}
+
+/**
+ * GET /api/characters/:id/talents/ui
+ * Load minimal talent UI response for display
+ * Returns only keywords, points, and unlocked talents needed for UI
+ */
+export async function getTalentUI(req: Request, res: Response): Promise<void> {
+  try {
+    const { id } = req.params;
+    const result = await getTalentUIResponseForCharacterId(id);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('Error loading talent UI response:', error);
     res.status(500).json({
       success: false,
       error: typeof error === 'object' && error !== null && 'message' in error

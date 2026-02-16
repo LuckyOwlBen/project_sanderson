@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import { TalentUIResponse } from '../../../shared/types/talents';
 
 export interface RadiantPathData {
   boundOrder: string | null;
@@ -33,6 +34,12 @@ interface TalentsResponse {
   error?: string;
 }
 
+interface TalentUIResponseData {
+  success: boolean;
+  data: TalentUIResponse;
+  error?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TalentsApiService {
   private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
@@ -45,6 +52,12 @@ export class TalentsApiService {
   getTalents(characterId: string): Observable<TalentsState> {
     return this.http
       .get<TalentsResponse>(`${this.charactersUrl}/${characterId}/talents`)
+      .pipe(map((response) => response.data));
+  }
+
+  getTalentUI(characterId: string): Observable<TalentUIResponse> {
+    return this.http
+      .get<TalentUIResponseData>(`${this.charactersUrl}/${characterId}/talents/ui`)
       .pipe(map((response) => response.data));
   }
 
