@@ -8,12 +8,12 @@ export interface StepValidation {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class StepValidationService {
   private validationState = new Map<number, boolean>();
   private validationSubject = new BehaviorSubject<Map<number, boolean>>(new Map());
-
+  
   public validation$: Observable<Map<number, boolean>> = this.validationSubject.asObservable();
 
   setStepValid(stepIndex: number, isValid: boolean): void {
@@ -37,16 +37,16 @@ export class StepValidationService {
 
   // Validate all steps based on character state
   validateAllSteps(character: Character): void {
-    this.validateAncestry(character); // Step 0
-    this.validateCulture(character); // Step 1
-    this.validateName(character); // Step 2
-    this.validateAttributes(character); // Step 3
-    this.validateSkills(character); // Step 4
-    this.validateExpertises(character); // Step 5
-    this.validatePath(character); // Step 6
-    this.validateTalents(character); // Step 7
-    this.validateEquipment(character); // Step 8
-    this.validateReview(character); // Step 9
+    this.validateAncestry(character);      // Step 0
+    this.validateCulture(character);       // Step 1
+    this.validateName(character);          // Step 2
+    this.validateAttributes(character);    // Step 3
+    this.validateSkills(character);        // Step 4
+    this.validateExpertises(character);    // Step 5
+    this.validatePath(character);          // Step 6
+    this.validateTalents(character);       // Step 7
+    this.validateEquipment(character);     // Step 8
+    this.validateReview(character);        // Step 9
   }
 
   private validateAncestry(character: Character): void {
@@ -80,17 +80,17 @@ export class StepValidationService {
       this.setStepValid(4, false);
       return;
     }
-
+    
     // Check if all skill points are allocated
     const level = character.level || 1;
-    const totalPoints = 8 + level * 2; // Base 8 + 2 per level
-
+    const totalPoints = 8 + (level * 2); // Base 8 + 2 per level
+    
     let allocatedPoints = 0;
     const skillRanks = character.skills.getAllSkillRanks();
     Object.values(skillRanks).forEach((rank: any) => {
       allocatedPoints += rank;
     });
-
+    
     const isValid = allocatedPoints === totalPoints;
     this.setStepValid(4, isValid);
   }
@@ -116,13 +116,13 @@ export class StepValidationService {
     // We need to check the actual talent tiers, but for now approximate
     // Assume Change Form is tier 0, so count total - 1 for singers
     paidTalentCount = character.unlockedTalents.size;
-
+    
     // At level 1, require based on ancestry
     let requiredTalents = character.level || 1;
     if (character.ancestry === 'singer' || character.ancestry === 'human') {
       requiredTalents += 1;
     }
-
+    
     const isValid = paidTalentCount >= requiredTalents;
     this.setStepValid(7, isValid);
   }

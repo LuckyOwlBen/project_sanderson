@@ -1,8 +1,8 @@
 /**
  * Paths Routes
- *
+ * 
  * REST API endpoints for character path selection.
- *
+ * 
  * Endpoints:
  * - GET /api/characters/:id/paths - Get current path selections
  * - POST /api/characters/:id/paths - Save path selections

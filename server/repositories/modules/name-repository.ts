@@ -12,10 +12,14 @@ export class NameModuleRepository extends BaseModuleRepository {
    * @param name - Character name
    * @param level - Character level (1-21)
    */
-  async save(characterId: string, name: string, level: number): Promise<SaveResult> {
+  async save(
+    characterId: string,
+    name: string,
+    level: number
+  ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       name,
-      level,
+      level
     });
   }
 
@@ -34,7 +38,7 @@ export class NameModuleRepository extends BaseModuleRepository {
     return {
       name: char.name || '',
       level: char.level || 1,
-      cultures: char.cultures || [],
+      cultures: char.cultures || []
     };
   }
 }

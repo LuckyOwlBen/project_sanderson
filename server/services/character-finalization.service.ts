@@ -1,6 +1,6 @@
 /**
  * Character Finalization Service
- *
+ * 
  * Orchestrates the finalization of all character creation sections.
  * Validates that all point allocation sections are complete and ready for finalization,
  * then finalizes all sections in sequence.
@@ -26,10 +26,10 @@ export class CharacterFinalizationService {
    * - Skills
    * - Talents
    * - Expertises
-   *
+   * 
    * Each finalize method validates pointsRemaining === 0 before proceeding.
    * If any section fails validation, the entire finalization is aborted.
-   *
+   * 
    * @param characterId - The character to finalize
    * @returns Success object
    * @throws Error if any section has unspent points or validation fails
@@ -40,7 +40,7 @@ export class CharacterFinalizationService {
     try {
       // Finalize all sections
       // Each method validates pointsRemaining === 0 and moves spent to total
-
+      
       await attributesFinalizationService.finalizeAttributesForCharacter(characterId);
       console.log(`[CharacterFinalization] ✓ Attributes finalized`);
 
@@ -63,7 +63,7 @@ export class CharacterFinalizationService {
       }
 
       console.log(`[CharacterFinalization] ✅ Character ${characterId} finalized successfully`);
-
+      
       return { success: true };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

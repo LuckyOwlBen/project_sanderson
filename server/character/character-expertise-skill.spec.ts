@@ -18,7 +18,7 @@ describe('Character - Expertise as Skill', () => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Blacksmithing', 'culture'),
         ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1'),
-        ExpertiseSourceHelper.create('Cartography', 'gm'),
+        ExpertiseSourceHelper.create('Cartography', 'gm')
       ];
 
       const expertiseSkills = character.getExpertiseSkills();
@@ -32,7 +32,7 @@ describe('Character - Expertise as Skill', () => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Zymology', 'culture'),
         ExpertiseSourceHelper.create('Archery', 'talent', 'talent-1'),
-        ExpertiseSourceHelper.create('Medicine', 'manual'),
+        ExpertiseSourceHelper.create('Medicine', 'manual')
       ];
 
       const expertiseSkills = character.getExpertiseSkills();
@@ -44,7 +44,7 @@ describe('Character - Expertise as Skill', () => {
     beforeEach(() => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Blacksmithing', 'culture'),
-        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1'),
+        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1')
       ];
     });
 
@@ -73,7 +73,7 @@ describe('Character - Expertise as Skill', () => {
     beforeEach(() => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Blacksmithing', 'culture'),
-        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1'),
+        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1')
       ];
     });
 
@@ -100,9 +100,9 @@ describe('Character - Expertise as Skill', () => {
     it('should always return 1 or 0 (no multi-rank expertises)', () => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Blacksmithing', 'culture'),
-        ExpertiseSourceHelper.create('Blacksmithing', 'talent', 'talent-1'), // Duplicate (shouldn't happen but testing)
+        ExpertiseSourceHelper.create('Blacksmithing', 'talent', 'talent-1') // Duplicate (shouldn't happen but testing)
       ];
-
+      
       // First match should return 1
       expect(character.getExpertiseRank('Blacksmithing')).toBe(1);
     });
@@ -112,7 +112,7 @@ describe('Character - Expertise as Skill', () => {
     beforeEach(() => {
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Blacksmithing', 'culture'),
-        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1'),
+        ExpertiseSourceHelper.create('Cooking', 'talent', 'talent-1')
       ];
       character.attributes.setAttribute('intellect', 3);
     });
@@ -134,11 +134,10 @@ describe('Character - Expertise as Skill', () => {
     });
 
     it('should support multiple expertises with same governing attribute', () => {
-      const blacksmithingTotal =
-        character.getExpertiseRank('Blacksmithing') +
-        character.attributes.getAttribute('intellect');
-      const cookingTotal =
-        character.getExpertiseRank('Cooking') + character.attributes.getAttribute('intellect');
+      const blacksmithingTotal = character.getExpertiseRank('Blacksmithing') + 
+                                 character.attributes.getAttribute('intellect');
+      const cookingTotal = character.getExpertiseRank('Cooking') + 
+                          character.attributes.getAttribute('intellect');
 
       expect(blacksmithingTotal).toBe(4);
       expect(cookingTotal).toBe(4);
@@ -147,7 +146,9 @@ describe('Character - Expertise as Skill', () => {
 
   describe('Expertise removal impact on skill checks', () => {
     it('should make expertise unavailable as skill after removal', () => {
-      character.selectedExpertises = [ExpertiseSourceHelper.create('Blacksmithing', 'culture')];
+      character.selectedExpertises = [
+        ExpertiseSourceHelper.create('Blacksmithing', 'culture')
+      ];
 
       expect(character.hasExpertise('Blacksmithing')).toBe(true);
       expect(character.getExpertiseRank('Blacksmithing')).toBe(1);

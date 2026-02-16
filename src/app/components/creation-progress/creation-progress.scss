@@ -31,22 +31,22 @@
   }
 
   &.has-pending {
-    border-color: #ffd700;
+    border-color: #FFD700;
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.15));
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
     animation: goldenPulse 2s ease-in-out infinite;
-
+    
     .card-icon {
-      color: #ffd700;
+      color: #FFD700;
       filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
     }
-
+    
     .card-label {
-      color: #ffd700;
+      color: #FFD700;
       font-weight: 600;
       text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
-
+    
     &:hover {
       background: linear-gradient(135deg, rgba(255, 215, 0, 0.35), rgba(255, 215, 0, 0.25));
       box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4);
@@ -82,7 +82,7 @@
   right: -4px;
   width: 12px;
   height: 12px;
-  background: #ffd700;
+  background: #FFD700;
   border-radius: 50%;
   border: 2px solid var(--gpSystemDarkGrey);
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
@@ -90,8 +90,7 @@
 }
 
 @keyframes pulse {
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -102,8 +101,7 @@
 }
 
 @keyframes goldenPulse {
-  0%,
-  100% {
+  0%, 100% {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
   }
   50% {
@@ -157,19 +155,19 @@
 .progress-step.finalized .step-indicator {
   background-color: var(--gpColor-Green);
   border-color: var(--gpColor-Green);
-
+  
   .step-icon {
     color: var(--gpSystemDarkestGrey);
   }
 }
 
 .progress-step.has-pending .step-indicator {
-  border-color: #ffd700;
+  border-color: #FFD700;
   background-color: rgba(255, 215, 0, 0.1);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-
+  
   .step-icon {
-    color: #ffd700;
+    color: #FFD700;
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
   }
 }
@@ -187,7 +185,7 @@
 }
 
 .progress-step.has-pending .step-label {
-  color: #ffd700;
+  color: #FFD700;
 }
 
 .step-connector {

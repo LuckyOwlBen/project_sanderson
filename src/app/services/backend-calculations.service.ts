@@ -1,6 +1,6 @@
 /**
  * Backend Calculations Service
- *
+ * 
  * Provides HTTP access to all backend calculation APIs.
  * Centralizes API communication for:
  * - Attack calculations (rolls, damage, hits)
@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class BackendCalculationsService {
   private apiUrl = 'http://localhost:3000/api';
@@ -43,7 +43,7 @@ export class BackendCalculationsService {
       damageNotation,
       damageBonus,
       targetDefense,
-      advantageMode,
+      advantageMode
     };
     return this.http.post(`${this.apiUrl}/calculations/attack/execute`, body);
   }
@@ -67,7 +67,7 @@ export class BackendCalculationsService {
       damageNotation,
       damageBonus,
       targetDefense,
-      advantageMode,
+      advantageMode
     };
     return this.http.post(`${this.apiUrl}/calculations/attack/combination`, body);
   }
@@ -87,7 +87,7 @@ export class BackendCalculationsService {
       bonusModifiers,
       damageNotation,
       damageBonus,
-      targetDefense,
+      targetDefense
     };
     return this.http.post(`${this.apiUrl}/calculations/attack/validate`, body);
   }
@@ -108,14 +108,7 @@ export class BackendCalculationsService {
     advantageMode: 'normal' | 'advantage' | 'disadvantage' = 'normal'
   ): Promise<any> {
     return firstValueFrom(
-      this.executeAttack(
-        skillTotal,
-        bonusModifiers,
-        damageNotation,
-        damageBonus,
-        targetDefense,
-        advantageMode
-      )
+      this.executeAttack(skillTotal, bonusModifiers, damageNotation, damageBonus, targetDefense, advantageMode)
     );
   }
 
@@ -132,15 +125,7 @@ export class BackendCalculationsService {
     advantageMode: 'normal' | 'advantage' | 'disadvantage' = 'normal'
   ): Promise<any> {
     return firstValueFrom(
-      this.executeAttackCombination(
-        attackCount,
-        skillTotal,
-        bonusModifiers,
-        damageNotation,
-        damageBonus,
-        targetDefense,
-        advantageMode
-      )
+      this.executeAttackCombination(attackCount, skillTotal, bonusModifiers, damageNotation, damageBonus, targetDefense, advantageMode)
     );
   }
 

@@ -2,7 +2,7 @@ import { Component, HostListener, signal, ViewChild, OnInit, OnDestroy } from '@
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { SidenavView } from './views/sidenav-view/sidenav-view';
+import { SidenavView } from "./views/sidenav-view/sidenav-view";
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
@@ -25,15 +25,15 @@ import { ActivatedRoute } from '@angular/router';
     CommonModule,
     SidenavView,
     CreationProgressComponent,
-  ],
+],
   templateUrl: './app.html',
-  styleUrl: './app.scss',
+  styleUrl: './app.scss'
 })
 export class App implements OnInit, OnDestroy {
   protected readonly title = signal('project-sanderson');
   isMobile: boolean = false;
   private destroy$ = new Subject<void>();
-
+  
   character: Character | null = null;
   hasCharacter = false;
   isInCreatorView = false;
@@ -51,18 +51,20 @@ export class App implements OnInit, OnDestroy {
     private serverHealth: ServerHealthService
   ) {
     this.checkMobile();
-
+    
     // Initialize view states based on current URL (fixes reload flash)
     this.updateViewStates();
-
+    
     // Close drawer on navigation when in mobile mode
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      if (this.isMobile && this.drawer) {
-        this.drawer.close();
-      }
-      // Update view states on navigation
-      this.updateViewStates();
-    });
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.isMobile && this.drawer) {
+          this.drawer.close();
+        }
+        // Update view states on navigation
+        this.updateViewStates();
+      });
   }
 
   private updateViewStates(): void {
@@ -75,15 +77,17 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to character state
-    this.characterState.character$.pipe(takeUntil(this.destroy$)).subscribe((character) => {
-      this.character = character;
-      this.hasCharacter = !!character && !!(character.name || character.ancestry);
-    });
+    this.characterState.character$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(character => {
+        this.character = character;
+        this.hasCharacter = !!character && !!(character.name || character.ancestry);
+      });
 
     // Track level-up mode from query params
     this.router.events
       .pipe(
-        filter((event) => event instanceof NavigationEnd),
+        filter(event => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
@@ -93,23 +97,25 @@ export class App implements OnInit, OnDestroy {
       });
 
     // Monitor server health
-    this.serverHealth.serverHealth$.pipe(takeUntil(this.destroy$)).subscribe((isHealthy) => {
-      const currentUrl = this.router.url.split('?')[0];
-
-      if (!isHealthy && !this.wasServerDown) {
-        // Server just went down - navigate to error page
-        this.wasServerDown = true;
-        console.log('[App] Server is down, navigating to error page');
-        if (!currentUrl.includes('/error')) {
-          this.router.navigate(['/error']);
+    this.serverHealth.serverHealth$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isHealthy => {
+        const currentUrl = this.router.url.split('?')[0];
+        
+        if (!isHealthy && !this.wasServerDown) {
+          // Server just went down - navigate to error page
+          this.wasServerDown = true;
+          console.log('[App] Server is down, navigating to error page');
+          if (!currentUrl.includes('/error')) {
+            this.router.navigate(['/error']);
+          }
+        } else if (isHealthy && this.wasServerDown) {
+          // Server just came back up - navigate to landing page
+          this.wasServerDown = false;
+          console.log('[App] Server is back up, navigating to landing page');
+          this.router.navigate(['/']);
         }
-      } else if (isHealthy && this.wasServerDown) {
-        // Server just came back up - navigate to landing page
-        this.wasServerDown = false;
-        console.log('[App] Server is back up, navigating to landing page');
-        this.router.navigate(['/']);
-      }
-    });
+      });
   }
 
   ngOnDestroy(): void {
@@ -137,9 +143,9 @@ export class App implements OnInit, OnDestroy {
   private checkMobile() {
     this.isMobile = window.innerWidth <= 768;
   }
-
+  
   @HostListener('window:beforeunload', ['$event'])
   unloadHandler(event: Event) {
-    // clearLocalStorage();
+   // clearLocalStorage();
   }
 }

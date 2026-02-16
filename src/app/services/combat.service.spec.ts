@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -23,7 +23,7 @@ describe('CombatService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CombatService],
+      providers: [CombatService]
     });
     service = TestBed.inject(CombatService);
   });
@@ -42,8 +42,8 @@ describe('CombatService', () => {
     });
 
     it('should emit combat state change on toggle', () => {
-      return new Promise<void>((resolve) => {
-        service.combatActive$.subscribe((isActive) => {
+      return new Promise<void>(resolve => {
+        service.combatActive$.subscribe(isActive => {
           if (isActive) {
             expect(isActive).toBe(true);
             resolve();
@@ -73,7 +73,7 @@ describe('CombatService', () => {
     it('should emit turn speed change only when changed', () => {
       return new Promise<void>((resolve, reject) => {
         let emitCount = 0;
-        service.turnSpeedChanged$.subscribe((event) => {
+        service.turnSpeedChanged$.subscribe(event => {
           emitCount++;
           try {
             expect(event.characterId).toBe('char123');
@@ -142,7 +142,7 @@ describe('CombatService', () => {
 
     it('should emit NPC card added event', () => {
       return new Promise<void>((resolve, reject) => {
-        service.npcCardAdded$.subscribe((card) => {
+        service.npcCardAdded$.subscribe(card => {
           try {
             expect(card.name).toBe('Goblin Scout');
             resolve();
@@ -157,7 +157,7 @@ describe('CombatService', () => {
     it('should emit NPC card removed event', () => {
       return new Promise<void>((resolve, reject) => {
         service.addNPCCard('goblin1', 'Goblin Scout', 3);
-        service.npcCardRemoved$.subscribe((id) => {
+        service.npcCardRemoved$.subscribe(id => {
           try {
             expect(id).toBe('goblin1');
             resolve();

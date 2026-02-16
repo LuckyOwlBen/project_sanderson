@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -42,8 +42,8 @@ describe('TalentView', () => {
         template: `<div class="talent-view-container">
                     <div *ngIf="pendingSprenGrant" class="spren-notification">{{ pendingSprenGrant.sprenType }} {{ pendingSprenGrant.order }}</div>
                     <div class="ideal-prompt" *ngIf="false"></div>
-                  </div>`,
-      },
+                  </div>`
+      }
     });
 
     await TestBed.configureTestingModule({
@@ -56,17 +56,17 @@ describe('TalentView', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: of({}),
-          },
-        },
-      ],
-    });
+            queryParams: of({})
+          }
+        }
+      ]
+    })
     await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(TalentView);
     component = fixture.componentInstance;
     characterStateService = TestBed.inject(CharacterStateService);
-
+    
     // Create a fresh character for each test
     mockCharacter = new Character();
   });
@@ -94,7 +94,7 @@ describe('TalentView', () => {
 
       // Look for any button with "Speak the Words" text
       const buttons = fixture.debugElement.queryAll(By.css('button'));
-      const speakButton = buttons.find((btn) =>
+      const speakButton = buttons.find(btn => 
         btn.nativeElement.textContent.includes('Speak the Words')
       );
       expect(speakButton).toBeFalsy();
@@ -114,7 +114,7 @@ describe('TalentView', () => {
         sprenType: 'Honorspren',
         philosophy: 'I will protect those who cannot protect themselves.',
         surgePair: ['ADHESION', 'GRAVITATION'],
-        characterId: 'test-char-id',
+        characterId: 'test-char-id'
       };
       fixture.detectChanges();
 
@@ -133,13 +133,13 @@ describe('TalentView', () => {
       // Set up character with spren and spoken ideal
       mockCharacter.radiantPath.grantSpren('Windrunner');
       mockCharacter.radiantPath.speakIdeal(mockCharacter.skills);
-
+      
       characterStateService.updateCharacter(mockCharacter);
       fixture.detectChanges();
 
       // Verify the character state
       expect(mockCharacter.radiantPath.hasSpokenIdeal()).toBe(true);
-
+      
       // Component should handle this gracefully without showing any prompt
       const idealPrompt = fixture.debugElement.query(By.css('.ideal-prompt'));
       expect(idealPrompt).toBeFalsy();
@@ -161,17 +161,15 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
     levelUpApiService = {
       getTalentSlice: vi.fn(),
       getTalentForLevel: vi.fn(),
-      getTables: vi.fn().mockReturnValue(
-        of({
-          attributePointsPerLevel: [12],
-          skillPointsPerLevel: [5],
-          healthPerLevel: [10],
-          healthStrengthBonusLevels: [],
-          maxSkillRanksPerLevel: [5],
-          skillRanksPerLevel: [1],
-          talentPointsPerLevel: [1],
-        })
-      ),
+      getTables: vi.fn().mockReturnValue(of({
+        attributePointsPerLevel: [12],
+        skillPointsPerLevel: [5],
+        healthPerLevel: [10],
+        healthStrengthBonusLevels: [],
+        maxSkillRanksPerLevel: [5],
+        skillRanksPerLevel: [1],
+        talentPointsPerLevel: [1]
+      }))
     };
 
     queryParamsSubject = new BehaviorSubject({});
@@ -182,8 +180,8 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
         template: `<div class="talent-view-container">
                     <div *ngIf="pendingSprenGrant" class="spren-notification">{{ pendingSprenGrant.sprenType }} {{ pendingSprenGrant.order }}</div>
                     <div class="ideal-prompt" *ngIf="false"></div>
-                  </div>`,
-      },
+                  </div>`
+      }
     });
 
     await TestBed.configureTestingModule({
@@ -197,10 +195,10 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: queryParamsSubject.asObservable(),
-          },
-        },
-      ],
+            queryParams: queryParamsSubject.asObservable()
+          }
+        }
+      ]
     }).compileComponents();
 
     // compile components
@@ -226,14 +224,14 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
       requiresSingerSelection: false,
       ancestry: null,
       level: 1,
-      mainPath: 'Windrunner',
+      mainPath: 'Windrunner'
     };
 
     levelUpApiService.getTalentForLevel.mockReturnValue(of(talentForLevelData));
-
+    
     // Set initial character in state
     characterStateService.updateCharacter(testCharacter);
-
+    
     // Emit route params to trigger the component's queryParams subscription
     queryParamsSubject.next({ levelUp: 'true' });
     fixture.detectChanges();
@@ -270,12 +268,12 @@ describe('TalentView - Fresh Backend Data on Route Change', () => {
       requiresSingerSelection: false,
       ancestry: null,
       level: 1,
-      mainPath: 'Skybreaker',
+      mainPath: 'Skybreaker'
     };
 
     // Set character BEFORE changing route params
     characterStateService.updateCharacter(testCharacter);
-
+    
     levelUpApiService.getTalentForLevel.mockReturnValue(of(talentData));
 
     // Now emit route params with level-up mode

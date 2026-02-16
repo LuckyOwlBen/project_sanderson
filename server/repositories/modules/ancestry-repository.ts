@@ -22,7 +22,7 @@ export class AncestryModuleRepository extends BaseModuleRepository {
     return await this.updateCharacterModule(characterId, {
       ancestry,
       cultures,
-      paths,
+      paths
     });
   }
 
@@ -41,7 +41,7 @@ export class AncestryModuleRepository extends BaseModuleRepository {
     return {
       ancestry: char.ancestry,
       cultures: char.cultures || [],
-      paths: char.paths || [],
+      paths: char.paths || []
     };
   }
 }

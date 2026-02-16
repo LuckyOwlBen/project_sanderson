@@ -7,7 +7,11 @@ import { Character } from '../../../character/character';
 @Component({
   selector: 'app-character-defenses-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatIconModule
+  ],
   templateUrl: './character-defenses-card.html',
   styleUrl: './character-defenses-card.scss',
 })

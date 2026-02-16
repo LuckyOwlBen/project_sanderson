@@ -1,35 +1,33 @@
-<mat-toolbar
-  color="primary"
-  class="app-toolbar"
-  *ngIf="!isInCharacterSheetView && !isInLandingView"
->
-  <mat-toolbar-row class="app-header">
-    <button mat-icon-button class="menu-button" (click)="drawer.toggle()">
-      <mat-icon>menu</mat-icon>
-    </button>
+<mat-toolbar color="primary" class="app-toolbar" *ngIf="!isInCharacterSheetView && !isInLandingView">
+    <mat-toolbar-row class="app-header">
+        <button mat-icon-button class="menu-button" (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        
+        <!-- Inline Progress during creation/level-up -->
+        <app-creation-progress 
+            *ngIf="shouldShowInlineProgress() && character"
+            [displayMode]="'inline-progress'"
+            class="toolbar-progress">
+        </app-creation-progress>
 
-    <!-- Inline Progress during creation/level-up -->
-    <app-creation-progress
-      *ngIf="shouldShowInlineProgress() && character"
-      [displayMode]="'inline-progress'"
-      class="toolbar-progress"
-    >
-    </app-creation-progress>
-
-    <!-- Navigation Grid when character is active -->
-    <app-creation-progress
-      *ngIf="shouldShowNavigationGrid() && character"
-      [displayMode]="'navigation-grid'"
-      class="toolbar-navigation"
-    >
-    </app-creation-progress>
-  </mat-toolbar-row>
+        <!-- Navigation Grid when character is active -->
+        <app-creation-progress 
+            *ngIf="shouldShowNavigationGrid() && character"
+            [displayMode]="'navigation-grid'"
+            class="toolbar-navigation">
+        </app-creation-progress>
+    </mat-toolbar-row>
 </mat-toolbar>
 <mat-sidenav-container [hasBackdrop]="false" class="app-sidenav-container">
-  <mat-sidenav #drawer class="app-sidenav" [opened]="!isMobile" [mode]="isMobile ? 'over' : 'side'">
-    <app-sidenav-view></app-sidenav-view>
-  </mat-sidenav>
-  <mat-sidenav-content class="app-sidenav-content">
-    <router-outlet />
-  </mat-sidenav-content>
+    <mat-sidenav
+        #drawer
+        class="app-sidenav"
+        [opened]="!isMobile"
+        [mode]="isMobile ? 'over' : 'side'">
+        <app-sidenav-view></app-sidenav-view>
+    </mat-sidenav>
+    <mat-sidenav-content class="app-sidenav-content">
+        <router-outlet />
+    </mat-sidenav-content>
 </mat-sidenav-container>

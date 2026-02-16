@@ -12,4 +12,6 @@ import { SkillManager } from '../skill-manager/skill-manager';
   templateUrl: './skill-selector.html',
   styleUrl: './skill-selector.scss',
 })
-export class SkillSelector {}
+export class SkillSelector {
+
+}

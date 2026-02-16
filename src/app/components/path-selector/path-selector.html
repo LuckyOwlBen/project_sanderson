@@ -7,22 +7,24 @@
     </div>
 
     <div class="path-grid">
-      <mat-card
+      <mat-card 
         *ngFor="let path of availablePaths"
         class="path-card"
-        (click)="selectMainPath(path.id)"
-      >
+        (click)="selectMainPath(path.id)">
+        
         <mat-card-header>
           <mat-icon class="path-icon">{{ getPathIcon(path) }}</mat-icon>
           <mat-card-title>{{ path.name }}</mat-card-title>
         </mat-card-header>
-
+        
         <mat-card-content>
           <p>{{ path.description }}</p>
         </mat-card-content>
-
+        
         <mat-card-actions>
-          <button mat-raised-button color="primary">Select {{ path.name }}</button>
+          <button mat-raised-button color="primary">
+            Select {{ path.name }}
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -32,30 +34,30 @@
   <div *ngIf="selectedMainPath && !selectedSpecialization" class="specialization-selection">
     <div class="path-header">
       <h2>Choose Your Specialization</h2>
-      <p class="subtitle">
-        Select a specific focus within the {{ getPathName(selectedMainPath) }} path
-      </p>
+      <p class="subtitle">Select a specific focus within the {{ getPathName(selectedMainPath) }} path</p>
       <button mat-button (click)="backToMainPath()">
         <mat-icon>arrow_back</mat-icon> Back to Paths
       </button>
     </div>
 
     <div class="path-grid">
-      <mat-card
+      <mat-card 
         *ngFor="let spec of availableSpecializations"
         class="path-card"
-        (click)="selectSpecialization(spec)"
-      >
+        (click)="selectSpecialization(spec)">
+        
         <mat-card-header>
           <mat-card-title>{{ spec.pathName }}</mat-card-title>
         </mat-card-header>
-
+        
         <mat-card-content>
           <p class="tier-info">{{ spec.nodes.length }} talents available</p>
         </mat-card-content>
-
+        
         <mat-card-actions>
-          <button mat-raised-button color="primary">Choose {{ spec.pathName }}</button>
+          <button mat-raised-button color="primary">
+            Choose {{ spec.pathName }}
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>

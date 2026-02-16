@@ -19,7 +19,7 @@ export interface TalentsState {
   finalized: boolean;
   totalTalents: string[];
   pendingTalents: string[];
-  pendingTrees: string[]; // Selected bonus path trees (removable until finalized)
+  pendingTrees: string[];  // Selected bonus path trees (removable until finalized)
   availableTrees: string[];
   selectedTreeId: string | null;
   requiresSingerSelection: boolean;
@@ -42,10 +42,9 @@ interface TalentUIResponseData {
 
 @Injectable({ providedIn: 'root' })
 export class TalentsApiService {
-  private apiBase =
-    window.location.hostname === 'localhost' && window.location.port === '4200'
-      ? 'http://localhost:3000/api'
-      : '/api';
+  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
+    ? 'http://localhost:3000/api'
+    : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}

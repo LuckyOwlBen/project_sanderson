@@ -4,21 +4,19 @@
     [character]="character"
     (save)="saveCharacter()"
     (export)="exportCharacter()"
-    (navigateBack)="backToList()"
-  >
+    (navigateBack)="backToList()">
   </app-character-sheet-header>
 
   <!-- Combat Turn Speed Selector -->
   <app-combat-turn-speed-selector [characterId]="characterId"></app-combat-turn-speed-selector>
 
   <!-- Radiant Path Notifications -->
-  <app-radiant-path-notifications
+  <app-radiant-path-notifications 
     [character]="character"
     [pendingSprenGrant]="pendingSprenGrant"
     (sprenAccepted)="onSprenAccepted()"
     (sprenDismissed)="onSprenDismissed()"
-    (idealSpoken)="onIdealSpoken()"
-  >
+    (idealSpoken)="onIdealSpoken()">
   </app-radiant-path-notifications>
 
   <!-- Expertise Grant Notification -->
@@ -36,8 +34,7 @@
             <strong>{{ pendingExpertiseGrant.expertiseName }}</strong>
           </div>
           <p class="grant-message">
-            This expertise has been added to your character and now functions as a skill with
-            Intellect as the governing attribute.
+            This expertise has been added to your character and now functions as a skill with Intellect as the governing attribute.
           </p>
         </div>
       </mat-card-content>
@@ -56,17 +53,12 @@
       <mat-card-header>
         <mat-icon mat-card-avatar class="notification-icon warning-icon">warning</mat-icon>
         <mat-card-title>Pending Level-Up!</mat-card-title>
-        <mat-card-subtitle
-          >You have {{ character!.pendingLevelPoints }} unspent level{{
-            character!.pendingLevelPoints > 1 ? 's' : ''
-          }}</mat-card-subtitle
-        >
+        <mat-card-subtitle>You have {{ character!.pendingLevelPoints }} unspent level{{ character!.pendingLevelPoints > 1 ? 's' : '' }}</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <div class="level-up-warning-content">
           <p class="warning-message">
-            You must spend your pending level points before continuing. Click the button below to
-            proceed with character advancement.
+            You must spend your pending level points before continuing. Click the button below to proceed with character advancement.
           </p>
         </div>
       </mat-card-content>
@@ -84,30 +76,12 @@
   <!-- Main Content -->
   <div class="sheet-tabs custom-tabs">
     <div class="tab-labels">
-      <button class="tab-label" [class.active]="activeTab === 0" (click)="activeTab = 0">
-        Overview
-      </button>
-      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">
-        Skills
-      </button>
-      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">
-        Talents &amp; Expertises
-      </button>
-      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">
-        Equipment
-      </button>
-      <button
-        class="tab-label"
-        *ngIf="character.ancestry === 'singer'"
-        [class.active]="activeTab === 4"
-        [class.highstorm-active]="isHighstormActive"
-        (click)="activeTab = 4"
-      >
-        Singer Forms
-      </button>
-      <button class="tab-label" [class.active]="activeTab === 5" (click)="activeTab = 5">
-        Notes
-      </button>
+      <button class="tab-label" [class.active]="activeTab === 0" (click)="activeTab = 0">Overview</button>
+      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">Skills</button>
+      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Talents &amp; Expertises</button>
+      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Equipment</button>
+      <button class="tab-label" *ngIf="character.ancestry === 'singer'" [class.active]="activeTab === 4" [class.highstorm-active]="isHighstormActive" (click)="activeTab = 4">Singer Forms</button>
+      <button class="tab-label" [class.active]="activeTab === 5" (click)="activeTab = 5">Notes</button>
     </div>
     <div class="tab-content" *ngIf="activeTab === 0">
       <div class="sheet-content overview-tab">
@@ -116,17 +90,16 @@
           [character]="character"
           [characterId]="characterId"
           [portraitUrl]="portraitUrl"
-          (portraitChanged)="onPortraitChanged($event)"
-        >
+          (portraitChanged)="onPortraitChanged($event)">
         </app-character-portrait-card>
-
+        
         <!-- Defenses Card -->
-        <app-character-defenses-card [character]="character"> </app-character-defenses-card>
-
-        <app-character-resources-bar
+        <app-character-defenses-card [character]="character">
+        </app-character-defenses-card>
+        
+        <app-character-resources-bar 
           [character]="character"
-          (resourceChanged)="onResourceChanged($event)"
-        >
+          (resourceChanged)="onResourceChanged($event)">
         </app-character-resources-bar>
       </div>
     </div>
@@ -149,27 +122,21 @@
         <!-- Equipment Subtabs -->
         <div class="equipment-tabs">
           <div class="equipment-tab-headers">
-            <button
-              class="equipment-tab-label"
-              [class.active]="equipmentActiveTab === 'inventory'"
-              (click)="equipmentActiveTab = 'inventory'"
-            >
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'inventory'" 
+                    (click)="equipmentActiveTab = 'inventory'">
               <span class="tab-icon">🎒</span>
               Inventory
             </button>
-            <button
-              class="equipment-tab-label"
-              [class.active]="equipmentActiveTab === 'crafting'"
-              (click)="equipmentActiveTab = 'crafting'"
-            >
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'crafting'" 
+                    (click)="equipmentActiveTab = 'crafting'">
               <span class="tab-icon">🔨</span>
               Crafting
             </button>
-            <button
-              class="equipment-tab-label"
-              [class.active]="equipmentActiveTab === 'companions'"
-              (click)="equipmentActiveTab = 'companions'"
-            >
+            <button class="equipment-tab-label" 
+                    [class.active]="equipmentActiveTab === 'companions'" 
+                    (click)="equipmentActiveTab = 'companions'">
               <span class="tab-icon">🐾</span>
               Companions
             </button>
@@ -187,7 +154,9 @@
               </div>
               <div class="companions-content">
                 <ng-container *ngIf="getActivePetCompanion(); else noPet">
-                  <app-companion-detail [companion]="getActivePetCompanion()!" [isActive]="true">
+                  <app-companion-detail 
+                    [companion]="getActivePetCompanion()!" 
+                    [isActive]="true">
                   </app-companion-detail>
                 </ng-container>
                 <ng-template #noPet>
@@ -207,15 +176,13 @@
       <div class="sheet-content singer-forms-tab">
         <div class="highstorm-status" *ngIf="isHighstormActive">
           <svg class="status-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+            <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
           </svg>
           <span>Highstorm in progress - You may change forms</span>
         </div>
         <div class="highstorm-status waiting" *ngIf="!isHighstormActive">
           <svg class="status-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3 0 1.13-.64 2.11-1.56 2.62l1.45 1.45C23.16 18.16 24 16.68 24 15c0-2.64-2.05-4.78-4.65-4.96zM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14c0 3.31 2.69 6 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27zM7.73 10l8 8H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h1.73z"
-            />
+            <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3 0 1.13-.64 2.11-1.56 2.62l1.45 1.45C23.16 18.16 24 16.68 24 15c0-2.64-2.05-4.78-4.65-4.96zM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14c0 3.31 2.69 6 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27zM7.73 10l8 8H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h1.73z"/>
           </svg>
           <span>Awaiting highstorm to change forms</span>
         </div>
@@ -233,13 +200,12 @@
           <mat-card-content>
             <mat-form-field appearance="outline" class="notes-field">
               <mat-label>Notes, objectives, and reminders...</mat-label>
-              <textarea
-                matInput
+              <textarea 
+                matInput 
                 [(ngModel)]="sessionNotes"
                 (blur)="saveCharacter()"
                 rows="10"
-                placeholder="Track your adventure here..."
-              >
+                placeholder="Track your adventure here...">
               </textarea>
             </mat-form-field>
           </mat-card-content>
@@ -247,11 +213,14 @@
       </div>
     </div>
   </div>
+
 </div>
 
 <div class="no-character" *ngIf="!character">
   <mat-icon>error_outline</mat-icon>
   <h2>No Character Loaded</h2>
   <p>Please select a character from the character list.</p>
-  <button mat-raised-button color="primary" (click)="backToList()">Go to Character List</button>
+  <button mat-raised-button color="primary" (click)="backToList()">
+    Go to Character List
+  </button>
 </div>

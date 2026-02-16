@@ -1,6 +1,6 @@
 /**
  * Bonus System - Shared Type Definitions
- *
+ * 
  * Interfaces for character bonuses and effects
  */
 

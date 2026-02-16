@@ -13,13 +13,19 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 @Component({
   selector: 'app-character-list-view',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './character-list-view.html',
   styleUrl: './character-list-view.scss',
 })
 export class CharacterListView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-
+  
   characters: SavedCharacter[] = [];
   loading = true;
   error: string | null = null;
@@ -44,10 +50,9 @@ export class CharacterListView implements OnInit, OnDestroy {
   loadCharacters(): void {
     this.loading = true;
     this.error = null;
-
+    
     console.log('[Character List] Loading characters...');
-    this.characterStorage
-      .listCharacters()
+    this.characterStorage.listCharacters()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (characters: SavedCharacter[]) => {
@@ -64,7 +69,7 @@ export class CharacterListView implements OnInit, OnDestroy {
         },
         complete: () => {
           console.log('[Character List] Load complete');
-        },
+        }
       });
   }
 
@@ -74,10 +79,9 @@ export class CharacterListView implements OnInit, OnDestroy {
 
   deleteCharacter(character: SavedCharacter, event: Event): void {
     event.stopPropagation(); // Prevent card click
-
+    
     if (confirm(`Are you sure you want to delete ${character.name}?`)) {
-      this.characterStorage
-        .deleteCharacter(character.id)
+      this.characterStorage.deleteCharacter(character.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -86,7 +90,7 @@ export class CharacterListView implements OnInit, OnDestroy {
           error: (err) => {
             console.error('Error deleting character:', err);
             alert('Failed to delete character');
-          },
+          }
         });
     }
   }
@@ -102,10 +106,9 @@ export class CharacterListView implements OnInit, OnDestroy {
 
   editCharacter(character: SavedCharacter, event: Event): void {
     event.stopPropagation(); // Prevent card click
-
+    
     // Load the character into state and navigate to creator
-    this.characterStorage
-      .loadCharacter(character.id)
+    this.characterStorage.loadCharacter(character.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (loadedCharacter: any) => {
@@ -118,7 +121,7 @@ export class CharacterListView implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Error loading character for edit:', err);
           alert('Failed to load character');
-        },
+        }
       });
   }
 

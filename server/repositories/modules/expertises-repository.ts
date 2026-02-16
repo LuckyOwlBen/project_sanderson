@@ -17,9 +17,12 @@ export class ExpertisesModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param expertises - Array of expertise source DTOs
    */
-  async save(characterId: string, expertises: ExpertiseSourceDTO[]): Promise<SaveResult> {
+  async save(
+    characterId: string,
+    expertises: ExpertiseSourceDTO[]
+  ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
-      selectedExpertises: expertises,
+      selectedExpertises: expertises
     });
   }
 

@@ -38,38 +38,19 @@
       <div class="converter-fields">
         <div class="form-field">
           <label for="broams">Broams</label>
-          <input
-            id="broams"
-            type="number"
-            [(ngModel)]="converterBroams"
-            (ngModelChange)="updateFromBroams()"
-            min="0"
-          />
+          <input id="broams" type="number" [(ngModel)]="converterBroams" (ngModelChange)="updateFromBroams()" min="0">
           <span class="hint">1 broam = 4 marks</span>
         </div>
 
         <div class="form-field">
           <label for="marks">Marks</label>
-          <input
-            id="marks"
-            type="number"
-            [(ngModel)]="converterMarks"
-            (ngModelChange)="updateFromMarks()"
-            min="0"
-          />
+          <input id="marks" type="number" [(ngModel)]="converterMarks" (ngModelChange)="updateFromMarks()" min="0">
           <span class="hint">Base currency</span>
         </div>
 
         <div class="form-field">
           <label for="chips">Chips</label>
-          <input
-            id="chips"
-            type="number"
-            [(ngModel)]="converterChips"
-            (ngModelChange)="updateFromChips()"
-            min="0"
-            step="0.1"
-          />
+          <input id="chips" type="number" [(ngModel)]="converterChips" (ngModelChange)="updateFromChips()" min="0" step="0.1">
           <span class="hint">5 chips = 1 mark</span>
         </div>
       </div>
@@ -83,35 +64,27 @@
   <!-- Search Bar -->
   <div class="search-bar" [class.disabled]="!storeEnabled">
     <span class="search-icon">🔍</span>
-    <input
-      type="text"
-      [(ngModel)]="searchQuery"
-      placeholder="Search by name or description..."
-      [disabled]="!storeEnabled"
-    />
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or description..." [disabled]="!storeEnabled">
   </div>
 
   <!-- Closed Categories Notice -->
   <div class="closed-categories-notice" *ngIf="getDisabledCategories().length > 0">
     <span class="icon">⚠️</span>
     <span class="message">
-      The GM has closed the following sections:
+      The GM has closed the following sections: 
       <strong>{{ getDisabledCategoriesMessage() }}</strong>
     </span>
   </div>
 
   <!-- Category Selector -->
   <div class="category-selector" [class.disabled]="!storeEnabled">
-    <button
+    <button 
       *ngFor="let category of categories"
       class="category-chip"
       [class.active]="selectedCategory === category.id && storeEnabled"
       [disabled]="!storeEnabled"
-      [style.display]="
-        category.id === 'all' || categoryEnabled.get(category.id) !== false ? 'inline-flex' : 'none'
-      "
-      (click)="storeEnabled && selectCategory(category.id)"
-    >
+      [style.display]="category.id === 'all' || categoryEnabled.get(category.id) !== false ? 'inline-flex' : 'none'"
+      (click)="storeEnabled && selectCategory(category.id)">
       <span class="icon">{{ getCategoryIcon(category.icon) }}</span>
       {{ category.label }}
     </button>
@@ -119,12 +92,12 @@
 
   <!-- Item Grid -->
   <div class="items-grid">
-    <div
+    <div 
       *ngFor="let item of availableItems"
       class="item-card card"
       [class.affordable]="canAfford(item)"
-      [class.expensive]="!canAfford(item)"
-    >
+      [class.expensive]="!canAfford(item)">
+      
       <div class="card-header">
         <span class="item-icon" [attr.data-type]="item.type">
           {{ getItemIconEmoji(item) }}
@@ -137,20 +110,13 @@
 
       <div class="card-content">
         <p class="item-description">{{ item.description }}</p>
-
+        
         <div class="item-stats" *ngIf="getItemStats(item)">
           <span class="icon">ℹ️</span>
           <span>{{ getItemStats(item) }}</span>
         </div>
 
-        <div
-          class="item-traits"
-          *ngIf="
-            item.weaponProperties &&
-            item.weaponProperties.traits &&
-            item.weaponProperties.traits.length > 0
-          "
-        >
+        <div class="item-traits" *ngIf="item.weaponProperties && item.weaponProperties.traits && item.weaponProperties.traits.length > 0">
           <span class="trait-chip" *ngFor="let trait of item.weaponProperties.traits.slice(0, 3)">
             {{ trait }}
           </span>
@@ -169,24 +135,22 @@
       </div>
 
       <div class="card-actions">
-        <button
+        <button 
           class="btn"
           [class.btn-primary]="canAfford(item)"
           [class.btn-disabled]="!canAfford(item)"
           [disabled]="!canAfford(item)"
           (click)="purchaseItem(item, 1)"
-          [title]="canAfford(item) ? 'Purchase this item' : 'Not enough currency'"
-        >
+          [title]="canAfford(item) ? 'Purchase this item' : 'Not enough currency'">
           <span class="icon">🛒</span>
           Buy
         </button>
-
-        <button
+        
+        <button 
           class="btn btn-small"
           *ngIf="item.stackable && canAfford(item, 5)"
           (click)="purchaseItem(item, 5)"
-          title="Buy 5x"
-        >
+          title="Buy 5x">
           <span class="icon">🛒</span>
           5x
         </button>

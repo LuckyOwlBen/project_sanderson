@@ -5,15 +5,16 @@ import { MovementRateCalculator } from './movementRate';
 import { RecoveryDieCalculator } from './recoveryDie';
 
 export class DerivedAttributesManager {
-  private sensesRangeCalculator = new SensesRangeCalculator();
-  private liftingAndCarryingCalculator = new LiftingAndCarryingCalculator();
-  private movementRateCalculator = new MovementRateCalculator();
-  private recoveryDieCalculator = new RecoveryDieCalculator();
 
+    private sensesRangeCalculator = new SensesRangeCalculator();
+    private liftingAndCarryingCalculator = new LiftingAndCarryingCalculator();
+    private movementRateCalculator = new MovementRateCalculator();
+    private recoveryDieCalculator = new RecoveryDieCalculator();
+      
   getLiftingCapacity(attribute: Attributes): number {
     return this.liftingAndCarryingCalculator.getLiftingCapacity(attribute.strength);
   }
-
+  
   getCarryingCapacity(attribute: Attributes): number {
     return this.liftingAndCarryingCalculator.getCarryingCapacity(attribute.strength);
   }

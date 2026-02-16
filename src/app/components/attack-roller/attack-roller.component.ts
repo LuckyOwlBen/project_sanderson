@@ -1,6 +1,6 @@
 /**
  * Attack Roller Component
- *
+ * 
  * Demonstrates integrated attack rolling with backend API.
  * - Calculates d20 rolls on backend
  * - Compares against target defense
@@ -60,7 +60,7 @@ interface AttackResult {
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatSelectModule,
+    MatSelectModule
   ],
   template: `
     <div class="attack-roller-container">
@@ -75,35 +75,35 @@ interface AttackResult {
             <!-- Skill Total Input -->
             <mat-form-field>
               <mat-label>Skill Total</mat-label>
-              <input matInput type="number" [(ngModel)]="skillTotal" placeholder="e.g., 8" />
+              <input matInput type="number" [(ngModel)]="skillTotal" placeholder="e.g., 8">
               <mat-hint>d20 + skill + bonuses</mat-hint>
             </mat-form-field>
 
             <!-- Bonus Modifiers Input -->
             <mat-form-field>
               <mat-label>Bonus Modifiers</mat-label>
-              <input matInput type="number" [(ngModel)]="bonusModifiers" placeholder="e.g., 2" />
+              <input matInput type="number" [(ngModel)]="bonusModifiers" placeholder="e.g., 2">
               <mat-hint>Additional bonuses</mat-hint>
             </mat-form-field>
 
             <!-- Damage Notation Input -->
             <mat-form-field>
               <mat-label>Damage Notation</mat-label>
-              <input matInput [(ngModel)]="damageNotation" placeholder="e.g., d6+1" />
+              <input matInput [(ngModel)]="damageNotation" placeholder="e.g., d6+1">
               <mat-hint>Format: XdY+Z (e.g., 2d6+2, d8-1)</mat-hint>
             </mat-form-field>
 
             <!-- Damage Bonus Input -->
             <mat-form-field>
               <mat-label>Damage Bonus</mat-label>
-              <input matInput type="number" [(ngModel)]="damageBonus" placeholder="e.g., 0" />
+              <input matInput type="number" [(ngModel)]="damageBonus" placeholder="e.g., 0">
               <mat-hint>Additional damage</mat-hint>
             </mat-form-field>
 
             <!-- Target Defense Input -->
             <mat-form-field>
               <mat-label>Target Defense</mat-label>
-              <input matInput type="number" [(ngModel)]="targetDefense" placeholder="e.g., 12" />
+              <input matInput type="number" [(ngModel)]="targetDefense" placeholder="e.g., 12">
               <mat-hint>Enemy defense to beat</mat-hint>
             </mat-form-field>
 
@@ -121,23 +121,28 @@ interface AttackResult {
 
           <!-- Roll Button -->
           <div class="button-group">
-            <button mat-raised-button color="primary" (click)="rollAttack()" [disabled]="loading">
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="rollAttack()"
+              [disabled]="loading">
               <mat-icon>casino</mat-icon>
               {{ loading ? 'Rolling...' : 'Roll Attack' }}
             </button>
 
             <!-- Attack Combination Button -->
-            <button
-              mat-raised-button
+            <button 
+              mat-raised-button 
               color="accent"
               (click)="rollAttackCombination()"
-              [disabled]="loading"
-            >
+              [disabled]="loading">
               <mat-icon>multiple_stop</mat-icon>
               {{ loading ? 'Rolling...' : 'Roll 3 Attacks' }}
             </button>
 
-            <button mat-raised-button (click)="resetForm()">
+            <button 
+              mat-raised-button
+              (click)="resetForm()">
               <mat-icon>refresh</mat-icon>
               Reset
             </button>
@@ -161,11 +166,7 @@ interface AttackResult {
           <!-- Combat Summary -->
           <div class="result-section combat-summary">
             <h3>Combat Summary</h3>
-            <div
-              class="summary-row"
-              [class.hit]="lastResult.combat.isHit"
-              [class.miss]="!lastResult.combat.isHit"
-            >
+            <div class="summary-row" [class.hit]="lastResult.combat.isHit" [class.miss]="!lastResult.combat.isHit">
               <span class="label">Result:</span>
               <span class="value">{{ lastResult.combat.hitDescription }}</span>
             </div>
@@ -179,22 +180,14 @@ interface AttackResult {
             </div>
             <div class="summary-row">
               <span class="label">Hit Margin:</span>
-              <span
-                class="value"
-                [class.positive]="lastResult.combat.hitMargin >= 0"
-                [class.negative]="lastResult.combat.hitMargin < 0"
-              >
+              <span class="value" [class.positive]="lastResult.combat.hitMargin >= 0" [class.negative]="lastResult.combat.hitMargin < 0">
                 {{ lastResult.combat.hitMargin >= 0 ? '+' : '' }}{{ lastResult.combat.hitMargin }}
               </span>
             </div>
             <div class="summary-row" *ngIf="lastResult.combat.isHit">
               <span class="label">Damage Dealt:</span>
-              <span class="value critical" *ngIf="lastResult.combat.isCritical"
-                >⚡ {{ lastResult.combat.damageDealt }} (CRITICAL)</span
-              >
-              <span class="value" *ngIf="!lastResult.combat.isCritical">{{
-                lastResult.combat.damageDealt
-              }}</span>
+              <span class="value critical" *ngIf="lastResult.combat.isCritical">⚡ {{ lastResult.combat.damageDealt }} (CRITICAL)</span>
+              <span class="value" *ngIf="!lastResult.combat.isCritical">{{ lastResult.combat.damageDealt }}</span>
             </div>
           </div>
 
@@ -234,10 +227,7 @@ interface AttackResult {
             </div>
             <div class="breakdown-row">
               <span class="label">Dice Rolls:</span>
-              <span class="value"
-                >[{{ lastResult.damageRoll.diceRolls.join(', ') }}] =
-                {{ lastResult.damageRoll.diceTotal }}</span
-              >
+              <span class="value">[{{ lastResult.damageRoll.diceRolls.join(', ') }}] = {{ lastResult.damageRoll.diceTotal }}</span>
             </div>
             <div class="breakdown-row">
               <span class="label">Bonuses:</span>
@@ -246,8 +236,7 @@ interface AttackResult {
             <div class="breakdown-row total">
               <span class="label">Total Damage:</span>
               <span class="value" [class.critical]="lastResult.combat.isCritical">
-                {{ lastResult.damageRoll.total
-                }}{{ lastResult.combat.isCritical ? ' (doubled for critical)' : '' }}
+                {{ lastResult.damageRoll.total }}{{ lastResult.combat.isCritical ? ' (doubled for critical)' : '' }}
               </span>
             </div>
           </div>
@@ -261,145 +250,139 @@ interface AttackResult {
             </div>
             <div class="breakdown-row">
               <span class="label">Kept:</span>
-              <span class="value"
-                >{{ lastResult.attackRoll.finalRoll }} ({{
-                  advantageMode === 'advantage' ? 'highest' : 'lowest'
-                }})</span
-              >
+              <span class="value">{{ lastResult.attackRoll.finalRoll }} ({{ advantageMode === 'advantage' ? 'highest' : 'lowest' }})</span>
             </div>
           </div>
         </mat-card-content>
       </mat-card>
     </div>
   `,
-  styles: [
-    `
-      .attack-roller-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px;
-        max-width: 900px;
-        margin: 0 auto;
-      }
+  styles: [`
+    .attack-roller-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-      mat-card {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
+    mat-card {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-      .input-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-      }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
 
-      mat-form-field {
-        width: 100%;
-      }
+    mat-form-field {
+      width: 100%;
+    }
 
-      .button-group {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-      }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-      button {
-        flex: 1;
-      }
+    button {
+      flex: 1;
+    }
 
-      .error-message {
-        color: #f44336;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 15px;
-        padding: 10px;
-        background-color: #ffebee;
-        border-radius: 4px;
-      }
+    .error-message {
+      color: #f44336;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #ffebee;
+      border-radius: 4px;
+    }
 
-      .result-section {
-        margin-bottom: 20px;
-        padding: 15px;
-        background-color: #f5f5f5;
-        border-radius: 4px;
-      }
+    .result-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
 
-      .result-section h3 {
-        margin: 0 0 15px 0;
-        color: #1976d2;
-        font-size: 16px;
-      }
+    .result-section h3 {
+      margin: 0 0 15px 0;
+      color: #1976d2;
+      font-size: 16px;
+    }
 
-      .summary-row,
-      .breakdown-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #e0e0e0;
-      }
+    .summary-row,
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
 
-      .summary-row:last-child,
-      .breakdown-row:last-child {
-        border-bottom: none;
-      }
+    .summary-row:last-child,
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
 
-      .breakdown-row.total {
-        font-weight: bold;
-        padding-top: 10px;
-        border-top: 2px solid #1976d2;
-      }
+    .breakdown-row.total {
+      font-weight: bold;
+      padding-top: 10px;
+      border-top: 2px solid #1976d2;
+    }
 
-      .label {
-        font-weight: 500;
-        color: #424242;
-      }
+    .label {
+      font-weight: 500;
+      color: #424242;
+    }
 
-      .value {
-        color: #1976d2;
-        font-weight: 600;
-      }
+    .value {
+      color: #1976d2;
+      font-weight: 600;
+    }
 
-      .value.positive {
-        color: #4caf50;
-      }
+    .value.positive {
+      color: #4caf50;
+    }
 
-      .value.negative {
-        color: #f44336;
-      }
+    .value.negative {
+      color: #f44336;
+    }
 
-      .value.critical {
-        color: #ff6f00;
-        font-size: 1.1em;
-      }
+    .value.critical {
+      color: #ff6f00;
+      font-size: 1.1em;
+    }
 
-      .summary-row.hit {
-        background-color: #c8e6c9;
-        border-radius: 4px;
-        padding: 10px;
-      }
+    .summary-row.hit {
+      background-color: #c8e6c9;
+      border-radius: 4px;
+      padding: 10px;
+    }
 
-      .summary-row.miss {
-        background-color: #ffcdd2;
-        border-radius: 4px;
-        padding: 10px;
-      }
+    .summary-row.miss {
+      background-color: #ffcdd2;
+      border-radius: 4px;
+      padding: 10px;
+    }
 
-      .special-info {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #fff3e0;
-        border-left: 4px solid #ff6f00;
-        border-radius: 2px;
-        font-weight: 500;
-      }
+    .special-info {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #fff3e0;
+      border-left: 4px solid #ff6f00;
+      border-radius: 2px;
+      font-weight: 500;
+    }
 
-      .advantage-info {
-        background-color: #e3f2fd;
-      }
-    `,
-  ],
+    .advantage-info {
+      background-color: #e3f2fd;
+    }
+  `]
 })
 export class AttackRollerComponent implements OnInit, OnDestroy {
   // Form inputs
@@ -487,7 +470,7 @@ export class AttackRollerComponent implements OnInit, OnDestroy {
           missCount: response.combination.summary.missCount,
           totalDamage: response.combination.summary.totalDamage,
           avgDamage: response.combination.summary.averageDamagePerAttack,
-          criticals: response.combination.summary.criticalHits,
+          criticals: response.combination.summary.criticalHits
         });
         this.error = `Rolled 3 attacks: ${response.combination.summary.hitCount} hits, ${response.combination.summary.missCount} misses, ${response.combination.summary.totalDamage} total damage`;
       } else {

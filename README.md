@@ -5,7 +5,6 @@ Web-based character creator and session manager for tabletop RPG sessions. Built
 ## 🚀 Quick Start
 
 **First Time Installation:**
-
 ```bash
 # Install frontend dependencies
 npm install
@@ -17,7 +16,6 @@ cd ..
 ```
 
 **Production (Recommended):**
-
 ```bash
 ./start.sh
 ```
@@ -74,7 +72,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
 ## 🌐 Network Setup
 
 **Enable hostname access (`sanderson-rpg.local`):**
-
 ```bash
 sudo apt-get install avahi-daemon
 sudo hostnamectl set-hostname sanderson-rpg

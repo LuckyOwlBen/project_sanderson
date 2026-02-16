@@ -1,6 +1,6 @@
 /**
  * Calculation Constants Tests
- *
+ * 
  * Validates that all point-per-level arrays match game design specifications
  * and that calculation functions work correctly.
  */
@@ -23,7 +23,7 @@ import {
   getHealthForLevel,
   getMaxSkillRanksForLevel,
   getSkillRanksForLevel,
-  getAllCalculationTables,
+  getAllCalculationTables
 } from './calculation-constants';
 
 describe.skip('Calculation Constants', () => {
@@ -153,20 +153,20 @@ describe.skip('Calculation Constants', () => {
   describe('Health Calculations', () => {
     it('should apply strength modifier only at bonus levels', () => {
       const strengthMod = 2;
-
+      
       // Level 1 is bonus level
       expect(getHealthForLevel(1, strengthMod)).toBe(10 + strengthMod);
-
+      
       // Level 2 is not bonus level
       expect(getHealthForLevel(2, strengthMod)).toBe(5); // no modifier
-
+      
       // Level 6 is bonus level
       expect(getHealthForLevel(6, strengthMod)).toBe(4 + strengthMod);
     });
 
     it('should apply strength bonus at levels 1, 6, 11, 16, 21', () => {
       const bonusLevels = [1, 6, 11, 16, 21];
-      bonusLevels.forEach((level) => {
+      bonusLevels.forEach(level => {
         expect(HEALTH_STRENGTH_BONUS_LEVELS).toContain(level);
       });
     });
@@ -188,22 +188,22 @@ describe.skip('Calculation Constants', () => {
 
   describe('Skill Ranks', () => {
     it('should return correct max ranks per level', () => {
-      expect(getMaxSkillRanksForLevel(1)).toBe(2); // Levels 1-5
+      expect(getMaxSkillRanksForLevel(1)).toBe(2);  // Levels 1-5
       expect(getMaxSkillRanksForLevel(5)).toBe(2);
-
-      expect(getMaxSkillRanksForLevel(6)).toBe(3); // Levels 6-10
+      
+      expect(getMaxSkillRanksForLevel(6)).toBe(3);  // Levels 6-10
       expect(getMaxSkillRanksForLevel(10)).toBe(3);
-
+      
       expect(getMaxSkillRanksForLevel(11)).toBe(4); // Levels 11-15
       expect(getMaxSkillRanksForLevel(15)).toBe(4);
-
+      
       expect(getMaxSkillRanksForLevel(16)).toBe(5); // Levels 16-21
       expect(getMaxSkillRanksForLevel(21)).toBe(5);
     });
 
     it('should return correct skill ranks per level', () => {
-      expect(getSkillRanksForLevel(1)).toBe(5); // Level 1
-      expect(getSkillRanksForLevel(2)).toBe(2); // Levels 2-20
+      expect(getSkillRanksForLevel(1)).toBe(5);  // Level 1
+      expect(getSkillRanksForLevel(2)).toBe(2);  // Levels 2-20
       expect(getSkillRanksForLevel(20)).toBe(2);
       expect(getSkillRanksForLevel(21)).toBe(0); // Terminal level
     });
@@ -216,7 +216,7 @@ describe.skip('Calculation Constants', () => {
   describe('getAllCalculationTables()', () => {
     it('should return all tables in single object', () => {
       const tables = getAllCalculationTables();
-
+      
       expect(tables).toHaveProperty('attributePointsPerLevel');
       expect(tables).toHaveProperty('skillPointsPerLevel');
       expect(tables).toHaveProperty('talentPointsPerLevel');
@@ -228,7 +228,7 @@ describe.skip('Calculation Constants', () => {
 
     it('should return same arrays as individual exports', () => {
       const tables = getAllCalculationTables();
-
+      
       expect(tables.attributePointsPerLevel).toEqual(ATTRIBUTE_POINTS_PER_LEVEL);
       expect(tables.skillPointsPerLevel).toEqual(SKILL_POINTS_PER_LEVEL);
       expect(tables.talentPointsPerLevel).toEqual(TALENT_POINTS_PER_LEVEL);

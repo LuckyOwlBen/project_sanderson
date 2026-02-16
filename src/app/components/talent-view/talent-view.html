@@ -20,11 +20,10 @@
 
   <div class="tree-selector" *ngIf="availableTrees.length > 1">
     <mat-chip-set>
-      <mat-chip
+      <mat-chip 
         *ngFor="let tree of availableTrees"
         [highlighted]="selectedTree?.pathName === tree.pathName"
-        (click)="selectTree(tree)"
-      >
+        (click)="selectTree(tree)">
         {{ tree.pathName }}
       </mat-chip>
     </mat-chip-set>
@@ -38,21 +37,21 @@
     </mat-card>
 
     <div class="talent-grid">
-      <mat-card
+      <mat-card 
         *ngFor="let talent of cachedVisibleTalents"
         class="talent-node"
         [class.unlocked]="isTalentUnlocked(talent.id)"
         [class.baseline-locked]="isTalentUnlocked(talent.id) && !canRemoveTalent(talent.id)"
         [class.available]="canUnlockTalent(talent)"
-        [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)"
-      >
+        [class.locked]="!canUnlockTalent(talent) && !isTalentUnlocked(talent.id)">
+        
         <mat-card-header>
           <mat-card-title>{{ talent.name }}</mat-card-title>
         </mat-card-header>
-
+        
         <mat-card-content>
           <p>{{ talent.description }}</p>
-
+          
           <div class="prerequisites" *ngIf="talent.prerequisites?.length > 0">
             <span class="prereq-label">Requires:</span>
             <ul>
@@ -62,57 +61,46 @@
             </ul>
           </div>
         </mat-card-content>
-
+        
         <mat-card-actions>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             color="primary"
             *ngIf="!isTalentUnlocked(talent.id) && canUnlockTalent(talent)"
-            (click)="unlockTalent(talent); $event.stopPropagation()"
-          >
+            (click)="unlockTalent(talent); $event.stopPropagation()">
             <mat-icon>add_circle</mat-icon>
             Select Talent
           </button>
-          <button
+          <button 
             mat-button
-            *ngIf="
-              !isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints > 0
-            "
-            disabled
-          >
+            *ngIf="!isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints > 0"
+            disabled>
             <mat-icon>lock</mat-icon>
             Prerequisites Not Met
           </button>
-          <button
+          <button 
             mat-button
-            *ngIf="
-              !isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints <= 0
-            "
-            disabled
-          >
+            *ngIf="!isTalentUnlocked(talent.id) && !canUnlockTalent(talent) && availableTalentPoints <= 0"
+            disabled>
             <mat-icon>stars</mat-icon>
             No Points Available
           </button>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             color="warn"
             *ngIf="isTalentUnlocked(talent.id) && canRemoveTalent(talent.id)"
-            (click)="removeTalent(talent.id); $event.stopPropagation()"
-          >
+            (click)="removeTalent(talent.id); $event.stopPropagation()">
             <mat-icon>remove_circle</mat-icon>
             Remove
           </button>
-          <button
+          <button 
             mat-button
             *ngIf="isTalentUnlocked(talent.id) && !canRemoveTalent(talent.id)"
-            disabled
-          >
+            disabled>
             <mat-icon>lock</mat-icon>
             Locked (Previous Level)
           </button>
-          <mat-icon *ngIf="isTalentUnlocked(talent.id)" class="unlocked-badge"
-            >check_circle</mat-icon
-          >
+          <mat-icon *ngIf="isTalentUnlocked(talent.id)" class="unlocked-badge">check_circle</mat-icon>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -121,19 +109,13 @@
   <!-- Core Path Selector for bonus talent -->
   <div class="core-path-selector" *ngIf="showCorePathSelector && availableCorePaths.length > 0">
     <h3>Select a Bonus Path (Optional)</h3>
-    <p class="helper-text">
-      You can select a key talent from another heroic path as your bonus talent. This will unlock
-      that path's specialties.
-    </p>
+    <p class="helper-text">You can select a key talent from another heroic path as your bonus talent. This will unlock that path's specialties.</p>
     <div class="core-path-grid">
-      <mat-card
+      <mat-card 
         *ngFor="let pathOption of availableCorePaths"
         class="core-path-card"
         [class.selected]="pathOption.isSelected"
-        (click)="
-          pathOption.isSelected ? removeBonusPath(pathOption.id) : selectBonusPath(pathOption.id)
-        "
-      >
+        (click)="pathOption.isSelected ? removeBonusPath(pathOption.id) : selectBonusPath(pathOption.id)">
         <mat-card-header>
           <mat-card-title>{{ pathOption.name }}</mat-card-title>
         </mat-card-header>
@@ -144,15 +126,10 @@
           </div>
         </mat-card-content>
         <mat-card-actions>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="pathOption.isSelected ? 'warn' : 'primary'"
-            (click)="
-              pathOption.isSelected
-                ? removeBonusPath(pathOption.id)
-                : selectBonusPath(pathOption.id)
-            "
-          >
+            (click)="pathOption.isSelected ? removeBonusPath(pathOption.id) : selectBonusPath(pathOption.id)">
             <mat-icon>{{ pathOption.isSelected ? 'remove_circle' : 'add_circle' }}</mat-icon>
             {{ pathOption.isSelected ? 'Remove' : 'Select' }}
           </button>

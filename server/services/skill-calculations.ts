@@ -1,9 +1,9 @@
 /**
  * Skill Calculations Service
- *
+ * 
  * Handles all skill total calculations and validations.
  * Skill Total = Skill Rank + (Associated Attribute Value / 2)
- *
+ * 
  * This service is the single source of truth for skill calculations.
  * Prevents frontend from duplicating calculation logic.
  */
@@ -51,40 +51,40 @@ export interface AllSkillTotals {
  */
 export const SKILL_ASSOCIATIONS: Record<string, keyof Attributes> = {
   // Physical Skills
-  AGILITY: 'quickness',
-  ATHLETICS: 'strength',
-  HEAVY_WEAPONRY: 'strength',
-  LIGHT_WEAPONRY: 'quickness',
-  STEALTH: 'quickness',
-  THIEVERY: 'quickness',
+  'AGILITY': 'quickness',
+  'ATHLETICS': 'strength',
+  'HEAVY_WEAPONRY': 'strength',
+  'LIGHT_WEAPONRY': 'quickness',
+  'STEALTH': 'quickness',
+  'THIEVERY': 'quickness',
 
   // Mental/Cognitive Skills
-  CRAFTING: 'intellect',
-  DEDUCTION: 'intellect',
-  DISCIPLINE: 'willpower',
-  INTIMIDATION: 'willpower',
-  LORE: 'intellect',
-  MEDICINE: 'intellect',
+  'CRAFTING': 'intellect',
+  'DEDUCTION': 'intellect',
+  'DISCIPLINE': 'willpower',
+  'INTIMIDATION': 'willpower',
+  'LORE': 'intellect',
+  'MEDICINE': 'intellect',
 
   // Social Skills
-  DECEPTION: 'presence',
-  INSIGHT: 'awareness',
-  LEADERSHIP: 'presence',
-  PERCEPTION: 'awareness',
-  PERSUASION: 'presence',
-  SURVIVAL: 'awareness',
+  'DECEPTION': 'presence',
+  'INSIGHT': 'awareness',
+  'LEADERSHIP': 'presence',
+  'PERCEPTION': 'awareness',
+  'PERSUASION': 'presence',
+  'SURVIVAL': 'awareness',
 
   // Surge Skills (all associated with willpower)
-  ADHESION: 'willpower',
-  GRAVITATION: 'willpower',
-  DIVISION: 'willpower',
-  ABRASION: 'willpower',
-  PROGRESSION: 'willpower',
-  ILLUMINATION: 'willpower',
-  TRANSFORMATION: 'willpower',
-  TRANSPORTATION: 'willpower',
-  COHESION: 'willpower',
-  TENSION: 'willpower',
+  'ADHESION': 'willpower',
+  'GRAVITATION': 'willpower',
+  'DIVISION': 'willpower',
+  'ABRASION': 'willpower',
+  'PROGRESSION': 'willpower',
+  'ILLUMINATION': 'willpower',
+  'TRANSFORMATION': 'willpower',
+  'TRANSPORTATION': 'willpower',
+  'COHESION': 'willpower',
+  'TENSION': 'willpower'
 };
 
 /**
@@ -100,7 +100,7 @@ export const SURGE_SKILLS = [
   'TRANSFORMATION',
   'TRANSPORTATION',
   'COHESION',
-  'TENSION',
+  'TENSION'
 ];
 
 /**
@@ -109,7 +109,7 @@ export const SURGE_SKILLS = [
 export class SkillCalculationsService {
   /**
    * Get the associated attribute for a skill
-   *
+   * 
    * @param skillName - Name of the skill
    * @returns Associated attribute name
    */
@@ -123,7 +123,7 @@ export class SkillCalculationsService {
 
   /**
    * Check if a skill is a surge skill
-   *
+   * 
    * @param skillName - Name of the skill
    * @returns True if surge skill
    */
@@ -133,7 +133,7 @@ export class SkillCalculationsService {
 
   /**
    * Calculate attribute modifier (attribute value / 2, rounded down)
-   *
+   * 
    * @param attributeValue - The attribute value
    * @returns Modifier (value / 2, rounded down)
    */
@@ -147,7 +147,7 @@ export class SkillCalculationsService {
   /**
    * Calculate total for a single skill
    * Total = Rank + (Associated Attribute / 2)
-   *
+   * 
    * @param skillName - Name of the skill
    * @param rank - Skill rank (0-5)
    * @param attributes - Character's attributes
@@ -160,7 +160,7 @@ export class SkillCalculationsService {
   ): SkillTotal {
     // Validate skill exists
     const associatedAttribute = this.getSkillAssociation(skillName);
-
+    
     // Get attribute value
     const attributeValue = attributes[associatedAttribute as keyof Attributes] || 0;
 
@@ -175,13 +175,13 @@ export class SkillCalculationsService {
       rank,
       attributeModifier,
       total,
-      associatedAttribute,
+      associatedAttribute
     };
   }
 
   /**
    * Calculate totals for all skills
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @returns Map of all skill totals
@@ -203,7 +203,7 @@ export class SkillCalculationsService {
 
   /**
    * Get all surge skill totals
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @returns Map of surge skill totals only
@@ -226,7 +226,7 @@ export class SkillCalculationsService {
 
   /**
    * Get all non-surge skill totals
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @returns Map of non-surge skill totals only
@@ -249,7 +249,7 @@ export class SkillCalculationsService {
 
   /**
    * Get skills by attribute category
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @param attribute - Which attribute to filter by (e.g., 'strength')
@@ -274,7 +274,7 @@ export class SkillCalculationsService {
 
   /**
    * Validate skill rank
-   *
+   * 
    * @param rank - Skill rank
    * @param maxRank - Maximum allowed rank (default 5)
    * @returns Validation result
@@ -294,7 +294,7 @@ export class SkillCalculationsService {
 
   /**
    * Validate all skill ranks
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param maxRank - Maximum allowed rank
    * @returns Validation result with any errors
@@ -314,13 +314,13 @@ export class SkillCalculationsService {
 
     return {
       valid: Object.keys(errors).length === 0,
-      errors,
+      errors
     };
   }
 
   /**
    * Validate attributes object
-   *
+   * 
    * @param attributes - Attributes to validate
    * @returns Validation result
    */
@@ -329,14 +329,7 @@ export class SkillCalculationsService {
       return { valid: false, error: 'Attributes must be an object' };
     }
 
-    const attributeNames = [
-      'strength',
-      'quickness',
-      'intellect',
-      'awareness',
-      'willpower',
-      'presence',
-    ];
+    const attributeNames = ['strength', 'quickness', 'intellect', 'awareness', 'willpower', 'presence'];
     for (const attr of attributeNames) {
       if (attributes[attr as keyof Attributes] !== undefined) {
         const value = attributes[attr as keyof Attributes];
@@ -354,7 +347,7 @@ export class SkillCalculationsService {
 
   /**
    * Get highest skill rank
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @returns Highest rank value
    */
@@ -364,19 +357,19 @@ export class SkillCalculationsService {
 
   /**
    * Get highest skill total
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @returns Highest total value
    */
   getHighestSkillTotal(skillRanks: SkillRanks = {}, attributes: Attributes = {}): number {
     const allTotals = this.calculateAllSkillTotals(skillRanks, attributes);
-    return Math.max(0, ...Object.values(allTotals).map((s) => s.total));
+    return Math.max(0, ...Object.values(allTotals).map(s => s.total));
   }
 
   /**
    * Get average skill rank
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @returns Average rank
    */
@@ -388,14 +381,14 @@ export class SkillCalculationsService {
 
   /**
    * Get average skill total
-   *
+   * 
    * @param skillRanks - Map of {skillName: rank}
    * @param attributes - Character's attributes
    * @returns Average total
    */
   getAverageSkillTotal(skillRanks: SkillRanks = {}, attributes: Attributes = {}): number {
     const allTotals = this.calculateAllSkillTotals(skillRanks, attributes);
-    const totals = Object.values(allTotals).map((s) => s.total);
+    const totals = Object.values(allTotals).map(s => s.total);
     if (totals.length === 0) return 0;
     return totals.reduce((a, b) => a + b, 0) / totals.length;
   }

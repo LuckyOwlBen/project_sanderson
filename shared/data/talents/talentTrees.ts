@@ -50,82 +50,82 @@ import { COHESION_SURGE_TREE } from './surges/cohesion';
 import { TENSION_SURGE_TREE } from './surges/tension';
 
 export const ALL_TALENT_TREES: Record<string, TalentTree> = {
-  //Tree Files Go Here
-  singerForms: SINGER_FORMS_TALENT_TREE,
-  singer: SINGER_FORMS_TALENT_TREE, // Map ancestry to talent tree
-
-  // Warrior Specializations
-  duelist: DUELIST_TALENT_TREE,
-  shardbearer: SHARDBEARER_TALENT_TREE,
-  soldier: SOLDIER_TALENT_TREE,
-
-  // Scholar Specializations
-  artifabrian: ARTIFABRIAN_TALENT_TREE,
-  strategist: STRATEGIST_TALENT_TREE,
-  surgeon: SURGEON_TALENT_TREE,
-
-  // Hunter Specializations
-  archer: ARCHER_TALENT_TREE,
-  assassin: ASSASSIN_TALENT_TREE,
-  tracker: TRACKER_TALENT_TREE,
-
-  // Leader Specializations
-  champion: CHAMPION_TALENT_TREE,
-  officer: OFFICER_TALENT_TREE,
-  politico: POLITICO_TALENT_TREE,
-
-  // Envoy Specializations
-  diplomat: DIPLOMAT_TALENT_TREE,
-  faithful: FAITHFUL_TALENT_TREE,
-  mentor: MENTOR_TALENT_TREE,
-
-  // Agent Specializations
-  investigator: INVESTIGATOR_TALENT_TREE,
-  spy: SPY_TALENT_TREE,
-  thief: THIEF_TALENT_TREE,
-
-  // Surge Trees
-  adhesion: ADHESION_SURGE_TREE,
-  gravitation: GRAVITATION_SURGE_TREE,
-  division: DIVISION_SURGE_TREE,
-  abrasion: ABRASION_SURGE_TREE,
-  progression: PROGRESSION_SURGE_TREE,
-  illumination: ILLUMINATION_SURGE_TREE,
-  transformation: TRANSFORMATION_SURGE_TREE,
-  transportation: TRANSPORTATION_SURGE_TREE,
-  cohesion: COHESION_SURGE_TREE,
-  tension: TENSION_SURGE_TREE,
+    //Tree Files Go Here
+    singerForms: SINGER_FORMS_TALENT_TREE,
+    singer: SINGER_FORMS_TALENT_TREE,  // Map ancestry to talent tree
+    
+    // Warrior Specializations
+    duelist: DUELIST_TALENT_TREE,
+    shardbearer: SHARDBEARER_TALENT_TREE,
+    soldier: SOLDIER_TALENT_TREE,
+    
+    // Scholar Specializations
+    artifabrian: ARTIFABRIAN_TALENT_TREE,
+    strategist: STRATEGIST_TALENT_TREE,
+    surgeon: SURGEON_TALENT_TREE,
+    
+    // Hunter Specializations
+    archer: ARCHER_TALENT_TREE,
+    assassin: ASSASSIN_TALENT_TREE,
+    tracker: TRACKER_TALENT_TREE,
+    
+    // Leader Specializations
+    champion: CHAMPION_TALENT_TREE,
+    officer: OFFICER_TALENT_TREE,
+    politico: POLITICO_TALENT_TREE,
+    
+    // Envoy Specializations
+    diplomat: DIPLOMAT_TALENT_TREE,
+    faithful: FAITHFUL_TALENT_TREE,
+    mentor: MENTOR_TALENT_TREE,
+    
+    // Agent Specializations
+    investigator: INVESTIGATOR_TALENT_TREE,
+    spy: SPY_TALENT_TREE,
+    thief: THIEF_TALENT_TREE,
+    
+    // Surge Trees
+    adhesion: ADHESION_SURGE_TREE,
+    gravitation: GRAVITATION_SURGE_TREE,
+    division: DIVISION_SURGE_TREE,
+    abrasion: ABRASION_SURGE_TREE,
+    progression: PROGRESSION_SURGE_TREE,
+    illumination: ILLUMINATION_SURGE_TREE,
+    transformation: TRANSFORMATION_SURGE_TREE,
+    transportation: TRANSPORTATION_SURGE_TREE,
+    cohesion: COHESION_SURGE_TREE,
+    tension: TENSION_SURGE_TREE,
 };
 
 export const ALL_TALENT_PATHS: Record<string, TalentPath> = {
-  warrior: WARRIOR_TALENT_TREE,
-  scholar: SCHOLAR_TALENT_TREE,
-  hunter: HUNTER_TALENT_TREES,
-  leader: LEADER_TALENT_TREE,
-  envoy: ENVOY_HEROIC_PATH,
-  agent: AGENT_HEROIC_PATH,
-
-  // Radiant Orders
-  windrunner: WINDRUNNER_TALENT_TREE,
-  skybreaker: SKYBREAKER_TALENT_TREE,
-  dustbringer: DUSTBRINGER_TALENT_TREE,
-  edgedancer: EDGEDANCER_TALENT_TREE,
-  truthwatcher: TRUTHWATCHER_TALENT_TREE,
-  lightweaver: LIGHTWEAVER_TALENT_TREE,
-  elsecaller: ELSECALLER_TALENT_TREE,
-  willshaper: WILLSHAPER_TALENT_TREE,
-  stoneward: STONEWARD_TALENT_TREE,
-  bondsmith: BONDSMITH_TALENT_TREE,
+    warrior: WARRIOR_TALENT_TREE,
+    scholar: SCHOLAR_TALENT_TREE,
+    hunter: HUNTER_TALENT_TREES,
+    leader: LEADER_TALENT_TREE,
+    envoy: ENVOY_HEROIC_PATH,
+    agent: AGENT_HEROIC_PATH,
+    
+    // Radiant Orders
+    windrunner: WINDRUNNER_TALENT_TREE,
+    skybreaker: SKYBREAKER_TALENT_TREE,
+    dustbringer: DUSTBRINGER_TALENT_TREE,
+    edgedancer: EDGEDANCER_TALENT_TREE,
+    truthwatcher: TRUTHWATCHER_TALENT_TREE,
+    lightweaver: LIGHTWEAVER_TALENT_TREE,
+    elsecaller: ELSECALLER_TALENT_TREE,
+    willshaper: WILLSHAPER_TALENT_TREE,
+    stoneward: STONEWARD_TALENT_TREE,
+    bondsmith: BONDSMITH_TALENT_TREE,
 };
 
 export function getTalentTree(pathName: string): TalentTree | undefined {
-  return ALL_TALENT_TREES[pathName.toLowerCase()];
+    return ALL_TALENT_TREES[pathName.toLowerCase()];
 }
 
 export function getTalentPath(pathName: string): TalentPath | undefined {
-  return ALL_TALENT_PATHS[pathName.toLowerCase()];
+    return ALL_TALENT_PATHS[pathName.toLowerCase()];
 }
 
 export function getAllTalentTrees(): TalentTree[] {
-  return Object.values(ALL_TALENT_TREES);
+    return Object.values(ALL_TALENT_TREES);
 }

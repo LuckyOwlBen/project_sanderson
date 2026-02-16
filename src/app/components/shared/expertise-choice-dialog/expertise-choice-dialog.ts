@@ -26,10 +26,10 @@ export interface ExpertiseChoiceResult {
     MatButtonModule,
     MatListModule,
     MatIconModule,
-    MatChipsModule,
+    MatChipsModule
   ],
   templateUrl: './expertise-choice-dialog.html',
-  styleUrl: './expertise-choice-dialog.scss',
+  styleUrl: './expertise-choice-dialog.scss'
 })
 export class ExpertiseChoiceDialog {
   selectedExpertises: Set<string> = new Set();
@@ -48,7 +48,7 @@ export class ExpertiseChoiceDialog {
       if (this.data.choiceCount === 1) {
         this.selectedExpertises.clear();
       }
-
+      
       // Only add if we haven't reached the limit
       if (this.selectedExpertises.size < this.data.choiceCount) {
         this.selectedExpertises.add(expertise);
@@ -61,7 +61,8 @@ export class ExpertiseChoiceDialog {
   }
 
   canSelect(expertise: string): boolean {
-    return this.isSelected(expertise) || this.selectedExpertises.size < this.data.choiceCount;
+    return this.isSelected(expertise) || 
+           this.selectedExpertises.size < this.data.choiceCount;
   }
 
   canConfirm(): boolean {
@@ -70,7 +71,7 @@ export class ExpertiseChoiceDialog {
 
   onConfirm(): void {
     this.dialogRef.close({
-      selected: Array.from(this.selectedExpertises),
+      selected: Array.from(this.selectedExpertises)
     } as ExpertiseChoiceResult);
   }
 

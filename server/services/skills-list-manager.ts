@@ -15,7 +15,7 @@ export class SkillsListManager {
         SkillType.HEAVY_WEAPONRY,
         SkillType.LIGHT_WEAPONRY,
         SkillType.STEALTH,
-        SkillType.THIEVERY,
+        SkillType.THIEVERY
       ],
       mental: [
         SkillType.CRAFTING,
@@ -23,7 +23,7 @@ export class SkillsListManager {
         SkillType.DISCIPLINE,
         SkillType.INTIMIDATION,
         SkillType.LORE,
-        SkillType.MEDICINE,
+        SkillType.MEDICINE
       ],
       social: [
         SkillType.DECEPTION,
@@ -31,8 +31,8 @@ export class SkillsListManager {
         SkillType.LEADERSHIP,
         SkillType.PERCEPTION,
         SkillType.PERSUASION,
-        SkillType.SURVIVAL,
-      ],
+        SkillType.SURVIVAL
+      ]
     };
   }
 }

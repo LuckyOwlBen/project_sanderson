@@ -1,13 +1,4 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  ChangeDetectionStrategy,
-  OnChanges,
-  SimpleChanges,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -17,7 +8,7 @@ import { Stance } from '../../../../../shared/types/attacks';
 
 /**
  * Stance Selector Component
- *
+ * 
  * Provides a dropdown menu to select the active combat stance.
  * Displays available stances with "None" option to deactivate.
  * Shows stance bonuses and advantages in expandable descriptions.
@@ -25,10 +16,15 @@ import { Stance } from '../../../../../shared/types/attacks';
 @Component({
   selector: 'app-stance-selector',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatSelectModule, MatFormFieldModule],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatFormFieldModule
+  ],
   templateUrl: './stance-selector.html',
   styleUrl: './stance-selector.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StanceSelectorComponent implements OnChanges {
   @Input() character: Character | null = null;
@@ -104,9 +100,7 @@ export class StanceSelectorComponent implements OnChanges {
    * Format stance display with activation cost
    */
   formatStanceLabel(stance: Stance): string {
-    return `${stance.name} (${stance.activationCost} action${
-      stance.activationCost > 1 ? 's' : ''
-    })`;
+    return `${stance.name} (${stance.activationCost} action${stance.activationCost > 1 ? 's' : ''})`;
   }
 
   /**

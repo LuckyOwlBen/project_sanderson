@@ -18,7 +18,7 @@ import {
   CombatStartEvent,
   TurnSpeedSelectionEvent,
   TurnGroupsUpdateEvent,
-  CharacterUpdatedEvent,
+  CharacterUpdatedEvent
 } from '../../../shared/types/websocket-events';
 
 // Extend shared PlayerJoinedEvent to use local Ancestry type
@@ -34,7 +34,7 @@ export type { HighstormEvent, CombatStartEvent, TurnSpeedSelectionEvent };
 export type { TurnGroupsUpdateEvent, CharacterUpdatedEvent };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class WebsocketService implements OnDestroy {
   private socket: Socket | null = null;
@@ -99,7 +99,7 @@ export class WebsocketService implements OnDestroy {
       // In development (port 4200), connect to backend at port 3000
       // In production (port 80), connect to same port
       const isDevelopment = window.location.port === '4200';
-      const port = isDevelopment ? '3000' : window.location.port || '80';
+      const port = isDevelopment ? '3000' : (window.location.port || '80');
       this.serverUrl = `${window.location.protocol}//${window.location.hostname}:${port}`;
     }
   }
@@ -120,14 +120,14 @@ export class WebsocketService implements OnDestroy {
     }
 
     console.log('[WebSocket] Connecting to:', this.serverUrl);
-
+    
     this.socket = io(this.serverUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 10,
-      timeout: 10000,
+      timeout: 10000
     });
 
     this.socket.on('connect', () => {
@@ -231,12 +231,12 @@ export class WebsocketService implements OnDestroy {
       console.log('[WebSocket] 📋 Turn groups updated:', data);
       this.turnGroupsUpdateSubject.next(data);
     });
-
+    
     this.socket.on('character-updated', (data: CharacterUpdatedEvent) => {
       console.log('[WebSocket] 🔄 Character updated:', data);
       this.characterUpdatedSubject.next(data);
     });
-
+    
     console.log('[WebSocket] ✅ All event listeners registered');
   }
 
@@ -271,7 +271,7 @@ export class WebsocketService implements OnDestroy {
       ancestry: data.ancestry,
       health: data.health,
       focus: data.focus,
-      investiture: data.investiture,
+      investiture: data.investiture
     });
   }
 
@@ -320,7 +320,7 @@ export class WebsocketService implements OnDestroy {
       order,
       sprenType: orderInfo.sprenType,
       surgePair: orderInfo.surgePair,
-      philosophy: orderInfo.philosophy,
+      philosophy: orderInfo.philosophy
     });
   }
 
@@ -345,7 +345,7 @@ export class WebsocketService implements OnDestroy {
       characterId,
       itemId,
       quantity,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 
@@ -358,7 +358,7 @@ export class WebsocketService implements OnDestroy {
     console.log('[WebSocket] Toggling store:', { storeId, enabled });
     this.socket.emit('gm-toggle-store', {
       storeId,
-      enabled,
+      enabled
     });
   }
 
@@ -384,7 +384,7 @@ export class WebsocketService implements OnDestroy {
     this.socket.emit('gm-grant-expertise', {
       characterId,
       expertiseName,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 📤 gm-grant-expertise event emitted');
   }
@@ -400,7 +400,7 @@ export class WebsocketService implements OnDestroy {
       characterId,
       amount,
       operation,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 💰 gm-grant-money event emitted');
   }
@@ -416,7 +416,7 @@ export class WebsocketService implements OnDestroy {
     console.log('[WebSocket] 📤 Socket connected:', this.socket.connected);
     this.socket.emit('gm-grant-level-up', {
       characterId,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
     console.log('[WebSocket] 📤 gm-grant-level-up event emitted');
   }
@@ -470,7 +470,7 @@ export class WebsocketService implements OnDestroy {
     console.log('[WebSocket] ⚡ Toggling highstorm:', { active });
     this.socket.emit('gm-toggle-highstorm', {
       active,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 
@@ -483,7 +483,7 @@ export class WebsocketService implements OnDestroy {
 
     console.log('[WebSocket] ⚔️ Starting combat');
     this.socket.emit('gm-start-combat', {
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 
@@ -497,7 +497,7 @@ export class WebsocketService implements OnDestroy {
     this.socket.emit('player-select-turn-speed', {
       characterId,
       turnSpeed,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 

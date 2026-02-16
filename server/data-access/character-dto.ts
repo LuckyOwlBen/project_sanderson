@@ -1,9 +1,9 @@
 /**
  * CharacterDTO - Data Transfer Object for Character persistence
- *
+ * 
  * Mirrors the 15 modules of the Character class for serialization and deserialization.
  * This DTO is used when saving/loading from database and file system.
- *
+ * 
  * Module-aligned structure:
  * - MODULE 1: IDENTITY
  * - MODULE 2: PROGRESSION
@@ -207,7 +207,7 @@ export function createEmptyCharacterDTO(id: string, name: string = ''): Characte
       intellect: 0,
       willpower: 0,
       awareness: 0,
-      presence: 0,
+      presence: 0
     },
 
     // MODULE 5: SKILLS
@@ -224,7 +224,7 @@ export function createEmptyCharacterDTO(id: string, name: string = ''): Characte
     resources: {
       health: { current: 0, max: 0 },
       focus: { current: 0, max: 0 },
-      investiture: { current: 0, max: 0, isActive: false },
+      investiture: { current: 0, max: 0, isActive: false }
     },
 
     // MODULE 9: SINGER FORMS
@@ -239,8 +239,8 @@ export function createEmptyCharacterDTO(id: string, name: string = ''): Characte
       items: [],
       equipped: {
         armor: null,
-        weapons: [],
-      },
+        weapons: []
+      }
     },
 
     // MODULE 12: BONUSES
@@ -250,16 +250,16 @@ export function createEmptyCharacterDTO(id: string, name: string = ''): Characte
     radiantPath: {
       currentIdeal: 1,
       currentOath: null,
-      hasSpren: false,
+      hasSpren: false
     },
 
     // MODULE 14: CRAFTING
     crafting: {
-      inProgress: false,
+      inProgress: false
     },
 
     // MODULE 15: METADATA
     sessionNotes: '',
-    lastModified: new Date().toISOString(),
+    lastModified: new Date().toISOString()
   };
 }

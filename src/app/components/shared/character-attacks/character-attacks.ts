@@ -7,7 +7,10 @@ import { Attack } from '../../../../../shared/types/attacks';
 @Component({
   selector: 'app-character-attacks',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatIconModule
+  ],
   templateUrl: './character-attacks.html',
   styleUrl: './character-attacks.scss',
 })
@@ -17,13 +20,13 @@ export class CharacterAttacksComponent {
   /**
    * Get all available attacks grouped by type
    */
-  getAttacks(): { melee: Attack[]; ranged: Attack[]; special: Attack[] } {
+  getAttacks(): { melee: Attack[], ranged: Attack[], special: Attack[] } {
     const attacks = this.character?.getAvailableAttacks() || [];
-
+    
     return {
-      melee: attacks.filter((a) => a.range === 'Melee'),
-      ranged: attacks.filter((a) => a.range.includes('Ranged')),
-      special: attacks.filter((a) => a.range !== 'Melee' && !a.range.includes('Ranged')),
+      melee: attacks.filter(a => a.range === 'Melee'),
+      ranged: attacks.filter(a => a.range.includes('Ranged')),
+      special: attacks.filter(a => a.range !== 'Melee' && !a.range.includes('Ranged'))
     };
   }
 
@@ -39,14 +42,10 @@ export class CharacterAttacksComponent {
    */
   getSourceIcon(source: string): string {
     switch (source) {
-      case 'weapon':
-        return '⚔️';
-      case 'talent':
-        return '✨';
-      case 'combined':
-        return '💥';
-      default:
-        return '⚔️';
+      case 'weapon': return '⚔️';
+      case 'talent': return '✨';
+      case 'combined': return '💥';
+      default: return '⚔️';
     }
   }
 
@@ -55,14 +54,10 @@ export class CharacterAttacksComponent {
    */
   getDefenseClass(defense: string): string {
     switch (defense.toLowerCase()) {
-      case 'physical':
-        return 'defense-physical';
-      case 'cognitive':
-        return 'defense-cognitive';
-      case 'spiritual':
-        return 'defense-spiritual';
-      default:
-        return '';
+      case 'physical': return 'defense-physical';
+      case 'cognitive': return 'defense-cognitive';
+      case 'spiritual': return 'defense-spiritual';
+      default: return '';
     }
   }
 
@@ -71,18 +66,12 @@ export class CharacterAttacksComponent {
    */
   getDamageTypeClass(damageType: string): string {
     switch (damageType.toLowerCase()) {
-      case 'keen':
-        return 'damage-keen';
-      case 'impact':
-        return 'damage-impact';
-      case 'energy':
-        return 'damage-energy';
-      case 'vital':
-        return 'damage-vital';
-      case 'spirit':
-        return 'damage-spirit';
-      default:
-        return '';
+      case 'keen': return 'damage-keen';
+      case 'impact': return 'damage-impact';
+      case 'energy': return 'damage-energy';
+      case 'vital': return 'damage-vital';
+      case 'spirit': return 'damage-spirit';
+      default: return '';
     }
   }
 }

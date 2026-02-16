@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -26,7 +26,7 @@ import { vi } from 'vitest';
 describe('App', () => {
   beforeEach(async () => {
     const mockServerHealthService = {
-      serverHealth$: of(true), // Mock server as healthy
+      serverHealth$: of(true) // Mock server as healthy
     };
 
     await TestBed.configureTestingModule({
@@ -43,8 +43,8 @@ describe('App', () => {
         },
         {
           provide: ServerHealthService,
-          useValue: mockServerHealthService,
-        },
+          useValue: mockServerHealthService
+        }
       ],
     }).compileComponents();
   });

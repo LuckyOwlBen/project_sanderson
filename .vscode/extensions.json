@@ -1,9 +1,4 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "angular.ng-template",
-    "xabikos.javascriptsnippets",
-    "ms-vscode.js-debug"
-  ]
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=827846
+  "recommendations": ["angular.ng-template"]
 }

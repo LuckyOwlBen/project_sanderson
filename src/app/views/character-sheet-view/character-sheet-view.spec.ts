@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -39,7 +39,7 @@ describe('CharacterSheetView - No character$ Subscription', () => {
 
     characterStorageService = {
       loadCharacter: vi.fn().mockReturnValue(of(testCharacter)),
-      saveCharacter: vi.fn().mockReturnValue(of({})),
+      saveCharacter: vi.fn().mockReturnValue(of({}))
     };
 
     const websocketServiceMock = {
@@ -58,7 +58,7 @@ describe('CharacterSheetView - No character$ Subscription', () => {
       sprenGrant$: of(null),
       levelUp$: of(null),
       highstorm$: of({ active: false }),
-      combatStart$: new Subject<any>(),
+      combatStart$: new Subject<any>()
     };
 
     paramsSubject = new BehaviorSubject({ id: 'char-123' });
@@ -74,10 +74,10 @@ describe('CharacterSheetView - No character$ Subscription', () => {
           provide: ActivatedRoute,
           useValue: {
             params: paramsSubject.asObservable(),
-            snapshot: { params: { id: 'char-123' } },
-          },
-        },
-      ],
+            snapshot: { params: { id: 'char-123' } }
+          }
+        }
+      ]
     }).compileComponents();
 
     characterStateService = TestBed.inject(CharacterStateService);

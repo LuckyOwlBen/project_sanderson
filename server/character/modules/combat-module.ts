@@ -60,7 +60,7 @@ export class CombatModule {
 
     // Verify the stance exists and is available
     const availableStances = this.getAvailableStances();
-    const stanceExists = availableStances.some((s) => s.id === stanceId);
+    const stanceExists = availableStances.some(s => s.id === stanceId);
 
     if (!stanceExists) {
       console.warn(`Stance with ID "${stanceId}" is not available for this character`);
@@ -78,7 +78,7 @@ export class CombatModule {
     if (!this.activeStanceId) return null;
 
     const availableStances = this.getAvailableStances();
-    return availableStances.find((s) => s.id === this.activeStanceId) || null;
+    return availableStances.find(s => s.id === this.activeStanceId) || null;
   }
 
   /**
@@ -90,7 +90,7 @@ export class CombatModule {
     const source = `stance:${stanceId}`;
 
     if (talentNode.bonuses && talentNode.bonuses.length > 0) {
-      talentNode.bonuses.forEach((bonus) => {
+      talentNode.bonuses.forEach(bonus => {
         this.bonusManager!.bonuses.addBonus(source, bonus);
       });
     }

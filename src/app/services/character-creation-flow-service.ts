@@ -9,7 +9,7 @@ export interface CreationStep {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CharacterCreationFlowService {
   private readonly steps: CreationStep[] = [
@@ -22,7 +22,7 @@ export class CharacterCreationFlowService {
     { label: 'Paths', route: 'paths' },
     { label: 'Talents', route: 'talents' },
     { label: 'Equipment', route: 'equipment' },
-    { label: 'Review', route: 'review' },
+    { label: 'Review', route: 'review' }
   ];
 
   private currentStepSubject = new BehaviorSubject<number>(0);
@@ -48,8 +48,8 @@ export class CharacterCreationFlowService {
   }
 
   setCurrentStepByRoute(route: string): void {
-    const stepIndex = this.steps.findIndex(
-      (step) => route.endsWith(`/${step.route}`) || route.includes(`/${step.route}?`)
+    const stepIndex = this.steps.findIndex(step => 
+      route.endsWith(`/${step.route}`) || route.includes(`/${step.route}?`)
     );
     if (stepIndex !== -1) {
       this.currentStepSubject.next(stepIndex);
@@ -62,12 +62,12 @@ export class CharacterCreationFlowService {
 
   canGoNext(): boolean {
     const currentStep = this.currentStepSubject.value;
-
+    
     // Can't go past the last step
     if (currentStep >= this.steps.length - 1) {
       return false;
     }
-
+    
     // Check if current step is valid via validation service
     return this.validationService.isStepValid(currentStep);
   }

@@ -1,13 +1,4 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnDestroy,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,14 +8,19 @@ import { Character } from '../../../character/character';
 @Component({
   selector: 'app-radiant-path-notifications',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule
+  ],
   templateUrl: './radiant-path-notifications.html',
   styleUrl: './radiant-path-notifications.scss',
 })
 export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
   @Input() character: Character | null = null;
   @Input() pendingSprenGrant: any = null;
-
+  
   @Output() sprenAccepted = new EventEmitter<void>();
   @Output() sprenDismissed = new EventEmitter<void>();
   @Output() idealSpoken = new EventEmitter<void>();
@@ -70,12 +66,15 @@ export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
     if (!this.character || !this.pendingSprenGrant) return;
 
     console.log('[Radiant Path] Accepting spren grant:', this.pendingSprenGrant);
-
+    
     // Grant the spren to the character with custom data from GM if provided
-    this.character.radiantPath.grantSpren(this.pendingSprenGrant.order, {
-      surgePair: this.pendingSprenGrant.surgePair,
-      philosophy: this.pendingSprenGrant.philosophy,
-    });
+    this.character.radiantPath.grantSpren(
+      this.pendingSprenGrant.order,
+      {
+        surgePair: this.pendingSprenGrant.surgePair,
+        philosophy: this.pendingSprenGrant.philosophy
+      }
+    );
 
     this.clearAutoDismiss();
     this.sprenAccepted.emit();
@@ -90,10 +89,10 @@ export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
     if (!this.character) return;
 
     console.log('[Radiant Path] Speaking First Ideal');
-
+    
     // Speak the First Ideal - this unlocks surge skills and surge trees
     this.character.radiantPath.speakIdeal(this.character.skills);
-
+    
     // Unlock investiture now that the character has both spren and spoken ideal
     this.character.unlockInvestiture();
     this.character.recalculateResources();
@@ -103,20 +102,16 @@ export class RadiantPathNotifications implements OnInit, OnDestroy, OnChanges {
 
   getSurgeNames(): string {
     if (!this.character) return '';
-
+    
     const orderInfo = this.character.radiantPath.getOrderInfo();
     if (!orderInfo) return '';
 
-    return orderInfo.surgePair
-      .map((surge) =>
-        surge
-          .toLowerCase()
-          .replace('_', ' ')
-          .split(' ')
-          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ')
-      )
-      .join(' and ');
+    return orderInfo.surgePair.map(surge => 
+      surge.toLowerCase().replace('_', ' ')
+        .split(' ')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    ).join(' and ');
   }
 
   hasSpren(): boolean {

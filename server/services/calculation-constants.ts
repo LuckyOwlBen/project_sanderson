@@ -1,9 +1,9 @@
 /**
  * Calculation Constants Service
- *
+ * 
  * Single source of truth for all point-per-level arrays and derived calculations.
  * These values define character progression and must be consistent across frontend and backend.
- *
+ * 
  * Any changes to these values must be validated against game design documentation.
  */
 
@@ -13,26 +13,26 @@
 
 export const ATTRIBUTE_POINTS_PER_LEVEL = [
   12, // Level 1: 12 points
-  0, // Level 2: 0 points
-  1, // Level 3: +1 point
-  0, // Level 4: 0 points
-  0, // Level 5: 0 points
-  1, // Level 6: +1 point
-  0, // Level 7: 0 points
-  0, // Level 8: 0 points
-  1, // Level 9: +1 point
-  0, // Level 10: 0 points
-  0, // Level 11: 0 points
-  1, // Level 12: +1 point
-  0, // Level 13: 0 points
-  0, // Level 14: 0 points
-  1, // Level 15: +1 point
-  0, // Level 16: 0 points
-  0, // Level 17: 0 points
-  1, // Level 18: +1 point
-  0, // Level 19: 0 points
-  0, // Level 20: 0 points
-  0, // Level 21: 0 points
+  0,  // Level 2: 0 points
+  1,  // Level 3: +1 point
+  0,  // Level 4: 0 points
+  0,  // Level 5: 0 points
+  1,  // Level 6: +1 point
+  0,  // Level 7: 0 points
+  0,  // Level 8: 0 points
+  1,  // Level 9: +1 point
+  0,  // Level 10: 0 points
+  0,  // Level 11: 0 points
+  1,  // Level 12: +1 point
+  0,  // Level 13: 0 points
+  0,  // Level 14: 0 points
+  1,  // Level 15: +1 point
+  0,  // Level 16: 0 points
+  0,  // Level 17: 0 points
+  1,  // Level 18: +1 point
+  0,  // Level 19: 0 points
+  0,  // Level 20: 0 points
+  0   // Level 21: 0 points
 ];
 
 export const SKILL_POINTS_PER_LEVEL = [
@@ -56,7 +56,7 @@ export const SKILL_POINTS_PER_LEVEL = [
   2,
   2,
   2,
-  2, // Level 21: 2 points
+  2  // Level 21: 2 points
 ];
 
 export const TALENT_POINTS_PER_LEVEL = [
@@ -80,32 +80,32 @@ export const TALENT_POINTS_PER_LEVEL = [
   1, // Level 18: 1 point
   1, // Level 19: 1 point
   1, // Level 20: 1 point
-  1, // Level 21: 1 point
+  1  // Level 21: 1 point
 ];
 
 // Health and skill progression
 export const HEALTH_PER_LEVEL = [
   10, // Level 1: 10 + STR
-  5, // Levels 2-5: +5
+  5,  // Levels 2-5: +5
   5,
   5,
   5,
-  4, // Levels 6-10: +4
+  4,  // Levels 6-10: +4
   4,
   4,
   4,
   4,
-  3, // Levels 11-15: +3
+  3,  // Levels 11-15: +3
   3,
   3,
   3,
   3,
-  2, // Levels 16-20: +2
+  2,  // Levels 16-20: +2
   2,
   2,
   2,
   2,
-  1, // Level 21: +1
+  1   // Level 21: +1
 ];
 
 export const HEALTH_STRENGTH_BONUS_LEVELS = [1, 6, 11, 16, 21];
@@ -131,7 +131,7 @@ export const MAX_SKILL_RANKS_PER_LEVEL = [
   5,
   5,
   5,
-  5,
+  5
 ];
 
 export const SKILL_RANKS_PER_LEVEL = [
@@ -155,7 +155,7 @@ export const SKILL_RANKS_PER_LEVEL = [
   2,
   2,
   2,
-  0, // Level 21: 0 ranks (terminal level)
+  0  // Level 21: 0 ranks (terminal level)
 ];
 
 // ============================================================================
@@ -228,6 +228,6 @@ export function getAllCalculationTables() {
     healthPerLevel: HEALTH_PER_LEVEL,
     healthStrengthBonusLevels: HEALTH_STRENGTH_BONUS_LEVELS,
     maxSkillRanksPerLevel: MAX_SKILL_RANKS_PER_LEVEL,
-    skillRanksPerLevel: SKILL_RANKS_PER_LEVEL,
+    skillRanksPerLevel: SKILL_RANKS_PER_LEVEL
   };
 }

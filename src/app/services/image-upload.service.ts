@@ -17,7 +17,7 @@ export interface ImageListResponse {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ImageUploadService {
   private apiUrl = 'http://localhost:80/api';
@@ -45,8 +45,8 @@ export class ImageUploadService {
    * Falls back to Base64 localStorage if server unavailable
    */
   uploadImage(
-    file: File,
-    characterId?: string,
+    file: File, 
+    characterId?: string, 
     imageType: string = 'portrait'
   ): Observable<ImageUploadResponse> {
     // Try server upload first
@@ -58,8 +58,11 @@ export class ImageUploadService {
       }
       formData.append('imageType', imageType);
 
-      return this.http.post<ImageUploadResponse>(`${this.apiUrl}/images/upload`, formData).pipe(
-        catchError((error) => {
+      return this.http.post<ImageUploadResponse>(
+        `${this.apiUrl}/images/upload`, 
+        formData
+      ).pipe(
+        catchError(error => {
           console.error('Server upload failed, falling back to localStorage:', error);
           // Fallback to localStorage if server fails
           return this.uploadToLocalStorage(file, characterId, imageType);
@@ -79,51 +82,51 @@ export class ImageUploadService {
     characterId?: string,
     imageType: string = 'portrait'
   ): Observable<ImageUploadResponse> {
-    return new Observable((observer) => {
+    return new Observable(observer => {
       const reader = new FileReader();
-
+      
       reader.onload = (e) => {
         try {
           const base64Image = e.target?.result as string;
-
+          
           // Delete old image for this character/type if it exists
           const oldKeyPattern = `${this.LOCALSTORAGE_PREFIX}${characterId}_${imageType}`;
-          Object.keys(localStorage).forEach((key) => {
+          Object.keys(localStorage).forEach(key => {
             if (key.startsWith(oldKeyPattern)) {
               localStorage.removeItem(key);
             }
           });
-
+          
           // Add timestamp to make each upload unique
           const timestamp = Date.now();
           const storageKey = `${this.LOCALSTORAGE_PREFIX}${characterId}_${imageType}_${timestamp}`;
-
+          
           // Store in localStorage
           localStorage.setItem(storageKey, base64Image);
-
+          
           observer.next({
             success: true,
             imageUrl: storageKey, // Return storage key as "URL"
-            filename: storageKey,
+            filename: storageKey
           });
           observer.complete();
         } catch (error: any) {
           observer.next({
             success: false,
-            error: error.message || 'localStorage storage failed',
+            error: error.message || 'localStorage storage failed'
           });
           observer.complete();
         }
       };
-
+      
       reader.onerror = () => {
         observer.next({
           success: false,
-          error: 'Failed to read file',
+          error: 'Failed to read file'
         });
         observer.complete();
       };
-
+      
       reader.readAsDataURL(file);
     });
   }
@@ -139,39 +142,37 @@ export class ImageUploadService {
 
     // Try server deletion
     if (!this.serverAvailable) {
-      return of({
-        success: false,
-        error: 'Server not available',
+      return of({ 
+        success: false, 
+        error: 'Server not available' 
       });
     }
 
-    return this.http
-      .delete<{ success: boolean; error?: string }>(`${this.apiUrl}/images/delete/${filename}`)
-      .pipe(
-        catchError((error) => {
-          console.error('Image deletion failed:', error);
-          return of({
-            success: false,
-            error: error.message || 'Deletion failed',
-          });
-        })
-      );
+    return this.http.delete<{ success: boolean; error?: string }>(
+      `${this.apiUrl}/images/delete/${filename}`
+    ).pipe(
+      catchError(error => {
+        console.error('Image deletion failed:', error);
+        return of({ 
+          success: false, 
+          error: error.message || 'Deletion failed' 
+        });
+      })
+    );
   }
 
   /**
    * Delete image from localStorage
    */
-  private deleteFromLocalStorage(
-    storageKey: string
-  ): Observable<{ success: boolean; error?: string }> {
+  private deleteFromLocalStorage(storageKey: string): Observable<{ success: boolean; error?: string }> {
     try {
       localStorage.removeItem(storageKey);
       console.log(`Image removed from localStorage: ${storageKey}`);
       return of({ success: true });
     } catch (error: any) {
-      return of({
-        success: false,
-        error: error.message || 'localStorage deletion failed',
+      return of({ 
+        success: false, 
+        error: error.message || 'localStorage deletion failed' 
       });
     }
   }
@@ -181,18 +182,20 @@ export class ImageUploadService {
    */
   listImages(): Observable<ImageListResponse> {
     if (!this.serverAvailable) {
-      return of({
-        success: false,
-        error: 'Server not available',
+      return of({ 
+        success: false, 
+        error: 'Server not available' 
       });
     }
 
-    return this.http.get<ImageListResponse>(`${this.apiUrl}/images/list`).pipe(
-      catchError((error) => {
+    return this.http.get<ImageListResponse>(
+      `${this.apiUrl}/images/list`
+    ).pipe(
+      catchError(error => {
         console.error('Image list failed:', error);
-        return of({
-          success: false,
-          error: error.message || 'Failed to list images',
+        return of({ 
+          success: false, 
+          error: error.message || 'Failed to list images' 
         });
       })
     );
@@ -204,31 +207,31 @@ export class ImageUploadService {
    */
   getImageUrl(imagePath: string): string {
     if (!imagePath) return '';
-
+    
     // Strip cache-busting query parameters to get the actual path/key
     const pathWithoutQuery = imagePath.split('?')[0];
-
+    
     // If it's a localStorage key, retrieve the Base64 data
     if (pathWithoutQuery.startsWith(this.LOCALSTORAGE_PREFIX)) {
       const base64Data = localStorage.getItem(pathWithoutQuery);
       return base64Data || '';
     }
-
+    
     // If already a full URL, return as-is (keep query params for server images)
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-
+    
     // If it's a data URL (Base64), return as-is
     if (imagePath.startsWith('data:')) {
       return imagePath;
     }
-
+    
     // If already starts with /images/, return with server base (keep query params)
     if (pathWithoutQuery.startsWith('/images/')) {
       return `http://localhost:80${imagePath}`;
     }
-
+    
     // Otherwise, assume it's just a filename (keep query params)
     return `http://localhost:80/images/${imagePath}`;
   }

@@ -20,9 +20,12 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param data - Radiant path data to save
    */
-  async save(characterId: string, data: RadiantPathData): Promise<SaveResult> {
+  async save(
+    characterId: string,
+    data: RadiantPathData
+  ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
-      radiantPath: data,
+      radiantPath: data
     });
   }
 
@@ -39,7 +42,7 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
       currentIdeal: char.radiantPath.currentIdeal || 1,
       idealSpoken: char.radiantPath.idealSpoken || false,
       surgePair: char.radiantPath.surgePair || null,
-      sprenType: char.radiantPath.sprenType || null,
+      sprenType: char.radiantPath.sprenType || null
     };
   }
 
@@ -61,7 +64,7 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
     radiantTier0TalentId?: string | null
   ): Promise<SaveResult> {
     const surgePairString = surgePair.join('/');
-
+    
     return await this.updateCharacterModule(characterId, {
       radiantPath: {
         boundOrder: order,
@@ -69,9 +72,9 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
         surgePair: surgePairString,
         currentIdeal: 1,
         idealSpoken: false,
-        radiantTier0TalentId: radiantTier0TalentId || null,
+        radiantTier0TalentId: radiantTier0TalentId || null
       },
-      radiantTier0TalentId: radiantTier0TalentId || null,
+      radiantTier0TalentId: radiantTier0TalentId || null
     });
   }
 
@@ -80,12 +83,15 @@ export class RadiantPathModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param idealNumber - The ideal number (1-4)
    */
-  async speakIdeal(characterId: string, idealNumber: number): Promise<SaveResult> {
+  async speakIdeal(
+    characterId: string,
+    idealNumber: number
+  ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       radiantPath: {
         currentIdeal: idealNumber,
-        idealSpoken: true,
-      },
+        idealSpoken: true
+      }
     });
   }
 

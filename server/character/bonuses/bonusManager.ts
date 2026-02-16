@@ -33,17 +33,17 @@ export class BonusManager {
     this.unlockedTalents.add(talentId);
 
     //Apply numeric bonuses
-    talentNode.bonuses.forEach((bonus) => {
+    talentNode.bonuses.forEach(bonus => {
       this.bonusModule.addBonus(`talent:${talentId}`, bonus);
     });
 
     // Apply advantages
-    talentNode.grantsAdvantage?.forEach((situation) => {
+    talentNode.grantsAdvantage?.forEach(situation => {
       this.advantageModule.addAdvantage(`talent:${talentId}:${situation}`);
     });
 
     // Apply disadvantages
-    talentNode.grantsDisadvantage?.forEach((situation) => {
+    talentNode.grantsDisadvantage?.forEach(situation => {
       this.advantageModule.addDisadvantage(`talent:${talentId}:${situation}`);
     });
 
@@ -55,27 +55,27 @@ export class BonusManager {
     if (this.activeForm) {
       this.bonusModule.removeBonus(`form:${this.activeForm}`);
       // Remove all advantages from old form
-      talentNode.grantsAdvantage?.forEach((situation) => {
+      talentNode.grantsAdvantage?.forEach(situation => {
         this.advantageModule.removeAdvantage(`form:${this.activeForm}:${situation}`);
       });
       // Remove all disadvantages from old form
-      talentNode.grantsDisadvantage?.forEach((situation) => {
+      talentNode.grantsDisadvantage?.forEach(situation => {
         this.advantageModule.removeDisadvantage(`form:${this.activeForm}:${situation}`);
       });
     }
     // Activate new form bonuses
     this.activeForm = formId;
-    talentNode.bonuses.forEach((bonus) => {
+    talentNode.bonuses.forEach(bonus => {
       this.bonusModule.addBonus(`form:${formId}`, bonus);
     });
 
     // Activate new form advantages
-    talentNode.grantsAdvantage?.forEach((situation) => {
+    talentNode.grantsAdvantage?.forEach(situation => {
       this.advantageModule.addAdvantage(`form:${formId}:${situation}`);
     });
 
     // Activate new form disadvantages
-    talentNode.grantsDisadvantage?.forEach((situation) => {
+    talentNode.grantsDisadvantage?.forEach(situation => {
       this.advantageModule.addDisadvantage(`form:${formId}:${situation}`);
     });
   }
@@ -91,12 +91,12 @@ export class BonusManager {
     }
 
     // Add expertise with talent source
-    const existing = this.character.selectedExpertises.find((e) => e.name === expertiseName);
+    const existing = this.character.selectedExpertises.find(e => e.name === expertiseName);
     if (!existing) {
       this.character.selectedExpertises.push({
         name: expertiseName,
         source: 'talent',
-        sourceId: `talent:${talentId}`,
+        sourceId: `talent:${talentId}`
       });
     }
   }
@@ -112,7 +112,7 @@ export class BonusManager {
 
     const sourceId = `talent:${talentId}`;
     this.character.selectedExpertises = this.character.selectedExpertises.filter(
-      (e) => e.sourceId !== sourceId
+      e => e.sourceId !== sourceId
     );
   }
 }

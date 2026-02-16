@@ -38,7 +38,7 @@ export class ItemGrantRepository {
 
       // Get current inventory items
       const items = character.inventory?.items ?? [];
-
+      
       // Check if item already exists
       const existingIndex = items.findIndex((item: any) => item.id === itemId);
       if (existingIndex >= 0) {
@@ -47,7 +47,7 @@ export class ItemGrantRepository {
         items.push({
           id: itemId,
           quantity,
-          customData: {},
+          customData: {}
         });
       }
 
@@ -55,7 +55,7 @@ export class ItemGrantRepository {
       character.inventory = {
         ...character.inventory,
         items,
-        currencyInChips: character.inventory?.currencyInChips ?? 0,
+        currencyInChips: character.inventory?.currencyInChips ?? 0
       };
 
       console.log(`[Item] ✅ Item ${itemId} added to character ${characterId}`);

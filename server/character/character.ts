@@ -10,11 +10,7 @@ import { RadiantPathManager } from './radiantPath/radiantPathManager';
 import { InventoryManager } from './inventory/inventoryManager';
 import { CraftingManager } from './crafting/craftingManager';
 import { ExpertiseSource } from './expertises/expertiseSource';
-import {
-  UniversalAbility,
-  getSingerFormAbilities,
-  SINGER_FORMS,
-} from './abilities/universalAbilities';
+import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilities/universalAbilities';
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
@@ -30,8 +26,9 @@ import {
   ExpertisesModule,
   SingerFormsModule,
   CombatModule,
-  MetadataModule,
+  MetadataModule
 } from './modules';
+
 
 export class Character {
   // ============================================================================
@@ -40,18 +37,10 @@ export class Character {
   readonly identity: IdentityModule = new IdentityModule();
 
   // Backward compatibility getters/setters
-  get id(): string {
-    return this.identity.id;
-  }
-  set id(value: string) {
-    this.identity.id = value;
-  }
-  get name(): string {
-    return this.identity.name;
-  }
-  set name(value: string) {
-    this.identity.name = value;
-  }
+  get id(): string { return this.identity.id; }
+  set id(value: string) { this.identity.id = value; }
+  get name(): string { return this.identity.name; }
+  set name(value: string) { this.identity.name = value; }
 
   // ============================================================================
   // MODULE 2: PROGRESSION - Experience and level tracking
@@ -59,24 +48,12 @@ export class Character {
   readonly progression: ProgressionModule = new ProgressionModule();
 
   // Backward compatibility getters/setters
-  get level(): number {
-    return this.progression.level;
-  }
-  set level(value: number) {
-    this.progression.level = value;
-  }
-  get pendingLevelPoints(): number {
-    return this.progression.pendingLevelPoints;
-  }
-  set pendingLevelPoints(value: number) {
-    this.progression.pendingLevelPoints = value;
-  }
-  get pendingLevel(): boolean {
-    return this.progression.pendingLevel;
-  }
-  set pendingLevel(value: boolean) {
-    this.progression.pendingLevel = value;
-  }
+  get level(): number { return this.progression.level; }
+  set level(value: number) { this.progression.level = value; }
+  get pendingLevelPoints(): number { return this.progression.pendingLevelPoints; }
+  set pendingLevelPoints(value: number) { this.progression.pendingLevelPoints = value; }
+  get pendingLevel(): boolean { return this.progression.pendingLevel; }
+  set pendingLevel(value: boolean) { this.progression.pendingLevel = value; }
 
   // ============================================================================
   // MODULE 3: ANCESTRY/CULTURE - Character background and heritage
@@ -84,24 +61,12 @@ export class Character {
   readonly ancestryModule: AncestryModule = new AncestryModule();
 
   // Backward compatibility getters/setters
-  get ancestry(): Ancestry | null {
-    return this.ancestryModule.ancestry;
-  }
-  set ancestry(value: Ancestry | null) {
-    this.ancestryModule.ancestry = value;
-  }
-  get cultures(): CulturalInterface[] {
-    return this.ancestryModule.cultures;
-  }
-  set cultures(value: CulturalInterface[]) {
-    this.ancestryModule.cultures = value;
-  }
-  get paths(): string[] {
-    return this.ancestryModule.paths;
-  }
-  set paths(value: string[]) {
-    this.ancestryModule.paths = value;
-  }
+  get ancestry(): Ancestry | null { return this.ancestryModule.ancestry; }
+  set ancestry(value: Ancestry | null) { this.ancestryModule.ancestry = value; }
+  get cultures(): CulturalInterface[] { return this.ancestryModule.cultures; }
+  set cultures(value: CulturalInterface[]) { this.ancestryModule.cultures = value; }
+  get paths(): string[] { return this.ancestryModule.paths; }
+  set paths(value: string[]) { this.ancestryModule.paths = value; }
 
   // ============================================================================
   // MODULE 4: ATTRIBUTES - Core character statistics
@@ -119,18 +84,10 @@ export class Character {
   readonly talentsModule: TalentsModule = new TalentsModule();
 
   // Backward compatibility getters/setters
-  get unlockedTalents(): Set<string> {
-    return this.talentsModule.unlockedTalents;
-  }
-  set unlockedTalents(value: Set<string>) {
-    this.talentsModule.unlockedTalents = value;
-  }
-  get baselineUnlockedTalents(): Set<string> | undefined {
-    return this.talentsModule.baselineUnlockedTalents;
-  }
-  set baselineUnlockedTalents(value: Set<string> | undefined) {
-    this.talentsModule.baselineUnlockedTalents = value;
-  }
+  get unlockedTalents(): Set<string> { return this.talentsModule.unlockedTalents; }
+  set unlockedTalents(value: Set<string>) { this.talentsModule.unlockedTalents = value; }
+  get baselineUnlockedTalents(): Set<string> | undefined { return this.talentsModule.baselineUnlockedTalents; }
+  set baselineUnlockedTalents(value: Set<string> | undefined) { this.talentsModule.baselineUnlockedTalents = value; }
 
   // ============================================================================
   // MODULE 7: EXPERTISES - Specialized knowledge domains
@@ -138,12 +95,8 @@ export class Character {
   readonly expertisesModule: ExpertisesModule = new ExpertisesModule();
 
   // Backward compatibility getters/setters
-  private get _selectedExpertises(): ExpertiseSource[] {
-    return this.expertisesModule.selectedExpertises;
-  }
-  private set _selectedExpertises(value: ExpertiseSource[]) {
-    this.expertisesModule.selectedExpertises = value;
-  }
+  private get _selectedExpertises(): ExpertiseSource[] { return this.expertisesModule.selectedExpertises; }
+  private set _selectedExpertises(value: ExpertiseSource[]) { this.expertisesModule.selectedExpertises = value; }
 
   // ============================================================================
   // MODULE 8: RESOURCES - Health, Focus, and Investiture pools
@@ -156,18 +109,10 @@ export class Character {
   readonly singerFormsModule: SingerFormsModule = new SingerFormsModule();
 
   // Backward compatibility getters/setters
-  get unlockedSingerForms(): string[] {
-    return this.singerFormsModule.unlockedSingerForms;
-  }
-  set unlockedSingerForms(value: string[]) {
-    this.singerFormsModule.unlockedSingerForms = value;
-  }
-  get activeForm(): string | undefined {
-    return this.singerFormsModule.activeForm;
-  }
-  set activeForm(value: string | undefined) {
-    this.singerFormsModule.activeForm = value;
-  }
+  get unlockedSingerForms(): string[] { return this.singerFormsModule.unlockedSingerForms; }
+  set unlockedSingerForms(value: string[]) { this.singerFormsModule.unlockedSingerForms = value; }
+  get activeForm(): string | undefined { return this.singerFormsModule.activeForm; }
+  set activeForm(value: string | undefined) { this.singerFormsModule.activeForm = value; }
 
   // ============================================================================
   // MODULE 10: COMBAT - Combat stance and attack system
@@ -175,12 +120,8 @@ export class Character {
   readonly combatModule: CombatModule = new CombatModule();
 
   // Backward compatibility getters/setters
-  get activeStanceId(): string | null {
-    return this.combatModule.activeStanceId;
-  }
-  set activeStanceId(value: string | null) {
-    this.combatModule.activeStanceId = value;
-  }
+  get activeStanceId(): string | null { return this.combatModule.activeStanceId; }
+  set activeStanceId(value: string | null) { this.combatModule.activeStanceId = value; }
 
   // ============================================================================
   // MODULE 11: INVENTORY - Items and equipment management
@@ -208,18 +149,10 @@ export class Character {
   readonly metadataModule: MetadataModule = new MetadataModule();
 
   // Backward compatibility getters/setters
-  get sessionNotes(): string {
-    return this.metadataModule.sessionNotes;
-  }
-  set sessionNotes(value: string) {
-    this.metadataModule.sessionNotes = value;
-  }
-  get lastModified(): string {
-    return this.metadataModule.lastModified;
-  }
-  set lastModified(value: string) {
-    this.metadataModule.lastModified = value;
-  }
+  get sessionNotes(): string { return this.metadataModule.sessionNotes; }
+  set sessionNotes(value: string) { this.metadataModule.sessionNotes = value; }
+  get lastModified(): string { return this.metadataModule.lastModified; }
+  set lastModified(value: string) { this.metadataModule.lastModified = value; }
 
   // ============================================================================
   // MODULE 16: COMPANIONS - Pet and companion management
@@ -257,7 +190,7 @@ export class Character {
     this.inventoryManager.setBonusManager(this.bonusManager);
     this.inventoryManager.setCharacter(this);
     this.craftingManager = new CraftingManager(this);
-
+    
     // Wire up module cross-references
     this.singerFormsModule.setBonusManager(this.bonusManager);
     this.combatModule.setCharacter(this);
@@ -335,14 +268,11 @@ export class Character {
    */
   recalculateResources(): void {
     // Get investiture bonus from bonus system (investiture-max target in RESOURCE type)
-    const investitureBonus = this.bonusManager.bonuses.getBonusesFor(
-      BonusType.RESOURCE,
-      'investiture-max'
-    );
-
+    const investitureBonus = this.bonusManager.bonuses.getBonusesFor(BonusType.RESOURCE, 'investiture-max');
+    
     // Recalculate base resources
     this.resourceManager.recalculateMaxValues(this.attributes);
-
+    
     // Apply investiture bonus separately if active
     if (this.resourceManager.investiture.isActive()) {
       this.resourceManager.investiture.recalculateMax(this.attributes, investitureBonus);
@@ -367,18 +297,18 @@ export class Character {
    */
   getUniversalAbilities(): UniversalAbility[] {
     const abilities: UniversalAbility[] = [];
-
+    
     // Get Radiant universal abilities if applicable
     abilities.push(...this.radiantPathManager.getUniversalAbilities());
-
+    
     // Get Singer form abilities if applicable
     abilities.push(...getSingerFormAbilities(this.unlockedSingerForms));
-
+    
     // Future: Add abilities from other sources
     // - Special items (e.g., Shardplate)
     // - Conditions
     // - Special rules
-
+    
     return abilities;
   }
 
@@ -445,7 +375,7 @@ export class Character {
    * @returns Array of expertise names the character possesses
    */
   getExpertiseSkills(): string[] {
-    return this.selectedExpertises.map((e) => e.name);
+    return this.selectedExpertises.map(e => e.name);
   }
 
   /**
@@ -600,4 +530,6 @@ export class Character {
     }
     this.companions.delete(petId);
   }
+
 }
+

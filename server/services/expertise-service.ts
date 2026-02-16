@@ -5,7 +5,7 @@ import {
   getExpertiseStateRecord,
   createExpertiseStateRecord,
   updateExpertiseStateRecord,
-  ExpertiseRecord,
+  ExpertiseRecord
 } from '../database';
 
 export interface ExpertiseSelection {
@@ -43,7 +43,7 @@ export function createEmptyExpertiseDTO(characterId: string): ExpertiseStateDTO 
     pointsSpent: 0,
     pointsRemaining: 0,
     finalized: false,
-    expertise: [],
+    expertise: []
   };
 }
 
@@ -66,12 +66,14 @@ function validateExpertiseSelection(
   selectedExpertise: ExpertiseSelection[]
 ): ValidationResult {
   // Count non-cultural expertises (those that consume Intellect points)
-  const nonCulturalCount = selectedExpertise.filter((exp) => exp.source !== 'culture').length;
+  const nonCulturalCount = selectedExpertise.filter(
+    exp => exp.source !== 'culture'
+  ).length;
 
   if (nonCulturalCount > totalPoints) {
     return {
       valid: false,
-      error: `You have selected ${nonCulturalCount} expertise(s) but only have ${totalPoints} Intellect point(s) available`,
+      error: `You have selected ${nonCulturalCount} expertise(s) but only have ${totalPoints} Intellect point(s) available`
     };
   }
 
@@ -84,14 +86,14 @@ export async function getExpertiseByCharacterId(characterId: string): Promise<Ex
 
   // Load expertise selections from database
   const dbExpertises = await getSelectedExpertises(characterId);
-  const expertise: ExpertiseSelection[] = dbExpertises.map((exp) => ({
+  const expertise: ExpertiseSelection[] = dbExpertises.map(exp => ({
     name: exp.name,
     source: exp.source,
-    sourceId: exp.sourceId,
+    sourceId: exp.sourceId
   }));
 
   // Count non-cultural expertises as pointsSpent
-  const pointsSpent = expertise.filter((exp) => exp.source !== 'culture').length;
+  const pointsSpent = expertise.filter(exp => exp.source !== 'culture').length;
   const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
 
   // Load or initialize expertise state record
@@ -102,14 +104,14 @@ export async function getExpertiseByCharacterId(characterId: string): Promise<Ex
       totalPoints,
       pointsSpent,
       pointsRemaining,
-      finalized: false,
+      finalized: false
     });
   } else {
     // Update state record with current calculations
     stateRecord = await updateExpertiseStateRecord(characterId, {
       totalPoints,
       pointsSpent,
-      pointsRemaining,
+      pointsRemaining
     });
   }
 
@@ -119,7 +121,7 @@ export async function getExpertiseByCharacterId(characterId: string): Promise<Ex
     pointsSpent,
     pointsRemaining,
     finalized: stateRecord.finalized,
-    expertise,
+    expertise
   };
 }
 
@@ -137,14 +139,14 @@ export async function setExpertiseByCharacterId(
   }
 
   // Count non-cultural expertises as pointsSpent
-  const pointsSpent = selectedExpertise.filter((exp) => exp.source !== 'culture').length;
+  const pointsSpent = selectedExpertise.filter(exp => exp.source !== 'culture').length;
   const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
 
   // Convert to ExpertiseRecord format for DB
-  const dbExpertises: ExpertiseRecord[] = selectedExpertise.map((exp) => ({
+  const dbExpertises: ExpertiseRecord[] = selectedExpertise.map(exp => ({
     name: exp.name,
     source: exp.source || 'manual',
-    sourceId: exp.sourceId,
+    sourceId: exp.sourceId
   }));
 
   // Replace expertise selections in database
@@ -158,13 +160,13 @@ export async function setExpertiseByCharacterId(
       totalPoints,
       pointsSpent,
       pointsRemaining,
-      finalized: false,
+      finalized: false
     });
   } else {
     stateRecord = await updateExpertiseStateRecord(characterId, {
       totalPoints,
       pointsSpent,
-      pointsRemaining,
+      pointsRemaining
     });
   }
 
@@ -174,14 +176,14 @@ export async function setExpertiseByCharacterId(
     pointsSpent,
     pointsRemaining,
     finalized: stateRecord.finalized,
-    expertise: selectedExpertise,
+    expertise: selectedExpertise
   };
 }
 
 /**
  * Finalize expertises for a character
  * Validates all points are spent, moves spent points to total, and locks from editing
- *
+ * 
  * Called during character creation finalization
  */
 export async function finalizeExpertisesForCharacter(characterId: string): Promise<void> {
@@ -201,7 +203,7 @@ export async function finalizeExpertisesForCharacter(characterId: string): Promi
   // totalPoints stays the same (don't double it), pointsRemaining becomes 0
   await updateExpertiseStateRecord(characterId, {
     pointsRemaining: 0,
-    finalized: true,
+    finalized: true
   });
 
   console.log(

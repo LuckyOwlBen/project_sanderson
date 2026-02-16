@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -21,6 +21,7 @@ try {
 import { parseTraitString, formatTraitString, TraitDefinition } from './traitDefinitions';
 
 describe('TraitDefinitions', () => {
+  
   describe('parseTraitString', () => {
     it('should parse simple traits without parameters', () => {
       const result = parseTraitString('Deadly');
@@ -31,7 +32,7 @@ describe('TraitDefinitions', () => {
       const result = parseTraitString('Thrown[20/60]');
       expect(result).toEqual({
         trait: 'Thrown',
-        params: { shortRange: 20, longRange: 60 },
+        params: { shortRange: 20, longRange: 60 }
       });
     });
 
@@ -39,7 +40,7 @@ describe('TraitDefinitions', () => {
       const result = parseTraitString('Melee[+5]');
       expect(result).toEqual({
         trait: 'Melee',
-        params: { meleeBonus: 5 },
+        params: { meleeBonus: 5 }
       });
     });
 
@@ -47,7 +48,7 @@ describe('TraitDefinitions', () => {
       const result = parseTraitString('Unique: loses Two-Handed trait');
       expect(result).toEqual({
         trait: 'Unique',
-        params: { effect: 'loses Two-Handed trait' },
+        params: { effect: 'loses Two-Handed trait' }
       });
     });
 
@@ -55,7 +56,7 @@ describe('TraitDefinitions', () => {
       const result = parseTraitString('Unique: loses Dangerous Trait');
       expect(result).toEqual({
         trait: 'Unique',
-        params: { effect: 'loses Dangerous Trait' },
+        params: { effect: 'loses Dangerous Trait' }
       });
     });
   });
@@ -70,7 +71,7 @@ describe('TraitDefinitions', () => {
     it('should format Thrown trait with parameters', () => {
       const trait: TraitDefinition = {
         trait: 'Thrown',
-        params: { shortRange: 30, longRange: 120 },
+        params: { shortRange: 30, longRange: 120 }
       };
       const result = formatTraitString(trait);
       expect(result).toBe('Thrown[30/120]');
@@ -79,7 +80,7 @@ describe('TraitDefinitions', () => {
     it('should format Melee trait with bonus', () => {
       const trait: TraitDefinition = {
         trait: 'Melee',
-        params: { meleeBonus: 5 },
+        params: { meleeBonus: 5 }
       };
       const result = formatTraitString(trait);
       expect(result).toBe('Melee[+5]');
@@ -88,7 +89,7 @@ describe('TraitDefinitions', () => {
     it('should format Unique trait with effect', () => {
       const trait: TraitDefinition = {
         trait: 'Unique',
-        params: { effect: 'loses Two-Handed trait' },
+        params: { effect: 'loses Two-Handed trait' }
       };
       const result = formatTraitString(trait);
       expect(result).toBe('Unique: loses Two-Handed trait');
@@ -104,10 +105,10 @@ describe('TraitDefinitions', () => {
       'Thrown[30/120]',
       'Melee[+5]',
       'Unique: loses Two-Handed trait',
-      'Unique: loses Dangerous Trait',
+      'Unique: loses Dangerous Trait'
     ];
 
-    testCases.forEach((original) => {
+    testCases.forEach(original => {
       it(`should round-trip "${original}"`, () => {
         const parsed = parseTraitString(original);
         const formatted = formatTraitString(parsed);
@@ -120,13 +121,13 @@ describe('TraitDefinitions', () => {
     it('should parse dagger traits', () => {
       const traits = ['Thrown[30/120]'];
       const expertTraits = ['Indirect'];
-
+      
       const parsedTraits = traits.map(parseTraitString);
       const parsedExpertTraits = expertTraits.map(parseTraitString);
-
+      
       expect(parsedTraits[0]).toEqual({
         trait: 'Thrown',
-        params: { shortRange: 30, longRange: 120 },
+        params: { shortRange: 30, longRange: 120 }
       });
       expect(parsedExpertTraits[0]).toEqual({ trait: 'Indirect' });
     });
@@ -134,45 +135,45 @@ describe('TraitDefinitions', () => {
     it('should parse knife traits', () => {
       const traits = ['Discreet'];
       const expertTraits = ['Offhand', 'Thrown[20/60]'];
-
+      
       const parsedTraits = traits.map(parseTraitString);
       const parsedExpertTraits = expertTraits.map(parseTraitString);
-
+      
       expect(parsedTraits[0]).toEqual({ trait: 'Discreet' });
       expect(parsedExpertTraits[0]).toEqual({ trait: 'Offhand' });
       expect(parsedExpertTraits[1]).toEqual({
         trait: 'Thrown',
-        params: { shortRange: 20, longRange: 60 },
+        params: { shortRange: 20, longRange: 60 }
       });
     });
 
     it('should parse shortsword traits', () => {
       const traits = ['Two-Handed'];
       const expertTraits = ['Unique: loses Two-Handed trait'];
-
+      
       const parsedTraits = traits.map(parseTraitString);
       const parsedExpertTraits = expertTraits.map(parseTraitString);
-
+      
       expect(parsedTraits[0]).toEqual({ trait: 'Two-Handed' });
       expect(parsedExpertTraits[0]).toEqual({
         trait: 'Unique',
-        params: { effect: 'loses Two-Handed trait' },
+        params: { effect: 'loses Two-Handed trait' }
       });
     });
 
     it('should parse shardblade (dead) traits', () => {
       const traits = ['Deadly', 'Dangerous', 'Unique'];
       const expertTraits = ['Unique: loses Dangerous Trait'];
-
+      
       const parsedTraits = traits.map(parseTraitString);
       const parsedExpertTraits = expertTraits.map(parseTraitString);
-
+      
       expect(parsedTraits[0]).toEqual({ trait: 'Deadly' });
       expect(parsedTraits[1]).toEqual({ trait: 'Dangerous' });
       expect(parsedTraits[2]).toEqual({ trait: 'Unique' });
       expect(parsedExpertTraits[0]).toEqual({
         trait: 'Unique',
-        params: { effect: 'loses Dangerous Trait' },
+        params: { effect: 'loses Dangerous Trait' }
       });
     });
   });

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -22,7 +22,7 @@ describe('TalentEffectParser', () => {
     it('should parse single expertise grant', () => {
       const effects = ['Gain Sleight of Hand expertise'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('single');
       expect(grants[0].expertises).toEqual(['Sleight of Hand']);
@@ -32,10 +32,10 @@ describe('TalentEffectParser', () => {
       const effects = [
         'Gain Light Weaponry expertise',
         'Gain Armor Proficiency expertise',
-        'Gain Military Life expertise',
+        'Gain Military Life expertise'
       ];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(3);
       expect(grants[0].expertises).toEqual(['Light Weaponry']);
       expect(grants[1].expertises).toEqual(['Armor Proficiency']);
@@ -44,10 +44,10 @@ describe('TalentEffectParser', () => {
 
     it('should parse choice with "choose one" pattern', () => {
       const effects = [
-        'Gain utility expertise in Armor Crafting, Equipment Crafting, or Weapon Crafting (choose one)',
+        'Gain utility expertise in Armor Crafting, Equipment Crafting, or Weapon Crafting (choose one)'
       ];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].choiceCount).toBe(1);
@@ -59,7 +59,7 @@ describe('TalentEffectParser', () => {
     it('should parse "or" pattern for two choices', () => {
       const effects = ['Gain Light Weaponry or Heavy Weaponry expertise'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].choiceCount).toBe(1);
@@ -68,12 +68,9 @@ describe('TalentEffectParser', () => {
     });
 
     it('should parse "gain a weapon expertise" as choice', () => {
-      const effects = [
-        'Once per round, can graze on miss without spending focus',
-        'gain a weapon expertise',
-      ];
+      const effects = ['Once per round, can graze on miss without spending focus', 'gain a weapon expertise'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].choiceCount).toBe(1);
@@ -84,7 +81,7 @@ describe('TalentEffectParser', () => {
     it('should parse "gain an armor expertise" as choice', () => {
       const effects = ['gain an armor expertise'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].expertises).toContain('Armor Proficiency');
@@ -93,7 +90,7 @@ describe('TalentEffectParser', () => {
     it('should parse slash-separated choices (Artifabrian talent)', () => {
       const effects = ['Gain utility expertise in Armor/Equipment/Weapon Crafting (choose one)'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].choiceCount).toBe(1);
@@ -107,10 +104,10 @@ describe('TalentEffectParser', () => {
       const effects = [
         'Gain Military Life cultural expertise',
         'gain a weapon expertise',
-        'gain an armor expertise',
+        'gain an armor expertise'
       ];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(3);
       expect(grants[0].type).toBe('single');
       expect(grants[1].type).toBe('choice');
@@ -121,19 +118,17 @@ describe('TalentEffectParser', () => {
       const effects = [
         'Once per round, can graze on miss without spending focus',
         'Spend 2 focus to feign innocence',
-        'Add +1 to all Crafting tests',
+        'Add +1 to all Crafting tests'
       ];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(0);
     });
 
     it('should parse complex real-world talent effect (Spy)', () => {
-      const effects = [
-        'Gain Sleight of Hand expertise. When discovered skulking, spend 2 focus to feign innocence.',
-      ];
+      const effects = ['Gain Sleight of Hand expertise. When discovered skulking, spend 2 focus to feign innocence.'];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       expect(grants.length).toBe(1);
       expect(grants[0].expertises).toContain('Sleight of Hand');
     });
@@ -141,26 +136,20 @@ describe('TalentEffectParser', () => {
     it('should parse complex real-world talent effect (Combat Training)', () => {
       const effects = [
         'Once per round, can graze on miss without spending focus',
-        'gain a weapon expertise', // Changed to match pattern
-        'gain an armor expertise', // Changed to match pattern
-        'Gain Military Life cultural expertise',
+        'gain a weapon expertise',  // Changed to match pattern
+        'gain an armor expertise',  // Changed to match pattern
+        'Gain Military Life cultural expertise'
       ];
       const grants = TalentEffectParser.parseExpertiseGrants(effects);
-
+      
       // Should parse weapon and armor as choices, Military Life as single
       expect(grants.length).toBe(3);
-
+      
       // Check that we have weapon and armor choices
-      const hasWeaponChoice = grants.some(
-        (g) => g.type === 'choice' && g.expertises.includes('Light Weaponry')
-      );
-      const hasArmorChoice = grants.some(
-        (g) => g.type === 'choice' && g.expertises.includes('Armor Proficiency')
-      );
-      const hasMilitaryLife = grants.some(
-        (g) => g.type === 'single' && g.expertises[0].includes('Military Life')
-      );
-
+      const hasWeaponChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Light Weaponry'));
+      const hasArmorChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Armor Proficiency'));
+      const hasMilitaryLife = grants.some(g => g.type === 'single' && g.expertises[0].includes('Military Life'));
+      
       expect(hasWeaponChoice).toBe(true);
       expect(hasArmorChoice).toBe(true);
       expect(hasMilitaryLife).toBe(true);
@@ -183,16 +172,12 @@ describe('TalentEffectParser', () => {
     it('should return all unique expertise options from grants', () => {
       const grants = [
         { type: 'single' as const, expertises: ['Light Weaponry'] },
-        {
-          type: 'choice' as const,
-          expertises: ['Armor Crafting', 'Weapon Crafting'],
-          choiceCount: 1,
-        },
-        { type: 'single' as const, expertises: ['Light Weaponry'] }, // Duplicate
+        { type: 'choice' as const, expertises: ['Armor Crafting', 'Weapon Crafting'], choiceCount: 1 },
+        { type: 'single' as const, expertises: ['Light Weaponry'] } // Duplicate
       ];
-
+      
       const options = TalentEffectParser.getAllExpertiseOptions(grants);
-
+      
       expect(options.length).toBe(3);
       expect(options).toContain('Light Weaponry');
       expect(options).toContain('Armor Crafting');
@@ -201,6 +186,7 @@ describe('TalentEffectParser', () => {
   });
 
   describe('parseExpertiseGrantsFromTalent - Structured Data Migration', () => {
+    
     it('should parse fixed expertise grants from killing_edge', () => {
       const talent: TalentNode = {
         id: 'killing_edge',
@@ -210,11 +196,13 @@ describe('TalentEffectParser', () => {
         prerequisites: [],
         tier: 1,
         bonuses: [],
-        expertiseGrants: [{ type: 'fixed', expertises: ['Knives', 'Slings'] }],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Knives', 'Slings'] }
+        ]
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(1);
       expect(grants[0].type).toBe('single');
       expect(grants[0].expertises).toEqual(['Knives', 'Slings']);
@@ -231,12 +219,12 @@ describe('TalentEffectParser', () => {
         bonuses: [],
         expertiseGrants: [
           { type: 'fixed', expertises: ['Shardplate'] },
-          { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] },
-        ],
+          { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] }
+        ]
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(2);
       expect(grants[0].type).toBe('single');
       expect(grants[0].expertises).toEqual(['Shardplate']);
@@ -257,12 +245,12 @@ describe('TalentEffectParser', () => {
         expertiseGrants: [
           { type: 'category', choiceCount: 1, category: 'weapon' },
           { type: 'category', choiceCount: 1, category: 'armor' },
-          { type: 'fixed', expertises: ['Military Life'] },
-        ],
+          { type: 'fixed', expertises: ['Military Life'] }
+        ]
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(3);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].expertises).toContain('Light Weaponry');
@@ -282,11 +270,13 @@ describe('TalentEffectParser', () => {
         prerequisites: [],
         tier: 2,
         bonuses: [],
-        expertiseGrants: [{ type: 'fixed', expertises: ['Motivational Speech'] }],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Motivational Speech'] }
+        ]
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(1);
       expect(grants[0].type).toBe('single');
       expect(grants[0].expertises).toEqual(['Motivational Speech']);
@@ -301,11 +291,11 @@ describe('TalentEffectParser', () => {
         prerequisites: [],
         tier: 1,
         bonuses: [],
-        otherEffects: ['Gain Sleight of Hand expertise'],
+        otherEffects: ['Gain Sleight of Hand expertise']
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(1);
       expect(grants[0].type).toBe('single');
       expect(grants[0].expertises).toContain('Sleight of Hand');
@@ -320,12 +310,14 @@ describe('TalentEffectParser', () => {
         prerequisites: [],
         tier: 1,
         bonuses: [],
-        expertiseGrants: [{ type: 'fixed', expertises: ['Structured Expertise'] }],
-        otherEffects: ['Gain Text Expertise expertise'],
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Structured Expertise'] }
+        ],
+        otherEffects: ['Gain Text Expertise expertise']
       };
 
       const grants = TalentEffectParser.parseExpertiseGrantsFromTalent(talent);
-
+      
       expect(grants).toHaveLength(1);
       expect(grants[0].expertises).toEqual(['Structured Expertise']);
     });
@@ -341,10 +333,12 @@ describe('TalentEffectParser', () => {
         prerequisites: [],
         tier: 1,
         bonuses: [],
-        expertiseGrants: [{ type: 'fixed', expertises: ['Knives', 'Slings'] }],
-        traitGrants: [
-          { targetItems: ['knife', 'sling'], traits: ['Deadly', 'Quickdraw'], expert: true },
+        expertiseGrants: [
+          { type: 'fixed', expertises: ['Knives', 'Slings'] }
         ],
+        traitGrants: [
+          { targetItems: ['knife', 'sling'], traits: ['Deadly', 'Quickdraw'], expert: true }
+        ]
       };
 
       expect(talent.traitGrants).toBeDefined();

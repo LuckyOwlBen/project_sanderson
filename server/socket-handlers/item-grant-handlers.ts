@@ -1,6 +1,6 @@
 /**
  * Item Grant Socket Handlers
- *
+ * 
  * Extracted WebSocket event handlers for item grant management
  * These are registered in server.ts socket.on('connection') block
  */
@@ -43,7 +43,7 @@ export function registerItemGrantHandlers(
         itemId,
         quantity,
         grantedBy: 'GM',
-        timestamp: timestamp || new Date().toISOString(),
+        timestamp: timestamp || new Date().toISOString()
       };
 
       // Add to in-memory queue
@@ -64,7 +64,7 @@ export function registerItemGrantHandlers(
       socket.emit('gm-grant-error', {
         type: 'item',
         characterId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
@@ -76,21 +76,19 @@ export function registerItemGrantHandlers(
   socket.on('item-grant-ack', async ({ characterId, itemId, quantity }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(
-        `[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
-      );
+      console.warn(`[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
       return;
     }
 
     try {
       const queue = inMemoryItemQueue.get(characterId) || [];
-
+      
       // Find and remove the matching grant from queue
       if (queue.length > 0 && queue[0].itemId === itemId && queue[0].quantity === quantity) {
         queue.shift();
       } else {
         const idx = queue.findIndex(
-          (entry) => entry.itemId === itemId && entry.quantity === quantity
+          entry => entry.itemId === itemId && entry.quantity === quantity
         );
         if (idx !== -1) {
           queue.splice(idx, 1);
@@ -138,9 +136,7 @@ function sendPendingItemGrant(characterId: string, io: Server): void {
   // This would normally use findSocketIdByCharacterId helper
   // For now, we emit to characterId - the client side will listen
   const grant = queue[0];
-  console.log(
-    `[GM Action] 🎁 Sending pending item grant to ${characterId}: ${grant.itemId} x${grant.quantity}`
-  );
+  console.log(`[GM Action] 🎁 Sending pending item grant to ${characterId}: ${grant.itemId} x${grant.quantity}`);
   io.emit('item-granted', grant);
 }
 
@@ -152,9 +148,7 @@ function sendPendingItemGrant(characterId: string, io: Server): void {
 export function resendPendingItemsOnReconnect(characterId: string, io: Server): void {
   const queue = inMemoryItemQueue.get(characterId);
   if (queue && queue.length > 0) {
-    console.log(
-      `[Item] 🔁 Resending ${queue.length} pending item grant(s) for ${characterId} on reconnect`
-    );
+    console.log(`[Item] 🔁 Resending ${queue.length} pending item grant(s) for ${characterId} on reconnect`);
     sendPendingItemGrant(characterId, io);
   }
 }
@@ -165,6 +159,6 @@ export function resendPendingItemsOnReconnect(characterId: string, io: Server): 
 export function getItemGrantQueueState(characterId: string): { pending: number } {
   const queue = inMemoryItemQueue.get(characterId) || [];
   return {
-    pending: queue.length,
+    pending: queue.length
   };
 }

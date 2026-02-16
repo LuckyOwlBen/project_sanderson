@@ -34,9 +34,7 @@
     <div class="resource-container">
       <div class="resource-header">
         <span class="resource-label">Health</span>
-        <span class="resource-value"
-          >{{ companion.currentHealth }} / {{ companion.statBlock.health.max }}</span
-        >
+        <span class="resource-value">{{ companion.currentHealth }} / {{ companion.statBlock.health.max }}</span>
       </div>
       <div class="resource-bar">
         <div class="resource-fill health-fill" [style.width.%]="healthPercent"></div>
@@ -46,9 +44,7 @@
     <div class="resource-container">
       <div class="resource-header">
         <span class="resource-label">Focus</span>
-        <span class="resource-value"
-          >{{ companion.currentFocus }} / {{ companion.statBlock.focus.max }}</span
-        >
+        <span class="resource-value">{{ companion.currentFocus }} / {{ companion.statBlock.focus.max }}</span>
       </div>
       <div class="resource-bar">
         <div class="resource-fill focus-fill" [style.width.%]="focusPercent"></div>
@@ -85,9 +81,7 @@
       <div class="skill-category">{{ skillGroup.category }}</div>
       <div class="skill-item" *ngFor="let skill of skillGroup.skills">
         <span class="skill-name">{{ skill.name }}</span>
-        <span class="skill-modifier" [class.positive]="skill.value > 0"
-          >{{ skill.value >= 0 ? '+' : '' }}{{ skill.value }}</span
-        >
+        <span class="skill-modifier" [class.positive]="skill.value > 0">{{ skill.value >= 0 ? '+' : '' }}{{ skill.value }}</span>
       </div>
     </div>
   </div>
@@ -103,11 +97,7 @@
   <!-- Abilities -->
   <div class="abilities-section" *ngIf="abilities.length > 0">
     <h4>Abilities</h4>
-    <div
-      class="ability"
-      *ngFor="let ability of abilities"
-      [ngClass]="getAbilityTypeClass(ability.type)"
-    >
+    <div class="ability" *ngFor="let ability of abilities" [ngClass]="getAbilityTypeClass(ability.type)">
       <div class="ability-header">
         <span class="ability-name">{{ ability.name }}</span>
         <span class="action-cost" [ngClass]="getActionCostClass(ability.actionCost)">

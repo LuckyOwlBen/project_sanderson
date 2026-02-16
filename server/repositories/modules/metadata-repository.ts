@@ -28,7 +28,7 @@ export class MetadataModuleRepository extends BaseModuleRepository {
     if (!char) return null;
     return {
       sessionNotes: char.sessionNotes || '',
-      lastModified: char.lastModified,
+      lastModified: char.lastModified
     };
   }
 }

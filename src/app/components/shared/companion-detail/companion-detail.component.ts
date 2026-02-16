@@ -8,7 +8,7 @@ import { PetAbility, ActionCost, DamageRoll } from '../../../character/companion
   standalone: true,
   imports: [CommonModule],
   templateUrl: './companion-detail.component.html',
-  styleUrls: ['./companion-detail.component.scss'],
+  styleUrls: ['./companion-detail.component.scss']
 })
 export class CompanionDetailComponent implements OnInit {
   @Input() companion: PetCompanion | undefined;
@@ -30,10 +30,10 @@ export class CompanionDetailComponent implements OnInit {
     if (!this.companion) return;
 
     this.displayName = this.companion.statBlock.name;
-
+    
     const maxHealth = this.companion.statBlock.health.max;
     const maxFocus = this.companion.statBlock.focus.max;
-
+    
     this.healthPercent = maxHealth > 0 ? (this.companion.currentHealth / maxHealth) * 100 : 0;
     this.focusPercent = maxFocus > 0 ? (this.companion.currentFocus / maxFocus) * 100 : 0;
   }
@@ -81,8 +81,8 @@ export class CompanionDetailComponent implements OnInit {
         category: 'Physical Skills',
         skills: Object.entries(this.statBlock.physicalSkills).map(([name, value]) => ({
           name,
-          value: value as number,
-        })),
+          value: value as number
+        }))
       });
     }
 
@@ -91,8 +91,8 @@ export class CompanionDetailComponent implements OnInit {
         category: 'Spiritual Skills',
         skills: Object.entries(this.statBlock.spiritualSkills).map(([name, value]) => ({
           name,
-          value: value as number,
-        })),
+          value: value as number
+        }))
       });
     }
 
@@ -112,21 +112,21 @@ export class CompanionDetailComponent implements OnInit {
 
   getDamageString(ability: PetAbility): string {
     if (!ability.attack) return '';
-
+    
     const damageStrings: string[] = [];
-
+    
     if (ability.attack.onGraze) {
       ability.attack.onGraze.forEach((dmg: DamageRoll) => {
         damageStrings.push(`Graze: ${dmg.description}`);
       });
     }
-
+    
     if (ability.attack.onHit) {
       ability.attack.onHit.forEach((dmg: DamageRoll) => {
         damageStrings.push(`Hit: ${dmg.description}`);
       });
     }
-
+    
     return damageStrings.join('; ');
   }
 

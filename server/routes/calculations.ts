@@ -1,9 +1,9 @@
 /**
  * Character Calculations Routes
- *
+ * 
  * REST endpoints for defense and derived attribute calculations.
  * These endpoints provide the single source of truth for all character stat calculations.
- *
+ * 
  * GET /api/characters/:id/calculations/defense
  * GET /api/characters/:id/calculations/derived
  * GET /api/characters/:id/calculations/all
@@ -19,14 +19,14 @@ function createCalculationsRoutes(app) {
 
   /**
    * GET /api/characters/:id/calculations/defense
-   *
+   * 
    * Calculate physics defense for a character
-   *
+   * 
    * Query params:
    *   strength: number (optional, default 0)
    *   quickness: number (optional, default 0)
    *   bonuses: JSON string (optional) - {source: value} map
-   *
+   * 
    * Response:
    * {
    *   physicsDef: number,
@@ -42,7 +42,7 @@ function createCalculationsRoutes(app) {
 
       const attrs = {
         strength: strength ? parseInt(strength as string, 10) : 0,
-        quickness: quickness ? parseInt(quickness as string, 10) : 0,
+        quickness: quickness ? parseInt(quickness as string, 10) : 0
       };
 
       let bonusMap = {};
@@ -52,7 +52,7 @@ function createCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid bonuses JSON',
+            error: 'Invalid bonuses JSON'
           });
         }
       }
@@ -61,7 +61,7 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
@@ -69,22 +69,22 @@ function createCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: defense,
+        data: defense
       });
     } catch (error) {
       console.error('[Routes] Error calculating defense:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate defense',
+        error: 'Failed to calculate defense'
       });
     }
   });
 
   /**
    * POST /api/characters/:id/calculations/defense
-   *
+   * 
    * Calculate defense with POST body (preferred for complex bonus objects)
-   *
+   * 
    * Request body:
    * {
    *   attributes: {strength?, quickness?},
@@ -98,7 +98,7 @@ function createCalculationsRoutes(app) {
       if (!attributes) {
         return res.status(400).json({
           success: false,
-          error: 'attributes required',
+          error: 'attributes required'
         });
       }
 
@@ -106,33 +106,30 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
-      const defense = characterCalculationsService.calculatePhysicsDefense(
-        attributes,
-        bonuses || {}
-      );
+      const defense = characterCalculationsService.calculatePhysicsDefense(attributes, bonuses || {});
 
       res.json({
         success: true,
-        data: defense,
+        data: defense
       });
     } catch (error) {
       console.error('[Routes] Error calculating defense:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate defense',
+        error: 'Failed to calculate defense'
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/derived
-   *
+   * 
    * Calculate derived attributes
-   *
+   * 
    * Query params:
    *   strength: number (optional)
    *   quickness: number (optional)
@@ -145,7 +142,7 @@ function createCalculationsRoutes(app) {
 
       const attrs = {
         strength: strength ? parseInt(strength as string, 10) : 0,
-        quickness: quickness ? parseInt(quickness as string, 10) : 0,
+        quickness: quickness ? parseInt(quickness as string, 10) : 0
       };
 
       const movBonus = movementBonuses ? parseInt(movementBonuses as string, 10) : 0;
@@ -155,7 +152,7 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
@@ -163,22 +160,22 @@ function createCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: derived,
+        data: derived
       });
     } catch (error) {
       console.error('[Routes] Error calculating derived attributes:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate derived attributes',
+        error: 'Failed to calculate derived attributes'
       });
     }
   });
 
   /**
    * POST /api/characters/:id/calculations/derived
-   *
+   * 
    * Calculate derived attributes with POST body
-   *
+   * 
    * Request body:
    * {
    *   attributes: {strength?, quickness?},
@@ -193,7 +190,7 @@ function createCalculationsRoutes(app) {
       if (!attributes) {
         return res.status(400).json({
           success: false,
-          error: 'attributes required',
+          error: 'attributes required'
         });
       }
 
@@ -201,7 +198,7 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
@@ -213,22 +210,22 @@ function createCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: derived,
+        data: derived
       });
     } catch (error) {
       console.error('[Routes] Error calculating derived attributes:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate derived attributes',
+        error: 'Failed to calculate derived attributes'
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/all
-   *
+   * 
    * Calculate all character stats at once
-   *
+   * 
    * Query params:
    *   strength: number
    *   quickness: number
@@ -242,17 +239,7 @@ function createCalculationsRoutes(app) {
    */
   app.get('/api/characters/:id/calculations/all', (req, res) => {
     try {
-      const {
-        strength,
-        quickness,
-        intellect,
-        awareness,
-        will,
-        presence,
-        defBonuses,
-        movementBonuses,
-        recoveryBonuses,
-      } = req.query;
+      const { strength, quickness, intellect, awareness, will, presence, defBonuses, movementBonuses, recoveryBonuses } = req.query;
 
       const attrs = {
         strength: strength ? parseInt(strength as string, 10) : 0,
@@ -260,7 +247,7 @@ function createCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : 0,
         awareness: awareness ? parseInt(awareness as string, 10) : 0,
         will: will ? parseInt(will as string, 10) : 0,
-        presence: presence ? parseInt(presence as string, 10) : 0,
+        presence: presence ? parseInt(presence as string, 10) : 0
       };
 
       let bonusMap = {};
@@ -270,7 +257,7 @@ function createCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid defBonuses JSON',
+            error: 'Invalid defBonuses JSON'
           });
         }
       }
@@ -282,35 +269,30 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
-      const calculations = characterCalculationsService.calculateAll(
-        attrs,
-        bonusMap,
-        movBonus,
-        recBonus
-      );
+      const calculations = characterCalculationsService.calculateAll(attrs, bonusMap, movBonus, recBonus);
 
       res.json({
         success: true,
-        data: calculations,
+        data: calculations
       });
     } catch (error) {
       console.error('[Routes] Error calculating all stats:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate all stats',
+        error: 'Failed to calculate all stats'
       });
     }
   });
 
   /**
    * POST /api/characters/:id/calculations/all
-   *
+   * 
    * Calculate all character stats with POST body (preferred)
-   *
+   * 
    * Request body:
    * {
    *   attributes: {strength?, quickness?, ...},
@@ -326,7 +308,7 @@ function createCalculationsRoutes(app) {
       if (!attributes) {
         return res.status(400).json({
           success: false,
-          error: 'attributes required',
+          error: 'attributes required'
         });
       }
 
@@ -334,7 +316,7 @@ function createCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error,
+          error: validation.error
         });
       }
 
@@ -347,13 +329,13 @@ function createCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: calculations,
+        data: calculations
       });
     } catch (error) {
       console.error('[Routes] Error calculating all stats:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate all stats',
+        error: 'Failed to calculate all stats'
       });
     }
   });

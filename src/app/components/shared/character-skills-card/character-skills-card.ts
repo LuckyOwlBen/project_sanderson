@@ -23,7 +23,7 @@ interface SkillDisplay {
   standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule, MatChipsModule],
   templateUrl: './character-skills-card.html',
-  styleUrls: ['./character-skills-card.scss'],
+  styleUrls: ['./character-skills-card.scss']
 })
 export class CharacterSkillsCard {
   @Input() character: Character | null = null;
@@ -39,7 +39,7 @@ export class CharacterSkillsCard {
     const skills: SkillDisplay[] = [];
 
     // Add regular and surge skills
-    Object.values(SkillType).forEach((skillType) => {
+    Object.values(SkillType).forEach(skillType => {
       const rank = this.character!.skills.getSkillRank(skillType);
       const associatedAttr = this.skillAssociationTable.checkSkillAssociation(skillType);
       const attrValue = this.character!.attributes.getAttribute(associatedAttr);
@@ -51,7 +51,7 @@ export class CharacterSkillsCard {
         attributeValue: attrValue,
         total: rank + attrValue,
         associatedAttribute: this.capitalizeFirst(associatedAttr),
-        rawSkillType: skillType,
+        rawSkillType: skillType
       });
     });
 
@@ -59,7 +59,7 @@ export class CharacterSkillsCard {
     const expertiseSkills = this.character.getExpertiseSkills();
     const intellectValue = this.character.attributes.getAttribute('intellect');
 
-    expertiseSkills.forEach((expertiseName) => {
+    expertiseSkills.forEach(expertiseName => {
       const rank = this.character!.getExpertiseRank(expertiseName);
       skills.push({
         name: expertiseName,
@@ -68,7 +68,7 @@ export class CharacterSkillsCard {
         attributeValue: intellectValue,
         total: rank + intellectValue,
         associatedAttribute: 'Intellect',
-        expertiseName,
+        expertiseName
       });
     });
 
@@ -79,12 +79,12 @@ export class CharacterSkillsCard {
   /**
    * Get skills grouped by type
    */
-  getSkillsByType(): { regular: SkillDisplay[]; surge: SkillDisplay[]; expertise: SkillDisplay[] } {
+  getSkillsByType(): { regular: SkillDisplay[], surge: SkillDisplay[], expertise: SkillDisplay[] } {
     const allSkills = this.getAllSkills();
     return {
-      regular: allSkills.filter((s) => s.type === 'regular'),
-      surge: allSkills.filter((s) => s.type === 'surge'),
-      expertise: allSkills.filter((s) => s.type === 'expertise'),
+      regular: allSkills.filter(s => s.type === 'regular'),
+      surge: allSkills.filter(s => s.type === 'surge'),
+      expertise: allSkills.filter(s => s.type === 'expertise')
     };
   }
 
@@ -93,12 +93,9 @@ export class CharacterSkillsCard {
    */
   getSkillIcon(skill: SkillDisplay): string {
     switch (skill.type) {
-      case 'surge':
-        return '⚡';
-      case 'expertise':
-        return '📚';
-      default:
-        return '🎯';
+      case 'surge': return '⚡';
+      case 'expertise': return '📚';
+      default: return '🎯';
     }
   }
 
@@ -116,7 +113,7 @@ export class CharacterSkillsCard {
     return skillType
       .toLowerCase()
       .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 

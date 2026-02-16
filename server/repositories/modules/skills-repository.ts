@@ -11,7 +11,10 @@ export class SkillsModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param skills - Skills map
    */
-  async save(characterId: string, skills: Record<string, number>): Promise<SaveResult> {
+  async save(
+    characterId: string,
+    skills: Record<string, number>
+  ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, { skills });
   }
 

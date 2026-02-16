@@ -43,13 +43,13 @@ function createAttackCalculationsRoutes(app) {
         damageNotation,
         damageBonus = 0,
         targetDefense,
-        advantageMode = 'normal',
+        advantageMode = 'normal'
       } = req.body;
 
       // Validate required fields
       if (skillTotal === undefined || damageNotation === undefined || targetDefense === undefined) {
         return res.status(400).json({
-          error: 'Missing required fields: skillTotal, damageNotation, targetDefense',
+          error: 'Missing required fields: skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -65,15 +65,15 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           error: 'Invalid attack parameters',
-          details: validation.errors,
+          details: validation.errors
         });
       }
 
       // Map string advantage mode to enum
       const advantageModeMap: Record<string, any> = {
-        normal: 'normal',
-        advantage: 'advantage',
-        disadvantage: 'disadvantage',
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
       const mode = advantageModeMap[advantageMode] ?? 'normal';
 
@@ -98,14 +98,14 @@ function createAttackCalculationsRoutes(app) {
             total: attack.attackRoll.total,
             isCritical: attack.attackRoll.isCritical,
             isFumble: attack.attackRoll.isFumble,
-            advantageMode: advantageMode,
+            advantageMode: advantageMode
           },
           damageRoll: {
             diceNotation: damageNotation,
             diceRolls: attack.damageRoll.diceRoll.rolls,
             diceTotal: attack.damageRoll.diceRoll.total,
             bonuses: attack.damageRoll.bonuses,
-            total: attack.damageRoll.total,
+            total: attack.damageRoll.total
           },
           combat: {
             vsDefense: attack.vsDefense,
@@ -118,15 +118,15 @@ function createAttackCalculationsRoutes(app) {
               attack.isHit,
               attack.hitMargin,
               attack.attackRoll.isCritical
-            ),
-          },
-        },
+            )
+          }
+        }
       });
     } catch (error) {
       console.error('Error executing attack:', error);
       res.status(500).json({
         error: 'Failed to execute attack',
-        message: error.message,
+        message: error.message
       });
     }
   });
@@ -151,12 +151,12 @@ function createAttackCalculationsRoutes(app) {
         damageNotation,
         damageBonus = '0',
         targetDefense,
-        advantageMode = 'normal',
+        advantageMode = 'normal'
       } = req.query;
 
       if (!skillTotal || !damageNotation || !targetDefense) {
         return res.status(400).json({
-          error: 'Missing required query params: skillTotal, damageNotation, targetDefense',
+          error: 'Missing required query params: skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -176,14 +176,14 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           error: 'Invalid attack parameters',
-          details: validation.errors,
+          details: validation.errors
         });
       }
 
       const advantageModeMap: Record<string, any> = {
-        normal: 'normal',
-        advantage: 'advantage',
-        disadvantage: 'disadvantage',
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
       const mode = advantageModeMap[advantageMode] ?? 'normal';
 
@@ -207,14 +207,14 @@ function createAttackCalculationsRoutes(app) {
             total: attack.attackRoll.total,
             isCritical: attack.attackRoll.isCritical,
             isFumble: attack.attackRoll.isFumble,
-            advantageMode: advantageMode,
+            advantageMode: advantageMode
           },
           damageRoll: {
             diceNotation: damageNotation,
             diceRolls: attack.damageRoll.diceRoll.rolls,
             diceTotal: attack.damageRoll.diceRoll.total,
             bonuses: attack.damageRoll.bonuses,
-            total: attack.damageRoll.total,
+            total: attack.damageRoll.total
           },
           combat: {
             vsDefense: attack.vsDefense,
@@ -227,15 +227,15 @@ function createAttackCalculationsRoutes(app) {
               attack.isHit,
               attack.hitMargin,
               attack.attackRoll.isCritical
-            ),
-          },
-        },
+            )
+          }
+        }
       });
     } catch (error) {
       console.error('Error executing attack:', error);
       res.status(500).json({
         error: 'Failed to execute attack',
-        message: error.message,
+        message: error.message
       });
     }
   });
@@ -273,17 +273,12 @@ function createAttackCalculationsRoutes(app) {
         damageNotation,
         damageBonus = 0,
         targetDefense,
-        advantageMode = 'normal',
+        advantageMode = 'normal'
       } = req.body;
 
-      if (
-        attackCount === undefined ||
-        skillTotal === undefined ||
-        damageNotation === undefined ||
-        targetDefense === undefined
-      ) {
+      if (attackCount === undefined || skillTotal === undefined || damageNotation === undefined || targetDefense === undefined) {
         return res.status(400).json({
-          error: 'Missing required fields: attackCount, skillTotal, damageNotation, targetDefense',
+          error: 'Missing required fields: attackCount, skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -298,20 +293,20 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           error: 'Invalid attack parameters',
-          details: validation.errors,
+          details: validation.errors
         });
       }
 
       if (attackCount < 1 || !Number.isInteger(attackCount)) {
         return res.status(400).json({
-          error: 'Invalid attackCount: must be a positive integer',
+          error: 'Invalid attackCount: must be a positive integer'
         });
       }
 
       const advantageModeMap: Record<string, any> = {
-        normal: 'normal',
-        advantage: 'advantage',
-        disadvantage: 'disadvantage',
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
       const mode = advantageModeMap[advantageMode] ?? 'normal';
 
@@ -335,23 +330,22 @@ function createAttackCalculationsRoutes(app) {
             isCritical: attack.attackRoll.isCritical,
             damageRoll: attack.damageRoll.total,
             isHit: attack.isHit,
-            damageDealt: attack.damageDealt,
+            damageDealt: attack.damageDealt
           })),
           summary: {
             hitCount: combination.hitCount,
             missCount: combination.missCount,
             totalDamage: combination.totalDamage,
             averageDamagePerAttack: combination.totalDamage / attackCount,
-            criticalHits: combination.attacks.filter((a) => a.attackRoll.isCritical && a.isHit)
-              .length,
-          },
-        },
+            criticalHits: combination.attacks.filter(a => a.attackRoll.isCritical && a.isHit).length
+          }
+        }
       });
     } catch (error) {
       console.error('Error executing attack combination:', error);
       res.status(500).json({
         error: 'Failed to execute attack combination',
-        message: error.message,
+        message: error.message
       });
     }
   });
@@ -378,13 +372,12 @@ function createAttackCalculationsRoutes(app) {
         damageNotation,
         damageBonus = '0',
         targetDefense,
-        advantageMode = 'normal',
+        advantageMode = 'normal'
       } = req.query;
 
       if (!attackCount || !skillTotal || !damageNotation || !targetDefense) {
         return res.status(400).json({
-          error:
-            'Missing required query params: attackCount, skillTotal, damageNotation, targetDefense',
+          error: 'Missing required query params: attackCount, skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -396,7 +389,7 @@ function createAttackCalculationsRoutes(app) {
 
       if (attackCountNum < 1 || !Number.isInteger(attackCountNum)) {
         return res.status(400).json({
-          error: 'Invalid attackCount: must be a positive integer',
+          error: 'Invalid attackCount: must be a positive integer'
         });
       }
 
@@ -411,14 +404,14 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           error: 'Invalid attack parameters',
-          details: validation.errors,
+          details: validation.errors
         });
       }
 
       const advantageModeMap: Record<string, any> = {
-        normal: 'normal',
-        advantage: 'advantage',
-        disadvantage: 'disadvantage',
+        'normal': 'normal',
+        'advantage': 'advantage',
+        'disadvantage': 'disadvantage'
       };
       const mode = advantageModeMap[advantageMode] ?? 'normal';
 
@@ -442,23 +435,22 @@ function createAttackCalculationsRoutes(app) {
             isCritical: attack.attackRoll.isCritical,
             damageRoll: attack.damageRoll.total,
             isHit: attack.isHit,
-            damageDealt: attack.damageDealt,
+            damageDealt: attack.damageDealt
           })),
           summary: {
             hitCount: combination.hitCount,
             missCount: combination.missCount,
             totalDamage: combination.totalDamage,
             averageDamagePerAttack: combination.totalDamage / attackCountNum,
-            criticalHits: combination.attacks.filter((a) => a.attackRoll.isCritical && a.isHit)
-              .length,
-          },
-        },
+            criticalHits: combination.attacks.filter(a => a.attackRoll.isCritical && a.isHit).length
+          }
+        }
       });
     } catch (error) {
       console.error('Error executing attack combination:', error);
       res.status(500).json({
         error: 'Failed to execute attack combination',
-        message: error.message,
+        message: error.message
       });
     }
   });
@@ -494,12 +486,12 @@ function createAttackCalculationsRoutes(app) {
         bonusModifiers = 0,
         damageNotation,
         damageBonus = 0,
-        targetDefense,
+        targetDefense
       } = req.body;
 
       if (skillTotal === undefined || damageNotation === undefined || targetDefense === undefined) {
         return res.status(400).json({
-          error: 'Missing required fields: skillTotal, damageNotation, targetDefense',
+          error: 'Missing required fields: skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -515,7 +507,7 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.json({
           success: false,
-          error: validation.errors.join('; '),
+          error: validation.errors.join('; ')
         });
       }
 
@@ -550,15 +542,15 @@ function createAttackCalculationsRoutes(app) {
             defenseDifficulty: defenseDifficulty,
             hitProbability: validation.valid
               ? Math.min(100, Math.max(5, (attackPower - targetDefense) * 5 + 50)) + '%'
-              : 'unknown',
-          },
-        },
+              : 'unknown'
+          }
+        }
       });
     } catch (error) {
       console.error('Error validating attack:', error);
       res.status(500).json({
         error: 'Failed to validate attack',
-        message: error.message,
+        message: error.message
       });
     }
   });
@@ -581,12 +573,12 @@ function createAttackCalculationsRoutes(app) {
         bonusModifiers = '0',
         damageNotation,
         damageBonus = '0',
-        targetDefense,
+        targetDefense
       } = req.query;
 
       if (!skillTotal || !damageNotation || !targetDefense) {
         return res.status(400).json({
-          error: 'Missing required query params: skillTotal, damageNotation, targetDefense',
+          error: 'Missing required query params: skillTotal, damageNotation, targetDefense'
         });
       }
 
@@ -607,7 +599,7 @@ function createAttackCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.json({
           success: false,
-          error: validation.errors.join('; '),
+          error: validation.errors.join('; ')
         });
       }
 
@@ -640,15 +632,15 @@ function createAttackCalculationsRoutes(app) {
             defenseDifficulty: defenseDifficulty,
             hitProbability: validation.valid
               ? Math.min(100, Math.max(5, (attackPower - targetDefenseNum) * 5 + 50)) + '%'
-              : 'unknown',
-          },
-        },
+              : 'unknown'
+          }
+        }
       });
     } catch (error) {
       console.error('Error validating attack:', error);
       res.status(500).json({
         error: 'Failed to validate attack',
-        message: error.message,
+        message: error.message
       });
     }
   });

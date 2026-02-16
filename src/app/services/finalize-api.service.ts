@@ -47,10 +47,9 @@ interface FinalizeResponse {
 
 @Injectable({ providedIn: 'root' })
 export class FinalizeApiService {
-  private apiBase =
-    window.location.hostname === 'localhost' && window.location.port === '4200'
-      ? 'http://localhost:3000/api'
-      : '/api';
+  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
+    ? 'http://localhost:3000/api'
+    : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}

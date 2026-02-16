@@ -10,7 +10,7 @@ class InventoryManager {
   // ===== INITIALIZATION =====
 
   applyStartingKit(kitId) {
-    const kit = STARTING_KITS.find((k) => k.id === kitId);
+    const kit = STARTING_KITS.find(k => k.id === kitId);
     if (!kit) return false;
 
     // Clear existing inventory
@@ -103,7 +103,7 @@ class InventoryManager {
   }
 
   getItemsByType(type) {
-    return this.getAllItems().filter((item) => item.type === type);
+    return this.getAllItems().filter(item => item.type === type);
   }
 
   hasItem(itemId, quantity = 1) {
@@ -160,8 +160,8 @@ class InventoryManager {
 
   getAllEquippedItems() {
     return Array.from(this.equippedItems.values())
-      .map((itemId) => this.items.get(itemId))
-      .filter((item) => item !== undefined);
+      .map(itemId => this.items.get(itemId))
+      .filter(item => item !== undefined);
   }
 
   // ===== CURRENCY =====
@@ -232,13 +232,13 @@ class InventoryManager {
     return {
       chips,
       marks: remainingMarks,
-      broams,
+      broams
     };
   }
 
   convertFromMixedDenominations(conversion) {
     // Convert everything to marks
-    return conversion.broams * 4 + conversion.marks + conversion.chips / 5;
+    return (conversion.broams * 4) + conversion.marks + (conversion.chips / 5);
   }
 
   // ===== TRANSACTIONS =====
@@ -246,7 +246,7 @@ class InventoryManager {
   purchaseItem(itemId, price, quantity = 1) {
     const totalCostInMarks = price * quantity;
     const totalCostInChips = Math.round(totalCostInMarks * 5);
-
+    
     if (!this.canAffordInChips(totalCostInChips)) {
       return false;
     }
@@ -265,9 +265,9 @@ class InventoryManager {
     }
 
     // Sell for half price
-    const sellPriceInMarks = price * 0.5;
+    const sellPriceInMarks = (price * 0.5);
     const sellPriceInChips = Math.round(sellPriceInMarks * quantity * 5);
-
+    
     if (this.removeItem(itemId, quantity)) {
       this.currencyInChips += sellPriceInChips;
       return true;
@@ -304,11 +304,11 @@ class InventoryManager {
         quantity: item.quantity,
         customData: {
           fabrialCharges: item.fabrialProperties?.currentCharges,
-          properties: item.properties,
-        },
+          properties: item.properties
+        }
       })),
       equippedItems: Array.from(this.equippedItems.entries()),
-      currencyInChips: Number.isFinite(this.currencyInChips) ? this.currencyInChips : 0,
+      currencyInChips: Number.isFinite(this.currencyInChips) ? this.currencyInChips : 0
     };
   }
 
@@ -324,7 +324,7 @@ class InventoryManager {
         const itemDef = getItemById(baseItemId);
         if (itemDef) {
           const item = { ...itemDef, id: itemData.id, quantity: itemData.quantity };
-
+          
           // Restore fabrial charges
           if (item.fabrialProperties && itemData.customData?.fabrialCharges !== undefined) {
             item.fabrialProperties.currentCharges = itemData.customData.fabrialCharges;

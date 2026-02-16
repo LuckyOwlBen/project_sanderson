@@ -10,25 +10,20 @@ export async function getSkills(req: Request, res: Response): Promise<void> {
 
     res.json({
       success: true,
-      data: result,
+      data: result
     });
   } catch (error) {
     console.error('Error loading skills:', error);
     res.status(500).json({
       success: false,
-      error:
-        typeof error === 'object' && error !== null && 'message' in error
-          ? (error as { message: string }).message
-          : String(error),
+      error: typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error)
     });
   }
 }
 
-export async function setSkills(
-  req: Request,
-  res: Response,
-  broadcaster: SocketBroadcaster
-): Promise<void> {
+export async function setSkills(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
     const { skills } = req.body ?? {};
@@ -36,28 +31,27 @@ export async function setSkills(
     if (!skills || typeof skills !== 'object' || Array.isArray(skills)) {
       res.status(400).json({
         success: false,
-        error: 'skills must be an object of type Record<string, number>',
+        error: 'skills must be an object of type Record<string, number>'
       });
       return;
     }
 
     const updated = await setSkillsByCharacterId(id, skills);
-
+    
     // Broadcast character update via WebSocket
     broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
-      data: updated,
+      data: updated
     });
   } catch (error) {
     console.error('Error saving skills:', error);
     res.status(500).json({
       success: false,
-      error:
-        typeof error === 'object' && error !== null && 'message' in error
-          ? (error as { message: string }).message
-          : String(error),
+      error: typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error)
     });
   }
 }
@@ -67,16 +61,15 @@ export async function getAvailableSkills(req: Request, res: Response): Promise<v
     const available = skillsListManager.getAvailableSkills();
     res.json({
       success: true,
-      data: available,
+      data: available
     });
   } catch (error) {
     console.error('Error loading available skills:', error);
     res.status(500).json({
       success: false,
-      error:
-        typeof error === 'object' && error !== null && 'message' in error
-          ? (error as { message: string }).message
-          : String(error),
+      error: typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error)
     });
   }
 }

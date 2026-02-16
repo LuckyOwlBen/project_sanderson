@@ -23,7 +23,7 @@ export class InventoryManager {
   }
 
   applyStartingKit(kitId: string): boolean {
-    const kit = STARTING_KITS.find((k) => k.id === kitId);
+    const kit = STARTING_KITS.find(k => k.id === kitId);
     if (!kit) return false;
 
     // Clear existing inventory
@@ -110,7 +110,7 @@ export class InventoryManager {
   }
 
   getItemsByType(type: string): InventoryItem[] {
-    return this.getAllItems().filter((item) => item.type === type);
+    return this.getAllItems().filter(item => item.type === type);
   }
 
   hasItem(itemId: string, quantity: number = 1): boolean {
@@ -142,7 +142,7 @@ export class InventoryManager {
 
     // Apply bonuses
     if (this.bonusManager && item.bonuses) {
-      item.bonuses.forEach((bonus) => {
+      item.bonuses.forEach(bonus => {
         this.bonusManager!.bonuses.addBonus(`equipment:${itemId}`, bonus);
       });
     }
@@ -185,7 +185,7 @@ export class InventoryManager {
 
     return {
       canUse: missingExpertises.length === 0,
-      missingExpertises,
+      missingExpertises
     };
   }
 
@@ -195,15 +195,15 @@ export class InventoryManager {
   private getWeaponExpertise(itemId: string, itemName: string): string | null {
     // Map common weapon types to expertises
     const weaponMap: Record<string, string> = {
-      sword: 'Dueling',
-      axe: 'Axe Fighting',
-      mace: 'Bludgeoning Weapons',
-      spear: 'Spear Fighting',
-      bow: 'Archery',
-      dagger: 'Knife Fighting',
-      staff: 'Staff Fighting',
-      hammer: 'Hammer Fighting',
-      lance: 'Mounted Combat',
+      'sword': 'Dueling',
+      'axe': 'Axe Fighting',
+      'mace': 'Bludgeoning Weapons',
+      'spear': 'Spear Fighting',
+      'bow': 'Archery',
+      'dagger': 'Knife Fighting',
+      'staff': 'Staff Fighting',
+      'hammer': 'Hammer Fighting',
+      'lance': 'Mounted Combat'
     };
 
     const lowerName = itemName.toLowerCase();
@@ -224,10 +224,10 @@ export class InventoryManager {
   private getArmorExpertise(itemId: string, itemName: string): string | null {
     // Map armor types to expertises
     const armorMap: Record<string, string> = {
-      plate: 'Armor Mastery',
-      mail: 'Armor Mastery',
-      leather: 'Light Armor',
-      hide: 'Light Armor',
+      'plate': 'Armor Mastery',
+      'mail': 'Armor Mastery',
+      'leather': 'Light Armor',
+      'hide': 'Light Armor'
     };
 
     const lowerName = itemName.toLowerCase();
@@ -278,8 +278,8 @@ export class InventoryManager {
 
   getAllEquippedItems(): InventoryItem[] {
     return Array.from(this.equippedItems.values())
-      .map((itemId) => this.items.get(itemId))
-      .filter((item) => item !== undefined) as InventoryItem[];
+      .map(itemId => this.items.get(itemId))
+      .filter(item => item !== undefined) as InventoryItem[];
   }
 
   // ===== CURRENCY =====
@@ -351,13 +351,13 @@ export class InventoryManager {
     return {
       chips,
       marks: remainingMarks,
-      broams,
+      broams
     };
   }
 
   convertFromMixedDenominations(conversion: CurrencyConversion): number {
     // Convert everything to marks
-    return conversion.broams * 4 + conversion.marks + conversion.chips / 5;
+    return (conversion.broams * 4) + conversion.marks + (conversion.chips / 5);
   }
 
   // ===== TRANSACTIONS =====
@@ -365,7 +365,7 @@ export class InventoryManager {
   purchaseItem(itemId: string, price: number, quantity: number = 1): boolean {
     const totalCostInMarks = price * quantity;
     const totalCostInChips = Math.round(totalCostInMarks * 5);
-
+    
     if (!this.canAffordInChips(totalCostInChips)) {
       return false;
     }
@@ -384,9 +384,9 @@ export class InventoryManager {
     }
 
     // Sell for half price
-    const sellPriceInMarks = price * 0.5;
+    const sellPriceInMarks = (price * 0.5);
     const sellPriceInChips = Math.round(sellPriceInMarks * quantity * 5);
-
+    
     if (this.removeItem(itemId, quantity)) {
       this.currencyInChips += sellPriceInChips;
       return true;
@@ -423,11 +423,11 @@ export class InventoryManager {
         quantity: item.quantity,
         customData: {
           fabrialCharges: item.fabrialProperties?.currentCharges,
-          properties: item.properties,
-        },
+          properties: item.properties
+        }
       })),
       equippedItems: Array.from(this.equippedItems.entries()),
-      currencyInChips: Number.isFinite(this.currencyInChips) ? this.currencyInChips : 0,
+      currencyInChips: Number.isFinite(this.currencyInChips) ? this.currencyInChips : 0
     };
   }
 
@@ -439,10 +439,9 @@ export class InventoryManager {
     if (data.items) {
       data.items.forEach((itemData: any) => {
         const rawId = itemData.id;
-        const itemDef =
-          itemData?.name && itemData?.type
-            ? itemData
-            : getItemById(rawId) || getItemById(rawId?.split('-')[0]);
+        const itemDef = (itemData?.name && itemData?.type)
+          ? itemData
+          : (getItemById(rawId) || getItemById(rawId?.split('-')[0]));
 
         if (itemDef) {
           const base = itemDef as any;
@@ -461,9 +460,9 @@ export class InventoryManager {
             weaponProperties: base.weaponProperties,
             armorProperties: base.armorProperties,
             fabrialProperties: base.fabrialProperties,
-            properties: base.properties,
+            properties: base.properties
           } as any;
-
+          
           // Restore fabrial charges
           if (item.fabrialProperties && itemData.customData?.fabrialCharges !== undefined) {
             item.fabrialProperties.currentCharges = itemData.customData.fabrialCharges;

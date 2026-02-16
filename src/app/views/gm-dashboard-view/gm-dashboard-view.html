@@ -7,7 +7,7 @@
         GM Control Center
       </h1>
     </div>
-
+    
     <div class="connection-status">
       <mat-chip [class.connected]="isConnected" [class.disconnected]="!isConnected">
         <mat-icon>{{ isConnected ? 'wifi' : 'wifi_off' }}</mat-icon>
@@ -26,19 +26,14 @@
       </mat-card-header>
       <mat-card-content>
         <p class="event-description">
-          {{
-            isHighstormActive
-              ? 'Singers can currently change forms during this highstorm.'
-              : 'Trigger a highstorm to allow Singers to change forms.'
-          }}
+          {{ isHighstormActive ? 'Singers can currently change forms during this highstorm.' : 'Trigger a highstorm to allow Singers to change forms.' }}
         </p>
       </mat-card-content>
       <mat-card-actions align="end">
-        <button
-          mat-raised-button
+        <button 
+          mat-raised-button 
           [color]="isHighstormActive ? 'warn' : 'accent'"
-          (click)="toggleHighstorm()"
-        >
+          (click)="toggleHighstorm()">
           <mat-icon>{{ isHighstormActive ? 'flash_off' : 'flash_on' }}</mat-icon>
           {{ isHighstormActive ? 'End Highstorm' : 'Trigger Highstorm' }}
         </button>
@@ -48,11 +43,10 @@
 
   <!-- Active Players Grid -->
   <div class="players-grid" *ngIf="activePlayers.size > 0">
-    <mat-card
-      *ngFor="let player of getActivePlayersArray()"
-      class="player-card"
-      [class.critical]="isCritical(player.characterId)"
-    >
+    <mat-card *ngFor="let player of getActivePlayersArray()" 
+              class="player-card"
+              [class.critical]="isCritical(player.characterId)">
+      
       <!-- Critical Alert Badge -->
       <div class="critical-badge" *ngIf="isCritical(player.characterId)">
         <mat-icon>warning</mat-icon>
@@ -62,9 +56,7 @@
       <mat-card-header>
         <mat-card-title>
           {{ player.name }}
-          <mat-icon class="level-icon" [matBadge]="player.level" matBadgeSize="small"
-            >star</mat-icon
-          >
+          <mat-icon class="level-icon" [matBadge]="player.level" matBadgeSize="small">star</mat-icon>
         </mat-card-title>
         <mat-card-subtitle>{{ player.ancestry }}</mat-card-subtitle>
       </mat-card-header>
@@ -75,16 +67,13 @@
           <div class="resource-header">
             <mat-icon class="resource-icon health">favorite</mat-icon>
             <span class="resource-label">Health</span>
-            <span class="resource-values"
-              >{{ player.health.current }} / {{ player.health.max }}</span
-            >
+            <span class="resource-values">{{ player.health.current }} / {{ player.health.max }}</span>
           </div>
-          <mat-progress-bar
-            mode="determinate"
+          <mat-progress-bar 
+            mode="determinate" 
             [value]="getHealthPercentage(player)"
             [color]="getHealthColor(player)"
-            class="resource-bar health-bar"
-          >
+            class="resource-bar health-bar">
           </mat-progress-bar>
         </div>
 
@@ -95,12 +84,11 @@
             <span class="resource-label">Focus</span>
             <span class="resource-values">{{ player.focus.current }} / {{ player.focus.max }}</span>
           </div>
-          <mat-progress-bar
-            mode="determinate"
+          <mat-progress-bar 
+            mode="determinate" 
             [value]="getFocusPercentage(player)"
             color="accent"
-            class="resource-bar focus-bar"
-          >
+            class="resource-bar focus-bar">
           </mat-progress-bar>
         </div>
 
@@ -109,23 +97,20 @@
           <div class="resource-header">
             <mat-icon class="resource-icon investiture">auto_awesome</mat-icon>
             <span class="resource-label">Investiture</span>
-            <span class="resource-values"
-              >{{ player.investiture.current }} / {{ player.investiture.max }}</span
-            >
+            <span class="resource-values">{{ player.investiture.current }} / {{ player.investiture.max }}</span>
           </div>
-          <mat-progress-bar
-            mode="determinate"
+          <mat-progress-bar 
+            mode="determinate" 
             [value]="getInvestiturePercentage(player)"
             color="primary"
-            class="resource-bar investiture-bar"
-          >
+            class="resource-bar investiture-bar">
           </mat-progress-bar>
         </div>
 
         <!-- Joined timestamp -->
         <div class="player-meta">
           <mat-icon>schedule</mat-icon>
-          <span>Joined: {{ player.joinedAt | date : 'short' }}</span>
+          <span>Joined: {{ player.joinedAt | date:'short' }}</span>
         </div>
       </mat-card-content>
 
@@ -168,11 +153,10 @@
             <mat-icon>store</mat-icon>
             <span class="store-name">General Store</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('main-store') ? 'primary' : 'warn'"
-            (click)="toggleStore('main-store')"
-          >
+            (click)="toggleStore('main-store')">
             <mat-icon>{{ isStoreEnabled('main-store') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('main-store') ? 'Open' : 'Closed' }}
           </button>
@@ -180,16 +164,13 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon
-              >{{ '{{' }}isStoreEnabled('weapons-shop') ? 'swords' : 'lock'{{'}}'}}</mat-icon
-            >
+            <mat-icon>{{'{{'}}isStoreEnabled('weapons-shop') ? 'swords' : 'lock'{{'}}'}}</mat-icon>
             <span class="store-name">Weapons Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('weapons-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('weapons-shop')"
-          >
+            (click)="toggleStore('weapons-shop')">
             <mat-icon>{{ isStoreEnabled('weapons-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('weapons-shop') ? 'Open' : 'Closed' }}
           </button>
@@ -197,28 +178,26 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>{{ '{{' }}isStoreEnabled('armor-shop') ? 'shield' : 'lock'{{'}}'}}</mat-icon>
+            <mat-icon>{{'{{'}}isStoreEnabled('armor-shop') ? 'shield' : 'lock'{{'}}'}}</mat-icon>
             <span class="store-name">Armor Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('armor-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('armor-shop')"
-          >
+            (click)="toggleStore('armor-shop')">
             <mat-icon>{{ isStoreEnabled('armor-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('armor-shop') ? 'Open' : 'Closed' }}
           </button>
         </div>
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>{{ isStoreEnabled('equipment-shop') ? 'backpack' : 'lock' }}</mat-icon>
+            <mat-icon>{{isStoreEnabled('equipment-shop') ? 'backpack' : 'lock'}}</mat-icon>
             <span class="store-name">Equipment Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('equipment-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('equipment-shop')"
-          >
+            (click)="toggleStore('equipment-shop')">
             <mat-icon>{{ isStoreEnabled('equipment-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('equipment-shop') ? 'Open' : 'Closed' }}
           </button>
@@ -226,14 +205,13 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>{{ isStoreEnabled('consumables-shop') ? 'science' : 'lock' }}</mat-icon>
+            <mat-icon>{{isStoreEnabled('consumables-shop') ? 'science' : 'lock'}}</mat-icon>
             <span class="store-name">Consumables Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('consumables-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('consumables-shop')"
-          >
+            (click)="toggleStore('consumables-shop')">
             <mat-icon>{{ isStoreEnabled('consumables-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('consumables-shop') ? 'Open' : 'Closed' }}
           </button>
@@ -241,14 +219,13 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>{{ isStoreEnabled('fabrials-shop') ? 'auto_awesome' : 'lock' }}</mat-icon>
+            <mat-icon>{{isStoreEnabled('fabrials-shop') ? 'auto_awesome' : 'lock'}}</mat-icon>
             <span class="store-name">Fabrials Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('fabrials-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('fabrials-shop')"
-          >
+            (click)="toggleStore('fabrials-shop')">
             <mat-icon>{{ isStoreEnabled('fabrials-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('fabrials-shop') ? 'Open' : 'Closed' }}
           </button>
@@ -256,19 +233,17 @@
 
         <div class="store-toggle">
           <div class="store-info">
-            <mat-icon>{{ isStoreEnabled('mounts-shop') ? 'pets' : 'lock' }}</mat-icon>
+            <mat-icon>{{isStoreEnabled('mounts-shop') ? 'pets' : 'lock'}}</mat-icon>
             <span class="store-name">Mounts Shop</span>
           </div>
-          <button
-            mat-raised-button
+          <button 
+            mat-raised-button 
             [color]="isStoreEnabled('mounts-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('mounts-shop')"
-          >
+            (click)="toggleStore('mounts-shop')">
             <mat-icon>{{ isStoreEnabled('mounts-shop') ? 'lock_open' : 'lock' }}</mat-icon>
             {{ isStoreEnabled('mounts-shop') ? 'Open' : 'Closed' }}
           </button>
-        </div>
-      </div>
+        </div>      </div>
     </mat-card-content>
   </mat-card>
 

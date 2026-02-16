@@ -1,6 +1,6 @@
 /**
  * Skill Calculations Service Tests
- *
+ * 
  * Validates skill total calculations and skill associations
  */
 
@@ -10,7 +10,7 @@ import {
   SkillRanks,
   Attributes,
   SKILL_ASSOCIATIONS,
-  SURGE_SKILLS,
+  SURGE_SKILLS
 } from './skill-calculations';
 
 describe.skip('SkillCalculationsService', () => {
@@ -111,7 +111,7 @@ describe.skip('SkillCalculationsService', () => {
     it('should calculate skill total correctly', () => {
       const attrs: Attributes = { strength: 12 };
       const result = service.calculateSkillTotal('ATHLETICS', 3, attrs);
-
+      
       expect(result.skillName).toBe('ATHLETICS');
       expect(result.rank).toBe(3);
       expect(result.attributeModifier).toBe(6); // 12/2
@@ -160,21 +160,21 @@ describe.skip('SkillCalculationsService', () => {
   describe('calculateAllSkillTotals', () => {
     it('should calculate totals for all skills', () => {
       const skillRanks: SkillRanks = {
-        ATHLETICS: 3,
-        STEALTH: 2,
-        DECEPTION: 1,
+        'ATHLETICS': 3,
+        'STEALTH': 2,
+        'DECEPTION': 1
       };
       const attrs: Attributes = {
         strength: 12,
         quickness: 14,
-        presence: 10,
+        presence: 10
       };
-
+      
       const results = service.calculateAllSkillTotals(skillRanks, attrs);
-
-      expect(results['ATHLETICS'].total).toBe(9); // 3 + 6(str)
-      expect(results['STEALTH'].total).toBe(9); // 2 + 7(qck)
-      expect(results['DECEPTION'].total).toBe(6); // 1 + 5(prs)
+      
+      expect(results['ATHLETICS'].total).toBe(9);   // 3 + 6(str)
+      expect(results['STEALTH'].total).toBe(9);     // 2 + 7(qck)
+      expect(results['DECEPTION'].total).toBe(6);   // 1 + 5(prs)
     });
 
     it('should include all known skills', () => {
@@ -189,7 +189,7 @@ describe.skip('SkillCalculationsService', () => {
     });
 
     it('should handle empty attributes', () => {
-      const results = service.calculateAllSkillTotals({ ATHLETICS: 3 }, {});
+      const results = service.calculateAllSkillTotals({ 'ATHLETICS': 3 }, {});
       expect(results['ATHLETICS'].total).toBe(3); // 3 + 0
     });
   });
@@ -201,15 +201,15 @@ describe.skip('SkillCalculationsService', () => {
   describe('calculateSurgeSkillTotals', () => {
     it('should return only surge skills', () => {
       const skillRanks: SkillRanks = {
-        ATHLETICS: 2,
-        ADHESION: 1,
-        GRAVITATION: 2,
-        PROGRESSION: 1,
+        'ATHLETICS': 2,
+        'ADHESION': 1,
+        'GRAVITATION': 2,
+        'PROGRESSION': 1
       };
       const attrs: Attributes = { willpower: 12 };
-
+      
       const results = service.calculateSurgeSkillTotals(skillRanks, attrs);
-
+      
       expect(results['ATHLETICS']).toBeUndefined();
       expect(results['ADHESION']).toBeDefined();
       expect(results['GRAVITATION']).toBeDefined();
@@ -218,11 +218,11 @@ describe.skip('SkillCalculationsService', () => {
 
     it('should calculate surge skill totals correctly', () => {
       const results = service.calculateSurgeSkillTotals(
-        { ADHESION: 3, PROGRESSION: 2 },
+        { 'ADHESION': 3, 'PROGRESSION': 2 },
         { willpower: 14 }
       );
-
-      expect(results['ADHESION'].total).toBe(10); // 3 + 7(wil/2)
+      
+      expect(results['ADHESION'].total).toBe(10);   // 3 + 7(wil/2)
       expect(results['PROGRESSION'].total).toBe(9); // 2 + 7(wil/2)
     });
   });
@@ -230,13 +230,13 @@ describe.skip('SkillCalculationsService', () => {
   describe('calculateNonSurgeSkillTotals', () => {
     it('should return only non-surge skills', () => {
       const skillRanks: SkillRanks = {
-        ATHLETICS: 2,
-        ADHESION: 1,
-        STEALTH: 2,
+        'ATHLETICS': 2,
+        'ADHESION': 1,
+        'STEALTH': 2
       };
-
+      
       const results = service.calculateNonSurgeSkillTotals(skillRanks, {});
-
+      
       expect(results['ATHLETICS']).toBeDefined();
       expect(results['STEALTH']).toBeDefined();
       expect(results['ADHESION']).toBeUndefined();
@@ -250,17 +250,17 @@ describe.skip('SkillCalculationsService', () => {
   describe('calculateSkillsByAttribute', () => {
     it('should return only skills for specified attribute', () => {
       const skillRanks: SkillRanks = {
-        ATHLETICS: 2,
-        HEAVY_WEAPONRY: 1,
-        STEALTH: 2,
-        CRAFTING: 2,
+        'ATHLETICS': 2,
+        'HEAVY_WEAPONRY': 1,
+        'STEALTH': 2,
+        'CRAFTING': 2
       };
       const attrs: Attributes = {
         strength: 12,
         quickness: 12,
-        intellect: 12,
+        intellect: 12
       };
-
+      
       const strengths = service.calculateSkillsByAttribute('strength', skillRanks, attrs);
       expect(strengths['ATHLETICS']).toBeDefined();
       expect(strengths['HEAVY_WEAPONRY']).toBeDefined();
@@ -270,13 +270,13 @@ describe.skip('SkillCalculationsService', () => {
 
     it('should calculate all quickness-based skills', () => {
       const skillRanks: SkillRanks = {
-        AGILITY: 2,
-        LIGHT_WEAPONRY: 1,
-        STEALTH: 3,
-        THIEVERY: 2,
+        'AGILITY': 2,
+        'LIGHT_WEAPONRY': 1,
+        'STEALTH': 3,
+        'THIEVERY': 2
       };
       const attrs: Attributes = { quickness: 14 };
-
+      
       const quickSkills = service.calculateSkillsByAttribute('quickness', skillRanks, attrs);
       expect(Object.keys(quickSkills).length).toBe(4);
       expect(quickSkills['AGILITY'].total).toBe(9); // 2 + 7
@@ -322,9 +322,9 @@ describe.skip('SkillCalculationsService', () => {
   describe('validateAllSkillRanks', () => {
     it('should accept valid skill ranks', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 3,
-        STEALTH: 2,
-        DECEPTION: 5,
+        'ATHLETICS': 3,
+        'STEALTH': 2,
+        'DECEPTION': 5
       };
       const result = service.validateAllSkillRanks(ranks);
       expect(result.valid).toBe(true);
@@ -333,8 +333,8 @@ describe.skip('SkillCalculationsService', () => {
 
     it('should reject invalid ranks', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 6,
-        STEALTH: -1,
+        'ATHLETICS': 6,
+        'STEALTH': -1
       };
       const result = service.validateAllSkillRanks(ranks);
       expect(result.valid).toBe(false);
@@ -348,7 +348,7 @@ describe.skip('SkillCalculationsService', () => {
       const result = service.validateAttributes({
         strength: 10,
         quickness: 12,
-        intellect: 11,
+        intellect: 11
       });
       expect(result.valid).toBe(true);
     });
@@ -376,9 +376,9 @@ describe.skip('SkillCalculationsService', () => {
   describe('getHighestSkillRank', () => {
     it('should return highest rank', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 2,
-        STEALTH: 5,
-        DECEPTION: 3,
+        'ATHLETICS': 2,
+        'STEALTH': 5,
+        'DECEPTION': 3
       };
       expect(service.getHighestSkillRank(ranks)).toBe(5);
     });
@@ -391,12 +391,12 @@ describe.skip('SkillCalculationsService', () => {
   describe('getHighestSkillTotal', () => {
     it('should return highest total', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 3,
-        STEALTH: 2,
+        'ATHLETICS': 3,
+        'STEALTH': 2
       };
       const attrs: Attributes = {
-        strength: 16, // +8
-        quickness: 10, // +5
+        strength: 16,  // +8
+        quickness: 10  // +5
       };
       // ATHLETICS = 3 + 8 = 11
       // STEALTH = 2 + 5 = 7
@@ -407,9 +407,9 @@ describe.skip('SkillCalculationsService', () => {
   describe('getAverageSkillRank', () => {
     it('should calculate average rank', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 2,
-        STEALTH: 4,
-        DECEPTION: 3,
+        'ATHLETICS': 2,
+        'STEALTH': 4,
+        'DECEPTION': 3
       };
       expect(service.getAverageSkillRank(ranks)).toBe(3); // (2+4+3)/3
     });
@@ -422,12 +422,12 @@ describe.skip('SkillCalculationsService', () => {
   describe('getAverageSkillTotal', () => {
     it('should calculate average total', () => {
       const ranks: SkillRanks = {
-        ATHLETICS: 2,
-        STEALTH: 2,
+        'ATHLETICS': 2,
+        'STEALTH': 2
       };
       const attrs: Attributes = {
         strength: 12,
-        quickness: 12,
+        quickness: 12
       };
       // ATHLETICS = 2 + 6 = 8
       // STEALTH = 2 + 6 = 8
@@ -443,13 +443,13 @@ describe.skip('SkillCalculationsService', () => {
   describe('Complete Character Sheet', () => {
     it('should calculate full skill sheet for standard character', () => {
       const skillRanks: SkillRanks = {
-        ATHLETICS: 3,
-        LIGHT_WEAPONRY: 2,
-        STEALTH: 2,
-        DECEPTION: 1,
-        CRAFTING: 2,
-        PERCEPTION: 2,
-        ADHESION: 1,
+        'ATHLETICS': 3,
+        'LIGHT_WEAPONRY': 2,
+        'STEALTH': 2,
+        'DECEPTION': 1,
+        'CRAFTING': 2,
+        'PERCEPTION': 2,
+        'ADHESION': 1
       };
       const attrs: Attributes = {
         strength: 12,
@@ -457,19 +457,19 @@ describe.skip('SkillCalculationsService', () => {
         intellect: 10,
         awareness: 11,
         willpower: 12,
-        presence: 10,
+        presence: 10
       };
 
       const allTotals = service.calculateAllSkillTotals(skillRanks, attrs);
 
       // Verify some specific skills
-      expect(allTotals['ATHLETICS'].total).toBe(9); // 3 + 6(str)
+      expect(allTotals['ATHLETICS'].total).toBe(9);    // 3 + 6(str)
       expect(allTotals['LIGHT_WEAPONRY'].total).toBe(9); // 2 + 7(qck)
-      expect(allTotals['STEALTH'].total).toBe(9); // 2 + 7(qck)
-      expect(allTotals['DECEPTION'].total).toBe(6); // 1 + 5(prs)
-      expect(allTotals['CRAFTING'].total).toBe(7); // 2 + 5(int)
-      expect(allTotals['PERCEPTION'].total).toBe(7); // 2 + 5(awr)
-      expect(allTotals['ADHESION'].total).toBe(7); // 1 + 6(wil)
+      expect(allTotals['STEALTH'].total).toBe(9);      // 2 + 7(qck)
+      expect(allTotals['DECEPTION'].total).toBe(6);    // 1 + 5(prs)
+      expect(allTotals['CRAFTING'].total).toBe(7);     // 2 + 5(int)
+      expect(allTotals['PERCEPTION'].total).toBe(7);   // 2 + 5(awr)
+      expect(allTotals['ADHESION'].total).toBe(7);     // 1 + 6(wil)
     });
   });
 });

@@ -24,8 +24,8 @@ export const ALL_ITEMS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: [],
-      expertTraits: [],
-    },
+      expertTraits: []
+    }
   },
   {
     id: 'steel-sword',
@@ -46,8 +46,8 @@ export const ALL_ITEMS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: [],
-      expertTraits: [],
-    },
+      expertTraits: []
+    }
   },
   {
     id: 'knife',
@@ -68,8 +68,8 @@ export const ALL_ITEMS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Discreet'],
-      expertTraits: [],
-    },
+      expertTraits: []
+    }
   },
   {
     id: 'rapier',
@@ -90,8 +90,8 @@ export const ALL_ITEMS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Discreet'],
-      expertTraits: [],
-    },
+      expertTraits: []
+    }
   },
   {
     id: 'leather-armor',
@@ -109,8 +109,8 @@ export const ALL_ITEMS: InventoryItem[] = [
     armorProperties: {
       deflectValue: 1,
       traits: [],
-      expertTraits: [],
-    },
+      expertTraits: []
+    }
   },
   {
     id: 'military-kit',
@@ -123,7 +123,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: false,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'waterskin',
@@ -136,7 +136,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'iron-ingot',
@@ -149,7 +149,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'health-potion',
@@ -162,14 +162,13 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: { healing: 10 },
+    properties: { healing: 10 }
   },
   {
     id: 'chickenhawk',
     name: 'Chickenhawk',
     type: 'pet',
-    description:
-      'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
+    description: 'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
     rarity: 'reward-only',
     price: 0, // Cannot be purchased
     weight: 8,
@@ -177,12 +176,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: {
-      species: 'Chickenhawk',
-      behavior: 'Protective',
-      intelligence: 'animal',
-      flyingSpeed: 40,
-    },
+    properties: { species: 'Chickenhawk', behavior: 'Protective', intelligence: 'animal', flyingSpeed: 40 }
   },
   {
     id: 'armored-hound',
@@ -196,12 +190,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: {
-      species: 'Hound',
-      behavior: 'Battle-hardened',
-      intelligence: 'animal',
-      movementSpeed: 50,
-    },
+    properties: { species: 'Hound', behavior: 'Battle-hardened', intelligence: 'animal', movementSpeed: 50 }
   },
   {
     id: 'spren-familiar',
@@ -215,14 +204,13 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: { species: 'Spren', behavior: 'Magical', intelligence: 'sapient' },
+    properties: { species: 'Spren', behavior: 'Magical', intelligence: 'sapient' }
   },
   {
     id: 'storm-drake',
     name: 'Storm Drake',
     type: 'pet',
-    description:
-      'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
+    description: 'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
     rarity: 'reward-only',
     price: 0, // Cannot be purchased
     weight: 45,
@@ -230,14 +218,13 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: { species: 'Drake', behavior: 'Fierce', intelligence: 'sapient', flyingSpeed: 60 },
+    properties: { species: 'Drake', behavior: 'Fierce', intelligence: 'sapient', flyingSpeed: 60 }
   },
   {
     id: 'demo-companion',
     name: 'Demo Companion',
     type: 'pet',
-    description:
-      'A friendly demonstration companion. Perfect for testing and learning how pets work.',
+    description: 'A friendly demonstration companion. Perfect for testing and learning how pets work.',
     rarity: 'reward-only',
     price: 0, // Cannot be purchased
     weight: 12,
@@ -245,19 +232,13 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: {
-      species: 'Training Creature',
-      behavior: 'Friendly',
-      intelligence: 'animal',
-      movementSpeed: 30,
-    },
+    properties: { species: 'Training Creature', behavior: 'Friendly', intelligence: 'animal', movementSpeed: 30 }
   },
   {
     id: 'larkin',
     name: 'Larkin',
     type: 'pet',
-    description:
-      'A small insectoid companion that can drain Investiture. Found in high places acting as a scout and warrior.',
+    description: 'A small insectoid companion that can drain Investiture. Found in high places acting as a scout and warrior.',
     rarity: 'reward-only',
     price: 0, // Cannot be purchased
     weight: 15,
@@ -265,13 +246,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     stackable: false,
     equipable: true,
     slot: 'accessory',
-    properties: {
-      species: 'Larkin',
-      behavior: 'Alert and efficient',
-      intelligence: 'animal',
-      flyingSpeed: 20,
-      movementSpeed: 30,
-    },
+    properties: { species: 'Larkin', behavior: 'Alert and efficient', intelligence: 'animal', flyingSpeed: 20, movementSpeed: 30 }
   },
   {
     id: 'leather',
@@ -284,7 +259,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'thread',
@@ -297,7 +272,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'leather-strip',
@@ -310,7 +285,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'steel-ingot',
@@ -323,7 +298,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'gemstone-ruby',
@@ -336,7 +311,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'metal-housing',
@@ -349,7 +324,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'copper-wire',
@@ -362,7 +337,7 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: true,
     equipable: false,
-    properties: {},
+    properties: {}
   },
   {
     id: 'heating-fabrial',
@@ -375,8 +350,8 @@ export const ALL_ITEMS: InventoryItem[] = [
     quantity: 0,
     stackable: false,
     equipable: false,
-    properties: { heating: 50 },
-  },
+    properties: { heating: 50 }
+  }
 ];
 
 export const STARTING_KITS: StartingKit[] = [
@@ -387,18 +362,18 @@ export const STARTING_KITS: StartingKit[] = [
     weapons: [{ itemId: 'iron-sword', quantity: 1 }],
     armor: [{ itemId: 'leather-armor', quantity: 1 }],
     equipment: [],
-    currency: 5, // Starting currency in marks
-  },
+    currency: 5 // Starting currency in marks
+  }
 ];
 
 export function getItemById(itemId: string): InventoryItem | undefined {
-  return ALL_ITEMS.find((item) => item.id === itemId);
+  return ALL_ITEMS.find(item => item.id === itemId);
 }
 
 export function getItemsByType(type: string): InventoryItem[] {
-  return ALL_ITEMS.filter((item) => item.type === type);
+  return ALL_ITEMS.filter(item => item.type === type);
 }
 
 export function getKitById(kitId: string): StartingKit | undefined {
-  return STARTING_KITS.find((kit) => kit.id === kitId);
+  return STARTING_KITS.find(kit => kit.id === kitId);
 }

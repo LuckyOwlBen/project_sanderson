@@ -4,7 +4,7 @@ async function setup() {
   // Import modules dynamically for global setup
   require('zone.js');
   require('zone.js/testing');
-
+  
   const { getTestBed } = require('@angular/core/testing');
   const {
     BrowserDynamicTestingModule,
@@ -12,7 +12,10 @@ async function setup() {
   } = require('@angular/platform-browser-dynamic/testing');
 
   console.log('[vitest.global-setup] Initializing Angular TestBed...');
-  getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  getTestBed().initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
   console.log('[vitest.global-setup] Angular TestBed initialized successfully');
 }
 

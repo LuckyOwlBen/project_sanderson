@@ -27,7 +27,7 @@ import { CulturesService } from '../../services/cultures.service';
     MatIconModule,
     MatChipsModule,
     MatSelectModule,
-    MatOptionModule,
+    MatOptionModule
   ],
   templateUrl: './character-name.html',
   styleUrl: './character-name.scss',
@@ -35,7 +35,7 @@ import { CulturesService } from '../../services/cultures.service';
 export class CharacterName implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 2; // Name is step 2
-
+  
   characterName: string = '';
   characterLevel: number = 1;
   nameError: string = '';
@@ -67,9 +67,11 @@ export class CharacterName implements OnInit, OnDestroy {
     }, 0);
 
     // Monitor the waiting flag from identity service
-    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
-      this.isWaitingForIdentity = waiting;
-    });
+    this.identityService.waitingForIdentity$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
 
     // Once we have a character ID, load name and level from API
     this.identityService.currentCharacterId$
@@ -87,20 +89,14 @@ export class CharacterName implements OnInit, OnDestroy {
 
   private loadNameFromApi(characterId: string): void {
     console.log('[CharacterName] Loading name and level for character:', characterId);
-    this.nameApiService
-      .getName(characterId)
+    this.nameApiService.getName(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (nameData) => {
           if (nameData) {
             this.characterName = nameData.name;
             this.characterLevel = nameData.level;
-            console.log(
-              '[CharacterName] Loaded name:',
-              this.characterName,
-              'level:',
-              this.characterLevel
-            );
+            console.log('[CharacterName] Loaded name:', this.characterName, 'level:', this.characterLevel);
             console.log('[CharacterName] Loaded cultures:', nameData.cultures);
             this.updateSuggestedNames(nameData.cultures);
           } else {
@@ -124,7 +120,7 @@ export class CharacterName implements OnInit, OnDestroy {
           this.isWaitingForIdentity = false;
           this.cdr.detectChanges();
           this.router.navigate(['/']);
-        },
+        }
       });
   }
 
@@ -158,25 +154,25 @@ export class CharacterName implements OnInit, OnDestroy {
 
   private validateName(): void {
     const trimmedName = this.characterName.trim();
-
+    
     // Check if empty
     if (!trimmedName) {
       this.nameError = 'Character name is required';
       return;
     }
-
+    
     // Check minimum length
     if (trimmedName.length < 2) {
       this.nameError = 'Name must be at least 2 characters';
       return;
     }
-
+    
     // Check maximum length
     if (trimmedName.length > 50) {
       this.nameError = 'Name must be 50 characters or less';
       return;
     }
-
+    
     // Only allow letters, spaces, hyphens, and apostrophes
     // This prevents SQL injection and other malicious input
     const validNamePattern = /^[a-zA-Z\s\-']+$/;
@@ -184,13 +180,13 @@ export class CharacterName implements OnInit, OnDestroy {
       this.nameError = 'Name can only contain letters, spaces, hyphens, and apostrophes';
       return;
     }
-
+    
     // Prevent excessive spaces
     if (/\s{2,}/.test(trimmedName)) {
       this.nameError = 'Name cannot contain multiple consecutive spaces';
       return;
     }
-
+    
     // Name is valid
     this.nameError = '';
   }
@@ -198,7 +194,7 @@ export class CharacterName implements OnInit, OnDestroy {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     console.log('[CharacterName] persistStep called');
-
+    
     if (!this.characterId) {
       console.warn('[CharacterName] No character ID available for saving');
       return;
@@ -211,10 +207,9 @@ export class CharacterName implements OnInit, OnDestroy {
 
     const nameToSave = this.characterName.trim();
     console.log('[CharacterName] Saving name:', nameToSave, 'level:', this.characterLevel);
-
+    
     this.isLoading = true;
-    this.nameApiService
-      .saveName(this.characterId, nameToSave, this.characterLevel)
+    this.nameApiService.saveName(this.characterId, nameToSave, this.characterLevel)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -225,7 +220,8 @@ export class CharacterName implements OnInit, OnDestroy {
           console.error('[CharacterName] Failed to save name:', error);
           this.isLoading = false;
           this.router.navigate(['/']);
-        },
+        }
       });
   }
 }
+

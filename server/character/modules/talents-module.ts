@@ -7,7 +7,10 @@ export class TalentsModule {
   unlockedTalents: Set<string> = new Set<string>();
   baselineUnlockedTalents?: Set<string>;
 
-  constructor(unlockedTalents: string[] = [], baselineUnlockedTalents?: string[]) {
+  constructor(
+    unlockedTalents: string[] = [],
+    baselineUnlockedTalents?: string[]
+  ) {
     this.unlockedTalents = new Set(unlockedTalents);
     if (baselineUnlockedTalents) {
       this.baselineUnlockedTalents = new Set(baselineUnlockedTalents);
@@ -56,8 +59,10 @@ export class TalentsModule {
     if (!this.baselineUnlockedTalents) {
       return Array.from(this.unlockedTalents);
     }
-
-    return Array.from(this.unlockedTalents).filter((t) => !this.baselineUnlockedTalents!.has(t));
+    
+    return Array.from(this.unlockedTalents).filter(
+      t => !this.baselineUnlockedTalents!.has(t)
+    );
   }
 
   /**

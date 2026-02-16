@@ -103,20 +103,20 @@
 
     .hint-text {
       margin-top: 1rem;
-
+      
       p {
         font-size: 0.95rem;
         color: #e8e8e8;
         font-style: italic;
       }
-
+      
       .requirements {
         margin-top: 1rem;
         padding: 0.75rem;
         background-color: var(--gpSystemDarkGrey);
         border-radius: 4px;
         font-style: normal;
-
+        
         small {
           color: #e8e8e8;
           font-size: 0.85rem;
@@ -130,7 +130,7 @@
       background-color: rgba(255, 193, 7, 0.15);
       border-left: 4px solid #ffc107;
       border-radius: 4px;
-
+      
       .error-text {
         font-size: 0.9rem;
         color: #ffc107;
@@ -144,7 +144,7 @@
       padding: 1rem;
       background-color: rgba(25, 118, 210, 0.05);
       border-radius: 8px;
-
+      
       p {
         font-size: 1.1rem;
         color: #ffffff;

@@ -65,9 +65,7 @@
                 </div>
                 <div class="stat-item">
                   <span class="stat-label">Action Cost</span>
-                  <span class="stat-value"
-                    >{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span
-                  >
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
                 </div>
               </div>
               <div class="attack-resource-cost" *ngIf="attack.resourceCost">
@@ -80,17 +78,12 @@
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
               </div>
-              <div
-                class="attack-bonuses"
-                *ngIf="attack.customModifiers && attack.customModifiers.length > 0"
-              >
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
                 <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
                 <ul class="modifiers-list">
                   <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
                     <span class="modifier-description">{{ modifier.description }}</span>
-                    <span class="modifier-condition" *ngIf="modifier.condition"
-                      >({{ modifier.condition }})</span
-                    >
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
                   </li>
                 </ul>
               </div>
@@ -158,9 +151,7 @@
                 </div>
                 <div class="stat-item">
                   <span class="stat-label">Action Cost</span>
-                  <span class="stat-value"
-                    >{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span
-                  >
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
                 </div>
               </div>
               <div class="attack-resource-cost" *ngIf="attack.resourceCost">
@@ -173,17 +164,12 @@
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
               </div>
-              <div
-                class="attack-bonuses"
-                *ngIf="attack.customModifiers && attack.customModifiers.length > 0"
-              >
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
                 <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
                 <ul class="modifiers-list">
                   <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
                     <span class="modifier-description">{{ modifier.description }}</span>
-                    <span class="modifier-condition" *ngIf="modifier.condition"
-                      >({{ modifier.condition }})</span
-                    >
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
                   </li>
                 </ul>
               </div>
@@ -251,9 +237,7 @@
                 </div>
                 <div class="stat-item">
                   <span class="stat-label">Action Cost</span>
-                  <span class="stat-value"
-                    >{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span
-                  >
+                  <span class="stat-value">{{ attack.actionCost }} action{{ attack.actionCost > 1 ? 's' : '' }}</span>
                 </div>
               </div>
               <div class="attack-resource-cost" *ngIf="attack.resourceCost">
@@ -266,17 +250,12 @@
                   <span class="trait-badge" *ngFor="let trait of attack.traits">{{ trait }}</span>
                 </div>
               </div>
-              <div
-                class="attack-bonuses"
-                *ngIf="attack.customModifiers && attack.customModifiers.length > 0"
-              >
+              <div class="attack-bonuses" *ngIf="attack.customModifiers && attack.customModifiers.length > 0">
                 <h5><span class="bonuses-icon">📈</span> Bonuses</h5>
                 <ul class="modifiers-list">
                   <li *ngFor="let modifier of attack.customModifiers" class="modifier-item">
                     <span class="modifier-description">{{ modifier.description }}</span>
-                    <span class="modifier-condition" *ngIf="modifier.condition"
-                      >({{ modifier.condition }})</span
-                    >
+                    <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
                   </li>
                 </ul>
               </div>
@@ -286,14 +265,7 @@
       </div>
 
       <!-- Empty State -->
-      <p
-        class="empty-text"
-        *ngIf="
-          getAttacks().melee.length === 0 &&
-          getAttacks().ranged.length === 0 &&
-          getAttacks().special.length === 0
-        "
-      >
+      <p class="empty-text" *ngIf="getAttacks().melee.length === 0 && getAttacks().ranged.length === 0 && getAttacks().special.length === 0">
         No attacks available. Equip a weapon to see your attack options.
       </p>
     </div>

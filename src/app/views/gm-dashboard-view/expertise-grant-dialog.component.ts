@@ -9,13 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { PlayerJoinedEvent } from '../../services/websocket.service';
-import {
-  ALL_EXPERTISES,
-  ExpertiseDefinition,
-  CULTURAL_EXPERTISES,
-  ITEM_EXPERTISES,
-  CRAFTING_EXPERTISES,
-} from '../../character/expertises/allExpertises';
+import { ALL_EXPERTISES, ExpertiseDefinition, CULTURAL_EXPERTISES, ITEM_EXPERTISES, CRAFTING_EXPERTISES } from '../../character/expertises/allExpertises';
 
 @Component({
   selector: 'app-expertise-grant-dialog',
@@ -29,18 +23,17 @@ import {
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatChipsModule,
+    MatChipsModule
   ],
   template: `
     <h2 mat-dialog-title>
       <mat-icon>school</mat-icon>
       Grant Expertise to {{ data.player.name }}
     </h2>
-
+    
     <mat-dialog-content>
       <p class="dialog-description">
-        Grant an expertise to this character. Expertises function as skills with Intellect as the
-        governing attribute.
+        Grant an expertise to this character. Expertises function as skills with Intellect as the governing attribute.
       </p>
 
       <!-- Category Filter -->
@@ -55,14 +48,12 @@ import {
           <mat-option value="specialist">Specialist/Crafting</mat-option>
         </mat-select>
       </mat-form-field>
-
+      
       <div class="expertises-list">
-        <div
-          *ngFor="let expertise of getFilteredExpertises()"
-          class="expertise-option"
-          [class.selected]="selectedExpertise?.name === expertise.name"
-          (click)="selectExpertise(expertise)"
-        >
+        <div *ngFor="let expertise of getFilteredExpertises()" 
+             class="expertise-option"
+             [class.selected]="selectedExpertise?.name === expertise.name"
+             (click)="selectExpertise(expertise)">
           <div class="expertise-content">
             <div class="expertise-header">
               <mat-icon class="expertise-icon">{{ getCategoryIcon(expertise.category) }}</mat-icon>
@@ -82,133 +73,134 @@ import {
         </p>
       </div>
     </mat-dialog-content>
-
+    
     <mat-dialog-actions align="end">
       <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="onGrant()" [disabled]="!selectedExpertise">
+      <button mat-raised-button 
+              color="primary" 
+              (click)="onGrant()"
+              [disabled]="!selectedExpertise">
         <mat-icon>check</mat-icon>
         Grant Expertise
       </button>
     </mat-dialog-actions>
   `,
-  styles: [
-    `
-      :host ::ng-deep .mat-mdc-dialog-content {
-        max-height: 65vh !important;
-        overflow-y: auto !important;
-        padding: 0 24px !important;
+  styles: [`
+    :host ::ng-deep .mat-mdc-dialog-content {
+      max-height: 65vh !important;
+      overflow-y: auto !important;
+      padding: 0 24px !important;
+    }
+
+    .dialog-description {
+      margin-bottom: 16px;
+      color: rgba(0, 0, 0, 0.6);
+      padding-top: 8px;
+    }
+
+    .category-select {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .expertises-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .expertise-option {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+
+      &:hover {
+        border-color: #2196F3;
+        background: #f5f5f5;
       }
 
-      .dialog-description {
-        margin-bottom: 16px;
-        color: rgba(0, 0, 0, 0.6);
-        padding-top: 8px;
+      &.selected {
+        border-color: #2196F3;
+        background: #E3F2FD;
+      }
+    }
+
+    .expertise-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .expertise-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .expertise-icon {
+        color: #2196F3;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
       }
 
-      .category-select {
-        width: 100%;
-        margin-bottom: 16px;
+      strong {
+        flex: 1;
+        font-size: 16px;
       }
 
-      .expertises-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
+      .category-chip {
+        font-size: 11px;
+        min-height: 24px;
+        padding: 4px 8px;
 
-      .expertise-option {
-        padding: 12px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        background: white;
-
-        &:hover {
-          border-color: #2196f3;
-          background: #f5f5f5;
+        &.chip-cultural {
+          background: #E8F5E9;
+          color: #2E7D32;
         }
 
-        &.selected {
-          border-color: #2196f3;
-          background: #e3f2fd;
-        }
-      }
-
-      .expertise-content {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .expertise-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        .expertise-icon {
-          color: #2196f3;
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
+        &.chip-weapon {
+          background: #FFEBEE;
+          color: #C62828;
         }
 
-        strong {
-          flex: 1;
-          font-size: 16px;
+        &.chip-armor {
+          background: #FFF3E0;
+          color: #E65100;
         }
 
-        .category-chip {
-          font-size: 11px;
-          min-height: 24px;
-          padding: 4px 8px;
+        &.chip-utility {
+          background: #E1F5FE;
+          color: #0277BD;
+        }
 
-          &.chip-cultural {
-            background: #e8f5e9;
-            color: #2e7d32;
-          }
-
-          &.chip-weapon {
-            background: #ffebee;
-            color: #c62828;
-          }
-
-          &.chip-armor {
-            background: #fff3e0;
-            color: #e65100;
-          }
-
-          &.chip-utility {
-            background: #e1f5fe;
-            color: #0277bd;
-          }
-
-          &.chip-specialist {
-            background: #f3e5f5;
-            color: #6a1b9a;
-          }
+        &.chip-specialist {
+          background: #F3E5F5;
+          color: #6A1B9A;
         }
       }
+    }
 
-      .expertise-description {
-        font-size: 13px;
-        color: rgba(0, 0, 0, 0.7);
-        line-height: 1.4;
-        margin-left: 28px;
-      }
+    .expertise-description {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.7);
+      line-height: 1.4;
+      margin-left: 28px;
+    }
 
-      .no-results {
-        text-align: center;
-        color: #999;
-        font-style: italic;
-        padding: 24px;
-      }
+    .no-results {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      padding: 24px;
+    }
 
-      mat-dialog-actions {
-        padding: 16px 24px !important;
-      }
-    `,
-  ],
+    mat-dialog-actions {
+      padding: 16px 24px !important;
+    }
+  `]
 })
 export class ExpertiseGrantDialogComponent {
   selectedExpertise: ExpertiseDefinition | null = null;
@@ -223,7 +215,7 @@ export class ExpertiseGrantDialogComponent {
     if (this.selectedCategory === 'all') {
       return ALL_EXPERTISES;
     }
-    return ALL_EXPERTISES.filter((e) => e.category === this.selectedCategory);
+    return ALL_EXPERTISES.filter(e => e.category === this.selectedCategory);
   }
 
   onCategoryChange(): void {
@@ -237,18 +229,12 @@ export class ExpertiseGrantDialogComponent {
 
   getCategoryIcon(category: string): string {
     switch (category) {
-      case 'cultural':
-        return 'public';
-      case 'weapon':
-        return 'swords';
-      case 'armor':
-        return 'shield';
-      case 'utility':
-        return 'construction';
-      case 'specialist':
-        return 'engineering';
-      default:
-        return 'school';
+      case 'cultural': return 'public';
+      case 'weapon': return 'swords';
+      case 'armor': return 'shield';
+      case 'utility': return 'construction';
+      case 'specialist': return 'engineering';
+      default: return 'school';
     }
   }
 
@@ -256,9 +242,9 @@ export class ExpertiseGrantDialogComponent {
     console.log('[Expertise Dialog] 🎯 onGrant called');
     console.log('[Expertise Dialog] 🎯 Selected expertise:', this.selectedExpertise);
     if (this.selectedExpertise) {
-      const result = {
+      const result = { 
         expertiseName: this.selectedExpertise.name,
-        expertise: this.selectedExpertise,
+        expertise: this.selectedExpertise
       };
       console.log('[Expertise Dialog] 🎯 Closing dialog with result:', result);
       this.dialogRef.close(result);

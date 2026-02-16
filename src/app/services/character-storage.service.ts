@@ -17,15 +17,14 @@ export interface SavedCharacter {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CharacterStorageService {
   // In production, API is served from same origin (no CORS needed)
   // In dev mode, backend runs on port 3000, frontend on 4200
-  private apiUrl =
-    window.location.hostname === 'localhost' && window.location.port === '4200'
-      ? 'http://localhost:3000/api/characters' // Dev mode
-      : '/api/characters'; // Production mode
+  private apiUrl = window.location.hostname === 'localhost' && window.location.port === '4200'
+    ? 'http://localhost:3000/api/characters'  // Dev mode
+    : '/api/characters';                        // Production mode
   private useServer = false; // Will auto-detect
   private serverAvailable: boolean | null = null;
 
@@ -36,8 +35,7 @@ export class CharacterStorageService {
   private checkServerAvailability(): void {
     // Quick health check
     const healthUrl = this.apiUrl.replace('/api/characters', '/api/health');
-    this.http
-      .get(healthUrl, { observe: 'response' })
+    this.http.get(healthUrl, { observe: 'response' })
       .pipe(
         map(() => true),
         catchError(() => of(false))
@@ -55,41 +53,40 @@ export class CharacterStorageService {
 
   createCharacter(): Observable<{ success: boolean; id: string; character: any }> {
     // Call server to create a new character with generated ID
-    return this.http
-      .post<{ success: boolean; id: string; character: any }>(`${this.apiUrl}/create`, {})
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          console.warn(
-            'Failed to create character on server, falling back to local generation',
-            error
-          );
-          // Fallback: generate ID locally
-          const timestamp = Date.now();
-          const id = `character_${timestamp}`;
-          return of({ success: true, id, character: null });
-        })
-      );
+    return this.http.post<{ success: boolean; id: string; character: any }>(
+      `${this.apiUrl}/create`,
+      {}
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to create character on server, falling back to local generation', error);
+        // Fallback: generate ID locally
+        const timestamp = Date.now();
+        const id = `character_${timestamp}`;
+        return of({ success: true, id, character: null });
+      })
+    );
   }
 
   saveCharacter(character: Character): Observable<{ success: boolean; id: string }> {
     const characterData = this.serializeCharacter(character);
-
+    
     // Try server first, fallback to localStorage on error
-    return this.http
-      .post<{ success: boolean; id: string }>(`${this.apiUrl}/save`, characterData)
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          console.warn('Failed to save to server, falling back to localStorage', error);
-          this.useServer = false;
-          return this.saveToLocalStorage(character);
-        })
-      );
+    return this.http.post<{ success: boolean; id: string }>(
+      `${this.apiUrl}/save`,
+      characterData
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.warn('Failed to save to server, falling back to localStorage', error);
+        this.useServer = false;
+        return this.saveToLocalStorage(character);
+      })
+    );
   }
 
   loadCharacter(characterId: string): Observable<Character | null> {
     // Prefer server load; fallback to localStorage on error
     return this.http.get<any>(`${this.apiUrl}/load/${characterId}`).pipe(
-      map((data) => this.deserializeCharacter(data))
+      map((data) => this.deserializeCharacter(data)),
       // catchError((error: HttpErrorResponse) => {
       //   console.warn('Failed to load from server, trying localStorage', error);
       //   //return this.loadFromLocalStorage(characterId);
@@ -148,7 +145,7 @@ export class CharacterStorageService {
         intellect: character.attributes.intellect,
         willpower: character.attributes.willpower,
         awareness: character.attributes.awareness,
-        presence: character.attributes.presence,
+        presence: character.attributes.presence
       },
       skills: character.skills.getAllSkillRanks(),
       unlockedTalents: Array.from(character.unlockedTalents),
@@ -157,22 +154,22 @@ export class CharacterStorageService {
       activeForm: character.activeForm,
       health: {
         current: character.resources.health.current,
-        max: character.resources.health.max,
+        max: character.resources.health.max
       },
       focus: {
         current: character.resources.focus.current,
-        max: character.resources.focus.max,
+        max: character.resources.focus.max
       },
       investiture: {
         current: character.resources.investiture.current,
         max: character.resources.investiture.max,
-        isActive: character.resources.investiture.isActive(),
+        isActive: character.resources.investiture.isActive()
       },
       radiantPath: character.radiantPath.toJSON(),
       inventory: character.inventory.serialize(),
       sessionNotes: (character as any).sessionNotes || '',
       // spentPoints is server-side tracking only, don't serialize from client
-      lastModified: new Date().toISOString(),
+      lastModified: new Date().toISOString()
     };
   }
 
@@ -188,29 +185,27 @@ export class CharacterStorageService {
       name: data.name,
       level: character.level,
       pendingLevel: character.pendingLevel,
-      pendingLevelPoints: character.pendingLevelPoints,
+      pendingLevelPoints: character.pendingLevelPoints
     });
     character.name = data.name || '';
-    character.ancestry = (data.ancestry as Ancestry) || null;
+    character.ancestry = data.ancestry as Ancestry || null;
     character.cultures = data.cultures || [];
     character.paths = data.paths || [];
-
+    
     // Migrate selectedExpertises from old string[] format to new ExpertiseSource[] format
     if (data.selectedExpertises) {
       if (Array.isArray(data.selectedExpertises) && data.selectedExpertises.length > 0) {
         // Check if it's old format (string[]) or new format (ExpertiseSource[])
         if (typeof data.selectedExpertises[0] === 'string') {
           // Old format - migrate to new format
-          character.selectedExpertises = ExpertiseSourceHelper.migrateFromStringArray(
-            data.selectedExpertises
-          );
+          character.selectedExpertises = ExpertiseSourceHelper.migrateFromStringArray(data.selectedExpertises);
         } else {
           // New format - use as is
           character.selectedExpertises = data.selectedExpertises;
         }
       }
     }
-
+    
     if (data.attributes) {
       character.attributes.strength = data.attributes.strength || 0;
       character.attributes.speed = data.attributes.speed || 0;
@@ -219,13 +214,13 @@ export class CharacterStorageService {
       character.attributes.awareness = data.attributes.awareness || 0;
       character.attributes.presence = data.attributes.presence || 0;
     }
-
+    
     if (data.skills) {
       Object.entries(data.skills).forEach(([skill, rank]) => {
         character.skills.setSkillRank(skill as any, rank as number);
       });
     }
-
+    
     if (data.unlockedTalents) {
       data.unlockedTalents.forEach((talentId: string) => {
         character.unlockedTalents.add(talentId);
@@ -235,7 +230,7 @@ export class CharacterStorageService {
     if (data.baselineUnlockedTalents) {
       character.baselineUnlockedTalents = new Set(data.baselineUnlockedTalents);
     }
-
+    
     if (data.unlockedSingerForms) {
       data.unlockedSingerForms.forEach((formId: string) => {
         character.unlockSingerForm(formId);
@@ -247,7 +242,7 @@ export class CharacterStorageService {
         applyTalentEffects(character, talentId);
       });
     }
-
+    
     if (data.health) {
       const healthDiff = data.health.current - character.resources.health.current;
       if (healthDiff !== 0) {
@@ -258,7 +253,7 @@ export class CharacterStorageService {
         }
       }
     }
-
+    
     if (data.focus) {
       const focusDiff = data.focus.current - character.resources.focus.current;
       if (focusDiff !== 0) {
@@ -269,17 +264,17 @@ export class CharacterStorageService {
         }
       }
     }
-
+    
     if (data.radiantPath) {
       character.radiantPath.fromJSON(data.radiantPath);
     }
-
+    
     // Unlock investiture if character has spren and has spoken ideal
     if (character.radiantPath.hasSpren() && character.radiantPath.hasSpokenIdeal()) {
       character.unlockInvestiture();
       character.recalculateResources();
     }
-
+    
     // Restore investiture state after unlocking (if needed)
     if (data.investiture) {
       // If investiture was saved as active, ensure it's unlocked
@@ -287,7 +282,7 @@ export class CharacterStorageService {
         character.resources.investiture.unlock();
         character.recalculateResources();
       }
-
+      
       // Set current value
       const investDiff = data.investiture.current - character.resources.investiture.current;
       if (investDiff !== 0) {
@@ -298,25 +293,25 @@ export class CharacterStorageService {
         }
       }
     }
-
+    
     if (data.inventory) {
       character.inventory.deserialize(data.inventory);
     }
-
+    
     // Set active form - default to dullform for Singers if not set
     if (data.activeForm) {
       character.setActiveForm(data.activeForm);
     } else if (character.ancestry === Ancestry.SINGER) {
       character.setActiveForm('dullform');
     }
-
+    
     (character as any).sessionNotes = data.sessionNotes || '';
-
+    
     // Restore spent points tracking
     if (data.spentPoints) {
       (character as any).spentPoints = data.spentPoints;
     }
-
+    
     return character;
   }
 
@@ -326,7 +321,7 @@ export class CharacterStorageService {
     if (existingId) {
       return existingId;
     }
-
+    
     // Generate new ID only if doesn't exist
     const safeName = character.name.toLowerCase().replace(/\s+/g, '_') || 'character';
     const timestamp = Date.now();
@@ -336,22 +331,22 @@ export class CharacterStorageService {
   private saveToLocalStorage(character: Character): Observable<{ success: boolean; id: string }> {
     const characterData = this.serializeCharacter(character);
     const id = characterData.id;
-
+    
     try {
       const existing = this.getAllFromLocalStorage();
-
+      
       // If character already has an ID, remove old entry to prevent duplicates
       if ((character as any).id) {
         // Remove any existing entry with this ID
         delete existing[(character as any).id];
       }
-
+      
       existing[id] = characterData;
       localStorage.setItem('saved_characters', JSON.stringify(existing));
-
+      
       // Update character object with ID for future saves
       (character as any).id = id;
-
+      
       return of({ success: true, id });
     } catch (error) {
       console.error('Error saving to localStorage:', error);
@@ -382,7 +377,7 @@ export class CharacterStorageService {
         level: data.level,
         ancestry: data.ancestry,
         lastModified: data.lastModified,
-        data,
+        data
       }));
       return of(list);
     } catch (error) {

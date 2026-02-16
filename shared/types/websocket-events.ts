@@ -1,6 +1,6 @@
 /**
  * WebSocket Events - Shared Type Definitions
- *
+ * 
  * Event types for real-time communication between client and server
  */
 

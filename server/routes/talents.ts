@@ -1,9 +1,9 @@
 /**
  * Talent System Routes
- *
+ * 
  * REST API endpoints for talent management.
  * All endpoints use dependency-injected TalentService for business logic.
- *
+ * 
  * Endpoints:
  * - GET /api/characters/:id/talents/forLevel - Get available talents & points for a level
  * - GET /api/characters/:id/level/talents - Get talent data for level-up (includes slice info)
@@ -18,13 +18,13 @@ export function createTalentRoutes(talentService: TalentService): Router {
 
   /**
    * GET /api/characters/:id/talents/forLevel?isCreationMode=true|false
-   *
+   * 
    * Get available talent points and selection state for a character's current level.
    * Used for both character creation and level-up talent selection.
-   *
+   * 
    * Query params:
    * - isCreationMode (boolean): If true, uses cumulative points. If false, uses level-specific points.
-   *
+   * 
    * Response includes:
    * - talentPoints: Number of points available to spend
    * - previouslySelectedTalents: Talents from previous levels (locked during level-up)
@@ -53,7 +53,7 @@ export function createTalentRoutes(talentService: TalentService): Router {
         unlockedTalents: state.unlockedTalents,
         spentPoints: state.spentPoints,
         lockedTalents: state.lockedTalents,
-        requiresSingerSelection: state.requiresSingerSelection,
+        requiresSingerSelection: state.requiresSingerSelection
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -64,10 +64,10 @@ export function createTalentRoutes(talentService: TalentService): Router {
 
   /**
    * GET /api/characters/:id/level/talents
-   *
+   * 
    * Get talent slice information for a character's level-up flow.
    * This endpoint is READ-ONLY and does not modify server state.
-   *
+   * 
    * Response includes talent availability data specific to level-up progression.
    */
   router.get('/characters/:id/level/talents', (req: Request, res: Response) => {
@@ -91,7 +91,7 @@ export function createTalentRoutes(talentService: TalentService): Router {
         spentPoints: state.spentPoints,
         lockedTalents: state.lockedTalents,
         requiresSingerSelection: state.requiresSingerSelection,
-        isLevelUp: true,
+        isLevelUp: true
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -102,17 +102,17 @@ export function createTalentRoutes(talentService: TalentService): Router {
 
   /**
    * PATCH /api/characters/:id/level/talents
-   *
+   * 
    * Save talent selections for the current level.
    * Server validates that point allocation doesn't exceed available.
    * Tracks spending to prevent re-allocation on revisit.
-   *
+   * 
    * Body:
    * {
    *   unlockedTalents: string[] - All talents to unlock (server calculates new ones)
    *   level?: number - Optional level override (defaults to character.level)
    * }
-   *
+   * 
    * Response:
    * {
    *   success: boolean,
@@ -159,7 +159,7 @@ export function createTalentRoutes(talentService: TalentService): Router {
         success: true,
         id,
         unlockedTalents: updated?.unlockedTalents || [],
-        spentPoints: { talents: spentTalents },
+        spentPoints: { talents: spentTalents }
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

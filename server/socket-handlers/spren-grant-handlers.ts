@@ -1,6 +1,6 @@
 /**
  * Spren Grant Socket Handlers
- *
+ * 
  * Extracted WebSocket event handlers for spren grant management
  * These are registered in server.ts socket.on('connection') block
  */
@@ -38,29 +38,27 @@ export function registerSprenHandlers(
         order,
         sprenType,
         surgePair,
-        philosophy,
+        philosophy
       };
 
       const result = await sprenGrantService.queueSprenGrant(payload, findSocketIdByCharacterId);
-
+      
       if (!result.success) {
         console.error(`[GM Action] ⭐ Failed to queue spren grant for ${characterId}`);
         socket.emit('gm-grant-error', {
           type: 'spren',
           characterId,
-          error: 'Failed to queue spren grant',
+          error: 'Failed to queue spren grant'
         });
       } else if (!result.sent) {
-        console.warn(
-          `[GM Action] ⚠️ Spren grant queued but player offline - will send on reconnect`
-        );
+        console.warn(`[GM Action] ⚠️ Spren grant queued but player offline - will send on reconnect`);
       }
     } catch (error) {
       console.error(`[GM Action] ❌ Error in gm-grant-spren handler:`, error);
       socket.emit('gm-grant-error', {
         type: 'spren',
         characterId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
@@ -72,15 +70,13 @@ export function registerSprenHandlers(
   socket.on('spren-grant-ack', async ({ characterId, order }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(
-        `[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
-      );
+      console.warn(`[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
       return;
     }
 
     try {
       const result = await sprenGrantService.handleSprenAck(characterId, order);
-
+      
       if (result.success) {
         console.log(`[Spren] ✅ Successfully processed ack for ${characterId}`);
       } else {

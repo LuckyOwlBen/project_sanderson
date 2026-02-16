@@ -1,6 +1,6 @@
 /**
  * Character Calculations Service Tests
- *
+ * 
  * Validates all defense and derived attribute calculations
  * Ensures calculations match game design specifications
  */
@@ -10,7 +10,7 @@ import {
   CharacterCalculationsService,
   Attributes,
   DefenseValues,
-  DerivedAttributes,
+  DerivedAttributes
 } from './character-calculations';
 
 describe.skip('CharacterCalculationsService', () => {
@@ -54,19 +54,22 @@ describe.skip('CharacterCalculationsService', () => {
 
     it('should combine all bonuses correctly', () => {
       const attributes: Attributes = {
-        strength: 12, // +6 to def
-        quickness: 12, // +6 to def
+        strength: 12,    // +6 to def
+        quickness: 12    // +6 to def
       };
       const bonuses = {
-        armor: 2,
-        enchantment: 1,
+        'armor': 2,
+        'enchantment': 1
       };
       const result = service.calculatePhysicsDefense(attributes, bonuses);
       expect(result.physicsDef).toBe(10 + 6 + 6 + 3); // 25
     });
 
     it('should handle zero bonuses', () => {
-      const result = service.calculatePhysicsDefense({ strength: 10, quickness: 10 }, {});
+      const result = service.calculatePhysicsDefense(
+        { strength: 10, quickness: 10 },
+        {}
+      );
       expect(result.bonuses).toBe(0);
       expect(result.physicsDef).toBe(10 + 5 + 5); // 20
     });
@@ -78,7 +81,7 @@ describe.skip('CharacterCalculationsService', () => {
     it('should handle negative bonuses (debuffs)', () => {
       const result = service.calculatePhysicsDefense(
         { strength: 10, quickness: 10 },
-        { curse: -2 }
+        { 'curse': -2 }
       );
       expect(result.bonuses).toBe(-2);
       expect(result.physicsDef).toBe(10 + 5 + 5 - 2); // 18
@@ -87,7 +90,7 @@ describe.skip('CharacterCalculationsService', () => {
     it('should handle mixed positive and negative bonuses', () => {
       const result = service.calculatePhysicsDefense(
         { strength: 10, quickness: 10 },
-        { armor: 3, curse: -1, blessing: 2 }
+        { 'armor': 3, 'curse': -1, 'blessing': 2 }
       );
       expect(result.bonuses).toBe(4); // 3 - 1 + 2
       expect(result.physicsDef).toBe(10 + 5 + 5 + 4); // 24
@@ -193,10 +196,10 @@ describe.skip('CharacterCalculationsService', () => {
     it('should return correct derived attributes for standard human', () => {
       const attrs: Attributes = {
         strength: 10,
-        quickness: 10,
+        quickness: 10
       };
       const result = service.getDerivedAttributes(attrs);
-
+      
       expect(result.movementSpeed).toBe(30);
       expect(result.recoveryDie).toBe('d6');
       expect(result.baseRecoveryDie).toBe('d6');
@@ -256,10 +259,10 @@ describe.skip('CharacterCalculationsService', () => {
         intellect: 10,
         awareness: 10,
         will: 10,
-        presence: 10,
+        presence: 10
       };
       const result = service.calculateAll(attrs);
-
+      
       expect(result.defense.physicsDef).toBe(10 + 6 + 6); // 22
       expect(result.derived.movementSpeed).toBe(40);
       expect(result.derived.recoveryDie).toBe('d6');
@@ -268,10 +271,15 @@ describe.skip('CharacterCalculationsService', () => {
     it('should apply all bonuses together', () => {
       const attrs: Attributes = {
         strength: 10,
-        quickness: 10,
+        quickness: 10
       };
-      const result = service.calculateAll(attrs, { armor: 2 }, 5, '+1');
-
+      const result = service.calculateAll(
+        attrs,
+        { 'armor': 2 },
+        5,
+        '+1'
+      );
+      
       expect(result.defense.physicsDef).toBe(10 + 5 + 5 + 2); // 22
       expect(result.derived.movementSpeed).toBe(35);
       expect(result.derived.recoveryDie).toBe('d6+1');
@@ -290,7 +298,7 @@ describe.skip('CharacterCalculationsService', () => {
         intellect: 10,
         awareness: 10,
         will: 10,
-        presence: 10,
+        presence: 10
       });
       expect(result.valid).toBe(true);
     });
@@ -336,10 +344,10 @@ describe.skip('CharacterCalculationsService', () => {
         intellect: 21,
         awareness: 20,
         will: 21,
-        presence: 20,
+        presence: 20
       };
       const result = service.calculateAll(attrs);
-
+      
       expect(result.defense.physicsDef).toBe(10 + 10 + 10); // 30
       expect(result.derived.movementSpeed).toBe(80); // 30 + (20-10)*5
       expect(result.derived.recoveryDie).toBe('d12');
@@ -352,10 +360,10 @@ describe.skip('CharacterCalculationsService', () => {
         intellect: 1,
         awareness: 1,
         will: 1,
-        presence: 1,
+        presence: 1
       };
       const result = service.calculateAll(attrs);
-
+      
       expect(result.defense.physicsDef).toBe(10 + 0 + 0); // 10
       expect(result.derived.movementSpeed).toBe(5); // 30 + (1-10)*5
       expect(result.derived.recoveryDie).toBe('d4');
@@ -363,11 +371,11 @@ describe.skip('CharacterCalculationsService', () => {
 
     it('should handle multiple bonus sources', () => {
       const bonuses = {
-        armor: 2,
-        shield: 1,
-        ring: 1,
-        blessing: 2,
-        curse: -1,
+        'armor': 2,
+        'shield': 1,
+        'ring': 1,
+        'blessing': 2,
+        'curse': -1
       };
       const result = service.calculatePhysicsDefense({ strength: 10, quickness: 10 }, bonuses);
       expect(result.bonuses).toBe(5); // 2+1+1+2-1
@@ -377,7 +385,7 @@ describe.skip('CharacterCalculationsService', () => {
     it('should handle zero attributes correctly', () => {
       const attrs: Attributes = {
         strength: 0,
-        quickness: 0,
+        quickness: 0
       };
       const result = service.calculateAll(attrs);
       expect(result.defense.physicsDef).toBe(10);
@@ -408,7 +416,10 @@ describe.skip('CharacterCalculationsService', () => {
     });
 
     it('should enforce defense includes all three components', () => {
-      const result = service.calculatePhysicsDefense({ strength: 12, quickness: 14 }, { armor: 1 });
+      const result = service.calculatePhysicsDefense(
+        { strength: 12, quickness: 14 },
+        { 'armor': 1 }
+      );
       // 10 (base) + 7 (qck/2) + 6 (str/2) + 1 (bonus)
       expect(result.physicsDef).toBe(24);
       expect(result.baseDef).toBe(10);

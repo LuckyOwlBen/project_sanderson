@@ -11,8 +11,8 @@ export class ExpertiseListManager {
         crafting: [],
         magic: [],
         social: [],
-        survival: [],
-      },
+        survival: []
+      }
     };
   }
 }

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -36,7 +36,7 @@ describe('CombatPanelComponent', () => {
 
   beforeEach(async () => {
     const mockDialog = {
-      open: vi.fn(),
+      open: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -48,16 +48,16 @@ describe('CombatPanelComponent', () => {
         MatDividerModule,
         MatSlideToggleModule,
         MatInputModule,
-        FormsModule,
+        FormsModule
       ],
       providers: [
         CombatService,
         WebsocketService,
         {
           provide: MatDialog,
-          useValue: mockDialog,
-        },
-      ],
+          useValue: mockDialog
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CombatPanelComponent);

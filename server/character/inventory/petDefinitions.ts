@@ -22,8 +22,7 @@ export const PET_ITEMS: InventoryItem[] = [
     weight: 8,
     price: 0,
     rarity: 'reward-only',
-    description:
-      'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
+    description: 'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -32,8 +31,8 @@ export const PET_ITEMS: InventoryItem[] = [
       behavior: 'Protective and loyal',
       intelligence: 'animal',
       flyingSpeed: 40,
-      specialAbilities: ['Swift Strike', 'Aerial Reconnaissance'],
-    } as PetProperties,
+      specialAbilities: ['Swift Strike', 'Aerial Reconnaissance']
+    } as PetProperties
   },
   {
     id: 'armored-hound',
@@ -52,8 +51,8 @@ export const PET_ITEMS: InventoryItem[] = [
       behavior: 'Loyal and battle-hardened',
       intelligence: 'animal',
       movementSpeed: 50,
-      specialAbilities: ['Protective Stance', 'Pack Tactics'],
-    } as PetProperties,
+      specialAbilities: ['Protective Stance', 'Pack Tactics']
+    } as PetProperties
   },
   {
     id: 'spren-familiar',
@@ -71,8 +70,8 @@ export const PET_ITEMS: InventoryItem[] = [
       species: 'Spren',
       behavior: 'Magical and curious',
       intelligence: 'sapient',
-      specialAbilities: ['Spell Resonance', 'Ethereal Form'],
-    } as PetProperties,
+      specialAbilities: ['Spell Resonance', 'Ethereal Form']
+    } as PetProperties
   },
   {
     id: 'storm-drake',
@@ -82,8 +81,7 @@ export const PET_ITEMS: InventoryItem[] = [
     weight: 45,
     price: 0,
     rarity: 'reward-only',
-    description:
-      'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
+    description: 'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -92,8 +90,8 @@ export const PET_ITEMS: InventoryItem[] = [
       behavior: 'Fierce and storm-aligned',
       intelligence: 'sapient',
       flyingSpeed: 60,
-      specialAbilities: ['Storm Breath', 'Lightning Aura'],
-    } as PetProperties,
+      specialAbilities: ['Storm Breath', 'Lightning Aura']
+    } as PetProperties
   },
   {
     id: 'demo-companion',
@@ -103,8 +101,7 @@ export const PET_ITEMS: InventoryItem[] = [
     weight: 12,
     price: 0,
     rarity: 'reward-only',
-    description:
-      'A friendly demonstration companion. Perfect for testing and learning how pets work.',
+    description: 'A friendly demonstration companion. Perfect for testing and learning how pets work.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -113,8 +110,8 @@ export const PET_ITEMS: InventoryItem[] = [
       behavior: 'Friendly and eager to help',
       intelligence: 'animal',
       movementSpeed: 30,
-      specialAbilities: ['Learn Quickly', 'Demo Mode'],
-    } as PetProperties,
+      specialAbilities: ['Learn Quickly', 'Demo Mode']
+    } as PetProperties
   },
   {
     id: 'larkin',
@@ -124,8 +121,7 @@ export const PET_ITEMS: InventoryItem[] = [
     weight: 15,
     price: 0,
     rarity: 'reward-only',
-    description:
-      'A small insectoid companion that can drain Investiture. Found in high places acting as a scout and warrior.',
+    description: 'A small insectoid companion that can drain Investiture. Found in high places acting as a scout and warrior.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -135,9 +131,9 @@ export const PET_ITEMS: InventoryItem[] = [
       intelligence: 'animal',
       flyingSpeed: 20,
       movementSpeed: 30,
-      specialAbilities: ['Bite', 'Drain Light', 'Invested Healing'],
-    } as PetProperties,
-  },
+      specialAbilities: ['Bite', 'Drain Light', 'Invested Healing']
+    } as PetProperties
+  }
 ];
 
 // ===== STAT BLOCKS (for combat and mechanics) =====
@@ -150,15 +146,14 @@ const LARKIN_ABILITIES: PetAbility[] = [
     actionCost: '1-action',
     range: '5 ft.',
     description: 'Melee attack with keen damage.',
-    detailedEffect:
-      'Attack +5, reach 5 ft., one target. Graze: 2 (1d4) keen damage. Hit: 7 (1d4 + 5) keen damage, and the larkin can spend 2 focus to use their Drain Light (no action required) on that target or an effect infusing them. The larkin automatically succeeds on their Agility test to do so.',
+    detailedEffect: 'Attack +5, reach 5 ft., one target. Graze: 2 (1d4) keen damage. Hit: 7 (1d4 + 5) keen damage, and the larkin can spend 2 focus to use their Drain Light (no action required) on that target or an effect infusing them. The larkin automatically succeeds on their Agility test to do so.',
     attack: {
       bonus: 5,
       reach: '5 ft.',
       target: 'one target',
       onGraze: [{ statistic: 'keen', dice: '1d4', description: '2 (1d4) keen damage' }],
-      onHit: [{ statistic: 'keen', bonus: 5, dice: '1d4', description: '7 (1d4 + 5) keen damage' }],
-    },
+      onHit: [{ statistic: 'keen', bonus: 5, dice: '1d4', description: '7 (1d4 + 5) keen damage' }]
+    }
   },
   {
     id: 'larkin-drain-light',
@@ -167,19 +162,18 @@ const LARKIN_ABILITIES: PetAbility[] = [
     actionCost: '2-actions',
     range: '5 ft.',
     description: 'Drain Investiture, charges, or Stormlight from a target.',
-    detailedEffect:
-      "If the larkin isn't at full Investiture, they choose one of the following targets within 5 feet of them, draining the chosen target of power:\n• Object with Charges: A fabrial or other object with charges loses 2 (1d4) charges.\n• Group of Spheres: Up to 2 (1d4) infused marks or broams within range lose the Stormlight or other Light infused in them.\n• Infused Object or Character: The target (or effect infused in the target) loses 2 (1d4) Investiture.\n\nIf the target is a character, or if it is an object worn or held by a character, the larkin must succeed on an Agility test against that character's Spiritual defense or the target isn't drained. The larkin regains the same amount of Investiture as they drained from the target. A character wearing Invested Shardplate can't have their Investiture drained in this way, but the Shardplate itself can be drained of charges.",
+    detailedEffect: 'If the larkin isn\'t at full Investiture, they choose one of the following targets within 5 feet of them, draining the chosen target of power:\n• Object with Charges: A fabrial or other object with charges loses 2 (1d4) charges.\n• Group of Spheres: Up to 2 (1d4) infused marks or broams within range lose the Stormlight or other Light infused in them.\n• Infused Object or Character: The target (or effect infused in the target) loses 2 (1d4) Investiture.\n\nIf the target is a character, or if it is an object worn or held by a character, the larkin must succeed on an Agility test against that character\'s Spiritual defense or the target isn\'t drained. The larkin regains the same amount of Investiture as they drained from the target. A character wearing Invested Shardplate can\'t have their Investiture drained in this way, but the Shardplate itself can be drained of charges.',
     utility: {
       target: 'one object or character within 5 ft.',
       effect: 'Drain 2 (1d4) Investiture, charges, or Stormlight. Larkin regains drained amount.',
       check: {
         statistic: 'Agility',
-        against: 'Spiritual defense',
-      },
+        against: 'Spiritual defense'
+      }
     },
     cost: {
-      focus: 0, // Can use 2 focus to trigger after Bite, or 2 actions standalone
-    },
+      focus: 0 // Can use 2 focus to trigger after Bite, or 2 actions standalone
+    }
   },
   {
     id: 'larkin-invested-healing',
@@ -190,11 +184,11 @@ const LARKIN_ABILITIES: PetAbility[] = [
     description: 'Spend 1 Investiture to recover 5 (1d6 + 2) health.',
     utility: {
       target: 'self',
-      effect: 'Recover 5 (1d6 + 2) health',
+      effect: 'Recover 5 (1d6 + 2) health'
     },
     cost: {
-      investiture: 1,
-    },
+      investiture: 1
+    }
   },
   {
     id: 'larkin-weak-wings',
@@ -202,13 +196,12 @@ const LARKIN_ABILITIES: PetAbility[] = [
     type: 'passive',
     actionCost: 'free',
     range: 'self',
-    description:
-      "The larkin can't fly further than their flying rate on a turn, even if they use the Move action again.",
+    description: 'The larkin can\'t fly further than their flying rate on a turn, even if they use the Move action again.',
     passive: {
       description: 'Flight limitation',
-      effects: ['Can fly max 20 ft. per turn'],
-    },
-  },
+      effects: ['Can fly max 20 ft. per turn']
+    }
+  }
 ];
 
 export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
@@ -221,37 +214,36 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Alert and efficient scout',
     health: {
       current: 14,
-      max: 14,
+      max: 14
     },
     focus: {
       current: 4,
-      max: 4,
+      max: 4
     },
     movement: {
       ground: 30,
-      flying: 20,
+      flying: 20
     },
     senses: {
       range: 20,
-      types: ['sight'],
+      types: ['sight']
     },
     deflect: 2,
     physicalSkills: {
-      Agility: 5,
+      'Agility': 5
     },
     spiritualSkills: {
-      Insight: 4,
-      Perception: 5,
-      Survival: 4,
+      'Insight': 4,
+      'Perception': 5,
+      'Survival': 4
     },
-    languages: "understands every Rosharan language, but can't speak",
+    languages: 'understands every Rosharan language, but can\'t speak',
     abilities: LARKIN_ABILITIES,
     specialTraits: ['Weak Wings'],
-    description:
-      'A small insectoid companion with a carapace. Can drain Investiture and Stormlight. Weak fliers due to wing limitations.',
-    source: 'Rosharan Creature Compendium',
+    description: 'A small insectoid companion with a carapace. Can drain Investiture and Stormlight. Weak fliers due to wing limitations.',
+    source: 'Rosharan Creature Compendium'
   },
-  chickenhawk: {
+  'chickenhawk': {
     id: 'chickenhawk',
     name: 'Chickenhawk',
     type: 'Special Companion – Small Animal',
@@ -260,23 +252,23 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Protective and loyal',
     health: {
       current: 10,
-      max: 10,
+      max: 10
     },
     focus: {
       current: 2,
-      max: 2,
+      max: 2
     },
     movement: {
       ground: 20,
-      flying: 40,
+      flying: 40
     },
     senses: {
       range: 30,
-      types: ['sight'],
+      types: ['sight']
     },
     deflect: 1,
     physicalSkills: {
-      Agility: 4,
+      'Agility': 4
     },
     abilities: [
       {
@@ -290,10 +282,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
           bonus: 4,
           reach: '5 ft.',
           target: 'one target',
-          onHit: [
-            { statistic: 'keen', bonus: 3, dice: '1d6', description: '6 (1d6 + 3) keen damage' },
-          ],
-        },
+          onHit: [{ statistic: 'keen', bonus: 3, dice: '1d6', description: '6 (1d6 + 3) keen damage' }]
+        }
       },
       {
         id: 'chickenhawk-swift-strike',
@@ -304,8 +294,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Move and attack in quick succession.',
         utility: {
           target: 'one target',
-          effect: 'Move up to 30 ft. and make one Peck attack',
-        },
+          effect: 'Move up to 30 ft. and make one Peck attack'
+        }
       },
       {
         id: 'chickenhawk-aerial-recon',
@@ -316,13 +306,12 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Scout from above, seeing what others cannot.',
         utility: {
           target: 'area',
-          effect: 'Fly up to 40 ft. and observe enemies within 60 ft.',
-        },
-      },
+          effect: 'Fly up to 40 ft. and observe enemies within 60 ft.'
+        }
+      }
     ],
-    description:
-      'A fierce avian companion, a cross between a chicken and a hawk. Excellent aerial scout.',
-    source: 'Sanderson RPG Companions',
+    description: 'A fierce avian companion, a cross between a chicken and a hawk. Excellent aerial scout.',
+    source: 'Sanderson RPG Companions'
   },
   'armored-hound': {
     id: 'armored-hound',
@@ -333,23 +322,23 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Loyal and battle-hardened',
     health: {
       current: 20,
-      max: 20,
+      max: 20
     },
     focus: {
       current: 3,
-      max: 3,
+      max: 3
     },
     movement: {
-      ground: 50,
+      ground: 50
     },
     senses: {
       range: 40,
-      types: ['sight', 'smell'],
+      types: ['sight', 'smell']
     },
     deflect: 3,
     physicalSkills: {
-      Agility: 3,
-      Athleticism: 4,
+      'Agility': 3,
+      'Athleticism': 4
     },
     abilities: [
       {
@@ -363,10 +352,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
           bonus: 5,
           reach: '5 ft.',
           target: 'one target',
-          onHit: [
-            { statistic: 'force', bonus: 4, dice: '1d8', description: '12 (1d8 + 4) force damage' },
-          ],
-        },
+          onHit: [{ statistic: 'force', bonus: 4, dice: '1d8', description: '12 (1d8 + 4) force damage' }]
+        }
       },
       {
         id: 'hound-protective-stance',
@@ -377,8 +364,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Guard a nearby ally, reducing incoming damage.',
         utility: {
           target: 'self',
-          effect: 'Grant advantage on defense saves to nearby allies',
-        },
+          effect: 'Grant advantage on defense saves to nearby allies'
+        }
       },
       {
         id: 'hound-pack-tactics',
@@ -389,13 +376,12 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Coordinate with nearby allies for advantage.',
         utility: {
           target: 'self and nearby allies',
-          effect: 'Grant advantage on attack rolls if ally is within 10 ft. of target',
-        },
-      },
+          effect: 'Grant advantage on attack rolls if ally is within 10 ft. of target'
+        }
+      }
     ],
-    description:
-      'A stalwart canine companion, magically protected and trained for combat. Excellent defense.',
-    source: 'Sanderson RPG Companions',
+    description: 'A stalwart canine companion, magically protected and trained for combat. Excellent defense.',
+    source: 'Sanderson RPG Companions'
   },
   'spren-familiar': {
     id: 'spren-familiar',
@@ -406,24 +392,24 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Magical and curious',
     health: {
       current: 8,
-      max: 8,
+      max: 8
     },
     focus: {
       current: 6,
-      max: 6,
+      max: 6
     },
     movement: {
-      flying: 50,
+      flying: 50
     },
     senses: {
       range: 60,
-      types: ['sight', 'magical sense'],
+      types: ['sight', 'magical sense']
     },
     deflect: 2,
     spiritualSkills: {
-      Insight: 5,
-      Perception: 5,
-      Lore: 4,
+      'Insight': 5,
+      'Perception': 5,
+      'Lore': 4
     },
     abilities: [
       {
@@ -435,11 +421,11 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Amplify magical effects within range.',
         utility: {
           target: 'one spell effect',
-          effect: "Increase spell's effect radius or potency",
+          effect: 'Increase spell\'s effect radius or potency'
         },
         cost: {
-          focus: 2,
-        },
+          focus: 2
+        }
       },
       {
         id: 'spren-ethereal-form',
@@ -450,16 +436,15 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Become partially ethereal, phasing through obstacles.',
         utility: {
           target: 'self',
-          effect: 'Move through solid objects (but not creatures) until end of turn',
+          effect: 'Move through solid objects (but not creatures) until end of turn'
         },
         cost: {
-          focus: 1,
-        },
-      },
+          focus: 1
+        }
+      }
     ],
-    description:
-      'A small spren bound to serve as a magical companion. Excellent for magical support.',
-    source: 'Sanderson RPG Companions',
+    description: 'A small spren bound to serve as a magical companion. Excellent for magical support.',
+    source: 'Sanderson RPG Companions'
   },
   'storm-drake': {
     id: 'storm-drake',
@@ -470,24 +455,24 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Fierce and storm-aligned',
     health: {
       current: 25,
-      max: 25,
+      max: 25
     },
     focus: {
       current: 5,
-      max: 5,
+      max: 5
     },
     movement: {
       ground: 30,
-      flying: 60,
+      flying: 60
     },
     senses: {
       range: 50,
-      types: ['sight', 'storm sense'],
+      types: ['sight', 'storm sense']
     },
     deflect: 2,
     physicalSkills: {
-      Agility: 5,
-      Athleticism: 5,
+      'Agility': 5,
+      'Athleticism': 5
     },
     abilities: [
       {
@@ -501,10 +486,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
           bonus: 6,
           reach: '5 ft.',
           target: 'one target',
-          onHit: [
-            { statistic: 'spark', bonus: 4, dice: '2d6', description: '14 (2d6 + 4) spark damage' },
-          ],
-        },
+          onHit: [{ statistic: 'spark', bonus: 4, dice: '2d6', description: '14 (2d6 + 4) spark damage' }]
+        }
       },
       {
         id: 'drake-storm-breath',
@@ -515,12 +498,11 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Unleash a cone of lightning and storm energy.',
         utility: {
           target: 'cone 30 ft.',
-          effect:
-            'All creatures in area take 12 (3d6) spark damage, or half on successful Agility save',
+          effect: 'All creatures in area take 12 (3d6) spark damage, or half on successful Agility save'
         },
         cost: {
-          focus: 2,
-        },
+          focus: 2
+        }
       },
       {
         id: 'drake-lightning-aura',
@@ -531,13 +513,12 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Ambient electricity surrounds the drake, hurting those who strike it.',
         passive: {
           description: 'Electrical aura',
-          effects: ['Creatures that hit the drake with melee attacks take 3 (1d6) spark damage'],
-        },
-      },
+          effects: ['Creatures that hit the drake with melee attacks take 3 (1d6) spark damage']
+        }
+      }
     ],
-    description:
-      'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
-    source: 'Sanderson RPG Companions',
+    description: 'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
+    source: 'Sanderson RPG Companions'
   },
   'demo-companion': {
     id: 'demo-companion',
@@ -548,18 +529,18 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
     behavior: 'Friendly and eager to help',
     health: {
       current: 12,
-      max: 12,
+      max: 12
     },
     focus: {
       current: 3,
-      max: 3,
+      max: 3
     },
     movement: {
-      ground: 30,
+      ground: 30
     },
     senses: {
       range: 30,
-      types: ['sight'],
+      types: ['sight']
     },
     deflect: 1,
     abilities: [
@@ -574,10 +555,8 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
           bonus: 3,
           reach: '5 ft.',
           target: 'one target',
-          onHit: [
-            { statistic: 'force', bonus: 1, dice: '1d4', description: '3 (1d4 + 1) force damage' },
-          ],
-        },
+          onHit: [{ statistic: 'force', bonus: 1, dice: '1d4', description: '3 (1d4 + 1) force damage' }]
+        }
       },
       {
         id: 'demo-learn-quickly',
@@ -588,20 +567,19 @@ export const PET_STAT_BLOCKS: Record<string, PetStatBlock> = {
         description: 'Perfect for testing new companion features.',
         passive: {
           description: 'Testing aid',
-          effects: ['Can be used to test all companion mechanics safely'],
-        },
-      },
+          effects: ['Can be used to test all companion mechanics safely']
+        }
+      }
     ],
-    description:
-      'A friendly demonstration companion. Perfect for testing and learning how pets work.',
-    source: 'Sanderson RPG Companions',
-  },
+    description: 'A friendly demonstration companion. Perfect for testing and learning how pets work.',
+    source: 'Sanderson RPG Companions'
+  }
 };
 
 // ===== HELPER FUNCTIONS =====
 
 export function getPetById(id: string): InventoryItem | undefined {
-  return PET_ITEMS.find((pet) => pet.id === id);
+  return PET_ITEMS.find(pet => pet.id === id);
 }
 
 export function getPetProperties(pet: InventoryItem): PetProperties | undefined {

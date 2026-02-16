@@ -52,54 +52,52 @@ import { takeUntil } from 'rxjs/operators';
       </mat-card-content>
     </mat-card>
   `,
-  styles: [
-    `
-      .turn-speed-selector {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 300px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-      }
+  styles: [`
+    .turn-speed-selector {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
 
-      mat-card-header {
-        margin-bottom: 12px;
-      }
+    mat-card-header {
+      margin-bottom: 12px;
+    }
 
-      mat-card-title {
-        font-size: 18px;
-        margin: 0;
-      }
+    mat-card-title {
+      font-size: 18px;
+      margin: 0;
+    }
 
-      .button-group {
-        display: flex;
-        gap: 8px;
-        margin: 16px 0;
-      }
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
 
-      .speed-button {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
+    .speed-button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
 
-      .speed-info {
-        margin-top: 16px;
-        padding: 12px;
-        border-radius: 4px;
-        background-color: rgba(63, 81, 181, 0.1);
-        border-left: 4px solid #3f51b5;
-      }
+    .speed-info {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 4px;
+      background-color: rgba(63, 81, 181, 0.1);
+      border-left: 4px solid #3f51b5;
+    }
 
-      .speed-info p {
-        margin: 0;
-        font-size: 14px;
-      }
-    `,
-  ],
+    .speed-info p {
+      margin: 0;
+      font-size: 14px;
+    }
+  `]
 })
 export class CombatTurnSpeedSelectorComponent implements OnInit, OnDestroy {
   @Input() characterId: string = '';
@@ -119,29 +117,35 @@ export class CombatTurnSpeedSelectorComponent implements OnInit, OnDestroy {
     // Listen for combat start from WebSocket (server-side trigger from GM)
     const combatStartStream = (this.websocketService as any)?.combatStart$;
     if (combatStartStream && typeof combatStartStream.pipe === 'function') {
-      combatStartStream.pipe(takeUntil(this.destroy$)).subscribe((event: any) => {
-        console.log('[Combat Selector] ⚔️ Combat start received from server');
-        this.isVisible = true;
-        this.cdr.markForCheck();
-      });
+      combatStartStream
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((event: any) => {
+          console.log('[Combat Selector] ⚔️ Combat start received from server');
+          this.isVisible = true;
+          this.cdr.markForCheck();
+        });
     }
 
     // Also listen for local combat toggle (for offline/single-player scenarios)
-    this.combatService.combatActive$.pipe(takeUntil(this.destroy$)).subscribe((isActive) => {
-      this.isVisible = isActive;
-      if (!isActive) {
-        this.selectedSpeed = null;
-      }
-      this.cdr.markForCheck();
-    });
+    this.combatService.combatActive$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isActive => {
+        this.isVisible = isActive;
+        if (!isActive) {
+          this.selectedSpeed = null;
+        }
+        this.cdr.markForCheck();
+      });
 
     // Track selected speed
-    this.combatService.turnSpeedChanged$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
-      if (event.characterId === this.characterId) {
-        this.selectedSpeed = event.turnSpeed;
-        this.cdr.markForCheck();
-      }
-    });
+    this.combatService.turnSpeedChanged$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (event.characterId === this.characterId) {
+          this.selectedSpeed = event.turnSpeed;
+          this.cdr.markForCheck();
+        }
+      });
 
     // Initialize with current selected speed if any
     const currentSpeed = this.combatService.getTurnSpeed(this.characterId);

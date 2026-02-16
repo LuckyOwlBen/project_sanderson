@@ -32,7 +32,7 @@ export class AncestryModule {
    * Add a culture
    */
   addCulture(culture: CulturalInterface): void {
-    if (!this.cultures.find((c) => c.name === culture.name)) {
+    if (!this.cultures.find(c => c.name === culture.name)) {
       this.cultures.push(culture);
     }
   }
@@ -41,7 +41,7 @@ export class AncestryModule {
    * Remove a culture
    */
   removeCulture(cultureName: string): void {
-    this.cultures = this.cultures.filter((c) => c.name !== cultureName);
+    this.cultures = this.cultures.filter(c => c.name !== cultureName);
   }
 
   /**
@@ -57,7 +57,7 @@ export class AncestryModule {
    * Remove a path
    */
   removePath(path: string): void {
-    this.paths = this.paths.filter((p) => p !== path);
+    this.paths = this.paths.filter(p => p !== path);
   }
 
   /**

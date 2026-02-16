@@ -15,7 +15,7 @@ function log(message) {
 }
 
 async function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function runTest() {
@@ -31,7 +31,7 @@ async function runTest() {
       damageNotation: 'd6+1',
       damageBonus: 0,
       targetDefense: 12,
-      advantageMode: 'normal',
+      advantageMode: 'normal'
     });
 
     log(`Request body: ${body}`);
@@ -39,10 +39,10 @@ async function runTest() {
     const response = await fetch('http://localhost:3000/api/calculations/attack/execute', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: body,
-      timeout: 5000,
+      timeout: 5000
     });
 
     log(`Response status: ${response.status}`);

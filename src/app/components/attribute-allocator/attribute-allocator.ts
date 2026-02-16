@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy,
-  Output,
-  EventEmitter,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, filter, take } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
@@ -31,19 +24,16 @@ interface AttributeConfig {
   imports: [CommonModule, ValueStepper],
   providers: [],
   templateUrl: './attribute-allocator.html',
-  styleUrls: ['./attribute-allocator.scss'],
+  styleUrls: ['./attribute-allocator.scss']
 })
-export class AttributeAllocator
-  extends BaseAllocator<AttributeConfig>
-  implements OnInit, OnDestroy
-{
+export class AttributeAllocator extends BaseAllocator<AttributeConfig> implements OnInit, OnDestroy {
   @Output() pendingChange = new EventEmitter<boolean>();
-
+  
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 3; // Attributes is step 3
   private derivedAttributesManager = new DerivedAttributesManager();
   private resourceManager: ResourceManager | null = null;
-
+  
   movementSpeed: number = 0;
   recoveryDie: string = '';
   derivedHealth: number = 0;
@@ -84,10 +74,9 @@ export class AttributeAllocator
 
   private loadAttributes(characterId: string): void {
     if (this.isLoading) return; // Prevent multiple simultaneous loads
-
+    
     this.isLoading = true;
-    this.attributesApi
-      .getAttributes(characterId)
+    this.attributesApi.getAttributes(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (state) => {
@@ -100,9 +89,10 @@ export class AttributeAllocator
           this.isLoading = false;
           // Don''t initialize defaults - wait for successful API response
           // This prevents overwriting server state with client defaults
-        },
+        }
       });
   }
+  
 
   private applyAttributesState(state: AttributesState): void {
     this.finalized = state.finalized;
@@ -117,13 +107,13 @@ export class AttributeAllocator
       { name: 'Awareness', key: 'awareness', currentValue: state.awareness },
       { name: 'Intellect', key: 'intellect', currentValue: state.intellect },
       { name: 'Willpower', key: 'willpower', currentValue: state.willpower },
-      { name: 'Presence', key: 'presence', currentValue: state.presence },
+      { name: 'Presence', key: 'presence', currentValue: state.presence }
     ];
 
     // Initialize with pointsRemaining as total available (includes level bonuses)
     this.initialize(attributes, state.pointsRemaining, false);
     this.initialize(attributes, state.pointsRemaining, false);
-
+    
     // Initialize resource manager with base attributes
     const attrs = new Attributes();
     attrs.strength = state.strength;
@@ -133,7 +123,7 @@ export class AttributeAllocator
     attrs.willpower = state.willpower;
     attrs.presence = state.presence;
     this.resourceManager = new ResourceManager(attrs);
-
+    
     // Force recalculation to ensure remainingPoints is correct
     this.updateValidation();
 
@@ -179,31 +169,31 @@ export class AttributeAllocator
 
   private updateLiveDerivedAttributes(): void {
     if (!this.resourceManager) return;
-
+    
     // Build Attributes object from current item values
     const attrs = this.buildAttributesFromItems();
-
+    
     // Recalculate resource manager with new attribute values
     this.resourceManager.recalculateMaxValues(attrs);
-
+    
     // Update derived attributes from calculated values
     this.derivedHealth = this.resourceManager.health.max;
     this.derivedFocus = this.resourceManager.focus.max;
     this.movementSpeed = this.derivedAttributesManager.getMovementSpeed(attrs);
     this.recoveryDie = this.derivedAttributesManager.getRecoveryDie(attrs);
-
+    
     // Trigger change detection
     this.cdr.markForCheck();
   }
 
   private buildAttributesFromItems(): Attributes {
     const attrs = new Attributes();
-    attrs.strength = this.items.find((i) => i.key === 'strength')?.currentValue ?? 0;
-    attrs.speed = this.items.find((i) => i.key === 'speed')?.currentValue ?? 0;
-    attrs.awareness = this.items.find((i) => i.key === 'awareness')?.currentValue ?? 0;
-    attrs.intellect = this.items.find((i) => i.key === 'intellect')?.currentValue ?? 0;
-    attrs.willpower = this.items.find((i) => i.key === 'willpower')?.currentValue ?? 0;
-    attrs.presence = this.items.find((i) => i.key === 'presence')?.currentValue ?? 0;
+    attrs.strength = this.items.find(i => i.key === 'strength')?.currentValue ?? 0;
+    attrs.speed = this.items.find(i => i.key === 'speed')?.currentValue ?? 0;
+    attrs.awareness = this.items.find(i => i.key === 'awareness')?.currentValue ?? 0;
+    attrs.intellect = this.items.find(i => i.key === 'intellect')?.currentValue ?? 0;
+    attrs.willpower = this.items.find(i => i.key === 'willpower')?.currentValue ?? 0;
+    attrs.presence = this.items.find(i => i.key === 'presence')?.currentValue ?? 0;
     return attrs;
   }
 
@@ -215,19 +205,20 @@ export class AttributeAllocator
       return acc;
     }, {} as Record<AttributeKey, number>);
 
-    this.attributesApi.updateAttributes(this.characterId, attributesObj).subscribe({
-      next: (state) => {
-        console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);
-        // Update derived attributes from server response for authoritative values
-        this.derivedHealth = state.derived.health;
-        this.derivedFocus = state.derived.focus;
-        this.movementSpeed = state.derived.movement;
-        this.recoveryDie = state.derived.recovery;
-      },
-      error: (err: any) => {
-        console.error(`[AttributeAllocator] Failed to save attributes:`, err);
-      },
-    });
+    this.attributesApi.updateAttributes(this.characterId, attributesObj)
+      .subscribe({
+        next: (state) => {
+          console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);
+          // Update derived attributes from server response for authoritative values
+          this.derivedHealth = state.derived.health;
+          this.derivedFocus = state.derived.focus;
+          this.movementSpeed = state.derived.movement;
+          this.recoveryDie = state.derived.recovery;
+        },
+        error: (err: any) => {
+          console.error(`[AttributeAllocator] Failed to save attributes:`, err);
+        }
+      });
   }
 
   // TrackBy function for ngFor to prevent unnecessary re-renders

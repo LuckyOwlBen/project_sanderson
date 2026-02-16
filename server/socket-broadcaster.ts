@@ -26,12 +26,12 @@ interface BroadcasterConfig {
 const DEFAULT_CONFIG: BroadcasterConfig = {
   debounceMs: 3000,
   queueExpirationMs: 3600000, // 1 hour
-  maxQueueSizePerCharacter: 50,
+  maxQueueSizePerCharacter: 50
 };
 
 /**
  * SocketBroadcaster manages character update events with debouncing and queuing.
- *
+ * 
  * Features:
  * - Per-socket debouncing to prevent update spam
  * - Deduplication - only one queued update per character
@@ -42,13 +42,13 @@ const DEFAULT_CONFIG: BroadcasterConfig = {
 export class SocketBroadcaster {
   private io: SocketIOServer;
   private config: BroadcasterConfig;
-
+  
   // Map of socketId -> characterId -> timer for debouncing
   private debounceTimers: Map<string, Map<string, NodeJS.Timeout>>;
-
+  
   // Map of characterId -> QueuedUpdate for offline players (deduplicated)
   private pendingUpdates: Map<string, QueuedUpdate>;
-
+  
   // Reference to activePlayers Map from server
   private activePlayers: Map<string, any>;
 
@@ -62,22 +62,22 @@ export class SocketBroadcaster {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.debounceTimers = new Map();
     this.pendingUpdates = new Map();
-
+    
     console.log('[SocketBroadcaster] Initialized with config:', this.config);
   }
 
   /**
    * Schedule a character update broadcast with debouncing.
-   *
+   * 
    * If the player is online, debounces and emits to their socket.
    * If the player is offline, queues the update (deduplicated by characterId).
-   *
+   * 
    * @param characterId The character that was updated
    */
   scheduleCharacterUpdate(characterId: string): void {
     // Find the socket for this character
     const socketId = this.findSocketByCharacterId(characterId);
-
+    
     if (socketId) {
       // Player is online - debounce and emit
       this.debounceAndEmit(socketId, characterId);
@@ -90,33 +90,29 @@ export class SocketBroadcaster {
   /**
    * Deliver any pending updates to a reconnecting player.
    * Called from the player-join WebSocket handler.
-   *
+   * 
    * @param socketId The socket that just connected
    * @param characterId The character that joined
    */
   deliverPendingUpdates(socketId: string, characterId: string): void {
     const queued = this.pendingUpdates.get(characterId);
-
+    
     if (!queued) {
       return; // No pending updates
     }
-
+    
     // Check if update has expired
     const age = Date.now() - new Date(queued.timestamp).getTime();
     if (age > this.config.queueExpirationMs) {
-      console.log(
-        `[SocketBroadcaster] Discarding expired update for ${characterId} (age: ${Math.round(
-          age / 1000
-        )}s)`
-      );
+      console.log(`[SocketBroadcaster] Discarding expired update for ${characterId} (age: ${Math.round(age / 1000)}s)`);
       this.pendingUpdates.delete(characterId);
       return;
     }
-
+    
     // Deliver the update
     console.log(`[SocketBroadcaster] Delivering queued update to ${characterId}`);
     this.emitToSocket(socketId, characterId);
-
+    
     // Remove from queue after delivery
     this.pendingUpdates.delete(characterId);
   }
@@ -128,7 +124,7 @@ export class SocketBroadcaster {
   cleanupExpiredUpdates(): void {
     const now = Date.now();
     let removedCount = 0;
-
+    
     for (const [characterId, update] of this.pendingUpdates.entries()) {
       const age = now - new Date(update.timestamp).getTime();
       if (age > this.config.queueExpirationMs) {
@@ -136,7 +132,7 @@ export class SocketBroadcaster {
         removedCount++;
       }
     }
-
+    
     if (removedCount > 0) {
       console.log(`[SocketBroadcaster] Cleaned up ${removedCount} expired updates`);
     }
@@ -150,10 +146,10 @@ export class SocketBroadcaster {
     for (const socketTimers of this.debounceTimers.values()) {
       timerCount += socketTimers.size;
     }
-
+    
     return {
       queueSize: this.pendingUpdates.size,
-      activeTimers: timerCount,
+      activeTimers: timerCount
     };
   }
 
@@ -181,24 +177,24 @@ export class SocketBroadcaster {
       socketTimers = new Map();
       this.debounceTimers.set(socketId, socketTimers);
     }
-
+    
     // Clear existing timer for this character (if any)
     const existingTimer = socketTimers.get(characterId);
     if (existingTimer) {
       clearTimeout(existingTimer);
     }
-
+    
     // Set new timer
     const timer = setTimeout(() => {
       this.emitToSocket(socketId, characterId);
-
+      
       // Clean up timer reference
       socketTimers!.delete(characterId);
       if (socketTimers!.size === 0) {
         this.debounceTimers.delete(socketId);
       }
     }, this.config.debounceMs);
-
+    
     socketTimers.set(characterId, timer);
   }
 
@@ -206,13 +202,11 @@ export class SocketBroadcaster {
    * Emit the character-updated event to a specific socket.
    */
   private emitToSocket(socketId: string, characterId: string): void {
-    console.log(
-      `[SocketBroadcaster] Emitting character-updated to socket ${socketId} for character ${characterId}`
-    );
-
+    console.log(`[SocketBroadcaster] Emitting character-updated to socket ${socketId} for character ${characterId}`);
+    
     this.io.to(socketId).emit('character-updated', {
       characterId,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 
@@ -222,21 +216,17 @@ export class SocketBroadcaster {
    */
   private queueUpdate(characterId: string): void {
     // Check if we're at the queue size limit
-    if (
-      !this.pendingUpdates.has(characterId) &&
-      this.pendingUpdates.size >= this.config.maxQueueSizePerCharacter * 10
-    ) {
-      console.warn(
-        `[SocketBroadcaster] Queue is full (${this.pendingUpdates.size} updates), discarding update for ${characterId}`
-      );
+    if (!this.pendingUpdates.has(characterId) && 
+        this.pendingUpdates.size >= this.config.maxQueueSizePerCharacter * 10) {
+      console.warn(`[SocketBroadcaster] Queue is full (${this.pendingUpdates.size} updates), discarding update for ${characterId}`);
       return;
     }
-
+    
     const update: QueuedUpdate = {
       characterId,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
-
+    
     // Deduplicate - always keep the latest update
     const existing = this.pendingUpdates.get(characterId);
     if (existing) {
@@ -244,7 +234,7 @@ export class SocketBroadcaster {
     } else {
       console.log(`[SocketBroadcaster] Queuing update for offline character ${characterId}`);
     }
-
+    
     this.pendingUpdates.set(characterId, update);
   }
 

@@ -22,14 +22,14 @@ import { CharacterImage } from '../../components/shared/character-image/characte
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    CharacterImage,
+    CharacterImage
   ],
   templateUrl: './character-review.html',
   styleUrl: './character-review.scss',
 })
 export class CharacterReview implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-
+  
   completeCharacter: CompleteCharacterView | null = null;
   portraitUrl: string | null = null;
   isLevelUpMode: boolean = false;
@@ -49,14 +49,18 @@ export class CharacterReview implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to route params to detect level-up mode
-    this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.isLevelUpMode = params['levelUp'] === 'true';
-    });
+    this.activatedRoute.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.isLevelUpMode = params['levelUp'] === 'true';
+      });
 
     // Monitor waiting state for character ID
-    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
-      this.isWaitingForIdentity = waiting;
-    });
+    this.identityService.waitingForIdentity$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
 
     // Try to get character ID immediately (synchronously)
     const existingCharacterId = this.identityService.getCurrentCharacterId();
@@ -86,17 +90,13 @@ export class CharacterReview implements OnInit, OnDestroy {
     this.isLoadingCharacter = true;
     this.characterLoadError = '';
 
-    this.finalizeApi
-      .getCompleteCharacter(characterId)
+    this.finalizeApi.getCompleteCharacter(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (complete) => {
           this.isLoadingCharacter = false;
           if (!complete) {
-            console.warn(
-              '[CharacterReview] API returned no complete character for ID:',
-              characterId
-            );
+            console.warn('[CharacterReview] API returned no complete character for ID:', characterId);
             this.characterLoadError = 'Failed to load character. Character may have been deleted.';
             return;
           }
@@ -107,7 +107,7 @@ export class CharacterReview implements OnInit, OnDestroy {
           this.isLoadingCharacter = false;
           console.error('[CharacterReview] Failed to load complete character from API:', err);
           this.characterLoadError = 'Failed to load character. Please check your connection.';
-        },
+        }
       });
   }
 
@@ -126,33 +126,32 @@ export class CharacterReview implements OnInit, OnDestroy {
     console.log('[CharacterReview] Finalizing character creation:', characterName);
     this.isLoadingCharacter = true;
     this.characterLoadError = '';
-
-    this.finalizeApi
-      .finalizeCharacter(this.characterId)
+    
+    this.finalizeApi.finalizeCharacter(this.characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (success) => {
           this.isLoadingCharacter = false;
-
+          
           if (success) {
             console.log('[CharacterReview] ✅ Character finalized successfully:', this.characterId);
-
+            
             // Update nav finalized status
             if (this.characterId) {
               this.navFinalized.loadNavFinalized(this.characterId).subscribe(() => {
                 // Navigate to character sheet
                 this.router.navigate(['/character-sheet', this.characterId], {
                   queryParams: {
-                    created: 'true', // Flag indicating character was just created
-                  },
+                    created: 'true' // Flag indicating character was just created
+                  }
                 });
               });
             } else {
               // Fallback navigation if characterId is missing
               this.router.navigate(['/character-sheet'], {
                 queryParams: {
-                  created: 'true',
-                },
+                  created: 'true'
+                }
               });
             }
           } else {
@@ -164,17 +163,20 @@ export class CharacterReview implements OnInit, OnDestroy {
         error: (err) => {
           this.isLoadingCharacter = false;
           console.error('[CharacterReview] ❌ Error finalizing character:', err);
-
+          
           // Check if error message indicates unspent points
           const errorMessage = err?.error?.error || err?.message || 'Unknown error';
           if (errorMessage.includes('points remaining')) {
             this.characterLoadError = errorMessage;
           } else {
-            this.characterLoadError =
-              'Error finalizing character. Please check your connection and try again.';
+            this.characterLoadError = 'Error finalizing character. Please check your connection and try again.';
           }
           this.cdr.detectChanges();
-        },
+        }
       });
   }
 }
+
+
+
+

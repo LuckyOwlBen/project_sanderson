@@ -1,6 +1,6 @@
 /**
  * Database Service Layer - SQLite Implementation
- *
+ * 
  * Uses better-sqlite3 for direct, synchronous database access.
  * Provides transaction-safe character CRUD and talent operations.
  * No ORM complexity - just SQL and transactions for safety.
@@ -23,7 +23,7 @@ export async function initDatabase() {
   try {
     db = await open({
       filename: DB_PATH,
-      driver: sqlite3.Database,
+      driver: sqlite3.Database
     });
     await db.run('PRAGMA journal_mode = WAL');
     await db.run('PRAGMA foreign_keys = ON');
@@ -42,12 +42,12 @@ export { dbInitialized, dbError };
 // ============================================================================
 // Single source of truth for path -> tier 0 talent mapping
 export const PATH_TIER0_TALENTS: Record<string, string> = {
-  warrior: 'vigilant_stance',
-  scholar: 'education',
-  hunter: 'seek_quarry',
-  leader: 'decisive_command',
-  envoy: 'rousing_presence',
-  agent: 'opportunist',
+  'warrior': 'vigilant_stance',
+  'scholar': 'education',
+  'hunter': 'seek_quarry',
+  'leader': 'decisive_command',
+  'envoy': 'rousing_presence',
+  'agent': 'opportunist'
 };
 
 /**
@@ -120,7 +120,7 @@ export interface TalentsStateRecord {
   finalized: boolean;
   totalTalents: string[];
   pendingTalents: string[];
-  pendingTrees: string[]; // Selected bonus path trees (removable until finalized)
+  pendingTrees: string[];  // Selected bonus path trees (removable until finalized)
 }
 
 export interface SaveResult {
@@ -292,10 +292,10 @@ export async function initializeSchema(): Promise<void> {
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
     `);
-
+    
     // Run migrations for existing tables
     await runMigrations();
-
+    
     console.log('[Database] Schema initialized');
   } catch (error) {
     if ((error as any).message.includes('already exists')) {
@@ -313,9 +313,9 @@ async function runMigrations(): Promise<void> {
   if (!db) throw new Error('Database not initialized');
   try {
     // Migration: Add currencyInChips column to Character table if it doesn't exist
-    const hasColumns = await db.all('PRAGMA table_info(Character)');
+    const hasColumns = await db.all("PRAGMA table_info(Character)");
     const hasCurrency = hasColumns.some((col: any) => col.name === 'currencyInChips');
-
+    
     if (!hasCurrency) {
       console.log('[Database] Running migration: Adding currencyInChips column to Character table');
       try {
@@ -356,38 +356,14 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
 
     // Load related data
     const attrs = await db.get('SELECT * FROM Attributes WHERE characterId = ?', characterId);
-    const skills = await db.all(
-      'SELECT skillName, value FROM Skill WHERE characterId = ?',
-      characterId
-    );
-    const talents = await db.all(
-      'SELECT talentId FROM UnlockedTalent WHERE characterId = ?',
-      characterId
-    );
-    const expertises = await db.all(
-      'SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?',
-      characterId
-    );
-    const items = await db.all(
-      'SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?',
-      characterId
-    );
-    const resources = await db.get(
-      'SELECT * FROM CharacterResources WHERE characterId = ?',
-      characterId
-    );
-    const paths = await db.all(
-      'SELECT pathName, tier0TalentId FROM PathSelection WHERE characterId = ?',
-      characterId
-    );
-    const cultures = await db.all(
-      'SELECT name FROM CultureSelection WHERE characterId = ?',
-      characterId
-    );
-    const radiantPath = await db.get(
-      'SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId FROM RadiantPath WHERE characterId = ?',
-      characterId
-    );
+    const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
+    const talents = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
+    const expertises = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
+    const items = await db.all('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?', characterId);
+    const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
+    const paths = await db.all('SELECT pathName, tier0TalentId FROM PathSelection WHERE characterId = ?', characterId);
+    const cultures = await db.all('SELECT name FROM CultureSelection WHERE characterId = ?', characterId);
+    const radiantPath = await db.get('SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId FROM RadiantPath WHERE characterId = ?', characterId);
 
     // Serialize to character format
     return {
@@ -398,16 +374,14 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       ancestry: char.ancestry,
       sessionNotes: char.sessionNotes,
       lastModified: char.lastModified,
-      attributes: attrs
-        ? {
-            strength: attrs.strength,
-            speed: attrs.speed,
-            intellect: attrs.intellect,
-            willpower: attrs.willpower,
-            awareness: attrs.awareness,
-            presence: attrs.presence,
-          }
-        : {},
+      attributes: attrs ? {
+        strength: attrs.strength,
+        speed: attrs.speed,
+        intellect: attrs.intellect,
+        willpower: attrs.willpower,
+        awareness: attrs.awareness,
+        presence: attrs.presence
+      } : {},
       skills: skills.reduce((acc: Record<string, number>, s: any) => {
         acc[s.skillName] = s.value;
         return acc;
@@ -418,36 +392,32 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
         items: items.map((item: any) => ({
           id: item.itemId,
           quantity: item.quantity,
-          customData: {},
+          customData: {}
         })),
         equippedItems: [],
-        currencyInChips: char.currencyInChips ?? 0,
+        currencyInChips: char.currencyInChips ?? 0
       },
-      resources: resources
-        ? {
-            health: { current: resources.healthCurrent, max: resources.healthMax },
-            focus: { current: resources.focusCurrent, max: resources.focusMax },
-            investiture: {
-              current: resources.investitureCurrent,
-              max: resources.investitureMax,
-              isActive: resources.investitureActive === 1,
-            },
-          }
-        : undefined,
+      resources: resources ? {
+        health: { current: resources.healthCurrent, max: resources.healthMax },
+        focus: { current: resources.focusCurrent, max: resources.focusMax },
+        investiture: {
+          current: resources.investitureCurrent,
+          max: resources.investitureMax,
+          isActive: resources.investitureActive === 1
+        }
+      } : undefined,
       paths: paths.map((p: any) => p.pathName),
       mainPathTier0TalentId: paths.length > 0 ? paths[0].tier0TalentId || null : null,
       cultures: cultures.map((c: any) => c.name),
-      radiantPath: radiantPath
-        ? {
-            boundOrder: radiantPath.boundOrder,
-            currentIdeal: radiantPath.currentIdeal,
-            idealSpoken: radiantPath.idealSpoken === 1,
-            surgePair: radiantPath.surgePair,
-            sprenType: radiantPath.sprenType,
-            radiantTier0TalentId: radiantPath.radiantTier0TalentId || null,
-          }
-        : undefined,
-      radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null,
+      radiantPath: radiantPath ? {
+        boundOrder: radiantPath.boundOrder,
+        currentIdeal: radiantPath.currentIdeal,
+        idealSpoken: radiantPath.idealSpoken === 1,
+        surgePair: radiantPath.surgePair,
+        sprenType: radiantPath.sprenType,
+        radiantTier0TalentId: radiantPath.radiantTier0TalentId || null
+      } : undefined,
+      radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -474,14 +444,13 @@ export async function getAttributesRecord(characterId: string): Promise<Attribut
     willpower: attrs.willpower ?? 2,
     awareness: attrs.awareness ?? 2,
     presence: attrs.presence ?? 2,
-    finalized: (attrs.finalized ?? 0) === 1,
+    finalized: (attrs.finalized ?? 0) === 1
   };
 }
 
 export async function createAttributesRecord(record: AttributesRecord): Promise<AttributesRecord> {
   if (!db) throw new Error('Database not initialized');
-  await db.run(
-    `
+  await db.run(`
     INSERT INTO Attributes (
       id, characterId, totalPoints, pointsSpent, pointsRemaining,
       strength, speed, intellect, willpower, awareness, presence, finalized
@@ -516,11 +485,10 @@ export async function updateAttributesRecord(
   const merged: AttributesRecord = {
     ...current,
     ...updates,
-    characterId,
+    characterId
   };
 
-  await db.run(
-    `
+  await db.run(`
     UPDATE Attributes SET
       totalPoints = ?,
       pointsSpent = ?,
@@ -550,10 +518,7 @@ export async function updateAttributesRecord(
   return merged;
 }
 
-export async function setAttributesFinalized(
-  characterId: string,
-  finalized: boolean
-): Promise<void> {
+export async function setAttributesFinalized(characterId: string, finalized: boolean): Promise<void> {
   if (!db) throw new Error('Database not initialized');
   await db.run(
     'UPDATE Attributes SET finalized = ? WHERE characterId = ?',
@@ -575,16 +540,13 @@ export async function getSkillsStateRecord(characterId: string): Promise<SkillsS
     totalPoints: state.totalPoints ?? 0,
     pointsSpent: state.pointsSpent ?? 0,
     pointsRemaining: state.pointsRemaining ?? 0,
-    finalized: (state.finalized ?? 0) === 1,
+    finalized: (state.finalized ?? 0) === 1
   };
 }
 
-export async function createSkillsStateRecord(
-  record: SkillsStateRecord
-): Promise<SkillsStateRecord> {
+export async function createSkillsStateRecord(record: SkillsStateRecord): Promise<SkillsStateRecord> {
   if (!db) throw new Error('Database not initialized');
-  await db.run(
-    `
+  await db.run(`
     INSERT INTO SkillsState (
       id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized
     ) VALUES (?, ?, ?, ?, ?, ?)
@@ -612,11 +574,10 @@ export async function updateSkillsStateRecord(
   const merged: SkillsStateRecord = {
     ...current,
     ...updates,
-    characterId,
+    characterId
   };
 
-  await db.run(
-    `
+  await db.run(`
     UPDATE SkillsState SET
       totalPoints = ?,
       pointsSpent = ?,
@@ -634,10 +595,7 @@ export async function updateSkillsStateRecord(
   return merged;
 }
 
-export async function setSkillsStateFinalized(
-  characterId: string,
-  finalized: boolean
-): Promise<void> {
+export async function setSkillsStateFinalized(characterId: string, finalized: boolean): Promise<void> {
   if (!db) throw new Error('Database not initialized');
   await db.run(
     'UPDATE SkillsState SET finalized = ? WHERE characterId = ?',
@@ -650,9 +608,7 @@ export async function setSkillsStateFinalized(
 // TALENTS STATE HELPERS
 // ============================================================================
 
-export async function getTalentsStateRecord(
-  characterId: string
-): Promise<TalentsStateRecord | null> {
+export async function getTalentsStateRecord(characterId: string): Promise<TalentsStateRecord | null> {
   if (!db) throw new Error('Database not initialized');
   const record = await db.get('SELECT * FROM CharacterTalents WHERE characterId = ?', characterId);
   if (!record) return null;
@@ -669,16 +625,13 @@ export async function getTalentsStateRecord(
     finalized: (record.finalized ?? 0) === 1,
     totalTalents: Array.isArray(totalTalents) ? totalTalents : [],
     pendingTalents: Array.isArray(pendingTalents) ? pendingTalents : [],
-    pendingTrees: Array.isArray(pendingTrees) ? pendingTrees : [],
+    pendingTrees: Array.isArray(pendingTrees) ? pendingTrees : []
   };
 }
 
-export async function createTalentsStateRecord(
-  record: TalentsStateRecord
-): Promise<TalentsStateRecord> {
+export async function createTalentsStateRecord(record: TalentsStateRecord): Promise<TalentsStateRecord> {
   if (!db) throw new Error('Database not initialized');
-  await db.run(
-    `
+  await db.run(`
     INSERT INTO CharacterTalents (
       id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized, totalTalents, pendingTalents, pendingTrees
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -709,11 +662,10 @@ export async function updateTalentsStateRecord(
   const merged: TalentsStateRecord = {
     ...current,
     ...updates,
-    characterId,
+    characterId
   };
 
-  await db.run(
-    `
+  await db.run(`
     UPDATE CharacterTalents SET
       totalPoints = ?,
       pointsSpent = ?,
@@ -739,20 +691,14 @@ export async function updateTalentsStateRecord(
 
 export async function getSkillRanks(characterId: string): Promise<Record<string, number>> {
   if (!db) throw new Error('Database not initialized');
-  const skills = await db.all(
-    'SELECT skillName, value FROM Skill WHERE characterId = ?',
-    characterId
-  );
+  const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
   return skills.reduce((acc: Record<string, number>, s: any) => {
     acc[s.skillName] = s.value;
     return acc;
   }, {});
 }
 
-export async function replaceSkillRanks(
-  characterId: string,
-  skills: Record<string, number>
-): Promise<void> {
+export async function replaceSkillRanks(characterId: string, skills: Record<string, number>): Promise<void> {
   if (!db) throw new Error('Database not initialized');
   // Use UPSERT to handle concurrent updates safely
   for (const [skillName, value] of Object.entries(skills)) {
@@ -761,10 +707,7 @@ export async function replaceSkillRanks(
        VALUES (?, ?, ?, ?)
        ON CONFLICT(characterId, skillName) DO UPDATE SET
          value = excluded.value`,
-      `skill-${characterId}-${skillName}`,
-      characterId,
-      skillName,
-      value
+      `skill-${characterId}-${skillName}`, characterId, skillName, value
     );
   }
 }
@@ -789,21 +732,15 @@ export interface ExpertiseStateRecord {
 
 export async function getSelectedExpertises(characterId: string): Promise<ExpertiseRecord[]> {
   if (!db) throw new Error('Database not initialized');
-  const records = await db.all(
-    'SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?',
-    characterId
-  );
-  return records.map((r) => ({
+  const records = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
+  return records.map(r => ({
     name: r.name,
     source: r.source,
-    sourceId: r.sourceId,
+    sourceId: r.sourceId
   }));
 }
 
-export async function replaceSelectedExpertises(
-  characterId: string,
-  expertises: ExpertiseRecord[]
-): Promise<void> {
+export async function replaceSelectedExpertises(characterId: string, expertises: ExpertiseRecord[]): Promise<void> {
   if (!db) throw new Error('Database not initialized');
   await db.run('DELETE FROM SelectedExpertise WHERE characterId = ?', characterId);
   for (const exp of expertises) {
@@ -818,9 +755,7 @@ export async function replaceSelectedExpertises(
   }
 }
 
-export async function getExpertiseStateRecord(
-  characterId: string
-): Promise<ExpertiseStateRecord | null> {
+export async function getExpertiseStateRecord(characterId: string): Promise<ExpertiseStateRecord | null> {
   if (!db) throw new Error('Database not initialized');
   const state = await db.get('SELECT * FROM ExpertiseState WHERE characterId = ?', characterId);
   if (!state) return null;
@@ -829,16 +764,13 @@ export async function getExpertiseStateRecord(
     totalPoints: state.totalPoints ?? 0,
     pointsSpent: state.pointsSpent ?? 0,
     pointsRemaining: state.pointsRemaining ?? 0,
-    finalized: (state.finalized ?? 0) === 1,
+    finalized: (state.finalized ?? 0) === 1
   };
 }
 
-export async function createExpertiseStateRecord(
-  record: ExpertiseStateRecord
-): Promise<ExpertiseStateRecord> {
+export async function createExpertiseStateRecord(record: ExpertiseStateRecord): Promise<ExpertiseStateRecord> {
   if (!db) throw new Error('Database not initialized');
-  await db.run(
-    `
+  await db.run(`
     INSERT INTO ExpertiseState (
       id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized
     ) VALUES (?, ?, ?, ?, ?, ?)
@@ -866,11 +798,10 @@ export async function updateExpertiseStateRecord(
   const merged: ExpertiseStateRecord = {
     ...current,
     ...updates,
-    characterId,
+    characterId
   };
 
-  await db.run(
-    `
+  await db.run(`
     UPDATE ExpertiseState SET
       totalPoints = ?,
       pointsSpent = ?,
@@ -887,6 +818,7 @@ export async function updateExpertiseStateRecord(
 
   return merged;
 }
+
 
 /**
  * Save a character to the database atomically
@@ -905,14 +837,13 @@ export async function saveCharacter(
       transactionStarted = true;
     } catch (e: any) {
       // If we can't start a transaction, we're already in one, so proceed without explicit transaction
-      if (!e.message?.includes('cannot start a transaction')) {
+      if (!(e.message?.includes('cannot start a transaction'))) {
         throw e;
       }
       transactionStarted = false;
     }
     // Upsert character
-    await db.run(
-      `
+    await db.run(`
       INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, lastModified)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
@@ -938,21 +869,16 @@ export async function saveCharacter(
 
     // NOTE: Attributes creation is handled by character-service.createCharacter() during initial creation
     // Only update existing attributes records here (not for new characters)
-    if (
-      character.attributes &&
-      character.attributes.totalPoints &&
-      character.attributes.totalPoints > 0
-    ) {
+    if (character.attributes && character.attributes.totalPoints && character.attributes.totalPoints > 0) {
       // Check if attributes record already exists for this character
       const existingAttrs = await db.get(
         'SELECT id FROM Attributes WHERE characterId = ?',
         character.id
       );
-
+      
       if (existingAttrs) {
         // Update existing attributes record
-        await db.run(
-          `
+        await db.run(`
           UPDATE Attributes 
           SET totalPoints = ?, pointsSpent = ?, pointsRemaining = ?, finalized = ?, 
               strength = ?, speed = ?, intellect = ?, willpower = ?, awareness = ?, presence = ?
@@ -982,10 +908,7 @@ export async function saveCharacter(
            VALUES (?, ?, ?, ?)
            ON CONFLICT(characterId, skillName) DO UPDATE SET
              value = excluded.value`,
-          `skill-${character.id}-${skillName}`,
-          character.id,
-          skillName,
-          value
+          `skill-${character.id}-${skillName}`, character.id, skillName, value
         );
       }
     }
@@ -1046,10 +969,7 @@ export async function saveCharacter(
            VALUES (?, ?, ?, ?)
            ON CONFLICT(characterId, pathName) DO UPDATE SET
              tier0TalentId = excluded.tier0TalentId`,
-          `path-${character.id}-${pathName}`,
-          character.id,
-          pathName,
-          tier0TalentId
+          `path-${character.id}-${pathName}`, character.id, pathName, tier0TalentId
         );
       }
     }
@@ -1068,8 +988,8 @@ export async function saveCharacter(
             `culture-${character.id}-${cultureName}`,
             character.id,
             cultureName,
-            '', // description can be populated later if needed
-            '', // expertise can be populated later if needed
+            '',  // description can be populated later if needed
+            '',  // expertise can be populated later if needed
             '[]' // suggestedNames as empty JSON array
           );
         }
@@ -1081,8 +1001,7 @@ export async function saveCharacter(
 
     // Save resources
     if (character.resources) {
-      await db.run(
-        `
+      await db.run(`
         INSERT INTO CharacterResources (id, characterId, healthCurrent, healthMax, focusCurrent, focusMax, investitureCurrent, investitureMax, investitureActive)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(characterId) DO UPDATE SET
@@ -1139,8 +1058,7 @@ export async function saveCharacter(
 
         // Map equipped items from equipped object (if present)
         if (character.inventory.equipped) {
-          const armorId =
-            character.inventory.equipped.armor?.itemId || character.inventory.equipped.armor?.id;
+          const armorId = character.inventory.equipped.armor?.itemId || character.inventory.equipped.armor?.id;
           if (armorId) equippedSet.add(armorId);
           if (Array.isArray(character.inventory.equipped.weapons)) {
             character.inventory.equipped.weapons.forEach((weapon: any) => {
@@ -1171,8 +1089,7 @@ export async function saveCharacter(
 
     // Save radiant path
     if (character.radiantPath) {
-      await db.run(
-        `
+      await db.run(`
         INSERT INTO RadiantPath (id, characterId, boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(characterId) DO UPDATE SET
@@ -1188,9 +1105,7 @@ export async function saveCharacter(
         character.radiantPath.boundOrder || null,
         character.radiantPath.currentIdeal ?? 1,
         character.radiantPath.idealSpoken ? 1 : 0,
-        Array.isArray(character.radiantPath.surgePair)
-          ? character.radiantPath.surgePair.join('/')
-          : null,
+        Array.isArray(character.radiantPath.surgePair) ? character.radiantPath.surgePair.join('/') : null,
         character.radiantPath.sprenType || null,
         character.radiantTier0TalentId || null
       );
@@ -1213,8 +1128,7 @@ export async function saveCharacter(
         talents[spentPointsTracking.level] = spentPointsTracking.talents;
       }
 
-      await db.run(
-        `
+      await db.run(`
         INSERT INTO SpentPoints (id, characterId, attributes, skills, talents)
         VALUES (?, ?, ?, ?, ?)
         ON CONFLICT(characterId) DO UPDATE SET
@@ -1241,10 +1155,7 @@ export async function saveCharacter(
         await db.run('ROLLBACK');
       } catch (rollbackError) {
         // Transaction may not exist if another concurrent operation already committed
-        console.warn(
-          '[Database] Rollback failed (transaction may not be active):',
-          (rollbackError as Error).message
-        );
+        console.warn('[Database] Rollback failed (transaction may not be active):', (rollbackError as Error).message);
       }
     }
     console.error(`[Database] Error saving character ${character.id}:`, error);
@@ -1270,12 +1181,12 @@ export async function unlockTalent(
       transactionStarted = true;
     } catch (e: any) {
       // If we can't start a transaction, we're already in one, so proceed without explicit transaction
-      if (!e.message?.includes('cannot start a transaction')) {
+      if (!(e.message?.includes('cannot start a transaction'))) {
         throw e;
       }
       transactionStarted = false;
     }
-
+    
     // Verify character exists
     const char = await db.get('SELECT id FROM Character WHERE id = ?', characterId);
     if (!char) {
@@ -1283,14 +1194,11 @@ export async function unlockTalent(
     }
 
     // Get current talents
-    const existing = await db.all(
-      'SELECT talentId FROM UnlockedTalent WHERE characterId = ?',
-      characterId
-    );
+    const existing = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
     const existingIds = new Set(existing.map((t: any) => t.talentId));
 
     // Only create talents that don't already exist
-    const newTalents = talentIds.filter((id) => !existingIds.has(id));
+    const newTalents = talentIds.filter(id => !existingIds.has(id));
     const now = new Date().toISOString();
     for (const talentId of newTalents) {
       await db.run(
@@ -1304,10 +1212,7 @@ export async function unlockTalent(
     }
 
     // Get all unlocked talents
-    const allTalents = await db.all(
-      'SELECT talentId FROM UnlockedTalent WHERE characterId = ?',
-      characterId
-    );
+    const allTalents = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
 
     // Update spent points tracking
     const spent = await db.get('SELECT * FROM SpentPoints WHERE characterId = ?', characterId);
@@ -1336,10 +1241,7 @@ export async function unlockTalent(
         await db.run('ROLLBACK');
       } catch (rollbackError) {
         // Transaction may not exist if another concurrent operation already committed
-        console.warn(
-          '[Database] Rollback failed (transaction may not be active):',
-          (rollbackError as Error).message
-        );
+        console.warn('[Database] Rollback failed (transaction may not be active):', (rollbackError as Error).message);
       }
     }
     console.error(`[Database] Error unlocking talents for ${characterId}:`, error);
@@ -1463,3 +1365,5 @@ export async function clearDatabase(): Promise<void> {
     throw error;
   }
 }
+
+

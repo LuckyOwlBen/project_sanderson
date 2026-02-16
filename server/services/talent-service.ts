@@ -1,9 +1,9 @@
 /**
  * Talent Service - Core Business Logic Layer
- *
+ * 
  * Handles all talent-related operations with database integration.
  * Implements dependency injection pattern for testability and modularity.
- *
+ * 
  * Responsibilities:
  * - Talent point calculations
  * - Tier 0 auto-unlock logic (SINGLE location)
@@ -21,35 +21,22 @@ import * as db from '../database.js';
 
 const TALENT_POINTS_PER_LEVEL = [
   2, // Level 1 (tier 0 + 1 tier 1)
-  1,
-  1,
-  1,
-  1, // Levels 2-5
+  1, 1, 1, 1, // Levels 2-5
   2, // Level 6 (bonus)
-  1,
-  1,
-  1,
-  1, // Levels 7-10
+  1, 1, 1, 1, // Levels 7-10
   2, // Level 11 (bonus)
-  1,
-  1,
-  1,
-  1, // Levels 12-15
+  1, 1, 1, 1, // Levels 12-15
   2, // Level 16 (bonus)
-  1,
-  1,
-  1,
-  1,
-  1, // Levels 17-21
+  1, 1, 1, 1, 1 // Levels 17-21
 ];
 
 const PATH_TIER0_TALENTS: Record<string, string> = {
-  warrior: 'vigilant_stance',
-  scholar: 'education',
-  hunter: 'seek_quarry',
-  leader: 'decisive_command',
-  envoy: 'rousing_presence',
-  agent: 'opportunist',
+  'warrior': 'vigilant_stance',
+  'scholar': 'education',
+  'hunter': 'seek_quarry',
+  'leader': 'decisive_command',
+  'envoy': 'rousing_presence',
+  'agent': 'opportunist'
 };
 
 // ============================================================================
@@ -86,15 +73,18 @@ export class TalentService {
   /**
    * Ensure tier 0 talent is unlocked for a character's main path
    * This is the SINGLE place where tier 0 auto-unlock happens
-   *
+   * 
    * Called from:
    * - POST /api/characters/:id/paths (when path is selected)
-   *
+   * 
    * @param characterId - Character ID
    * @param mainPath - Character's main path
    * @returns The tier 0 talent ID, or null if path not set
    */
-  ensureTier0Unlocked(characterId: string, mainPath: string | null): string | null {
+  ensureTier0Unlocked(
+    characterId: string,
+    mainPath: string | null
+  ): string | null {
     const tier0TalentId = this.getTier0TalentForPath(mainPath);
 
     if (!tier0TalentId) {
@@ -158,11 +148,11 @@ export class TalentService {
 
   /**
    * Calculate available talent points for allocation
-   *
+   * 
    * For CHARACTER CREATION:
    * - Returns cumulative points from level 1 to current level
    * - Subtracts all non-tier0 talents already selected
-   *
+   * 
    * For LEVEL-UP:
    * - Returns only current level's points
    * - Subtracts new talents selected this level (not previously selected)
@@ -209,7 +199,7 @@ export class TalentService {
       const overspent = Math.abs(availablePoints);
       return {
         valid: false,
-        message: `Talent point limit exceeded by ${overspent} point(s)`,
+        message: `Talent point limit exceeded by ${overspent} point(s)`
       };
     }
 
@@ -242,12 +232,9 @@ export class TalentService {
 
     const mainPath = character.paths?.[0] || null;
     let unlockedTalents = character.unlockedTalents || [];
-
+    
     // Ensure mainPathTier0TalentId is included in unlockedTalents
-    if (
-      character.mainPathTier0TalentId &&
-      !unlockedTalents.includes(character.mainPathTier0TalentId)
-    ) {
+    if (character.mainPathTier0TalentId && !unlockedTalents.includes(character.mainPathTier0TalentId)) {
       unlockedTalents = [...unlockedTalents, character.mainPathTier0TalentId];
     }
 
@@ -275,7 +262,7 @@ export class TalentService {
       unlockedTalents,
       spentPoints: { talents: spentTalents },
       lockedTalents: isCreationMode ? [] : previouslySelected,
-      requiresSingerSelection: this.requiresSingerSelection(character.ancestry, level),
+      requiresSingerSelection: this.requiresSingerSelection(character.ancestry, level)
     };
   }
 
@@ -314,7 +301,7 @@ export class TalentService {
   /**
    * Finalize talents for a character
    * Validates all points are spent, moves spent points to total, and locks from editing
-   *
+   * 
    * Called during character creation finalization
    */
   async finalizeTalentsForCharacter(characterId: string): Promise<void> {
@@ -334,7 +321,7 @@ export class TalentService {
     // totalPoints stays the same (don't double it), pointsRemaining becomes 0
     await db.updateTalentsStateRecord(characterId, {
       pointsRemaining: 0,
-      finalized: true,
+      finalized: true
     });
 
     console.log(

@@ -17,12 +17,12 @@ export class ProgressionModuleRepository extends BaseModuleRepository {
     characterId: string,
     level: number,
     pendingLevelPoints: number,
-    pendingLevel: boolean
+    pendingLevel: boolean,
   ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       level,
       pendingLevelPoints,
-      pendingLevel,
+      pendingLevel
     });
   }
 
@@ -31,15 +31,13 @@ export class ProgressionModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @returns Progression data or null
    */
-  async load(
-    characterId: string
-  ): Promise<{ level: number; pendingLevelPoints: number; pendingLevel: boolean } | null> {
+  async load(characterId: string): Promise<{ level: number; pendingLevelPoints: number; pendingLevel: boolean } | null> {
     const char = await this.loadCharacterData(characterId);
     if (!char) return null;
     return {
       level: char.level,
       pendingLevelPoints: char.pendingLevelPoints,
-      pendingLevel: char.pendingLevel ?? false,
+      pendingLevel: char.pendingLevel ?? false
     };
   }
 }

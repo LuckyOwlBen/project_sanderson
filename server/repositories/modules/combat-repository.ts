@@ -24,7 +24,7 @@ export class CombatModuleRepository extends BaseModuleRepository {
     const char = await this.loadCharacterData(characterId);
     if (!char) return null;
     return {
-      activeStanceId: char.activeStanceId || null,
+      activeStanceId: char.activeStanceId || null
     };
   }
 }

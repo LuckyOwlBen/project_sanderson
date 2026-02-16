@@ -16,21 +16,22 @@ interface PathsResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PathsApiService {
-  private apiBase =
-    window.location.hostname === 'localhost' && window.location.port === '4200'
-      ? 'http://localhost:3000/api'
-      : '/api';
+  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
+    ? 'http://localhost:3000/api'
+    : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}
 
   getPaths(characterId: string): Observable<PathsSelection> {
-    return this.http.get<PathsResponse>(`${this.charactersUrl}/${characterId}/paths`).pipe(
-      map((response) => ({
-        type: response.type ?? null,
-        sub: response.sub ?? null,
-      }))
-    );
+    return this.http
+      .get<PathsResponse>(`${this.charactersUrl}/${characterId}/paths`)
+      .pipe(
+        map((response) => ({
+          type: response.type ?? null,
+          sub: response.sub ?? null
+        }))
+      );
   }
 
   savePaths(characterId: string, type: string, sub: string): Observable<PathsSelection> {
@@ -39,7 +40,7 @@ export class PathsApiService {
       .pipe(
         map((response) => ({
           type: response.type ?? null,
-          sub: response.sub ?? null,
+          sub: response.sub ?? null
         }))
       );
   }

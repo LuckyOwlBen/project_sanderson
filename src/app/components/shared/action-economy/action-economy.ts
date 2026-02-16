@@ -13,16 +13,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         <span class="label">Actions:</span>
         <div class="action-dots">
           @for (action of actionArray; track $index) {
-          <div
-            class="dot action-dot"
-            [class.used]="$index < actionsUsed"
-            [matTooltip]="$index < actionsUsed ? 'Action Used' : 'Action Available'"
-            (click)="onActionClick($index)"
-          >
-            <mat-icon>{{
-              $index < actionsUsed ? 'check_circle' : 'radio_button_unchecked'
-            }}</mat-icon>
-          </div>
+            <div 
+              class="dot action-dot"
+              [class.used]="$index < actionsUsed"
+              [matTooltip]="$index < actionsUsed ? 'Action Used' : 'Action Available'"
+              (click)="onActionClick($index)"
+            >
+              <mat-icon>{{ $index < actionsUsed ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </div>
           }
         </div>
       </div>
@@ -30,7 +28,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       <div class="economy-section">
         <span class="label">Reaction:</span>
         <div class="action-dots">
-          <div
+          <div 
             class="dot reaction-dot"
             [class.used]="reactionUsed"
             [matTooltip]="reactionUsed ? 'Reaction Used' : 'Reaction Available'"
@@ -42,84 +40,82 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       </div>
     </div>
   `,
-  styles: [
-    `
-      .action-economy {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        padding: 8px 12px;
-        background: rgba(0, 0, 0, 0.03);
-        border-radius: 8px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-      }
+  styles: [`
+    .action-economy {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
 
-      .economy-section {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
+    .economy-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-      .label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #666;
-      }
+    .label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+    }
 
-      .action-dots {
-        display: flex;
-        gap: 6px;
-      }
+    .action-dots {
+      display: flex;
+      gap: 6px;
+    }
 
-      .dot {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-      }
+    .dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
 
-      .interactive .dot {
-        cursor: pointer;
-      }
+    .interactive .dot {
+      cursor: pointer;
+    }
 
-      .interactive .dot:hover {
-        transform: scale(1.1);
-      }
+    .interactive .dot:hover {
+      transform: scale(1.1);
+    }
 
-      .action-dot mat-icon {
-        color: #2196f3;
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
+    .action-dot mat-icon {
+      color: #2196f3;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
 
-      .action-dot.used mat-icon {
-        color: #4caf50;
-      }
+    .action-dot.used mat-icon {
+      color: #4caf50;
+    }
 
-      .reaction-dot mat-icon {
-        color: #ff9800;
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-      }
+    .reaction-dot mat-icon {
+      color: #ff9800;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
 
-      .reaction-dot.used mat-icon {
-        color: #f44336;
-      }
+    .reaction-dot.used mat-icon {
+      color: #f44336;
+    }
 
-      .dot:not(.used) {
-        opacity: 0.6;
-      }
+    .dot:not(.used) {
+      opacity: 0.6;
+    }
 
-      .dot.used {
-        opacity: 1;
-      }
-    `,
-  ],
+    .dot.used {
+      opacity: 1;
+    }
+  `]
 })
 export class ActionEconomyComponent {
   @Input() maxActions: number = 3;
@@ -136,7 +132,7 @@ export class ActionEconomyComponent {
 
   onActionClick(index: number): void {
     if (!this.interactive) return;
-
+    
     if (index === this.actionsUsed && this.actionsUsed < this.maxActions) {
       this.actionUsed.emit();
     }
@@ -144,7 +140,7 @@ export class ActionEconomyComponent {
 
   onReactionClick(): void {
     if (!this.interactive) return;
-
+    
     if (!this.reactionUsed) {
       this.reactionUsedEvent.emit();
     }

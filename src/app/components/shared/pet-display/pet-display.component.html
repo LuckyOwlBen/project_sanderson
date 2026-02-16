@@ -52,27 +52,24 @@
   </div>
 
   <div class="pet-actions">
-    <button
-      *ngIf="!isEquipped()"
+    <button 
+      *ngIf="!isEquipped()" 
       class="action-button bond-button"
       (click)="equipPet()"
-      title="Bond with this pet"
-    >
+      title="Bond with this pet">
       🔗 Bond Pet
     </button>
-    <button
-      *ngIf="isEquipped()"
+    <button 
+      *ngIf="isEquipped()" 
       class="action-button unbond-button"
       (click)="unequipPet()"
-      title="Release this pet"
-    >
+      title="Release this pet">
       ✂️ Release
     </button>
-    <button
+    <button 
       class="action-button remove-button"
       (click)="removePet()"
-      title="Remove pet from inventory"
-    >
+      title="Remove pet from inventory">
       🗑️ Remove
     </button>
   </div>

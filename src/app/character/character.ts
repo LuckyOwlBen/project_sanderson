@@ -10,16 +10,13 @@ import { RadiantPathManager } from './radiantPath/radiantPathManager';
 import { InventoryManager } from './inventory/inventoryManager';
 import { CraftingManager } from './crafting/craftingManager';
 import { ExpertiseSource } from './expertises/expertiseSource';
-import {
-  UniversalAbility,
-  getSingerFormAbilities,
-  SINGER_FORMS,
-} from './abilities/universalAbilities';
+import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilities/universalAbilities';
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
 import { PetCompanion } from './companions/petCompanion';
 import { getPetStatBlock } from './inventory/petDefinitions';
+
 
 export class Character {
   id: string = '';
@@ -34,10 +31,10 @@ export class Character {
   private _selectedExpertises: ExpertiseSource[] = [];
   unlockedTalents: Set<string> = new Set<string>();
   baselineUnlockedTalents?: Set<string>; // Talents unlocked before current level-up session
-
+  
   // Singer forms tracking - stores IDs of unlocked forms
   unlockedSingerForms: string[] = [];
-
+  
   // Active Singer form - the form currently granting bonuses
   activeForm?: string;
 
@@ -52,11 +49,11 @@ export class Character {
   private radiantPathManager = new RadiantPathManager();
   private inventoryManager = new InventoryManager();
   private craftingManager: CraftingManager;
-
+  
   // Companions
   private companions: Map<string, PetCompanion> = new Map();
   private activePetId: string | undefined;
-
+  
   /**
    * Performance cache: Set of expertise names for O(1) lookup
    * Invalidated when selectedExpertises changes
@@ -156,14 +153,11 @@ export class Character {
    */
   recalculateResources(): void {
     // Get investiture bonus from bonus system (investiture-max target in RESOURCE type)
-    const investitureBonus = this.bonusManager.bonuses.getBonusesFor(
-      BonusType.RESOURCE,
-      'investiture-max'
-    );
-
+    const investitureBonus = this.bonusManager.bonuses.getBonusesFor(BonusType.RESOURCE, 'investiture-max');
+    
     // Recalculate base resources
     this.resourceManager.recalculateMaxValues(this.attributes);
-
+    
     // Apply investiture bonus separately if active
     if (this.resourceManager.investiture.isActive()) {
       this.resourceManager.investiture.recalculateMax(this.attributes, investitureBonus);
@@ -184,18 +178,18 @@ export class Character {
    */
   getUniversalAbilities(): UniversalAbility[] {
     const abilities: UniversalAbility[] = [];
-
+    
     // Get Radiant universal abilities if applicable
     abilities.push(...this.radiantPathManager.getUniversalAbilities());
-
+    
     // Get Singer form abilities if applicable
     abilities.push(...getSingerFormAbilities(this.unlockedSingerForms));
-
+    
     // Future: Add abilities from other sources
     // - Special items (e.g., Shardplate)
     // - Conditions
     // - Special rules
-
+    
     return abilities;
   }
 
@@ -222,7 +216,7 @@ export class Character {
    * @returns Array of expertise names the character possesses
    */
   getExpertiseSkills(): string[] {
-    return this.selectedExpertises.map((e) => e.name);
+    return this.selectedExpertises.map(e => e.name);
   }
 
   /**
@@ -236,12 +230,12 @@ export class Character {
     // Always check if cache needs rebuilding
     const currentExpertiseCount = this._selectedExpertises.length;
     const cacheSize = this.expertiseCache?.size ?? -1;
-
+    
     // Rebuild cache if array length changed (detects push/splice/etc)
     if (!this.expertiseCache || cacheSize !== currentExpertiseCount) {
       this.rebuildExpertiseCache();
     }
-
+    
     return this.expertiseCache!.has(expertiseName);
   }
 
@@ -261,7 +255,7 @@ export class Character {
    * @private
    */
   private rebuildExpertiseCache(): void {
-    this.expertiseCache = new Set(this.selectedExpertises.map((e) => e.name));
+    this.expertiseCache = new Set(this.selectedExpertises.map(e => e.name));
   }
 
   /**
@@ -306,7 +300,9 @@ export class Character {
    */
   getAvailableForms(): UniversalAbility[] {
     // Dullform is always available for Singers
-    return SINGER_FORMS.filter((form) => form.id === 'dullform' || this.hasSingerForm(form.id));
+    return SINGER_FORMS.filter(form => 
+      form.id === 'dullform' || this.hasSingerForm(form.id)
+    );
   }
 
   /**
@@ -321,7 +317,7 @@ export class Character {
     const source = this.getActiveFormSource();
     // BonusModule doesn't expose a way to get bonuses by source, so we'll track them ourselves
     const bonuses: BonusEffect[] = [];
-
+    
     // Retrieve form info to determine which bonuses should be active
     const formInfo = this.getActiveFormInfo();
     if (!formInfo) {
@@ -390,7 +386,7 @@ export class Character {
       return undefined;
     }
 
-    return SINGER_FORMS.find((f) => f.id === this.activeForm);
+    return SINGER_FORMS.find(f => f.id === this.activeForm);
   }
 
   /**
@@ -410,7 +406,7 @@ export class Character {
       return;
     }
 
-    const form = SINGER_FORMS.find((f) => f.id === this.activeForm);
+    const form = SINGER_FORMS.find(f => f.id === this.activeForm);
     if (!form) {
       return;
     }
@@ -419,118 +415,46 @@ export class Character {
 
     switch (this.activeForm) {
       case 'nimbleform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'agility',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
         break;
       case 'artform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'presence',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 1 });
         break;
       case 'meditationform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'willpower',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
         break;
       case 'scholarform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'intellect',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
         break;
       case 'warform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'strength',
-          value: 2,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'vitality',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
         break;
       case 'workform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'strength',
-          value: 1,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'vitality',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
         break;
       case 'direform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'strength',
-          value: 1,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'agility',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
         break;
       case 'stormform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'strength',
-          value: 2,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'vitality',
-          value: 2,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 2 });
         break;
       case 'decayform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'vitality',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
         break;
       case 'envoyform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'presence',
-          value: 2,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'intellect',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 2 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
         break;
       case 'nightform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'agility',
-          value: 2,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 2 });
         break;
       case 'relayform':
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'intellect',
-          value: 1,
-        });
-        this.bonusManager.bonuses.addBonus(source, {
-          type: BonusType.ATTRIBUTE,
-          target: 'willpower',
-          value: 1,
-        });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
         break;
     }
   }
@@ -576,7 +500,7 @@ export class Character {
 
     // Verify the stance exists and is available
     const availableStances = this.getAvailableStances();
-    const stanceExists = availableStances.some((s) => s.id === stanceId);
+    const stanceExists = availableStances.some(s => s.id === stanceId);
 
     if (!stanceExists) {
       console.warn(`Stance with ID "${stanceId}" is not available for this character`);
@@ -597,7 +521,7 @@ export class Character {
     }
 
     const availableStances = this.getAvailableStances();
-    return availableStances.find((s) => s.id === this.activeStanceId) || null;
+    return availableStances.find(s => s.id === this.activeStanceId) || null;
   }
 
   /**
@@ -640,7 +564,7 @@ export class Character {
   addCompanion(petId: string): PetCompanion | undefined {
     const statBlock = getPetStatBlock(petId);
     if (!statBlock) return undefined;
-
+    
     const companion = new PetCompanion(statBlock);
     this.companions.set(petId, companion);
     return companion;
@@ -706,4 +630,5 @@ export class Character {
     }
     this.companions.delete(petId);
   }
+
 }

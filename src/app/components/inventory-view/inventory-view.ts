@@ -1,54 +1,48 @@
-import {
-  Component,
-  Input,
-  OnDestroy,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { Character } from '../../character/character';
-import { InventoryItem } from '../../../../shared/types/inventory';
+  import { Component, Input, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+  import { Subject } from 'rxjs';
+  import { MatCardModule } from '@angular/material/card';
+  import { MatButtonModule } from '@angular/material/button';
+  import { MatIconModule } from '@angular/material/icon';
+  import { MatChipsModule } from '@angular/material/chips';
+  import { MatTooltipModule } from '@angular/material/tooltip';
+  import { MatProgressBarModule } from '@angular/material/progress-bar';
+  import { MatExpansionModule } from '@angular/material/expansion';
+  import { Character } from '../../character/character';
+  import { InventoryItem } from '../../../../shared/types/inventory';
 
-@Component({
-  selector: 'app-inventory-view',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    MatExpansionModule,
-  ],
-  templateUrl: './inventory-view.html',
-  styleUrls: ['./inventory-view.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class InventoryView implements OnDestroy {
-  private destroy$ = new Subject<void>();
-  @Input() character: Character | null = null;
-  selectedTab: 'equipped' | 'inventory' = 'equipped';
-  expandedItemId: string | null = null;
+  @Component({
+    selector: 'app-inventory-view',
+    standalone: true,
+    imports: [
+      CommonModule,
+      MatCardModule,
+      MatButtonModule,
+      MatIconModule,
+      MatChipsModule,
+      MatTooltipModule,
+      MatProgressBarModule,
+      MatExpansionModule
+    ],
+    templateUrl: './inventory-view.html',
+    styleUrls: ['./inventory-view.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
+  })
+  export class InventoryView implements OnDestroy {
+    private destroy$ = new Subject<void>();
+    @Input() character: Character | null = null;
+    selectedTab: 'equipped' | 'inventory' = 'equipped';
+    expandedItemId: string | null = null;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+    constructor(private cdr: ChangeDetectorRef) {}
 
-  /**
-   * Trigger change detection for the inventory view
-   * Called when inventory changes externally (e.g., from item grants)
-   */
-  public refreshInventoryView(): void {
-    this.cdr.markForCheck();
-  }
+    /**
+     * Trigger change detection for the inventory view
+     * Called when inventory changes externally (e.g., from item grants)
+     */
+    public refreshInventoryView(): void {
+      this.cdr.markForCheck();
+    }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -86,7 +80,7 @@ export class InventoryView implements OnDestroy {
   }
 
   getUnequippedItems(): InventoryItem[] {
-    return this.getAllItems().filter((item) => !this.isEquipped(item));
+    return this.getAllItems().filter(item => !this.isEquipped(item));
   }
 
   // ===== WEIGHT & CAPACITY =====
@@ -127,15 +121,15 @@ export class InventoryView implements OnDestroy {
 
   getExpertiseTooltip(item: InventoryItem): string {
     if (!this.character || !this.hasExpertTraits(item)) return '';
-
+    
     const result = this.character.inventory.canUseExpertTraits(item.id);
-
+    
     if (result.canUse) {
       return 'Expert traits unlocked';
     } else if (result.missingExpertises.length > 0) {
       return `Requires: ${result.missingExpertises.join(', ')}`;
     }
-
+    
     return '';
   }
 
@@ -155,7 +149,7 @@ export class InventoryView implements OnDestroy {
     const marks = this.getCurrency();
     const conversion = this.character?.inventory.convertToMixedDenominations(marks);
     if (!conversion) return '0mk';
-
+    
     if (conversion.broams > 0) {
       return `${conversion.broams}b ${conversion.marks}mk`;
     }
@@ -174,7 +168,7 @@ export class InventoryView implements OnDestroy {
 
   getItemDescription(item: InventoryItem): string {
     let desc = item.description;
-
+    
     if (item.weaponProperties) {
       desc += `\n\nDamage: ${item.weaponProperties.damage} ${item.weaponProperties.damageType}`;
       desc += `\nRange: ${item.weaponProperties.range}`;
@@ -182,51 +176,40 @@ export class InventoryView implements OnDestroy {
         desc += `\nTraits: ${item.weaponProperties.traits.join(', ')}`;
       }
     }
-
+    
     if (item.armorProperties) {
       desc += `\n\nDeflect: ${item.armorProperties.deflectValue}`;
       if (item.armorProperties.traits.length > 0) {
         desc += `\nTraits: ${item.armorProperties.traits.join(', ')}`;
       }
     }
-
+    
     if (item.fabrialProperties) {
       desc += `\n\nCharges: ${item.fabrialProperties.currentCharges}/${item.fabrialProperties.charges}`;
       desc += `\nEffect: ${item.fabrialProperties.effect}`;
     }
-
+    
     return desc;
   }
 
   getItemIcon(item: InventoryItem): string {
     switch (item.type) {
-      case 'weapon':
-        return 'swords';
-      case 'armor':
-        return 'shield';
-      case 'equipment':
-        return 'backpack';
-      case 'consumable':
-        return 'science';
-      case 'fabrial':
-        return 'auto_awesome';
-      case 'mount':
-        return 'pets';
-      case 'vehicle':
-        return 'directions_boat';
-      default:
-        return 'inventory_2';
+      case 'weapon': return 'swords';
+      case 'armor': return 'shield';
+      case 'equipment': return 'backpack';
+      case 'consumable': return 'science';
+      case 'fabrial': return 'auto_awesome';
+      case 'mount': return 'pets';
+      case 'vehicle': return 'directions_boat';
+      default: return 'inventory_2';
     }
   }
 
   getRarityColor(rarity: string): string {
     switch (rarity) {
-      case 'reward-only':
-        return 'accent';
-      case 'talent-only':
-        return 'accent';
-      default:
-        return 'primary';
+      case 'reward-only': return 'accent';
+      case 'talent-only': return 'accent';
+      default: return 'primary';
     }
   }
   trackByItemId(index: number, item: InventoryItem): string {

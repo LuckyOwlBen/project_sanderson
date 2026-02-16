@@ -42,7 +42,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: var(--gpSystemDarkGrey);
-
+  
   &:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
@@ -105,7 +105,7 @@
     grid-template-columns: 1fr;
   }
 
-  .landing-container {
+  .landing-container{
     padding-bottom: 10rem;
   }
 }

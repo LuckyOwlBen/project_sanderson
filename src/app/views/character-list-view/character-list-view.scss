@@ -9,25 +9,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-
+  
   .header-content {
     display: flex;
     align-items: center;
     gap: 1rem;
-
+    
     h1 {
       margin: 0;
       font-size: 2rem;
       color: #ffffff;
     }
   }
-
+  
   .back-button {
     mat-icon {
       color: var(--gpColor-ChalkyBlue);
     }
   }
-
+  
   button {
     display: flex;
     align-items: center;
@@ -44,7 +44,7 @@
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-
+  
   mat-icon {
     font-size: 4rem;
     width: 4rem;
@@ -52,17 +52,17 @@
     color: var(--gpColor-ChalkyBlue);
     margin-bottom: 1rem;
   }
-
+  
   h2 {
     margin: 0.5rem 0;
     color: #ffffff;
   }
-
+  
   p {
     color: #e8e8e8;
     margin-bottom: 2rem;
   }
-
+  
   button {
     margin-top: 1rem;
   }
@@ -84,56 +84,56 @@
   cursor: pointer;
   transition: all 0.3s ease;
   background: var(--gpSystemDarkerGrey) !important;
-
+  
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(102, 192, 244, 0.3);
     background: var(--gpSystemDarkGrey) !important;
   }
-
+  
   mat-card-header {
     margin-bottom: 1rem;
-
+    
     .character-avatar {
       background-color: var(--gpColor-ChalkyBlue);
       color: #ffffff;
     }
   }
-
+  
   mat-card-title {
     font-size: 1.5rem;
     color: #ffffff;
   }
-
+  
   mat-card-subtitle {
     font-size: 1rem;
     color: #e8e8e8;
     margin-top: 0.25rem;
   }
-
+  
   mat-card-content {
     .character-info {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-
+      
       .info-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         color: #e8e8e8;
-
+        
         mat-icon {
           font-size: 1.25rem;
           width: 1.25rem;
           height: 1.25rem;
           color: var(--gpColor-ChalkyBlue);
         }
-
+        
         span {
           font-size: 0.9rem;
         }
-
+        
         &.last-modified {
           color: #b0b0b0;
           font-size: 0.85rem;
@@ -144,18 +144,18 @@
       }
     }
   }
-
+  
   mat-card-actions {
     display: flex;
     justify-content: flex-end;
     padding: 0.5rem 1rem;
     border-top: 1px solid var(--gpSystemDarkGrey);
-
+    
     button {
       display: flex;
       align-items: center;
       gap: 0.25rem;
-
+      
       mat-icon {
         font-size: 1.25rem;
         width: 1.25rem;
@@ -170,22 +170,22 @@
   .character-list-container {
     padding: 1rem;
   }
-
+  
   .list-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-
+    
     .header-content {
       justify-content: center;
     }
-
+    
     button {
       width: 100%;
       justify-content: center;
     }
   }
-
+  
   .character-grid {
     grid-template-columns: 1fr;
   }

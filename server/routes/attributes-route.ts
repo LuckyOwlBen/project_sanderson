@@ -1,9 +1,5 @@
 import { Express } from 'express';
-import {
-  getAttributes,
-  setAttributes,
-  finalizeAttributes,
-} from '../controllers/attributes-controller';
+import { getAttributes, setAttributes, finalizeAttributes } from '../controllers/attributes-controller';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
@@ -36,7 +32,5 @@ export default function createAttributesRoute(app: Express, broadcaster: SocketB
    *
    * @returns { success: boolean, data: { characterId: string, finalized: boolean } }
    */
-  app.post('/api/characters/:id/attributes/finalize', (req, res) =>
-    finalizeAttributes(req, res, broadcaster)
-  );
+  app.post('/api/characters/:id/attributes/finalize', (req, res) => finalizeAttributes(req, res, broadcaster));
 }

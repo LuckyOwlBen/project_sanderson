@@ -1,6 +1,6 @@
 /**
  * Character Navigation Finalized Service
- *
+ * 
  * Provides finalized status for character creation/level-up steps.
  * This service is the single source of truth for what steps are locked down
  * in a character's progression. Used by frontend to display nav button colors.
@@ -11,7 +11,7 @@ import {
   getSkillsStateRecord,
   getTalentsStateRecord,
   getExpertiseStateRecord,
-  loadCharacter,
+  loadCharacter
 } from '../database';
 
 export interface NavigationFinalizedStatus {
@@ -30,7 +30,7 @@ export class CharacterNavFinalizedService {
   /**
    * Get navigation finalized status for a character
    * Queries each step's finalized property from the database
-   *
+   * 
    * @param characterId - Character to query
    * @returns Navigation finalized status object
    */
@@ -53,8 +53,7 @@ export class CharacterNavFinalizedService {
       // At finalization, we'll update all these flags together
       const hasAncestry = !!character.ancestry;
       const hasCulture = (character.cultures?.length ?? 0) > 0;
-      const hasName =
-        !!(character.name && character.name.length > 0) && character.name !== 'Unnamed';
+      const hasName = !!(character.name && character.name.length > 0) && character.name !== 'Unnamed';
       const hasPath = (character.paths?.length ?? 0) > 0;
 
       return {
@@ -66,21 +65,18 @@ export class CharacterNavFinalizedService {
         skills: skills?.finalized ?? false,
         paths: hasPath,
         talents: talents?.finalized ?? false,
-        equipment: true, // Equipment is always available/finalizable
+        equipment: true // Equipment is always available/finalizable
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      console.error(
-        `[CharacterNavFinalized] Error getting navigation status for ${characterId}:`,
-        message
-      );
+      console.error(`[CharacterNavFinalized] Error getting navigation status for ${characterId}:`, message);
       throw error;
     }
   }
 
   /**
    * Get finalized status for a specific step
-   *
+   * 
    * @param characterId - Character to query
    * @param step - Step name: ancestry, culture, name, attributes, skills, talents, expertises, paths, equipment
    * @returns Boolean indicating if step is finalized

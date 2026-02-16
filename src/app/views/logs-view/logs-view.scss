@@ -63,9 +63,7 @@
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .logs-container {
@@ -100,18 +98,10 @@
   line-height: 1;
 }
 
-.icon.info {
-  color: #1976d2;
-}
-.icon.warn {
-  color: #f57c00;
-}
-.icon.error {
-  color: #d32f2f;
-}
-.icon.hollow {
-  color: #bbb;
-}
+.icon.info { color: #1976d2; }
+.icon.warn { color: #f57c00; }
+.icon.error { color: #d32f2f; }
+.icon.hollow { color: #bbb; }
 
 .log-meta {
   display: flex;
@@ -131,15 +121,9 @@
   letter-spacing: 0.04em;
 }
 
-.level.info {
-  color: #1976d2;
-}
-.level.warn {
-  color: #f57c00;
-}
-.level.error {
-  color: #d32f2f;
-}
+.level.info { color: #1976d2; }
+.level.warn { color: #f57c00; }
+.level.error { color: #d32f2f; }
 
 .message {
   grid-column: 2;

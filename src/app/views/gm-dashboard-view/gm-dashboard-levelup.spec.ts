@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -28,7 +28,7 @@ describe('GmDashboardView - Level Up', () => {
     focus: { current: 30, max: 30 },
     investiture: { current: 10, max: 10 },
     joinedAt: new Date().toISOString(),
-    socketId: 'socket-123',
+    socketId: 'socket-123'
   };
 
   it('should have grantLevelUp method', () => {
@@ -38,13 +38,13 @@ describe('GmDashboardView - Level Up', () => {
 
   it('should update player level when modified', () => {
     const player = { ...mockPlayer };
-
+    
     // Initial level
     expect(player.level).toBe(5);
-
+    
     // Simulate level-up
     player.level = 6;
-
+    
     expect(player.level).toBe(6);
   });
 });

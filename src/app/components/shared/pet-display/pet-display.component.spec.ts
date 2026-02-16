@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -26,7 +26,7 @@ describe('PetDisplayComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PetDisplayComponent],
+      imports: [PetDisplayComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(PetDisplayComponent);
@@ -138,7 +138,7 @@ describe('PetDisplayComponent', () => {
 
       const abilitiesSection = fixture.nativeElement.querySelector('.abilities-list');
       expect(abilitiesSection).toBeTruthy();
-
+      
       const abilities = fixture.nativeElement.querySelectorAll('.ability');
       expect(abilities.length).toBeGreaterThan(0);
     });

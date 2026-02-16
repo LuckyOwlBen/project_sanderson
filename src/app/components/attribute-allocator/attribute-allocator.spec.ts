@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
+  testBed.initTestEnvironment(
+    BrowserDynamicTestingModule,
+    platformBrowserDynamicTesting(),
+  );
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -38,11 +38,11 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
   beforeEach(async () => {
     levelUpApiService = {
       getAttributeSlice: vi.fn(),
-      updateAttributeSlice: vi.fn(),
+      updateAttributeSlice: vi.fn()
     };
 
     creationApiService = {
-      updateAttributes: vi.fn(),
+      updateAttributes: vi.fn()
     };
 
     queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
@@ -58,10 +58,10 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: queryParamsSubject.asObservable(),
-          },
-        },
-      ],
+            queryParams: queryParamsSubject.asObservable()
+          }
+        }
+      ]
     }).compileComponents();
 
     levelUpApiService = TestBed.inject(LevelUpApiService);
@@ -92,10 +92,10 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         awareness: 10,
         intellect: 10,
         willpower: 10,
-        presence: 10,
+        presence: 10
       },
       pointsForLevel: 12,
-      success: true,
+      success: true
     };
 
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice1));
@@ -138,15 +138,15 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         awareness: 10,
         intellect: 10,
         willpower: 10,
-        presence: 10,
+        presence: 10
       },
       pointsForLevel: 12,
-      success: true,
+      success: true
     };
 
     // Set character BEFORE changing route params
     characterStateService.updateCharacter(testCharacter);
-
+    
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
 
     // Now emit route params with level-up mode
@@ -192,10 +192,10 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         awareness: 10,
         intellect: 10,
         willpower: 10,
-        presence: 10,
+        presence: 10
       },
       pointsForLevel: 12, // Server says: 12 points available for THIS level
-      success: true,
+      success: true
     };
 
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
@@ -225,10 +225,10 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         awareness: 7,
         intellect: 6,
         willpower: 5,
-        presence: 4,
+        presence: 4
       },
       pointsForLevel: 12,
-      success: true,
+      success: true
     };
 
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
@@ -270,16 +270,14 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
         awareness: 8,
         intellect: 7,
         willpower: 6,
-        presence: 5,
+        presence: 5
       },
       pointsForLevel: 12,
-      success: true,
+      success: true
     };
 
     levelUpApiService.getAttributeSlice.mockReturnValue(of(slice));
-    creationApiService.updateAttributes.mockReturnValue(
-      of({ success: true, attributes: slice.attributes, id: 'char-999' })
-    );
+    creationApiService.updateAttributes.mockReturnValue(of({ success: true, attributes: slice.attributes, id: 'char-999' }));
 
     characterStateService.updateCharacter(testCharacter);
     queryParamsSubject.next({ levelUp: 'false' });
@@ -295,7 +293,7 @@ describe('AttributeAllocator - Fresh Backend Data on Route Change', () => {
       awareness: 8,
       intellect: 7,
       willpower: 6,
-      presence: 5,
+      presence: 5
     });
   });
 });

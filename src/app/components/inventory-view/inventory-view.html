@@ -5,19 +5,15 @@
       <span class="currency-icon">💰</span>
       <span class="currency-amount">{{ getCurrencyDisplay() }}</span>
     </div>
-
+    
     <div class="weight-tracker" [class.overencumbered]="isOverencumbered()">
       <span class="weight-icon">⚖</span>
       <div class="weight-info">
-        <span class="weight-text"
-          >{{ getTotalWeight() | number : '1.0-1' }} / {{ getCarryingCapacity() }} lbs</span
-        >
+        <span class="weight-text">{{ getTotalWeight() | number:'1.0-1' }} / {{ getCarryingCapacity() }} lbs</span>
         <div class="weight-bar-container">
-          <div
-            class="weight-bar-fill"
-            [style.width.%]="getWeightPercentage()"
-            [class.overweight]="isOverencumbered()"
-          ></div>
+          <div class="weight-bar-fill" 
+               [style.width.%]="getWeightPercentage()"
+               [class.overweight]="isOverencumbered()"></div>
         </div>
       </div>
     </div>
@@ -26,19 +22,11 @@
   <!-- Custom Tab Selector -->
   <div class="custom-tabs inventory-tabs">
     <div class="tab-labels">
-      <button
-        class="tab-label"
-        [class.active]="selectedTab === 'equipped'"
-        (click)="selectTab('equipped')"
-      >
+      <button class="tab-label" [class.active]="selectedTab === 'equipped'" (click)="selectTab('equipped')">
         <span class="tab-icon">🛡</span>
         Equipment
       </button>
-      <button
-        class="tab-label"
-        [class.active]="selectedTab === 'inventory'"
-        (click)="selectTab('inventory')"
-      >
+      <button class="tab-label" [class.active]="selectedTab === 'inventory'" (click)="selectTab('inventory')">
         <span class="tab-icon">📦</span>
         Inventory
       </button>
@@ -61,13 +49,12 @@
               <div class="item-info">
                 <div class="item-name">
                   {{ item.name }}
-                  <mat-icon
+                  <mat-icon 
                     *ngIf="hasExpertTraits(item)"
                     [class.expertise-unlocked]="canUseExpertTraits(item)"
                     [class.expertise-locked]="!canUseExpertTraits(item)"
                     [matTooltip]="getExpertiseTooltip(item)"
-                    class="expertise-indicator"
-                  >
+                    class="expertise-indicator">
                     {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
                   </mat-icon>
                 </div>
@@ -99,13 +86,12 @@
               <div class="item-info">
                 <div class="item-name">
                   {{ item.name }}
-                  <mat-icon
+                  <mat-icon 
                     *ngIf="hasExpertTraits(item)"
                     [class.expertise-unlocked]="canUseExpertTraits(item)"
                     [class.expertise-locked]="!canUseExpertTraits(item)"
                     [matTooltip]="getExpertiseTooltip(item)"
-                    class="expertise-indicator"
-                  >
+                    class="expertise-indicator">
                     {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
                   </mat-icon>
                 </div>
@@ -134,13 +120,12 @@
               <div class="item-info">
                 <div class="item-name">
                   {{ item.name }}
-                  <mat-icon
+                  <mat-icon 
                     *ngIf="hasExpertTraits(item)"
                     [class.expertise-unlocked]="canUseExpertTraits(item)"
                     [class.expertise-locked]="!canUseExpertTraits(item)"
                     [matTooltip]="getExpertiseTooltip(item)"
-                    class="expertise-indicator"
-                  >
+                    class="expertise-indicator">
                     {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
                   </mat-icon>
                 </div>
@@ -182,63 +167,51 @@
   <!-- Inventory Tab -->
   <div class="inventory-section" *ngIf="selectedTab === 'inventory'">
     <mat-accordion class="inventory-list">
-      <mat-expansion-panel
+      <mat-expansion-panel 
         *ngFor="let item of getUnequippedItems(); trackBy: trackByItemId"
         [expanded]="isItemExpanded(item.id)"
         (opened)="toggleItemExpansion(item.id)"
         (closed)="toggleItemExpansion(item.id)"
-        class="inventory-item"
-      >
+        class="inventory-item">
+        
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
             <span class="item-name" [matTooltip]="item.name">{{ item.name }}</span>
-            <mat-icon
+            <mat-icon 
               *ngIf="hasExpertTraits(item)"
               [class.expertise-unlocked]="canUseExpertTraits(item)"
               [class.expertise-locked]="!canUseExpertTraits(item)"
               [matTooltip]="getExpertiseTooltip(item)"
-              class="expertise-indicator-small"
-            >
+              class="expertise-indicator-small">
               {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
             </mat-icon>
             <span class="item-quantity" *ngIf="item.quantity > 1">x{{ item.quantity }}</span>
           </mat-panel-title>
           <mat-panel-description>
-            <span class="item-weight"
-              >{{ item.weight * item.quantity | number : '1.1-1' }} lbs</span
-            >
+            <span class="item-weight">{{ item.weight * item.quantity | number:'1.1-1' }} lbs</span>
             <span class="item-price">{{ item.price }}mk</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
 
         <div class="item-details">
           <p class="item-description">{{ getItemDescription(item) }}</p>
-
+          
           <!-- Expert Traits -->
           <div class="expert-traits-section" *ngIf="hasExpertTraits(item)">
             <div class="expert-traits-header">
-              <mat-icon
-                [class.unlocked]="canUseExpertTraits(item)"
-                [class.locked]="!canUseExpertTraits(item)"
-              >
+              <mat-icon [class.unlocked]="canUseExpertTraits(item)" [class.locked]="!canUseExpertTraits(item)">
                 {{ canUseExpertTraits(item) ? 'lock_open' : 'lock' }}
               </mat-icon>
               <span class="expert-traits-title">Expert Traits</span>
-              <span
-                class="expert-status"
-                [class.unlocked]="canUseExpertTraits(item)"
-                [class.locked]="!canUseExpertTraits(item)"
-              >
+              <span class="expert-status" [class.unlocked]="canUseExpertTraits(item)" [class.locked]="!canUseExpertTraits(item)">
                 {{ canUseExpertTraits(item) ? 'Unlocked' : 'Locked' }}
               </span>
             </div>
             <div class="expert-traits-list">
-              <mat-chip
-                *ngFor="let trait of getExpertTraitsList(item)"
-                [class.disabled]="!canUseExpertTraits(item)"
-                class="expert-trait-chip"
-              >
+              <mat-chip *ngFor="let trait of getExpertTraitsList(item)" 
+                        [class.disabled]="!canUseExpertTraits(item)"
+                        class="expert-trait-chip">
                 {{ trait }}
               </mat-chip>
             </div>
@@ -247,23 +220,21 @@
               {{ getExpertiseTooltip(item) }}
             </p>
           </div>
-
+          
           <div class="item-actions">
-            <button
-              mat-raised-button
+            <button 
+              mat-raised-button 
               color="primary"
               *ngIf="item.equipable && !isEquipped(item)"
-              (click)="equipItem(item)"
-            >
+              (click)="equipItem(item)">
               <mat-icon>shield</mat-icon>
               Equip
             </button>
-
-            <button
+            
+            <button 
               mat-stroked-button
               *ngIf="item.rarity === 'common'"
-              matTooltip="Sell for {{ item.price * 0.5 | number : '1.0-0' }}mk"
-            >
+              matTooltip="Sell for {{ (item.price * 0.5) | number:'1.0-0' }}mk">
               <mat-icon>sell</mat-icon>
               Sell
             </button>

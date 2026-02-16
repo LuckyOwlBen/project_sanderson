@@ -11,14 +11,14 @@
 .section-header {
   max-width: 1400px;
   margin: 0 auto 1.5rem auto;
-
+  
   h2 {
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
     font-weight: 600;
     color: #ffffff;
   }
-
+  
   .section-subtitle {
     margin: 0;
     color: #e8e8e8;
@@ -39,14 +39,14 @@
   max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
-
+  
   mat-icon {
     color: #ffc107;
     font-size: 24px;
     width: 24px;
     height: 24px;
   }
-
+  
   span {
     font-weight: 500;
     font-size: 1rem;
@@ -70,18 +70,18 @@
 
   &:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
     background-color: var(--gpSystemDarkGrey) !important;
   }
-
+  
   &.disabled {
     opacity: 0.4;
     cursor: not-allowed;
     filter: grayscale(0.7);
-
+    
     &:hover {
       transform: none;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
   }
 
@@ -89,7 +89,7 @@
     height: 200px;
     overflow: hidden;
     position: relative;
-
+    
     .image-placeholder {
       width: 100%;
       height: 100%;
@@ -97,7 +97,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-
+      
       .culture-image {
         width: 100%;
         height: 100%;
@@ -107,7 +107,7 @@
         left: 0;
         z-index: 2;
       }
-
+      
       .placeholder-icon {
         font-size: 80px;
         width: 80px;
@@ -120,14 +120,14 @@
 
   mat-card-content {
     padding: 1.5rem;
-
+    
     .culture-name {
       margin: 0 0 0.75rem 0;
       font-size: 1.75rem;
       font-weight: 600;
       color: #ffffff;
     }
-
+    
     .culture-expertise {
       display: flex;
       align-items: center;
@@ -136,14 +136,14 @@
       color: var(--gpColor-ChalkyBlue);
       font-weight: 500;
       font-size: 1rem;
-
+      
       mat-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
       }
     }
-
+    
     .culture-description {
       color: #e8e8e8;
       line-height: 1.6;
@@ -155,6 +155,7 @@
       overflow: hidden;
     }
   }
+
 }
 
 .culture-details {
@@ -173,7 +174,7 @@
       height: 300px;
       overflow: hidden;
       position: relative;
-
+      
       .detail-image-placeholder {
         width: 100%;
         height: 100%;
@@ -181,7 +182,7 @@
         align-items: center;
         justify-content: center;
         position: relative;
-
+        
         .detail-image {
           width: 100%;
           height: 100%;
@@ -191,7 +192,7 @@
           left: 0;
           z-index: 2;
         }
-
+        
         .detail-placeholder-icon {
           font-size: 120px;
           width: 120px;
@@ -201,17 +202,17 @@
         }
       }
     }
-
+    
     mat-card-content {
       padding: 2rem;
-
+      
       .detail-name {
         margin: 0 0 1.5rem 0;
         font-size: 2.5rem;
         font-weight: 700;
         color: #ffffff;
       }
-
+      
       .expertise-section {
         display: flex;
         align-items: center;
@@ -221,23 +222,23 @@
         background-color: var(--gpSystemDarkGrey);
         border-radius: 8px;
         color: #ffffff;
-
+        
         mat-icon {
           color: var(--gpColor-ChalkyBlue);
           font-size: 24px;
           width: 24px;
           height: 24px;
         }
-
+        
         strong {
           color: #ffffff;
           margin-right: 0.5rem;
         }
       }
-
+      
       .description-section {
         margin-bottom: 1.5rem;
-
+        
         p {
           line-height: 1.8;
           font-size: 1.1rem;
@@ -245,7 +246,7 @@
           margin: 0;
         }
       }
-
+      
       .names-section {
         display: flex;
         gap: 0.75rem;
@@ -253,7 +254,7 @@
         padding: 1rem;
         background-color: var(--gpSystemDarkGrey);
         border-radius: 8px;
-
+        
         mat-icon {
           color: var(--gpColor-ChalkyBlue);
           font-size: 24px;
@@ -261,16 +262,16 @@
           height: 24px;
           flex-shrink: 0;
         }
-
+        
         .names-content {
           flex: 1;
-
+          
           strong {
             display: block;
             margin-bottom: 0.5rem;
             color: #ffffff;
           }
-
+          
           .name-list {
             margin: 0;
             color: #e8e8e8;
@@ -278,13 +279,13 @@
           }
         }
       }
-
+      
       .confirm-button {
         width: 100%;
         padding: 1rem;
         font-size: 1.1rem;
         font-weight: 600;
-
+        
         mat-icon {
           margin-right: 0.5rem;
         }
@@ -310,25 +311,25 @@
 .selected-culture-card {
   transition: all 0.2s ease;
   background-color: var(--gpSystemDarkerGrey) !important;
-
+  
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     background-color: var(--gpSystemDarkGrey) !important;
   }
-
+  
   .selected-culture-content {
     display: flex;
     align-items: center;
     gap: 1.5rem;
     padding: 1rem;
-
+    
     .selected-image-container {
       flex-shrink: 0;
       width: 120px;
       height: 80px;
       overflow: hidden;
       border-radius: 8px;
-
+      
       .image-placeholder {
         width: 100%;
         height: 100%;
@@ -336,7 +337,7 @@
         align-items: center;
         justify-content: center;
         position: relative;
-
+        
         .culture-image {
           width: 100%;
           height: 100%;
@@ -346,7 +347,7 @@
           left: 0;
           z-index: 2;
         }
-
+        
         .placeholder-icon {
           font-size: 40px;
           width: 40px;
@@ -356,17 +357,17 @@
         }
       }
     }
-
+    
     .selected-info {
       flex: 1;
-
+      
       .selected-name {
         margin: 0 0 0.5rem 0;
         font-size: 1.5rem;
         font-weight: 600;
         color: #ffffff;
       }
-
+      
       .selected-expertise {
         display: flex;
         align-items: center;
@@ -375,7 +376,7 @@
         color: var(--gpColor-ChalkyBlue);
         font-weight: 500;
         font-size: 1rem;
-
+        
         mat-icon {
           font-size: 18px;
           width: 18px;
@@ -383,10 +384,10 @@
         }
       }
     }
-
+    
     .remove-button {
       flex-shrink: 0;
-
+      
       mat-icon {
         font-size: 24px;
         width: 24px;
@@ -412,12 +413,12 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
-
+      
       .selected-image-container {
         width: 100%;
         height: 120px;
       }
-
+      
       .remove-button {
         align-self: flex-end;
       }

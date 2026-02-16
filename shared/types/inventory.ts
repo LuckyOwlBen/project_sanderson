@@ -1,21 +1,13 @@
 /**
  * Inventory System - Shared Type Definitions
- *
+ * 
  * Types for items, inventory, and equipment
  */
 
 import { BonusEffect } from './bonuses';
 import { DamageType } from './attacks';
 
-export type ItemType =
-  | 'weapon'
-  | 'armor'
-  | 'equipment'
-  | 'consumable'
-  | 'mount'
-  | 'vehicle'
-  | 'fabrial'
-  | 'pet';
+export type ItemType = 'weapon' | 'armor' | 'equipment' | 'consumable' | 'mount' | 'vehicle' | 'fabrial' | 'pet';
 export type ItemRarity = 'common' | 'reward-only' | 'talent-only';
 export type EquipmentSlot = 'mainHand' | 'offHand' | 'armor' | 'accessory' | 'mount';
 export type WeaponSkill = 'light-weaponry' | 'heavy-weaponry' | 'athletics';
@@ -114,5 +106,5 @@ export const CURRENCY_RATES = {
   garnet: { chip: 1, mark: 5, broam: 20 },
   ruby: { chip: 2, mark: 10, broam: 40 },
   amethyst: { chip: 5, mark: 25, broam: 100 },
-  emerald: { chip: 10, mark: 50, broam: 200 },
+  emerald: { chip: 10, mark: 50, broam: 200 }
 } as const;

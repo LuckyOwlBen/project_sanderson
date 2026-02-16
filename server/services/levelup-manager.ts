@@ -1,11 +1,11 @@
 /**
  * Level Up Manager Service
- *
+ * 
  * Handles character level-up progression:
  * - Increments character level
  * - Awards points from level tables to available points (pointsRemaining)
  * - Sets finalized: false on affected state records to unlock allocation UI
- *
+ * 
  * Range methods allow bulk multi-level processing for catch-ups
  */
 
@@ -18,32 +18,28 @@ import {
   getTalentsStateRecord,
   updateTalentsStateRecord,
   getExpertiseStateRecord,
-  updateExpertiseStateRecord,
+  updateExpertiseStateRecord
 } from '../database';
 
 export class LevelUpManager {
   // ATTRIBUTE POINTS: 12 at level 1, then +1 at levels 3,6,9,12,15,18 (up to level 21)
-  private ATTRIBUTE_POINTS_PER_LEVEL = [
-    12, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0,
-  ];
-
+  private ATTRIBUTE_POINTS_PER_LEVEL = [12, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0];
+  
   // SKILL POINTS: 4 at level 1, then 2 per level after (up to level 21)
   private SKILL_POINTS_PER_LEVEL = [4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
-
+  
   // HEALTH GAINED: 10 + STR at level 1, then +5 to level 5, +4 to level 10, +3 to level 15, +2 to level 20, +1 at 21
   private HEALTH_PER_LEVEL = [10, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1];
-
+  
   // ADD STRENGTH to health gained at these levels
   private HEALTH_STRENGTH_BONUS_LEVELS = [1, 6, 11, 16, 21];
-
+  
   // MAX SKILL RANKS: +2 to level 5, +3 to level 10, +4 to level 15, +5 to level 21
-  private MAX_SKILL_RANKS_PER_LEVEL = [
-    2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5,
-  ];
-
+  private MAX_SKILL_RANKS_PER_LEVEL = [2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5];
+  
   // SKILL RANKS: 5 at level 1, then 2 per level to level 20, 0 at 21
   private SKILL_RANKS_PER_LEVEL = [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0];
-
+  
   // TALENT POINTS: 2 at levels 1,6,11,16 and 1 talent at all other levels
   private TALENT_POINTS_PER_LEVEL = [2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1];
 
@@ -159,22 +155,18 @@ export class LevelUpManager {
   /**
    * Assign creation-time level bonuses when a character is created at a level > 1
    * Calculates cumulative points for levels 2 through selectedLevel and assigns to database
-   *
+   * 
    * @param characterId - The character to assign bonuses to
    * @param selectedLevel - The selected creation level (must be > 1 for bonuses to apply)
    */
   async getCreationLevelBonuses(characterId: string, selectedLevel: number): Promise<void> {
     // Only apply bonuses if creating at level > 1
     if (selectedLevel <= 1) {
-      console.log(
-        `[LevelUp] Character ${characterId} at level ${selectedLevel} - skipping bonuses (level 1)`
-      );
+      console.log(`[LevelUp] Character ${characterId} at level ${selectedLevel} - skipping bonuses (level 1)`);
       return;
     }
 
-    console.log(
-      `[LevelUp] Applying creation bonuses for character ${characterId} at level ${selectedLevel}`
-    );
+    console.log(`[LevelUp] Applying creation bonuses for character ${characterId} at level ${selectedLevel}`);
 
     try {
       // Calculate cumulative bonuses from level 2 to selected level
@@ -182,9 +174,7 @@ export class LevelUpManager {
       const skillPoints = this.getSkillPointsRange(2, selectedLevel);
       const talentPoints = this.getTalentPointsRange(2, selectedLevel);
 
-      console.log(
-        `[LevelUp] Calculated bonuses - Attributes: ${attributePoints}, Skills: ${skillPoints}, Talents: ${talentPoints}`
-      );
+      console.log(`[LevelUp] Calculated bonuses - Attributes: ${attributePoints}, Skills: ${skillPoints}, Talents: ${talentPoints}`);
 
       // Update Attributes state: add bonus points to pointsRemaining
       if (attributePoints > 0) {
@@ -192,11 +182,9 @@ export class LevelUpManager {
         console.log(`[LevelUp] Attributes record before update:`, attrRecord);
         if (attrRecord) {
           const newPointsRemaining = (attrRecord.pointsRemaining || 0) + attributePoints;
-          console.log(
-            `[LevelUp] Updating attributes: ${attrRecord.pointsRemaining} + ${attributePoints} = ${newPointsRemaining}`
-          );
+          console.log(`[LevelUp] Updating attributes: ${attrRecord.pointsRemaining} + ${attributePoints} = ${newPointsRemaining}`);
           await updateAttributesRecord(characterId, {
-            pointsRemaining: newPointsRemaining,
+            pointsRemaining: newPointsRemaining
           });
           console.log(`[LevelUp] Attributes updated successfully`);
         }
@@ -208,11 +196,9 @@ export class LevelUpManager {
         console.log(`[LevelUp] Skills record before update:`, skillsRecord);
         if (skillsRecord) {
           const newPointsRemaining = (skillsRecord.pointsRemaining || 0) + skillPoints;
-          console.log(
-            `[LevelUp] Updating skills: ${skillsRecord.pointsRemaining} + ${skillPoints} = ${newPointsRemaining}`
-          );
+          console.log(`[LevelUp] Updating skills: ${skillsRecord.pointsRemaining} + ${skillPoints} = ${newPointsRemaining}`);
           await updateSkillsStateRecord(characterId, {
-            pointsRemaining: newPointsRemaining,
+            pointsRemaining: newPointsRemaining
           });
           console.log(`[LevelUp] Skills updated successfully`);
         }
@@ -225,12 +211,10 @@ export class LevelUpManager {
         if (talentsRecord) {
           const newTotalPoints = (talentsRecord.totalPoints || 0) + talentPoints;
           const newPointsRemaining = (talentsRecord.pointsRemaining || 0) + talentPoints;
-          console.log(
-            `[LevelUp] Updating talents: totalPoints ${talentsRecord.totalPoints} + ${talentPoints} = ${newTotalPoints}, pointsRemaining ${talentsRecord.pointsRemaining} + ${talentPoints} = ${newPointsRemaining}`
-          );
+          console.log(`[LevelUp] Updating talents: totalPoints ${talentsRecord.totalPoints} + ${talentPoints} = ${newTotalPoints}, pointsRemaining ${talentsRecord.pointsRemaining} + ${talentPoints} = ${newPointsRemaining}`);
           await updateTalentsStateRecord(characterId, {
             totalPoints: newTotalPoints,
-            pointsRemaining: newPointsRemaining,
+            pointsRemaining: newPointsRemaining
           });
           console.log(`[LevelUp] Talents updated successfully`);
         }
@@ -238,10 +222,7 @@ export class LevelUpManager {
 
       console.log(`[LevelUp] Completed bonuses application for character ${characterId}`);
     } catch (error) {
-      console.error(
-        `[LevelUp] Failed to assign creation level bonuses for character ${characterId}:`,
-        error
-      );
+      console.error(`[LevelUp] Failed to assign creation level bonuses for character ${characterId}:`, error);
       // Don't throw - allow character creation to proceed even if bonus assignment fails
     }
   }
@@ -251,7 +232,7 @@ export class LevelUpManager {
    * - Increments level by 1
    * - Awards points to pointsRemaining (available points)
    * - Sets finalized: false on affected state records
-   *
+   * 
    * @param characterId - The character to level up
    * @throws Error if character not found or level >= 21
    */
@@ -284,12 +265,7 @@ export class LevelUpManager {
       // Update character level
       character.level = newLevel;
       character.pendingLevel = true; // Set flag for level-up flow
-      await characterRepository.progression.save(
-        characterId,
-        newLevel,
-        character.pendingLevelPoints,
-        true
-      );
+      await characterRepository.progression.save(characterId, newLevel, character.pendingLevelPoints, true);
 
       // Update Attributes state: add points to pointsRemaining, set finalized: false
       if (attributePoints > 0) {
@@ -297,7 +273,7 @@ export class LevelUpManager {
         if (attrRecord) {
           await updateAttributesRecord(characterId, {
             pointsRemaining: (attrRecord.pointsRemaining || 0) + attributePoints,
-            finalized: false,
+            finalized: false
           });
         }
       }
@@ -308,7 +284,7 @@ export class LevelUpManager {
         if (skillsRecord) {
           await updateSkillsStateRecord(characterId, {
             pointsRemaining: (skillsRecord.pointsRemaining || 0) + skillPoints,
-            finalized: false,
+            finalized: false
           });
         }
       }
@@ -320,7 +296,7 @@ export class LevelUpManager {
           await updateTalentsStateRecord(characterId, {
             totalPoints: (talentsRecord.totalPoints || 0) + talentPoints,
             pointsRemaining: (talentsRecord.pointsRemaining || 0) + talentPoints,
-            finalized: false,
+            finalized: false
           });
         }
       }
@@ -335,7 +311,7 @@ export class LevelUpManager {
           // Add the delta to pointsRemaining
           await updateExpertiseStateRecord(characterId, {
             pointsRemaining: (expertiseRecord.pointsRemaining || 0) + intellectIncrease,
-            finalized: false,
+            finalized: false
           });
         }
       }
@@ -345,12 +321,12 @@ export class LevelUpManager {
         newLevel,
         attributePointsAwarded: attributePoints,
         skillPointsAwarded: skillPoints,
-        talentPointsAwarded: talentPoints,
+        talentPointsAwarded: talentPoints
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -358,15 +334,12 @@ export class LevelUpManager {
   /**
    * Process multiple level-ups at once (for catch-up scenarios)
    * Calls processLevelUp for each level from currentLevel+1 to targetLevel
-   *
+   * 
    * @param characterId - The character to level up
    * @param targetLevel - The level to reach
    * @returns Summary of all levels processed
    */
-  async processMultipleLevelUps(
-    characterId: string,
-    targetLevel: number
-  ): Promise<{
+  async processMultipleLevelUps(characterId: string, targetLevel: number): Promise<{
     success: boolean;
     levelsProcessed: number;
     totalAttributePoints: number;
@@ -382,7 +355,7 @@ export class LevelUpManager {
         totalAttributePoints: 0,
         totalSkillPoints: 0,
         totalTalentPoints: 0,
-        errors: [`Character ${characterId} not found`],
+        errors: [`Character ${characterId} not found`]
       };
     }
 
@@ -409,14 +382,14 @@ export class LevelUpManager {
       totalAttributePoints,
       totalSkillPoints,
       totalTalentPoints,
-      errors: errors.length > 0 ? errors : undefined,
+      errors: errors.length > 0 ? errors : undefined
     };
   }
 
   /**
    * Get finalization status for all categories
    * Returns which categories are finalized and which need updating for level-up
-   *
+   * 
    * @param characterId - The character to check
    * @returns Status object with finalized flags and first unfinalzed step
    */
@@ -458,7 +431,7 @@ export class LevelUpManager {
         skillsFinalized,
         talentsFinalized,
         expertiseFinalized,
-        firstUnfinalizedStep,
+        firstUnfinalizedStep
       };
     } catch (error) {
       return {
@@ -468,7 +441,7 @@ export class LevelUpManager {
         talentsFinalized: true,
         expertiseFinalized: true,
         firstUnfinalizedStep: null,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }

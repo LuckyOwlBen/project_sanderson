@@ -10,7 +10,7 @@ import { getPetProperties, PetProperties } from '../../../character/inventory/pe
   standalone: true,
   imports: [CommonModule],
   templateUrl: './pet-display.component.html',
-  styleUrls: ['./pet-display.component.scss'],
+  styleUrls: ['./pet-display.component.scss']
 })
 export class PetDisplayComponent implements OnDestroy {
   private destroy$ = new Subject<void>();

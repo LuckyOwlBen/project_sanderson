@@ -1,16 +1,11 @@
 /**
  * Attributes Finalization Service
- *
+ * 
  * Handles finalization of attribute allocations at the end of character creation.
  * Once finalized, attributes cannot be edited until next level-up.
  */
 
-import {
-  createAttributesRecord,
-  getAttributesRecord,
-  setAttributesFinalized,
-  updateAttributesRecord,
-} from '../database';
+import { createAttributesRecord, getAttributesRecord, setAttributesFinalized, updateAttributesRecord } from '../database';
 
 export class AttributesFinalizationService {
   constructor() {}
@@ -18,7 +13,7 @@ export class AttributesFinalizationService {
   /**
    * Finalize attributes for a character
    * Validates all points are spent, moves spent points to total, and locks from editing
-   *
+   * 
    * Called after character creation is complete (last step)
    */
   async finalizeAttributesForCharacter(characterId: string): Promise<void> {
@@ -38,7 +33,7 @@ export class AttributesFinalizationService {
     // totalPoints stays the same (don't double it), pointsRemaining becomes 0
     await updateAttributesRecord(characterId, {
       pointsRemaining: 0,
-      finalized: true,
+      finalized: true
     });
 
     console.log(
@@ -49,7 +44,7 @@ export class AttributesFinalizationService {
   /**
    * Reset attributes finalization for level-up
    * Sets finalized flag to false, allowing re-allocation of new points
-   *
+   * 
    * Called when character levels up
    */
   async resetAttributesForLevelUp(characterId: string): Promise<void> {
@@ -66,7 +61,7 @@ export class AttributesFinalizationService {
         willpower: 0,
         awareness: 0,
         presence: 0,
-        finalized: false,
+        finalized: false
       });
       console.log(
         `[AttributesFinalization] Created attributes (reset for level-up) for character: ${characterId}`

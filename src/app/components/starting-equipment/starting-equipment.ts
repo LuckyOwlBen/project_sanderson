@@ -16,13 +16,7 @@ import { Subject, takeUntil, filter, take, switchMap } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
 import { EquipmentApiService, EquipmentResponse } from '../../services/equipment-api.service';
-import {
-  ItemType,
-  StartingKitDTO,
-  InventoryDTO,
-  InventoryItem,
-  InventoryViewItem,
-} from '../../../../shared/types/inventory';
+import { ItemType, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem } from '../../../../shared/types/inventory';
 
 @Component({
   selector: 'app-starting-equipment',
@@ -42,28 +36,29 @@ import {
     MatSelectModule,
   ],
   templateUrl: './starting-equipment.html',
-  styleUrls: ['./starting-equipment.scss'],
+  styleUrls: ['./starting-equipment.scss']
 })
+
 export class StartingEquipment implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private currentCharacterId: string | null = null;
-
+  
   // Inventory state
   private currentInventory: InventoryDTO | null = null;
   inventoryItems: InventoryViewItem[] = [];
   currentCurrency = 0;
-
+  
   // Available items and kits
   availableKits: StartingKitDTO[] = [];
   selectedKitId: string | null = null;
   startingKit: StartingKitDTO | null = null;
   hasRefundedKit = false;
   private defaultKitId: string | null = null;
-
+  
   availableItems: InventoryItem[] = [];
   filteredItems: InventoryItem[] = [];
   paginatedItems: InventoryItem[] = [];
-
+  
   // UI state
   selectedCategory: ItemType | 'all' = 'all';
   pageSize = 12;
@@ -80,9 +75,11 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Monitor identity service waiting state
-    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
-      this.isWaitingForIdentity = waiting;
-    });
+    this.identityService.waitingForIdentity$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((waiting) => {
+        this.isWaitingForIdentity = waiting;
+      });
 
     // Load from API when character ID becomes available
     this.identityService.currentCharacterId$
@@ -105,8 +102,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   private loadFromApi(characterId: string): void {
-    this.equipmentApi
-      .getEquipment(characterId)
+    this.equipmentApi.getEquipment(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: EquipmentResponse) => {
@@ -123,13 +119,12 @@ export class StartingEquipment implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Error loading equipment from API:', err);
           this.router.navigate(['/']);
-        },
+        }
       });
   }
 
   private loadAvailableKits(): void {
-    this.equipmentApi
-      .getAvailableKits()
+    this.equipmentApi.getAvailableKits()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (kits) => {
@@ -143,13 +138,12 @@ export class StartingEquipment implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error loading available kits:', err);
-        },
+        }
       });
   }
 
   private loadStoreItems(): void {
-    this.equipmentApi
-      .getStoreItems()
+    this.equipmentApi.getStoreItems()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (items) => {
@@ -159,7 +153,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error loading store items:', err);
-        },
+        }
       });
   }
 
@@ -173,9 +167,10 @@ export class StartingEquipment implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+
+
   private applyKitForCharacter(characterId: string, kitId: string, kit: StartingKitDTO): void {
-    this.equipmentApi
-      .applyStartingKit(characterId, kitId)
+    this.equipmentApi.applyStartingKit(characterId, kitId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -194,18 +189,17 @@ export class StartingEquipment implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error applying kit:', err);
-        },
+        }
       });
   }
 
   applyKit(kitId: string): void {
-    const kit = this.availableKits.find((k) => k.id === kitId);
+    const kit = this.availableKits.find(k => k.id === kitId);
     if (!kit || !this.currentCharacterId) return;
 
     // If a kit is already applied, refund it first (clean slate)
     if (this.selectedKitId && this.selectedKitId !== kitId) {
-      this.equipmentApi
-        .refundStartingKit(this.currentCharacterId)
+      this.equipmentApi.refundStartingKit(this.currentCharacterId)
         .pipe(
           takeUntil(this.destroy$),
           switchMap(() => {
@@ -230,7 +224,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
           },
           error: (err) => {
             console.error('Error switching kit:', err);
-          },
+          }
         });
     } else {
       // No existing kit, just apply the new one
@@ -241,11 +235,10 @@ export class StartingEquipment implements OnInit, OnDestroy {
   refundStartingKit(): void {
     this.identityService.currentCharacterId$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((characterId) => {
+      .subscribe(characterId => {
         if (!characterId) return;
 
-        this.equipmentApi
-          .refundStartingKit(characterId)
+        this.equipmentApi.refundStartingKit(characterId)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (response) => {
@@ -264,7 +257,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('Error refunding kit:', err);
-            },
+            }
           });
       });
   }
@@ -273,11 +266,9 @@ export class StartingEquipment implements OnInit, OnDestroy {
     if (this.selectedCategory === 'all') {
       this.filteredItems = [...this.availableItems];
     } else {
-      this.filteredItems = this.availableItems.filter(
-        (item) => item.type === this.selectedCategory
-      );
+      this.filteredItems = this.availableItems.filter(item => item.type === this.selectedCategory);
     }
-
+    
     this.pageIndex = 0;
     this.updatePaginatedItems();
   }
@@ -302,11 +293,10 @@ export class StartingEquipment implements OnInit, OnDestroy {
   purchaseItem(item: InventoryItem): void {
     this.identityService.currentCharacterId$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((characterId) => {
+      .subscribe(characterId => {
         if (!characterId) return;
 
-        this.equipmentApi
-          .purchaseItem(characterId, item.id, 1)
+        this.equipmentApi.purchaseItem(characterId, item.id, 1)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (response) => {
@@ -322,7 +312,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('Error purchasing item:', err);
-            },
+            }
           });
       });
   }
@@ -339,21 +329,21 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   getAllInventoryItems(): { item: InventoryItem; quantity: number }[] {
     return this.inventoryItems
-      .filter((item) => item && item.id && item.name && item.price !== undefined)
+      .filter(item => item && item.id && item.name && item.price !== undefined)
       .map((item) => ({
         item,
-        quantity: item.quantity,
+        quantity: item.quantity
       }));
   }
 
   getItemIcon(item: InventoryItem): string {
     const iconMap: { [key: string]: string } = {
-      weapon: 'swords',
-      armor: 'shield',
-      equipment: 'backpack',
-      consumable: 'science',
-      fabrial: 'auto_awesome',
-      mount: 'pets',
+      'weapon': 'swords',
+      'armor': 'shield',
+      'equipment': 'backpack',
+      'consumable': 'science',
+      'fabrial': 'auto_awesome',
+      'mount': 'pets'
     };
     return iconMap[item.type] || 'category';
   }
@@ -363,10 +353,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   getInventoryWeight(): number {
-    return this.inventoryItems.reduce(
-      (sum, item) => sum + (item.weight ?? 0) * (item.quantity ?? 0),
-      0
-    );
+    return this.inventoryItems.reduce((sum, item) => sum + ((item.weight ?? 0) * (item.quantity ?? 0)), 0);
   }
 
   getTotalCurrency(): number {
@@ -375,20 +362,16 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   getCurrencyDisplay(): string {
     const converted = this.convertToMixedDenominations(this.currentCurrency);
-
+    
     const parts: string[] = [];
     if (converted.broams > 0) parts.push(`${converted.broams}b`);
     if (converted.marks > 0) parts.push(`${converted.marks}mk`);
     if (converted.chips > 0) parts.push(`${converted.chips}c`);
-
+    
     return parts.length > 0 ? parts.join(' ') : '0 broams';
   }
 
-  private convertToMixedDenominations(marks: number): {
-    chips: number;
-    marks: number;
-    broams: number;
-  } {
+  private convertToMixedDenominations(marks: number): { chips: number; marks: number; broams: number } {
     const totalChips = Math.round(marks * 5);
     const broams = Math.floor(totalChips / 20);
     const remainingChips = totalChips % 20;
@@ -398,18 +381,17 @@ export class StartingEquipment implements OnInit, OnDestroy {
     return {
       chips,
       marks: remainingMarks,
-      broams,
+      broams
     };
   }
 
   sellItem(itemId: string): void {
     this.identityService.currentCharacterId$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((characterId) => {
+      .subscribe(characterId => {
         if (!characterId) return;
 
-        this.equipmentApi
-          .sellItem(characterId, itemId)
+        this.equipmentApi.sellItem(characterId, itemId)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (response) => {
@@ -425,26 +407,24 @@ export class StartingEquipment implements OnInit, OnDestroy {
             },
             error: (err) => {
               console.error('Error selling item:', err);
-            },
+            }
           });
       });
   }
 
   getStartingKitItems(): { item: InventoryItem; quantity: number }[] {
     if (!this.startingKit) return [];
-
+    
     const kitItemIds = new Set<string>();
-    [...this.startingKit.weapons, ...this.startingKit.armor, ...this.startingKit.equipment].forEach(
-      (kitItem) => {
-        kitItemIds.add(kitItem.itemId);
-      }
-    );
-
+    [...this.startingKit.weapons, ...this.startingKit.armor, ...this.startingKit.equipment].forEach(kitItem => {
+      kitItemIds.add(kitItem.itemId);
+    });
+    
     return this.inventoryItems
-      .filter((item) => kitItemIds.has(item.baseId ?? item.id))
-      .map((item) => ({
+      .filter(item => kitItemIds.has(item.baseId ?? item.id))
+      .map(item => ({
         item,
-        quantity: item.quantity,
+        quantity: item.quantity
       }));
   }
 
@@ -462,16 +442,17 @@ export class StartingEquipment implements OnInit, OnDestroy {
 
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
-    this.identityService.currentCharacterId$.pipe(take(1)).subscribe((characterId) => {
-      if (!characterId || !this.currentInventory) return;
-
-      this.equipmentApi
-        .saveEquipment(characterId, this.currentInventory)
-        .pipe(take(1))
-        .subscribe({
-          next: (response) => console.log('Equipment saved successfully:', response),
-          error: (error) => console.error('Failed to save equipment:', error),
-        });
-    });
+    this.identityService.currentCharacterId$
+      .pipe(take(1))
+      .subscribe(characterId => {
+        if (!characterId || !this.currentInventory) return;
+        
+        this.equipmentApi.saveEquipment(characterId, this.currentInventory)
+          .pipe(take(1))
+          .subscribe({
+            next: (response) => console.log('Equipment saved successfully:', response),
+            error: (error) => console.error('Failed to save equipment:', error)
+          });
+      });
   }
 }

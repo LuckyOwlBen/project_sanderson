@@ -1,6 +1,6 @@
 /**
  * Attack Calculations Service Tests
- *
+ * 
  * Validates all combat calculations including attacks, damage, and advantage/disadvantage
  */
 
@@ -11,7 +11,7 @@ import {
   DiceRoll,
   AttackRoll,
   DamageRoll,
-  Attack,
+  Attack
 } from './attack-calculations';
 
 describe('AttackCalculationsService', () => {
@@ -322,12 +322,12 @@ describe('AttackCalculationsService', () => {
   describe('executeAttackCombination', () => {
     it('should execute multiple attacks', () => {
       const combination = service.executeAttackCombination(
-        3, // 3 attacks
-        5, // skill total
-        0, // bonus
+        3,    // 3 attacks
+        5,    // skill total
+        0,    // bonus
         'd6', // damage
-        0, // damage bonus
-        12 // defense
+        0,    // damage bonus
+        12    // defense
       );
 
       expect(combination.attacks).toHaveLength(3);
@@ -439,11 +439,11 @@ describe('AttackCalculationsService', () => {
       // Against defense 12
 
       const attack = service.executeAttack(
-        8, // skill total: 2 + 6
-        2, // weapon bonus
+        8,      // skill total: 2 + 6
+        2,      // weapon bonus
         'd6+2', // damage
-        1, // additional bonus
-        12, // target defense
+        1,      // additional bonus
+        12,     // target defense
         AdvantageMode.NORMAL
       );
 
@@ -460,12 +460,12 @@ describe('AttackCalculationsService', () => {
 
     it('should handle multiple attacks with different outcomes', () => {
       const combination = service.executeAttackCombination(
-        2, // 2 attacks
-        8, // skill total
-        1, // bonus
-        'd6', // damage
-        0, // damage bonus
-        12, // target defense
+        2,      // 2 attacks
+        8,      // skill total
+        1,      // bonus
+        'd6',   // damage
+        0,      // damage bonus
+        12,     // target defense
         AdvantageMode.NORMAL
       );
 

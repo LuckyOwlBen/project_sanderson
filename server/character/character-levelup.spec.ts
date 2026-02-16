@@ -34,10 +34,10 @@ describe('Character - Level Up', () => {
 
   it('should decrement pending points when level-up is completed', () => {
     character.pendingLevelPoints = 3;
-
+    
     // Simulate completing one level-up
     character.pendingLevelPoints -= 1;
-
+    
     expect(character.pendingLevelPoints).toBe(2);
   });
 

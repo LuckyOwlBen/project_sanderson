@@ -3,7 +3,7 @@
     <mat-icon *ngIf="resource.icon" class="resource-icon">{{ resource.icon }}</mat-icon>
     <mat-card-title>{{ resource.name }}</mat-card-title>
   </mat-card-header>
-
+  
   <mat-card-content>
     <div class="resource-display">
       <div class="resource-numbers">
@@ -11,59 +11,60 @@
         <span class="separator">/</span>
         <span class="max">{{ resource.max }}</span>
       </div>
-
+      
       <div class="resource-bar-container">
-        <div
-          class="resource-bar"
+        <div 
+          class="resource-bar" 
           [style.width.%]="percentage"
-          [style.background-color]="barColor"
-        ></div>
+          [style.background-color]="barColor">
+        </div>
       </div>
     </div>
   </mat-card-content>
-
+  
   <div class="resource-warning" *ngIf="resource.canRestore === false && resource.restoreWarning">
     <mat-icon class="warning-icon">warning</mat-icon>
     <span class="warning-text">{{ resource.restoreWarning }}</span>
   </div>
-
+  
   <mat-card-actions>
     <div class="button-group">
-      <button
-        mat-icon-button
-        color="warn"
+      <button 
+        mat-icon-button 
+        color="warn" 
         (click)="decrement(5)"
         [disabled]="resource.current === 0"
-        title="Decrease by 5"
-      >
+        title="Decrease by 5">
         <mat-icon>keyboard_double_arrow_down</mat-icon>
       </button>
-      <button
-        mat-icon-button
-        color="warn"
+      <button 
+        mat-icon-button 
+        color="warn" 
         (click)="decrement(1)"
         [disabled]="resource.current === 0"
-        title="Decrease by 1"
-      >
+        title="Decrease by 1">
         <mat-icon>remove</mat-icon>
       </button>
-      <button mat-stroked-button (click)="setToMax()" class="reset-button">Reset</button>
-      <button
-        mat-icon-button
-        color="primary"
+      <button 
+        mat-stroked-button 
+        (click)="setToMax()"
+        class="reset-button">
+        Reset
+      </button>
+      <button 
+        mat-icon-button 
+        color="primary" 
         (click)="increment(1)"
         [disabled]="!canIncrement"
-        [title]="incrementTooltip"
-      >
+        [title]="incrementTooltip">
         <mat-icon>add</mat-icon>
       </button>
-      <button
-        mat-icon-button
-        color="primary"
+      <button 
+        mat-icon-button 
+        color="primary" 
         (click)="increment(5)"
         [disabled]="!canIncrement"
-        [title]="incrementTooltip5"
-      >
+        [title]="incrementTooltip5">
         <mat-icon>keyboard_double_arrow_up</mat-icon>
       </button>
     </div>

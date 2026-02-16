@@ -8,16 +8,13 @@ import { SocketBroadcaster } from '../socket-broadcaster';
  * @param app Express app instance
  * @param broadcaster Socket broadcaster for character updates
  */
-export default function createCharacterFinalizationRoute(
-  app: Express,
-  broadcaster: SocketBroadcaster
-): void {
+export default function createCharacterFinalizationRoute(app: Express, broadcaster: SocketBroadcaster): void {
   console.log('[Routes] Registering character finalization route...');
 
   /**
    * GET /api/characters/:id/complete
    * Get a flattened view of a complete character for review
-   *
+   * 
    * Returns display-friendly data without deep nesting.
    * Used by the review page before finalization.
    *
@@ -28,7 +25,7 @@ export default function createCharacterFinalizationRoute(
   /**
    * POST /api/characters/:id/finalize
    * Finalize character creation
-   *
+   * 
    * Validates all sections (attributes, skills, talents, expertises) are complete
    * and finalizes all point allocations. Once finalized, the character is locked
    * for level 1 until level-up occurs.

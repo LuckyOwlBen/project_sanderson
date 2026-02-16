@@ -6,9 +6,8 @@
   </mat-card-header>
   <mat-card-content>
     <p class="spren-message">
-      A <strong>{{ pendingSprenGrant.sprenType }}</strong> has offered to bond with you, granting
-      you the powers of a <strong>{{ pendingSprenGrant.order }}</strong
-      >.
+      A <strong>{{ pendingSprenGrant.sprenType }}</strong> has offered to bond with you, 
+      granting you the powers of a <strong>{{ pendingSprenGrant.order }}</strong>.
     </p>
     <p class="philosophy-text">
       <em>"{{ pendingSprenGrant.philosophy }}"</em>
@@ -30,16 +29,15 @@
   </mat-card-header>
   <mat-card-content>
     <p class="ideal-message">
-      You have bonded with a spren. To unlock your surges, you must speak the First Ideal of the
-      Knights Radiant:
+      You have bonded with a spren. To unlock your surges, you must speak the First Ideal of the Knights Radiant:
     </p>
     <p class="first-ideal">
       <strong>"Life before death. Strength before weakness. Journey before destination."</strong>
     </p>
     <p class="order-info" *ngIf="getOrderInfo()">
-      As a <strong>{{ getOrderInfo()?.order }}</strong
-      >, you will gain access to the surges of <strong>{{ getSurgeNames() }}</strong
-      >.
+      As a <strong>{{ getOrderInfo()?.order }}</strong>, 
+      you will gain access to the surges of 
+      <strong>{{ getSurgeNames() }}</strong>.
     </p>
   </mat-card-content>
   <mat-card-actions>
