@@ -32,19 +32,19 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      
+
       &[mat-raised-button] {
         background-color: var(--gpColor-ChalkyBlue);
         color: #ffffff;
-        
+
         &:hover {
           background-color: #5ab3e8;
         }
       }
-      
+
       &[mat-button] {
         color: var(--gpColor-ChalkyBlue);
-        
+
         &:hover {
           background-color: var(--gpSystemDarkGrey);
         }
@@ -59,15 +59,15 @@
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 1rem;
-    
+
     .header-left h1 {
       font-size: 1.3rem;
     }
-    
+
     .header-subtitle {
       font-size: 0.9rem;
     }
-    
+
     .header-actions button {
       font-size: 0.9rem;
       padding: 0.4rem 1rem;

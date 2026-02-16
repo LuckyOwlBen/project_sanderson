@@ -6,16 +6,13 @@ import { ResourceTracker, Resource } from '../../resource-tracker/resource-track
 @Component({
   selector: 'app-character-resources-bar',
   standalone: true,
-  imports: [
-    CommonModule,
-    ResourceTracker
-  ],
+  imports: [CommonModule, ResourceTracker],
   templateUrl: './character-resources-bar.html',
   styleUrl: './character-resources-bar.scss',
 })
 export class CharacterResourcesBar {
   @Input() character!: Character;
-  @Output() resourceChanged = new EventEmitter<{ resourceName: string, newValue: number }>();
+  @Output() resourceChanged = new EventEmitter<{ resourceName: string; newValue: number }>();
 
   get healthResource(): Resource {
     return {
@@ -23,7 +20,7 @@ export class CharacterResourcesBar {
       current: this.character?.resources.health.current || 0,
       max: this.character?.resources.health.max || 0,
       icon: 'favorite',
-      color: '#f44336'
+      color: '#f44336',
     };
   }
 
@@ -33,7 +30,7 @@ export class CharacterResourcesBar {
       current: this.character?.resources.focus.current || 0,
       max: this.character?.resources.focus.max || 0,
       icon: 'psychology',
-      color: '#2196f3'
+      color: '#2196f3',
     };
   }
 
@@ -43,13 +40,13 @@ export class CharacterResourcesBar {
     const wealth = this.character?.inventory.getCurrency() || 0;
     const requiredWealth = max * 3;
     const canRestore = current < max ? wealth >= requiredWealth : true;
-    
+
     let restoreWarning: string | undefined;
     if (current < max && !canRestore) {
       const deficit = requiredWealth - wealth;
       restoreWarning = `Need ${deficit} more marks in spheres to restore Investiture (requires ${requiredWealth} marks total)`;
     }
-    
+
     return {
       name: 'Investiture',
       current,
@@ -57,7 +54,7 @@ export class CharacterResourcesBar {
       icon: 'auto_awesome',
       color: '#9c27b0',
       canRestore,
-      restoreWarning
+      restoreWarning,
     };
   }
 

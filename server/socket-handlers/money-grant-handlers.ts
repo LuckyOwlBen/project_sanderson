@@ -1,6 +1,6 @@
 /**
  * Money Grant Socket Handlers
- * 
+ *
  * Extracted WebSocket event handlers for money grant management
  * These are registered in server.ts socket.on('connection') block
  */
@@ -28,7 +28,9 @@ export function registerMoneyGrantHandlers(
    */
   socket.on('gm-grant-money', async (data) => {
     const { characterId, amount, operation, timestamp } = data;
-    console.log(`[GM Action] 💰 Granting money: ${amount} (${operation}) to character ${characterId}`);
+    console.log(
+      `[GM Action] 💰 Granting money: ${amount} (${operation}) to character ${characterId}`
+    );
 
     try {
       // Load character
@@ -38,7 +40,7 @@ export function registerMoneyGrantHandlers(
         socket.emit('gm-grant-error', {
           type: 'money',
           characterId,
-          error: 'Character not found'
+          error: 'Character not found',
         });
         return;
       }
@@ -47,7 +49,7 @@ export function registerMoneyGrantHandlers(
       if (!character.inventory) {
         character.inventory = {
           items: [],
-          currencyInChips: 0
+          currencyInChips: 0,
         };
       }
 
@@ -66,7 +68,9 @@ export function registerMoneyGrantHandlers(
       character.inventory.currencyInChips = newBalance;
       await saveCharacter(character);
 
-      console.log(`[GM Action] ✅ Money updated for ${characterId}: ${currentBalance} → ${newBalance}`);
+      console.log(
+        `[GM Action] ✅ Money updated for ${characterId}: ${currentBalance} → ${newBalance}`
+      );
 
       // Find player's socket and notify them
       const targetSocketId = findSocketIdByCharacterId(characterId);
@@ -75,11 +79,13 @@ export function registerMoneyGrantHandlers(
           amount: operation === 'add' ? amount : 0,
           newBalance,
           operation,
-          timestamp: timestamp || new Date().toISOString()
+          timestamp: timestamp || new Date().toISOString(),
         });
         console.log(`[GM Action] 💬 Notified player of money grant`);
       } else {
-        console.warn(`[GM Action] ⚠️ Player ${characterId} offline - money still saved to character`);
+        console.warn(
+          `[GM Action] ⚠️ Player ${characterId} offline - money still saved to character`
+        );
       }
 
       // Broadcast updated player info to GM
@@ -93,14 +99,14 @@ export function registerMoneyGrantHandlers(
         characterId,
         amount,
         operation,
-        newBalance
+        newBalance,
       });
     } catch (error) {
       console.error(`[GM Action] ❌ Error in gm-grant-money handler:`, error);
       socket.emit('gm-grant-error', {
         type: 'money',
         characterId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   });

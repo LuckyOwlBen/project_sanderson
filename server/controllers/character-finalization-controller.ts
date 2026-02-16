@@ -1,6 +1,6 @@
 /**
  * Character Finalization Controller
- * 
+ *
  * Handles HTTP endpoints for finalizing character creation.
  */
 
@@ -11,14 +11,18 @@ import { SocketBroadcaster } from '../socket-broadcaster';
 /**
  * POST /api/characters/:id/finalize
  * Finalize character creation
- * 
+ *
  * Validates all sections are complete and finalizes all point allocations.
- * 
+ *
  * @param req.params.id - Character ID
  * @returns { success: boolean } - Success indicator
  * @throws 400 if any section has unspent points
  */
-export async function finalizeCharacter(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
+export async function finalizeCharacter(
+  req: Request,
+  res: Response,
+  broadcaster: SocketBroadcaster
+): Promise<void> {
   try {
     const { id } = req.params;
 
@@ -28,23 +32,23 @@ export async function finalizeCharacter(req: Request, res: Response, broadcaster
     const result = await characterFinalizationService.finalizeCharacterCreation(id);
 
     console.log(`[FinalizeController] ✅ Character ${id} finalized successfully`);
-    
+
     // Broadcast character update via WebSocket
     broadcaster.scheduleCharacterUpdate(id);
-    
+
     res.json({
-      success: true
+      success: true,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[FinalizeController] ❌ Finalization error:', message);
-    
+
     // Return 400 for validation errors (unspent points)
     const statusCode = message.includes('points remaining') ? 400 : 500;
-    
+
     res.status(statusCode).json({
       success: false,
-      error: message
+      error: message,
     });
   }
 }

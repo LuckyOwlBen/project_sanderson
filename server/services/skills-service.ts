@@ -5,7 +5,7 @@ import {
   loadCharacter,
   replaceSkillRanks,
   updateSkillsStateRecord,
-  setSkillsStateFinalized
+  setSkillsStateFinalized,
 } from '../database';
 import { pointAllocationService } from './point-allocation-service';
 
@@ -25,7 +25,7 @@ export function createEmptySkillsDTO(characterId: string): SkillsStateDTO {
     pointsSpent: 0,
     pointsRemaining: 0,
     finalized: false,
-    skills: {}
+    skills: {},
   };
 }
 
@@ -49,7 +49,7 @@ export async function getSkillsByCharacterId(characterId: string): Promise<Skill
       totalPoints,
       pointsSpent,
       pointsRemaining,
-      finalized: false
+      finalized: false,
     });
   } else if (
     state.totalPoints !== totalPoints ||
@@ -59,7 +59,7 @@ export async function getSkillsByCharacterId(characterId: string): Promise<Skill
     state = await updateSkillsStateRecord(characterId, {
       totalPoints,
       pointsSpent,
-      pointsRemaining
+      pointsRemaining,
     });
   }
 
@@ -69,7 +69,7 @@ export async function getSkillsByCharacterId(characterId: string): Promise<Skill
     pointsSpent: state.pointsSpent,
     pointsRemaining: state.pointsRemaining,
     finalized: state.finalized,
-    skills
+    skills,
   };
 }
 
@@ -89,14 +89,14 @@ export async function setSkillsByCharacterId(
     ? await updateSkillsStateRecord(characterId, {
         totalPoints,
         pointsSpent,
-        pointsRemaining
+        pointsRemaining,
       })
     : await createSkillsStateRecord({
         characterId,
         totalPoints,
         pointsSpent,
         pointsRemaining,
-        finalized: false
+        finalized: false,
       });
 
   return {
@@ -105,14 +105,14 @@ export async function setSkillsByCharacterId(
     pointsSpent: updated.pointsSpent,
     pointsRemaining: updated.pointsRemaining,
     finalized: updated.finalized,
-    skills
+    skills,
   };
 }
 
 /**
  * Finalize skills for a character
  * Validates all points are spent, moves spent points to total, and locks from editing
- * 
+ *
  * Called during character creation finalization
  */
 export async function finalizeSkillsForCharacter(characterId: string): Promise<void> {
@@ -132,7 +132,7 @@ export async function finalizeSkillsForCharacter(characterId: string): Promise<v
   // totalPoints stays the same (don't double it), pointsRemaining becomes 0
   await updateSkillsStateRecord(characterId, {
     pointsRemaining: 0,
-    finalized: true
+    finalized: true,
   });
 
   console.log(

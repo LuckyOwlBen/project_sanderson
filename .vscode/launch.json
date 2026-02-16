@@ -1,13 +1,47 @@
 {
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Server (9229)",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/server",
+      "remoteRoot": null,
+      "runtimeExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    },
+    {
       "type": "chrome",
       "request": "launch",
+      "name": "Launch Chrome (ng serve)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/src",
       "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200/"
+      "runtimeExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "--user-data-dir=${workspaceFolder}/.vscode/chrome"
+      ],
+      "sourceMaps": true,
+      "trace": false
+    },
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "Launch Chrome (ng serve) - Windows",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "npm: start",
+      "runtimeExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "--user-data-dir=${workspaceFolder}/.vscode/chrome"
+      ],
+      "sourceMaps": true,
+      "trace": false
     }
   ]
 }
+
+// legacy extra block removed

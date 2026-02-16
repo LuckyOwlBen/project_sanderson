@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -29,8 +29,8 @@ describe('Character Stance Bonuses', () => {
     prerequisites: [],
     tier: 1,
     bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 1, condition: 'while in stonestance' }
-    ]
+      { type: BonusType.DEFLECT, target: 'all', value: 1, condition: 'while in stonestance' },
+    ],
   };
 
   const VINESTANCE_TALENT = {
@@ -42,22 +42,33 @@ describe('Character Stance Bonuses', () => {
     tier: 4,
     bonuses: [
       { type: BonusType.DEFENSE, target: 'physical', value: 1, condition: 'while in vinestance' },
-      { type: BonusType.DEFENSE, target: 'cognitive', value: 1, condition: 'while in vinestance' }
-    ]
+      { type: BonusType.DEFENSE, target: 'cognitive', value: 1, condition: 'while in vinestance' },
+    ],
   };
 
   const BLOODSTANCE_TALENT = {
     id: 'bloodstance',
     name: 'Bloodstance',
-    description: 'Learn Bloodstance. Your Physical, Cognitive, and Spiritual defenses decrease by 2.',
+    description:
+      'Learn Bloodstance. Your Physical, Cognitive, and Spiritual defenses decrease by 2.',
     actionCost: 1,
     prerequisites: [],
     tier: 3,
     bonuses: [
       { type: BonusType.DEFENSE, target: 'physical', value: -2, condition: 'while in bloodstance' },
-      { type: BonusType.DEFENSE, target: 'cognitive', value: -2, condition: 'while in bloodstance' },
-      { type: BonusType.DEFENSE, target: 'spiritual', value: -2, condition: 'while in bloodstance' }
-    ]
+      {
+        type: BonusType.DEFENSE,
+        target: 'cognitive',
+        value: -2,
+        condition: 'while in bloodstance',
+      },
+      {
+        type: BonusType.DEFENSE,
+        target: 'spiritual',
+        value: -2,
+        condition: 'while in bloodstance',
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -80,17 +91,32 @@ describe('Character Stance Bonuses', () => {
 
     it('should apply Vinestance with +1 physical and cognitive defense', () => {
       character.applyStanceBonuses('vinestance', VINESTANCE_TALENT);
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
       expect(physicalDefense).toBe(1);
       expect(cognitiveDefense).toBe(1);
     });
 
     it('should apply Bloodstance with -2 defense penalties', () => {
       character.applyStanceBonuses('bloodstance', BLOODSTANCE_TALENT);
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
-      const spiritualDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'spiritual');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
+      const spiritualDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'spiritual'
+      );
       expect(physicalDefense).toBe(-2);
       expect(cognitiveDefense).toBe(-2);
       expect(spiritualDefense).toBe(-2);
@@ -98,8 +124,14 @@ describe('Character Stance Bonuses', () => {
 
     it('should handle stances with multiple bonuses of same type', () => {
       character.applyStanceBonuses('vinestance', VINESTANCE_TALENT);
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
       expect(physicalDefense).toBe(1);
       expect(cognitiveDefense).toBe(1);
     });
@@ -120,7 +152,7 @@ describe('Character Stance Bonuses', () => {
         actionCost: 1,
         prerequisites: [],
         tier: 1,
-        bonuses: []
+        bonuses: [],
       };
       expect(() => character.applyStanceBonuses('emptystance', emptyStance)).not.toThrow();
       const deflectBonus = character.bonuses.bonuses.getBonusesFor(BonusType.DEFLECT, 'all');
@@ -135,7 +167,7 @@ describe('Character Stance Bonuses', () => {
         actionCost: 1,
         prerequisites: [],
         tier: 1,
-        bonuses: undefined
+        bonuses: undefined,
       };
       expect(() => character.applyStanceBonuses('nostance', noBonusesStance)).not.toThrow();
     });
@@ -164,8 +196,14 @@ describe('Character Stance Bonuses', () => {
       character.activeStanceId = 'vinestance';
       character.applyStanceBonuses('vinestance', VINESTANCE_TALENT);
       character.clearStanceBonuses();
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
       expect(physicalDefense).toBe(0);
       expect(cognitiveDefense).toBe(0);
     });
@@ -174,9 +212,18 @@ describe('Character Stance Bonuses', () => {
       character.activeStanceId = 'bloodstance';
       character.applyStanceBonuses('bloodstance', BLOODSTANCE_TALENT);
       character.clearStanceBonuses();
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
-      const spiritualDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'spiritual');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
+      const spiritualDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'spiritual'
+      );
       expect(physicalDefense).toBe(0);
       expect(cognitiveDefense).toBe(0);
       expect(spiritualDefense).toBe(0);
@@ -190,7 +237,11 @@ describe('Character Stance Bonuses', () => {
     });
 
     it('should not affect bonuses from other sources', () => {
-      character.bonuses.bonuses.addBonus('talent:other', { type: BonusType.DEFLECT, target: 'all', value: 2 });
+      character.bonuses.bonuses.addBonus('talent:other', {
+        type: BonusType.DEFLECT,
+        target: 'all',
+        value: 2,
+      });
       character.activeStanceId = 'stonestance';
       character.applyStanceBonuses('stonestance', STONESTANCE_TALENT);
       character.clearStanceBonuses();
@@ -212,8 +263,14 @@ describe('Character Stance Bonuses', () => {
 
       character.activeStanceId = 'vinestance';
       character.applyStanceBonuses('vinestance', VINESTANCE_TALENT);
-      const physicalDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'physical');
-      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(BonusType.DEFENSE, 'cognitive');
+      const physicalDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'physical'
+      );
+      const cognitiveDefense = character.bonuses.bonuses.getBonusesFor(
+        BonusType.DEFENSE,
+        'cognitive'
+      );
       expect(physicalDefense).toBe(1);
       expect(cognitiveDefense).toBe(1);
 
@@ -249,9 +306,7 @@ describe('Character Stance Bonuses', () => {
     it('should not contain hardcoded bonus values', () => {
       const customStonestance = {
         ...STONESTANCE_TALENT,
-        bonuses: [
-          { type: BonusType.DEFLECT, target: 'all', value: 3 }
-        ]
+        bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 3 }],
       };
       character.applyStanceBonuses('stonestance', customStonestance);
       const deflectBonus = character.bonuses.bonuses.getBonusesFor(BonusType.DEFLECT, 'all');
@@ -268,15 +323,17 @@ describe('Character Stance Bonuses', () => {
         tier: 1,
         bonuses: [
           { type: BonusType.SKILL, target: 'athletics', value: 2 },
-          { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 }
-        ]
+          { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 },
+        ],
       };
       character.applyStanceBonuses('custom', customStance);
       const skillBonus = character.bonuses.bonuses.getBonusesFor(BonusType.SKILL, 'athletics');
-      const attributeBonus = character.bonuses.bonuses.getBonusesFor(BonusType.ATTRIBUTE, 'strength');
+      const attributeBonus = character.bonuses.bonuses.getBonusesFor(
+        BonusType.ATTRIBUTE,
+        'strength'
+      );
       expect(skillBonus).toBe(2);
       expect(attributeBonus).toBe(1);
     });
   });
 });
-

@@ -19,9 +19,10 @@ interface SkillsResponse {
 
 @Injectable({ providedIn: 'root' })
 export class SkillsApiService {
-  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api'
-    : '/api';
+  private apiBase =
+    window.location.hostname === 'localhost' && window.location.port === '4200'
+      ? 'http://localhost:3000/api'
+      : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}

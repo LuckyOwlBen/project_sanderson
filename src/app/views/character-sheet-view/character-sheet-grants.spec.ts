@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -28,25 +28,25 @@ describe('CharacterSheetView - Grant Idempotency', () => {
   describe('Spren Grant Idempotency', () => {
     it('should detect when character already has spren', () => {
       expect(character.radiantPath.hasSpren()).toBe(false);
-      
+
       character.radiantPath.grantSpren('Windrunner');
-      
+
       expect(character.radiantPath.hasSpren()).toBe(true);
     });
 
     it('should prevent duplicate spren grants', () => {
       character.radiantPath.grantSpren('Windrunner');
-      
+
       const hasSpren = character.radiantPath.hasSpren();
       expect(hasSpren).toBe(true);
-      
+
       // Attempting to check again should still return true
       expect(character.radiantPath.hasSpren()).toBe(true);
     });
 
     it('should store the correct order when spren is granted', () => {
       character.radiantPath.grantSpren('Windrunner');
-      
+
       const orderInfo = character.radiantPath.getOrderInfo();
       expect(orderInfo?.order).toBe('Windrunner');
     });
@@ -55,34 +55,28 @@ describe('CharacterSheetView - Grant Idempotency', () => {
   describe('Expertise Grant Idempotency', () => {
     it('should detect when expertise already exists', () => {
       // Add expertise
-      character.selectedExpertises = [
-        { name: 'Alchemy', source: 'gm' }
-      ];
+      character.selectedExpertises = [{ name: 'Alchemy', source: 'gm' }];
 
-      const expertiseNames = character.selectedExpertises.map(e => e.name);
+      const expertiseNames = character.selectedExpertises.map((e) => e.name);
       expect(expertiseNames.includes('Alchemy')).toBe(true);
     });
 
     it('should not duplicate expertise in list', () => {
-      character.selectedExpertises = [
-        { name: 'Alchemy', source: 'gm' }
-      ];
+      character.selectedExpertises = [{ name: 'Alchemy', source: 'gm' }];
 
       // Check for duplicate
-      const hasAlchemy = character.selectedExpertises.some(e => e.name === 'Alchemy');
+      const hasAlchemy = character.selectedExpertises.some((e) => e.name === 'Alchemy');
       expect(hasAlchemy).toBe(true);
 
       // Adding same expertise should be detected
-      const isDuplicate = character.selectedExpertises.some(e => e.name === 'Alchemy');
+      const isDuplicate = character.selectedExpertises.some((e) => e.name === 'Alchemy');
       expect(isDuplicate).toBe(true);
     });
 
     it('should track expertise source', () => {
-      character.selectedExpertises = [
-        { name: 'Alchemy', source: 'gm' }
-      ];
+      character.selectedExpertises = [{ name: 'Alchemy', source: 'gm' }];
 
-      const expertise = character.selectedExpertises.find(e => e.name === 'Alchemy');
+      const expertise = character.selectedExpertises.find((e) => e.name === 'Alchemy');
       expect(expertise?.source).toBe('gm');
     });
   });
@@ -108,7 +102,7 @@ describe('CharacterSheetView - Grant Idempotency', () => {
       expect(result1).toBe(true);
 
       const items = character.inventory.getAllItems();
-      const swords = items.filter(i => i.id.startsWith('iron-sword'));
+      const swords = items.filter((i) => i.id.startsWith('iron-sword'));
       expect(swords.length).toBeGreaterThanOrEqual(1);
     });
 

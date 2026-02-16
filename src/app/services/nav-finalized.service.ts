@@ -1,6 +1,6 @@
 /**
  * Navigation Finalized Service (Frontend)
- * 
+ *
  * Caches finalized status for character creation steps.
  * Acts as a local cache of backend state for instant UI updates.
  * Updated at strategic moments: character load, finalize, level-up.
@@ -25,7 +25,7 @@ export interface NavigationFinalized {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NavFinalizedService {
   private loaded$ = new BehaviorSubject<boolean>(false);
@@ -38,7 +38,7 @@ export class NavFinalizedService {
     skills: false,
     paths: false,
     talents: false,
-    equipment: false
+    equipment: false,
   });
 
   constructor(private http: HttpClient) {}
@@ -54,8 +54,8 @@ export class NavFinalizedService {
    * Get a specific step's finalized status
    */
   getStepFinalized(step: keyof NavigationFinalized): Observable<boolean> {
-    return new Observable(observer => {
-      this.navFinalized$.subscribe(status => {
+    return new Observable((observer) => {
+      this.navFinalized$.subscribe((status) => {
         observer.next(status[step]);
       });
     });
@@ -71,19 +71,24 @@ export class NavFinalizedService {
       return of(this.navFinalized$.value);
     }
 
-    return this.http.get<NavigationFinalized>(`/api/character/${characterId}/isNavFinalized`)
-      .pipe(
-        tap(status => {
-          console.log(`[NavFinalizedService] Loaded finalized status for character ${characterId}:`, status);
-          this.navFinalized$.next(status);
-          this.loaded$.next(true);
-        }),
-        catchError(error => {
-          console.error(`[NavFinalizedService] Error loading finalized status for ${characterId}:`, error);
-          // Return current cached state on error
-          return of(this.navFinalized$.value);
-        })
-      );
+    return this.http.get<NavigationFinalized>(`/api/character/${characterId}/isNavFinalized`).pipe(
+      tap((status) => {
+        console.log(
+          `[NavFinalizedService] Loaded finalized status for character ${characterId}:`,
+          status
+        );
+        this.navFinalized$.next(status);
+        this.loaded$.next(true);
+      }),
+      catchError((error) => {
+        console.error(
+          `[NavFinalizedService] Error loading finalized status for ${characterId}:`,
+          error
+        );
+        // Return current cached state on error
+        return of(this.navFinalized$.value);
+      })
+    );
   }
 
   /**

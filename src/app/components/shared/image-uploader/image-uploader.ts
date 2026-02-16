@@ -8,12 +8,7 @@ import { ImageUploadService } from '../../../services/image-upload.service';
 @Component({
   selector: 'app-image-uploader',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './image-uploader.html',
   styleUrl: './image-uploader.scss',
 })
@@ -23,17 +18,14 @@ export class ImageUploader {
   @Input() imageType: string = 'portrait';
   @Input() label: string = 'Character Portrait';
   @Input() showPreview: boolean = true;
-  
+
   @Output() imageUploaded = new EventEmitter<string>();
   @Output() imageRemoved = new EventEmitter<void>();
 
   uploading = false;
   uploadError: string | null = null;
 
-  constructor(
-    private imageUploadService: ImageUploadService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(private imageUploadService: ImageUploadService, private cdr: ChangeDetectorRef) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -42,7 +34,7 @@ export class ImageUploader {
     }
 
     const file = input.files[0];
-    
+
     // Validate file type
     if (!file.type.match(/^image\/(jpeg|jpg|png|webp)$/)) {
       this.uploadError = 'Only JPEG, PNG, and WebP images are allowed';
@@ -62,12 +54,13 @@ export class ImageUploader {
     this.uploading = true;
     this.uploadError = null;
 
-    this.imageUploadService.uploadImage(file, this.characterId, this.imageType)
+    this.imageUploadService
+      .uploadImage(file, this.characterId, this.imageType)
       .subscribe((response: any) => {
         // Defer state updates to next tick to avoid ExpressionChangedAfterItHasBeenCheckedError
         setTimeout(() => {
           this.uploading = false;
-          
+
           if (response.success && response.imageUrl) {
             this.currentImageUrl = response.imageUrl;
             this.imageUploaded.emit(response.imageUrl);
@@ -86,7 +79,7 @@ export class ImageUploader {
 
     // Extract filename from URL
     const filename = this.currentImageUrl.split('/').pop();
-    
+
     if (filename) {
       this.imageUploadService.deleteImage(filename).subscribe((response: any) => {
         // Defer state updates to next tick

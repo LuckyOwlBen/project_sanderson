@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -23,7 +23,7 @@ describe('WebsocketService - Level Up', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [WebsocketService]
+      providers: [WebsocketService],
     });
     service = TestBed.inject(WebsocketService);
   });
@@ -41,11 +41,11 @@ describe('WebsocketService - Level Up', () => {
       characterId: 'test-char-123',
       newLevel: 5,
       grantedBy: 'GM',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     let receivedEvent: LevelUpEvent | undefined;
-    service.levelUp$.subscribe(event => {
+    service.levelUp$.subscribe((event) => {
       receivedEvent = event;
     });
 

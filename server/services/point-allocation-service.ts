@@ -1,9 +1,9 @@
 /**
  * Point Allocation Service
- * 
+ *
  * Business logic for managing point allocations across character progression.
  * Calculates available points, validates allocations, tracks spent points.
- * 
+ *
  * This is the authoritative backend service for point allocation accuracy.
  * All frontend point allocation decisions should be validated here.
  */
@@ -19,7 +19,7 @@ import {
   getTotalTalentPointsUpToLevel,
   getAttributePointsForLevel,
   getSkillPointsForLevel,
-  getTalentPointsForLevel
+  getTalentPointsForLevel,
 } from './calculation-constants';
 
 /**
@@ -101,7 +101,7 @@ export class PointAllocationService {
 
   /**
    * Validate attribute allocation for a level
-   * 
+   *
    * Rules:
    * - All 6 attributes must be defined
    * - Minimum value: 1
@@ -113,7 +113,14 @@ export class PointAllocationService {
     currentAllocations: Attributes,
     previousAllocations: Attributes = {}
   ): ValidationResult {
-    const attributeNames = ['strength', 'quickness', 'intellect', 'awareness', 'will', 'presence'] as const;
+    const attributeNames = [
+      'strength',
+      'quickness',
+      'intellect',
+      'awareness',
+      'will',
+      'presence',
+    ] as const;
     const totalAvailable = this.getTotalAttributePointsAvailable(level);
 
     // Check all attributes are defined
@@ -121,21 +128,21 @@ export class PointAllocationService {
       if (currentAllocations[attr] === undefined || currentAllocations[attr] === null) {
         return {
           valid: false,
-          message: `Missing attribute: ${attr}`
+          message: `Missing attribute: ${attr}`,
         };
       }
 
       if (typeof currentAllocations[attr] !== 'number') {
         return {
           valid: false,
-          message: `Invalid value for ${attr}: must be a number`
+          message: `Invalid value for ${attr}: must be a number`,
         };
       }
 
       if (currentAllocations[attr] < 1) {
         return {
           valid: false,
-          message: `${attr} must be at least 1`
+          message: `${attr} must be at least 1`,
         };
       }
     }
@@ -152,25 +159,26 @@ export class PointAllocationService {
       0
     );
 
-    const expectedTotal = previousTotal + (level === 1 ? totalAvailable : getAttributePointsForLevel(level));
+    const expectedTotal =
+      previousTotal + (level === 1 ? totalAvailable : getAttributePointsForLevel(level));
 
     if (totalSpent !== expectedTotal) {
       return {
         valid: false,
         message: `Total points incorrect. Expected ${expectedTotal}, got ${totalSpent}`,
-        pointsRemaining: expectedTotal - totalSpent
+        pointsRemaining: expectedTotal - totalSpent,
       };
     }
 
     return {
       valid: true,
-      message: 'Attributes valid'
+      message: 'Attributes valid',
     };
   }
 
   /**
    * Validate skill allocation for a level
-   * 
+   *
    * Rules:
    * - Each skill can be ranked 0-5 (or max for level)
    * - Total points spent must equal total available
@@ -187,7 +195,7 @@ export class PointAllocationService {
     if (!currentAllocations || typeof currentAllocations !== 'object') {
       return {
         valid: false,
-        message: 'Skills must be an object'
+        message: 'Skills must be an object',
       };
     }
 
@@ -196,7 +204,7 @@ export class PointAllocationService {
       if (typeof rank !== 'number' || rank < 0 || rank > 5) {
         return {
           valid: false,
-          message: `Invalid rank for ${skillName}: must be 0-5`
+          message: `Invalid rank for ${skillName}: must be 0-5`,
         };
       }
 
@@ -204,7 +212,7 @@ export class PointAllocationService {
       if (rank < previousRank) {
         return {
           valid: false,
-          message: `Cannot decrease ${skillName} rank from ${previousRank} to ${rank}`
+          message: `Cannot decrease ${skillName} rank from ${previousRank} to ${rank}`,
         };
       }
     }
@@ -221,19 +229,19 @@ export class PointAllocationService {
       return {
         valid: false,
         message: `Points spent this level incorrect. Expected ${levelPoints}, spent ${pointsSpentThisLevel}`,
-        pointsRemaining: levelPoints - pointsSpentThisLevel
+        pointsRemaining: levelPoints - pointsSpentThisLevel,
       };
     }
 
     return {
       valid: true,
-      message: 'Skills valid'
+      message: 'Skills valid',
     };
   }
 
   /**
    * Validate talent allocation for a level
-   * 
+   *
    * Rules:
    * - Each talent can only be selected once (true/false map)
    * - Talents cannot be unselected
@@ -251,7 +259,7 @@ export class PointAllocationService {
     if (!currentTalents || typeof currentTalents !== 'object') {
       return {
         valid: false,
-        message: 'Talents must be an object'
+        message: 'Talents must be an object',
       };
     }
 
@@ -269,7 +277,7 @@ export class PointAllocationService {
         if (wasSelected) {
           return {
             valid: false,
-            message: `Cannot unselect talent: ${talentId}`
+            message: `Cannot unselect talent: ${talentId}`,
           };
         }
       }
@@ -285,13 +293,13 @@ export class PointAllocationService {
       return {
         valid: false,
         message: `Talents selected incorrect. Expected ${expectedNewTalents}, got ${newTalentsThisLevel}`,
-        pointsRemaining: expectedNewTalents - newTalentsThisLevel
+        pointsRemaining: expectedNewTalents - newTalentsThisLevel,
       };
     }
 
     return {
       valid: true,
-      message: 'Talents valid'
+      message: 'Talents valid',
     };
   }
 
@@ -305,9 +313,16 @@ export class PointAllocationService {
     isCreation: boolean = false
   ): AllocationSlice {
     const pointsTotal = this.getTotalAttributePointsAvailable(level);
-    
+
     // Calculate points spent so far
-    const attributeNames = ['strength', 'quickness', 'intellect', 'awareness', 'will', 'presence'] as const;
+    const attributeNames = [
+      'strength',
+      'quickness',
+      'intellect',
+      'awareness',
+      'will',
+      'presence',
+    ] as const;
     let pointsSpent = 0;
     let definedCount = 0;
 
@@ -321,7 +336,9 @@ export class PointAllocationService {
     // Points available this level (not cumulative, just this level)
     const levelPoints = isCreation && level === 1 ? 12 : getAttributePointsForLevel(level);
     const pointsAvailable = levelPoints;
-    const pointsRemaining = pointsAvailable - (pointsSpent - (level === 1 ? 0 : this.getTotalAttributePointsAvailable(level - 1)));
+    const pointsRemaining =
+      pointsAvailable -
+      (pointsSpent - (level === 1 ? 0 : this.getTotalAttributePointsAvailable(level - 1)));
 
     // Can proceed if all attributes are allocated and points match exactly
     const validation = this.validateAttributeAllocation(level, currentAttributes);
@@ -335,7 +352,7 @@ export class PointAllocationService {
       pointsSpent,
       pointsTotal,
       canProceed,
-      validation
+      validation,
     };
   }
 
@@ -371,7 +388,7 @@ export class PointAllocationService {
       pointsSpent: pointsSpentThisLevel,
       pointsTotal,
       canProceed,
-      validation
+      validation,
     };
   }
 
@@ -404,7 +421,12 @@ export class PointAllocationService {
 
     const pointsRemaining = expectedNewTalents - talentsSelectedThisLevel;
 
-    const validation = this.validateTalentAllocation(level, currentTalents, previousTalents, tier0TalentId);
+    const validation = this.validateTalentAllocation(
+      level,
+      currentTalents,
+      previousTalents,
+      tier0TalentId
+    );
     const canProceed = validation.valid;
 
     return {
@@ -415,7 +437,7 @@ export class PointAllocationService {
       pointsSpent: talentsSelectedThisLevel,
       pointsTotal,
       canProceed,
-      validation
+      validation,
     };
   }
 }

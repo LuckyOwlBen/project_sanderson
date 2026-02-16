@@ -29,7 +29,7 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 })
 export class SidenavView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   character: Character | null = null;
   hasCharacter = false;
   isInCreatorView = false;
@@ -42,23 +42,20 @@ export class SidenavView implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        this.character = character;
-        // A character is "active" if it has meaningful data (name or ancestry) and level > 0
-        this.hasCharacter = !!character && !!(character.name || character.ancestry) && (character.level || 0) > 0;
-      });
+    this.characterState.character$.pipe(takeUntil(this.destroy$)).subscribe((character) => {
+      this.character = character;
+      // A character is "active" if it has meaningful data (name or ancestry) and level > 0
+      this.hasCharacter =
+        !!character && !!(character.name || character.ancestry) && (character.level || 0) > 0;
+    });
 
     // Initialize view states based on current URL (fixes reload flash)
     this.updateViewStates();
 
     // Track if we're in the character creator view or character sheet view
-    this.router.events
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.updateViewStates();
-      });
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.updateViewStates();
+    });
   }
 
   private updateViewStates(): void {
@@ -95,6 +92,8 @@ export class SidenavView implements OnInit, OnDestroy {
     // 1. Character is active (has name/ancestry and level > 0)
     // 2. OR we're in the character-sheet view (even if character hasn't loaded yet)
     // 3. OR we're in the creator view (even if character is just being created)
-    return this.hasCharacter || this.isInCharacterSheetView || (this.isInCreatorView && !!this.character);
+    return (
+      this.hasCharacter || this.isInCharacterSheetView || (this.isInCreatorView && !!this.character)
+    );
   }
 }

@@ -7,7 +7,7 @@ import {
   applyStartingKit,
   refundStartingKit,
   getAvailableKits,
-  getStore
+  getStore,
 } from '../controllers/equipment-controller';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
@@ -40,7 +40,9 @@ export default function createEquipmentRoute(app: Express, broadcaster: SocketBr
    * @body { itemId: string, quantity: number }
    * @returns { success: boolean, inventory: InventoryDTO, currency: number }
    */
-  app.post('/api/characters/:id/equipment/purchase', (req, res) => purchaseItem(req, res, broadcaster));
+  app.post('/api/characters/:id/equipment/purchase', (req, res) =>
+    purchaseItem(req, res, broadcaster)
+  );
 
   /**
    * POST /api/characters/:id/equipment/sell
@@ -58,7 +60,9 @@ export default function createEquipmentRoute(app: Express, broadcaster: SocketBr
    * @body { kitId: string }
    * @returns { success: boolean, inventory: InventoryDTO, appliedKit: string, currency: number }
    */
-  app.post('/api/characters/:id/equipment/apply-kit', (req, res) => applyStartingKit(req, res, broadcaster));
+  app.post('/api/characters/:id/equipment/apply-kit', (req, res) =>
+    applyStartingKit(req, res, broadcaster)
+  );
 
   /**
    * POST /api/characters/:id/equipment/refund-kit
@@ -66,7 +70,9 @@ export default function createEquipmentRoute(app: Express, broadcaster: SocketBr
    *
    * @returns { success: boolean, inventory: InventoryDTO, currency: number }
    */
-  app.post('/api/characters/:id/equipment/refund-kit', (req, res) => refundStartingKit(req, res, broadcaster));
+  app.post('/api/characters/:id/equipment/refund-kit', (req, res) =>
+    refundStartingKit(req, res, broadcaster)
+  );
 
   /**
    * GET /api/equipment/kits

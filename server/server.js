@@ -25,8 +25,8 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -42,7 +42,7 @@ const LEVEL_TABLES = {
   healthStrengthBonusLevels: [1, 6, 11, 16, 21],
   maxSkillRanksPerLevel: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
   skillRanksPerLevel: [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-  talentPointsPerLevel: [2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1]
+  talentPointsPerLevel: [2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1],
 };
 
 // Track active players
@@ -56,7 +56,7 @@ const storeState = {
   'equipment-shop': true,
   'consumables-shop': true,
   'fabrials-shop': true,
-  'mounts-shop': true
+  'mounts-shop': true,
 };
 
 // Track highstorm state
@@ -134,7 +134,7 @@ const upload = multer({
       return;
     }
     cb(null, true);
-  }
+  },
 });
 
 // Middleware
@@ -167,7 +167,9 @@ app.get('/api/logs', (req, res) => {
   const limit = Math.min(parseInt(req.query.limit, 10) || 200, LOG_BUFFER_SIZE);
   const start = Math.max(logBuffer.length - limit, 0);
   const logs = logBuffer.slice(start).reverse();
-  originalConsole.log(`[API] GET /api/logs requested. Buffer size: ${logBuffer.length}, returning ${logs.length} logs`);
+  originalConsole.log(
+    `[API] GET /api/logs requested. Buffer size: ${logBuffer.length}, returning ${logs.length} logs`
+  );
   res.json({ logs });
 });
 
@@ -186,7 +188,7 @@ async function ensureDirectories() {
     await fsPromises.mkdir(CHARACTERS_DIR, { recursive: true });
     console.log('Created characters directory:', CHARACTERS_DIR);
   }
-  
+
   try {
     await fsPromises.access(IMAGES_DIR);
   } catch {
@@ -201,29 +203,29 @@ function getCharacterFilepath(id) {
 
 async function loadCharacterData(id, retries = 3) {
   const filepath = getCharacterFilepath(id);
-  
+
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       const data = await fsPromises.readFile(filepath, 'utf8');
-      
+
       // Check if data is empty
       if (!data || data.trim().length === 0) {
         throw new Error('Character file is empty');
       }
-      
+
       const character = JSON.parse(data);
-      
+
       // Ensure paths array exists and is initialized properly
       if (!character.paths) {
         character.paths = [];
       }
-      
+
       return character;
     } catch (error) {
       // If it's a JSON parse error and we have retries left, wait and try again
       if (error instanceof SyntaxError && attempt < retries - 1) {
         console.warn(`JSON parse error on attempt ${attempt + 1} for ${id}, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Wait 100ms
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Wait 100ms
         continue;
       }
       // Otherwise throw the error
@@ -234,7 +236,7 @@ async function loadCharacterData(id, retries = 3) {
 
 async function saveCharacterData(character) {
   const filepath = getCharacterFilepath(character.id);
-await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
+  await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
 }
 
 function getLevelTableValue(table, level) {
@@ -259,10 +261,14 @@ function sendPendingLevelUp(characterId) {
   const targetSocket = findSocketIdByCharacterId(characterId);
   if (targetSocket) {
     const payload = queue[0];
-    console.log(`[GM Action] 🆙 Sending pending level-up to socket ${targetSocket}, new level: ${payload.newLevel}`);
+    console.log(
+      `[GM Action] 🆙 Sending pending level-up to socket ${targetSocket}, new level: ${payload.newLevel}`
+    );
     io.to(targetSocket).emit('level-up-granted', payload);
   } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending level-up`);
+    console.warn(
+      `[GM Action] ⚠️ No active socket for character ${characterId} while sending pending level-up`
+    );
   }
 }
 
@@ -278,7 +284,9 @@ function sendPendingSprenGrant(characterId) {
     console.log(`[GM Action] ⭐ Sending pending spren grant to socket ${targetSocket}`);
     io.to(targetSocket).emit('spren-granted', grant);
   } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending spren grant`);
+    console.warn(
+      `[GM Action] ⚠️ No active socket for character ${characterId} while sending pending spren grant`
+    );
   }
 }
 
@@ -291,10 +299,14 @@ function sendPendingExpertiseGrants(characterId) {
   const targetSocket = findSocketIdByCharacterId(characterId);
   if (targetSocket) {
     const grant = queue[0];
-    console.log(`[GM Action] 📚 Sending pending expertise grant to socket ${targetSocket}: ${grant.expertiseName}`);
+    console.log(
+      `[GM Action] 📚 Sending pending expertise grant to socket ${targetSocket}: ${grant.expertiseName}`
+    );
     io.to(targetSocket).emit('expertise-granted', grant);
   } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending expertise grant`);
+    console.warn(
+      `[GM Action] ⚠️ No active socket for character ${characterId} while sending pending expertise grant`
+    );
   }
 }
 
@@ -307,24 +319,26 @@ function sendPendingItemGrants(characterId) {
   const targetSocket = findSocketIdByCharacterId(characterId);
   if (targetSocket) {
     const grant = queue[0];
-    console.log(`[GM Action] 🎁 Sending pending item grant to socket ${targetSocket}: ${grant.itemId} x${grant.quantity}`);
+    console.log(
+      `[GM Action] 🎁 Sending pending item grant to socket ${targetSocket}: ${grant.itemId} x${grant.quantity}`
+    );
     io.to(targetSocket).emit('item-granted', grant);
   } else {
-    console.warn(`[GM Action] ⚠️ No active socket for character ${characterId} while sending pending item grant`);
+    console.warn(
+      `[GM Action] ⚠️ No active socket for character ${characterId} while sending pending item grant`
+    );
   }
 }
 
 //Wireguard invite validation
-app.get('/invite/:name', (req, res) => {
-   
-});
+app.get('/invite/:name', (req, res) => {});
 
 // Create new character (minimal data with generated ID)
 app.post('/api/characters/create', async (req, res) => {
   try {
     const timestamp = Date.now();
     const id = `character_${timestamp}`;
-    
+
     // Create minimal character structure for creation flow
     const character = {
       id,
@@ -341,7 +355,7 @@ app.post('/api/characters/create', async (req, res) => {
         intellect: 0,
         willpower: 0,
         awareness: 0,
-        presence: 0
+        presence: 0,
       },
       skills: {},
       unlockedTalents: [],
@@ -354,14 +368,14 @@ app.post('/api/characters/create', async (req, res) => {
       radiantPath: { currentIdeal: 1, currentOath: null },
       inventory: { items: [], equipped: { armor: null, weapons: [] } },
       sessionNotes: '',
-      lastModified: new Date().toISOString()
+      lastModified: new Date().toISOString(),
     };
 
     const filename = `${id}.json`;
     const filepath = path.join(CHARACTERS_DIR, filename);
-    
+
     await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2), 'utf8');
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
@@ -370,19 +384,19 @@ app.post('/api/characters/create', async (req, res) => {
     } catch (dbError) {
       console.warn(`[Create] Warning: Failed to save to database: ${dbError.message}`);
     }
-    
+
     console.log(`Created new character: ${id}`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       id,
-      character
+      character,
     });
   } catch (error) {
     console.error('Error creating character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -391,11 +405,11 @@ app.post('/api/characters/create', async (req, res) => {
 app.post('/api/characters/save', async (req, res) => {
   try {
     const character = req.body;
-    
+
     if (!character.id) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Character ID is required' 
+      return res.status(400).json({
+        success: false,
+        error: 'Character ID is required',
       });
     }
 
@@ -415,13 +429,13 @@ app.post('/api/characters/save', async (req, res) => {
     const filename = `${character.id}.json`;
     const filepath = path.join(CHARACTERS_DIR, filename);
     const tempPath = `${filepath}.tmp`;
-    
+
     // Write to temp file first, then rename for atomic operation
     await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
     await fsPromises.rename(tempPath, filepath);
-    
+
     console.log(`Saved character: ${character.name} (${character.id})`);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
@@ -431,16 +445,16 @@ app.post('/api/characters/save', async (req, res) => {
       console.warn(`[Database] Warning: Failed to save character to database: ${dbError.message}`);
       // Continue anyway - JSON save succeeded
     }
-    
-    res.json({ 
-      success: true, 
-      id: character.id 
+
+    res.json({
+      success: true,
+      id: character.id,
     });
   } catch (error) {
     console.error('Error saving character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -456,7 +470,7 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     if (!itemId || !price || quantity < 1) {
       return res.status(400).json({
         success: false,
-        error: 'itemId, price, and quantity are required'
+        error: 'itemId, price, and quantity are required',
       });
     }
 
@@ -465,7 +479,7 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -474,7 +488,7 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     if (!item) {
       return res.status(400).json({
         success: false,
-        error: 'Item not found'
+        error: 'Item not found',
       });
     }
 
@@ -488,18 +502,20 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     if (!inventoryManager.purchaseItem(itemId, price, quantity)) {
       return res.status(400).json({
         success: false,
-        error: 'Cannot afford item'
+        error: 'Cannot afford item',
       });
     }
 
     // Log transaction
     const conversion = inventoryManager.convertToMixedDenominations(price * quantity);
-    console.log(`[Store] Purchase: Character ${id} bought ${quantity}x ${item.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`);
+    console.log(
+      `[Store] Purchase: Character ${id} bought ${quantity}x ${item.name} for ${conversion.broams}b ${conversion.marks}m ${conversion.chips}c`
+    );
 
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
@@ -513,13 +529,13 @@ app.post('/api/character/:id/inventory/purchase', async (req, res) => {
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Purchased ${quantity}x ${item.name}`
+      message: `Purchased ${quantity}x ${item.name}`,
     });
   } catch (error) {
     console.error('Error purchasing item:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -533,7 +549,7 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     if (!kitId) {
       return res.status(400).json({
         success: false,
-        error: 'kitId is required'
+        error: 'kitId is required',
       });
     }
 
@@ -542,7 +558,7 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     if (!kit) {
       return res.status(400).json({
         success: false,
-        error: 'Starting kit not found'
+        error: 'Starting kit not found',
       });
     }
 
@@ -551,7 +567,7 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -565,27 +581,31 @@ app.post('/api/character/:id/inventory/apply-kit', async (req, res) => {
     // Save character with new inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character);
-      console.log(`[Inventory] Saved starting kit to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Inventory] Saved starting kit to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Inventory] Warning: Failed to save starting kit to database: ${dbError.message}`);
+      console.warn(
+        `[Inventory] Warning: Failed to save starting kit to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Applied ${kit.name}`
+      message: `Applied ${kit.name}`,
     });
   } catch (error) {
     console.error('Error applying kit:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -599,7 +619,7 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     if (!itemId || quantity < 1) {
       return res.status(400).json({
         success: false,
-        error: 'itemId and quantity are required'
+        error: 'itemId and quantity are required',
       });
     }
 
@@ -608,7 +628,7 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     if (!item) {
       return res.status(400).json({
         success: false,
-        error: 'Item not found'
+        error: 'Item not found',
       });
     }
 
@@ -617,7 +637,7 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -636,27 +656,31 @@ app.post('/api/character/:id/inventory/add', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character);
-      console.log(`[Inventory] Saved item addition to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Inventory] Saved item addition to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Inventory] Warning: Failed to save item addition to database: ${dbError.message}`);
+      console.warn(
+        `[Inventory] Warning: Failed to save item addition to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Added ${quantity}x ${item.name}`
+      message: `Added ${quantity}x ${item.name}`,
     });
   } catch (error) {
     console.error('Error adding item:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -670,7 +694,7 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     if (!itemId || quantity < 1) {
       return res.status(400).json({
         success: false,
-        error: 'itemId and quantity are required'
+        error: 'itemId and quantity are required',
       });
     }
 
@@ -679,7 +703,7 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -693,7 +717,7 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     if (!inventoryManager.removeItem(itemId, quantity)) {
       return res.status(400).json({
         success: false,
-        error: 'Item not found in inventory'
+        error: 'Item not found in inventory',
       });
     }
 
@@ -703,27 +727,31 @@ app.post('/api/character/:id/inventory/remove', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character);
-      console.log(`[Inventory] Saved item removal to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Inventory] Saved item removal to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Inventory] Warning: Failed to save item removal to database: ${dbError.message}`);
+      console.warn(
+        `[Inventory] Warning: Failed to save item removal to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Removed item`
+      message: `Removed item`,
     });
   } catch (error) {
     console.error('Error removing item:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -737,7 +765,7 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     if (!itemId) {
       return res.status(400).json({
         success: false,
-        error: 'itemId is required'
+        error: 'itemId is required',
       });
     }
 
@@ -746,7 +774,7 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -765,13 +793,15 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
         const requiredExpertise = getRequiredExpertiseForWeapon(item.id, item.name);
         if (requiredExpertise) {
           const characterExpertises = character.expertises || [];
-          const hasExpertise = characterExpertises.some(e => {
+          const hasExpertise = characterExpertises.some((e) => {
             const expertiseName = typeof e === 'string' ? e : e.name;
             return expertiseName === requiredExpertise;
           });
-          
+
           if (!hasExpertise) {
-            console.log(`[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`);
+            console.log(
+              `[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`
+            );
             // Log but don't block - character can equip but won't get benefit from expert traits
           }
         }
@@ -782,13 +812,15 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
         const requiredExpertise = getRequiredExpertiseForArmor(item.id, item.name);
         if (requiredExpertise) {
           const characterExpertises = character.expertises || [];
-          const hasExpertise = characterExpertises.some(e => {
+          const hasExpertise = characterExpertises.some((e) => {
             const expertiseName = typeof e === 'string' ? e : e.name;
             return expertiseName === requiredExpertise;
           });
-          
+
           if (!hasExpertise) {
-            console.log(`[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`);
+            console.log(
+              `[Inventory] Warning: Character lacks '${requiredExpertise}' expertise for ${item.name}`
+            );
             // Log but don't block
           }
         }
@@ -799,7 +831,7 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     if (!inventoryManager.equipItem(itemId)) {
       return res.status(400).json({
         success: false,
-        error: 'Cannot equip item'
+        error: 'Cannot equip item',
       });
     }
 
@@ -809,27 +841,31 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character);
-      console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Inventory] Saved equipment change to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
+      console.warn(
+        `[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Item equipped`
+      message: `Item equipped`,
     });
   } catch (error) {
     console.error('Error equipping item:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -840,15 +876,15 @@ app.post('/api/character/:id/inventory/equip', async (req, res) => {
  */
 function getRequiredExpertiseForWeapon(itemId, itemName) {
   const weaponMap = {
-    'sword': 'Dueling',
-    'axe': 'Axe Fighting',
-    'mace': 'Bludgeoning Weapons',
-    'spear': 'Spear Fighting',
-    'bow': 'Archery',
-    'dagger': 'Knife Fighting',
-    'staff': 'Staff Fighting',
-    'hammer': 'Hammer Fighting',
-    'lance': 'Mounted Combat'
+    sword: 'Dueling',
+    axe: 'Axe Fighting',
+    mace: 'Bludgeoning Weapons',
+    spear: 'Spear Fighting',
+    bow: 'Archery',
+    dagger: 'Knife Fighting',
+    staff: 'Staff Fighting',
+    hammer: 'Hammer Fighting',
+    lance: 'Mounted Combat',
   };
 
   const lowerName = itemName.toLowerCase();
@@ -869,10 +905,10 @@ function getRequiredExpertiseForWeapon(itemId, itemName) {
  */
 function getRequiredExpertiseForArmor(itemId, itemName) {
   const armorMap = {
-    'plate': 'Armor Mastery',
-    'mail': 'Armor Mastery',
-    'leather': 'Light Armor',
-    'hide': 'Light Armor'
+    plate: 'Armor Mastery',
+    mail: 'Armor Mastery',
+    leather: 'Light Armor',
+    hide: 'Light Armor',
   };
 
   const lowerName = itemName.toLowerCase();
@@ -896,7 +932,7 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     if (!itemId) {
       return res.status(400).json({
         success: false,
-        error: 'itemId is required'
+        error: 'itemId is required',
       });
     }
 
@@ -905,7 +941,7 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     if (!character) {
       return res.status(404).json({
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       });
     }
 
@@ -919,7 +955,7 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     if (!inventoryManager.unequipItem(itemId)) {
       return res.status(400).json({
         success: false,
-        error: 'Cannot unequip item'
+        error: 'Cannot unequip item',
       });
     }
 
@@ -929,27 +965,31 @@ app.post('/api/character/:id/inventory/unequip', async (req, res) => {
     // Save character with updated inventory
     character.inventory = inventoryManager.serialize();
     await saveCharacterData(character);
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character);
-      console.log(`[Inventory] Saved equipment change to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Inventory] Saved equipment change to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`);
+      console.warn(
+        `[Inventory] Warning: Failed to save equipment change to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
     res.json({
       success: true,
       inventory: character.inventory,
-      message: `Item unequipped`
+      message: `Item unequipped`,
     });
   } catch (error) {
     console.error('Error unequipping item:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -961,23 +1001,23 @@ app.get('/api/items', (req, res) => {
     let items = itemDefinitions.ALL_ITEMS;
 
     if (type) {
-      items = items.filter(item => item.type === type);
+      items = items.filter((item) => item.type === type);
     }
 
     if (rarity) {
-      items = items.filter(item => item.rarity === rarity);
+      items = items.filter((item) => item.rarity === rarity);
     }
 
     res.json({
       success: true,
       count: items.length,
-      items
+      items,
     });
   } catch (error) {
     console.error('Error retrieving items:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -986,19 +1026,19 @@ app.get('/api/items', (req, res) => {
 app.get('/api/store/items', (req, res) => {
   try {
     // Filter to common rarity items only
-    const storeItems = itemDefinitions.ALL_ITEMS.filter(item => item.rarity === 'common');
+    const storeItems = itemDefinitions.ALL_ITEMS.filter((item) => item.rarity === 'common');
 
     res.json({
       success: true,
       count: storeItems.length,
       items: storeItems,
-      storeState
+      storeState,
     });
   } catch (error) {
     console.error('Error retrieving store items:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1012,7 +1052,7 @@ app.post('/api/characters/:id/paths', async (req, res) => {
     if (!mainPath || typeof mainPath !== 'string') {
       return res.status(400).json({
         success: false,
-        error: 'mainPath is required and must be a string'
+        error: 'mainPath is required and must be a string',
       });
     }
 
@@ -1040,18 +1080,18 @@ app.post('/api/characters/:id/paths', async (req, res) => {
     if (!character.paths.includes(mainPath)) {
       character.paths.unshift(mainPath);
     }
-    
+
     // Add specialization if provided
     if (specialization && !character.paths.includes(specialization)) {
       character.paths.push(specialization);
     }
-    
+
     character.lastModified = new Date().toISOString();
     await fsPromises.writeFile(
       path.join(CHARACTERS_DIR, `character_${id}.json`),
       JSON.stringify(character, null, 2)
     );
-    
+
     // Also save to database
     try {
       const db = require('./database.js');
@@ -1070,7 +1110,7 @@ app.post('/api/characters/:id/paths', async (req, res) => {
       paths: character.paths,
       tier0Unlocked: tier0Result.unlocked,
       tier0TalentId: tier0Result.talentId,
-      message: tier0Result.unlocked ? 'Path selected and tier-0 talent unlocked' : 'Path selected'
+      message: tier0Result.unlocked ? 'Path selected and tier-0 talent unlocked' : 'Path selected',
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1086,25 +1126,25 @@ app.get('/api/characters/load/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    
+
     const data = await fsPromises.readFile(filepath, 'utf8');
     const character = JSON.parse(data);
-    
+
     console.log(`Loaded character: ${character.name} (${id})`);
     console.log(`Character skills:`, character.skills || {});
-    
+
     res.json(character);
   } catch (error) {
     if (error.code === 'ENOENT') {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Character not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found',
       });
     }
     console.error('Error loading character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -1113,22 +1153,22 @@ app.get('/api/characters/load/:id', async (req, res) => {
 app.get('/api/characters/list', async (req, res) => {
   try {
     const files = await fsPromises.readdir(CHARACTERS_DIR);
-    const jsonFiles = files.filter(f => f.endsWith('.json'));
-    
+    const jsonFiles = files.filter((f) => f.endsWith('.json'));
+
     const characters = await Promise.all(
       jsonFiles.map(async (file) => {
         try {
           const filepath = path.join(CHARACTERS_DIR, file);
           const data = await fsPromises.readFile(filepath, 'utf8');
           const character = JSON.parse(data);
-          
+
           return {
             id: character.id,
             name: character.name,
             level: character.level,
             ancestry: character.ancestry,
             lastModified: character.lastModified,
-            data: character
+            data: character,
           };
         } catch (error) {
           console.error(`Error reading ${file}:`, error);
@@ -1136,20 +1176,20 @@ app.get('/api/characters/list', async (req, res) => {
         }
       })
     );
-    
+
     // Filter out any failed reads and sort by last modified
     const validCharacters = characters
-      .filter(c => c !== null)
+      .filter((c) => c !== null)
       .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-    
+
     console.log(`Listed ${validCharacters.length} characters`);
-    
+
     res.json(validCharacters);
   } catch (error) {
     console.error('Error listing characters:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -1170,7 +1210,7 @@ app.get('/api/characters/:id/level/summary', async (req, res) => {
       level: character.level || 1,
       ancestry: character.ancestry || null,
       pendingLevelPoints: character.pendingLevelPoints || 0,
-      lastModified: character.lastModified
+      lastModified: character.lastModified,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1186,33 +1226,35 @@ app.post('/api/characters/:id/creation-init', async (req, res) => {
   try {
     const { id } = req.params;
     const { targetLevel } = req.body;
-    
+
     if (!targetLevel || targetLevel < 1 || targetLevel > 21) {
       return res.status(400).json({
         success: false,
-        error: 'targetLevel must be between 1 and 21'
+        error: 'targetLevel must be between 1 and 21',
       });
     }
-    
+
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
     const data = await fsPromises.readFile(filepath, 'utf8');
     const character = JSON.parse(data);
-    
+
     // Set level and clear spent points for fresh creation at this level
     character.level = targetLevel;
     character.spentPoints = {}; // Fresh state for creation
-    
+
     // Save character
     const tempPath = `${filepath}.tmp`;
     await fsPromises.writeFile(tempPath, JSON.stringify(character, null, 2), 'utf8');
     await fsPromises.rename(tempPath, filepath);
-    
-    console.log(`[Character Creation] Initialized character ${character.name} (${id}) at level ${targetLevel}`);
+
+    console.log(
+      `[Character Creation] Initialized character ${character.name} (${id}) at level ${targetLevel}`
+    );
     res.json({
       success: true,
       id,
       level: targetLevel,
-      message: `Character initialized for creation at level ${targetLevel}`
+      message: `Character initialized for creation at level ${targetLevel}`,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1240,26 +1282,30 @@ app.get('/api/characters/:id/level/attributes', async (req, res) => {
     const isCreationMode = req.query.isCreationMode === 'true';
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    
+
     // In creation mode, return cumulative points; otherwise single-level points
-    const totalPointsForLevel = isCreationMode 
+    const totalPointsForLevel = isCreationMode
       ? getCumulativePoints(LEVEL_TABLES.attributePointsPerLevel, level)
       : getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
-    
+
     // Track spent points per level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
     if (!character.spentPoints.attributes) character.spentPoints.attributes = {};
     const spentForThisLevel = character.spentPoints.attributes[level] || 0;
     const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
-    
+
     const mode = isCreationMode ? 'creation' : 'level-up';
-    console.log(`[${mode.toUpperCase()}] Provided attribute points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`);
+    console.log(
+      `[${mode.toUpperCase()}] Provided attribute points for ${character.name} (${
+        character.id
+      }): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`
+    );
     res.json({
       id: character.id,
       level,
       attributes: character.attributes || {},
       pointsForLevel,
-      isCreationMode
+      isCreationMode,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1277,20 +1323,24 @@ app.get('/api/characters/:id/level/skills', async (req, res) => {
     const isCreationMode = req.query.isCreationMode === 'true';
     const character = await loadCharacterData(id);
     const level = character.level || 1;
-    
+
     // In creation mode, return cumulative points; otherwise single-level points
     const totalPointsForLevel = isCreationMode
       ? getCumulativePoints(LEVEL_TABLES.skillPointsPerLevel, level)
       : getLevelTableValue(LEVEL_TABLES.skillPointsPerLevel, level);
-    
+
     // Track spent points per level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
     if (!character.spentPoints.skills) character.spentPoints.skills = {};
     const spentForThisLevel = character.spentPoints.skills[level] || 0;
     const pointsForLevel = Math.max(0, totalPointsForLevel - spentForThisLevel);
-    
+
     const mode = isCreationMode ? 'creation' : 'level-up';
-    console.log(`[${mode.toUpperCase()}] Provided skill points for ${character.name} (${character.id}): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`);
+    console.log(
+      `[${mode.toUpperCase()}] Provided skill points for ${character.name} (${
+        character.id
+      }): ${pointsForLevel} (${spentForThisLevel} already spent, cumulative: ${isCreationMode})`
+    );
     console.log(`[${mode}] Current skills for ${character.name}:`, character.skills || {});
     res.json({
       id: character.id,
@@ -1299,7 +1349,7 @@ app.get('/api/characters/:id/level/skills', async (req, res) => {
       pointsForLevel,
       maxRank: getLevelTableValue(LEVEL_TABLES.maxSkillRanksPerLevel, level),
       ranksPerLevel: getLevelTableValue(LEVEL_TABLES.skillRanksPerLevel, level),
-      success: true
+      success: true,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1315,13 +1365,15 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
   try {
     const { id } = req.params;
     const isCreationMode = req.query.isCreationMode === 'true';
-    
+
     const character = await loadCharacterData(id);
     const level = character.level || 1;
     const mainPath = character.paths && character.paths.length > 0 ? character.paths[0] : null;
-    
+
     if (!mainPath) {
-      console.warn(`[Talents] Character ${character.id} has no main path selected; returning zero points`);
+      console.warn(
+        `[Talents] Character ${character.id} has no main path selected; returning zero points`
+      );
       return res.json({
         talentPoints: 0,
         previouslySelectedTalents: [],
@@ -1331,7 +1383,7 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
         ancestry: character.ancestry || null,
         level,
         mainPath: null,
-        isCreationMode
+        isCreationMode,
       });
     }
 
@@ -1349,7 +1401,7 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       ancestry: character.ancestry || null,
       level,
       mainPath,
-      isCreationMode
+      isCreationMode,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1378,7 +1430,7 @@ app.get('/api/characters/:id/level/talents', async (req, res) => {
       baselineUnlockedTalents: state.previouslySelectedTalents,
       pointsForLevel: state.talentPoints,
       talentPointsAllocation: state.talentPoints,
-      spentPoints: state.spentPoints
+      spentPoints: state.spentPoints,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1407,40 +1459,53 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
       : getLevelTableValue(LEVEL_TABLES.attributePointsPerLevel, level);
     const prevAttrs = character.attributes || {};
     // Calculate total positive increases compared to previous values
-    const keys = ['strength','speed','awareness','intellect','willpower','presence'];
+    const keys = ['strength', 'speed', 'awareness', 'intellect', 'willpower', 'presence'];
     let increaseTotal = 0;
-    keys.forEach(k => {
+    keys.forEach((k) => {
       const oldVal = Number(prevAttrs[k] ?? 0);
       const newVal = Number(attributes[k] ?? oldVal);
       if (newVal > oldVal) {
-        increaseTotal += (newVal - oldVal);
+        increaseTotal += newVal - oldVal;
       }
     });
     if (increaseTotal > pointsForLevel) {
-      return res.status(400).json({ success: false, error: `Attribute allocation exceeded. Level ${level} allows ${pointsForLevel} points, attempted ${increaseTotal}.` });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: `Attribute allocation exceeded. Level ${level} allows ${pointsForLevel} points, attempted ${increaseTotal}.`,
+        });
     }
 
     // Persist merged attributes
-    character.attributes = { ...(prevAttrs), ...attributes };
+    character.attributes = { ...prevAttrs, ...attributes };
     character.lastModified = new Date().toISOString();
-    
+
     // Track spent points for this level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
     if (!character.spentPoints.attributes) character.spentPoints.attributes = {};
     character.spentPoints.attributes[level] = increaseTotal;
 
-    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-    
+    await fsPromises.writeFile(
+      getCharacterFilepath(id),
+      JSON.stringify(character, null, 2),
+      'utf8'
+    );
+
     // Also save to database
     try {
       const db = require('./database.js');
       db.saveCharacter(character, {
         attributes: increaseTotal,
-        level
+        level,
       });
-      console.log(`[Attributes] Saved attributes to database for ${character.name} (${character.id})`);
+      console.log(
+        `[Attributes] Saved attributes to database for ${character.name} (${character.id})`
+      );
     } catch (dbError) {
-      console.warn(`[Attributes] Warning: Failed to save attributes to database: ${dbError.message}`);
+      console.warn(
+        `[Attributes] Warning: Failed to save attributes to database: ${dbError.message}`
+      );
       // Continue anyway - JSON save succeeded
     }
 
@@ -1448,7 +1513,7 @@ app.patch('/api/characters/:id/level/attributes', async (req, res) => {
       success: true,
       id: character.id,
       attributes: character.attributes,
-      lastModified: character.lastModified
+      lastModified: character.lastModified,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1488,16 +1553,21 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
         throw new Error(`Skill ${skillKey} exceeds max rank ${maxRank} at level ${level}`);
       }
       if (newRank > oldRank) {
-        increaseTotal += (newRank - oldRank);
+        increaseTotal += newRank - oldRank;
       }
     });
     if (increaseTotal > pointsForLevel) {
-      return res.status(400).json({ success: false, error: `Skill allocation exceeded. Level ${level} allows ${pointsForLevel} points, attempted ${increaseTotal}.` });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: `Skill allocation exceeded. Level ${level} allows ${pointsForLevel} points, attempted ${increaseTotal}.`,
+        });
     }
 
-    character.skills = { ...(prevSkills), ...skills };
+    character.skills = { ...prevSkills, ...skills };
     character.lastModified = new Date().toISOString();
-    
+
     // Track spent points for this level to prevent re-adding on revisits
     if (!character.spentPoints) character.spentPoints = {};
     if (!character.spentPoints.skills) character.spentPoints.skills = {};
@@ -1506,8 +1576,12 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
     console.log(`[Skills] Saved skills for ${character.name} (${character.id}):`, character.skills);
 
     // Save to both JSON file (for backwards compatibility) and database
-    await fsPromises.writeFile(getCharacterFilepath(id), JSON.stringify(character, null, 2), 'utf8');
-    
+    await fsPromises.writeFile(
+      getCharacterFilepath(id),
+      JSON.stringify(character, null, 2),
+      'utf8'
+    );
+
     // Also save to database (like talents do)
     try {
       const db = require('./database.js');
@@ -1515,7 +1589,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
         skills: increaseTotal,
         level,
         attributes: character.spentPoints.attributes?.[level] ?? 0,
-        talents: character.spentPoints.talents?.[level] ?? 0
+        talents: character.spentPoints.talents?.[level] ?? 0,
       });
       console.log(`[Skills] Saved skills to database for ${character.name} (${character.id})`);
     } catch (dbError) {
@@ -1527,7 +1601,7 @@ app.patch('/api/characters/:id/level/skills', async (req, res) => {
       success: true,
       id: character.id,
       skills: character.skills,
-      lastModified: character.lastModified
+      lastModified: character.lastModified,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1551,7 +1625,7 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
     if (!Array.isArray(unlockedTalents)) {
       return res.status(400).json({
         success: false,
-        error: 'unlockedTalents must be an array'
+        error: 'unlockedTalents must be an array',
       });
     }
 
@@ -1560,21 +1634,31 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
     const mainPath = character.mainPath || character.paths?.[0] || null;
 
     // Validate selection (pass character object)
-    const validation = talentService.validateTalentSelection(character, unlockedTalents, level, mainPath);
+    const validation = talentService.validateTalentSelection(
+      character,
+      unlockedTalents,
+      level,
+      mainPath
+    );
     if (!validation.isValid) {
       return res.status(400).json({
         success: false,
         error: validation.error,
-        validation
+        validation,
       });
     }
 
     // Prepare for save
-    const saveResult = talentService.saveTalentSelections(character, unlockedTalents, level, mainPath);
+    const saveResult = talentService.saveTalentSelections(
+      character,
+      unlockedTalents,
+      level,
+      mainPath
+    );
     if (!saveResult.success) {
       return res.status(400).json({
         success: false,
-        error: saveResult.error
+        error: saveResult.error,
       });
     }
 
@@ -1593,7 +1677,7 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
       level,
       unlockedTalents: updatedState.unlockedTalents,
       spentPoints: updatedState.spentPoints,
-      pointsForLevel: updatedState.talentPoints
+      pointsForLevel: updatedState.talentPoints,
     });
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -1609,23 +1693,23 @@ app.delete('/api/characters/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const filepath = path.join(CHARACTERS_DIR, `${id}.json`);
-    
+
     await fsPromises.unlink(filepath);
-    
+
     console.log(`Deleted character: ${id}`);
-    
+
     res.json({ success: true });
   } catch (error) {
     if (error.code === 'ENOENT') {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Character not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'Character not found',
       });
     }
     console.error('Error deleting character:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -1634,48 +1718,49 @@ app.delete('/api/characters/delete/:id', async (req, res) => {
 app.post('/api/images/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'No image file provided' 
+      return res.status(400).json({
+        success: false,
+        error: 'No image file provided',
       });
     }
 
     const { characterId, imageType } = req.body; // imageType: 'portrait', 'background', etc.
-    
+
     // Generate filename
     const timestamp = Date.now();
-    const filename = characterId 
+    const filename = characterId
       ? `${characterId}_${imageType || 'image'}_${timestamp}.webp`
       : `${imageType || 'image'}_${timestamp}.webp`;
-    
+
     const filepath = path.join(IMAGES_DIR, filename);
 
     // Convert and compress to WebP
     await sharp(req.file.buffer)
-      .resize(800, 800, { // Max dimensions, maintains aspect ratio
+      .resize(800, 800, {
+        // Max dimensions, maintains aspect ratio
         fit: 'inside',
-        withoutEnlargement: true
+        withoutEnlargement: true,
       })
-      .webp({ 
+      .webp({
         quality: 85, // Good balance of quality and file size
-        effort: 4    // Compression effort (0-6, higher = smaller file)
+        effort: 4, // Compression effort (0-6, higher = smaller file)
       })
       .toFile(filepath);
 
     const imageUrl = `/images/${filename}`;
-    
+
     console.log(`Uploaded image: ${filename} (${Math.round(req.file.size / 1024)}KB -> WebP)`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       imageUrl: imageUrl,
-      filename: filename
+      filename: filename,
     });
   } catch (error) {
     console.error('Error uploading image:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -1684,33 +1769,33 @@ app.post('/api/images/upload', upload.single('image'), async (req, res) => {
 app.delete('/api/images/delete/:filename', async (req, res) => {
   try {
     const { filename } = req.params;
-    
+
     // Security: prevent directory traversal
     if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid filename' 
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid filename',
       });
     }
-    
+
     const filepath = path.join(IMAGES_DIR, filename);
-    
+
     await fsPromises.unlink(filepath);
-    
+
     console.log(`Deleted image: ${filename}`);
-    
+
     res.json({ success: true });
   } catch (error) {
     if (error.code === 'ENOENT') {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Image not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'Image not found',
       });
     }
     console.error('Error deleting image:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
@@ -1719,32 +1804,34 @@ app.delete('/api/images/delete/:filename', async (req, res) => {
 app.get('/api/images/list', async (req, res) => {
   try {
     const files = await fsPromises.readdir(IMAGES_DIR);
-    const imageFiles = files.filter(f => f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png'));
-    
-    const images = imageFiles.map(filename => ({
+    const imageFiles = files.filter(
+      (f) => f.endsWith('.webp') || f.endsWith('.jpg') || f.endsWith('.png')
+    );
+
+    const images = imageFiles.map((filename) => ({
       filename: filename,
-      url: `/images/${filename}`
+      url: `/images/${filename}`,
     }));
-    
-    res.json({ 
-      success: true, 
-      images: images 
+
+    res.json({
+      success: true,
+      images: images,
     });
   } catch (error) {
     console.error('Error listing images:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message 
+    res.status(500).json({
+      success: false,
+      error: error.message,
     });
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    mode: IS_PRODUCTION ? 'production' : 'development'
+    mode: IS_PRODUCTION ? 'production' : 'development',
   });
 });
 
@@ -1767,7 +1854,7 @@ io.on('connection', (socket) => {
   // Player joins session with character
   socket.on('player-join', (data) => {
     const { characterId, name, level, ancestry, health, focus, investiture } = data;
-    
+
     // Handle ancestry - should always be a string from Ancestry enum (e.g., 'human', 'singer')
     // Fallback to 'Unknown' if null/undefined
     const ancestryName = ancestry || 'Unknown';
@@ -1776,20 +1863,23 @@ io.on('connection', (socket) => {
     const confirmedLevel = lastConfirmedLevels.get(characterId);
     const existingQueue = pendingLevelUps.get(characterId) || [];
     if (confirmedLevel && confirmedLevel > level) {
-      console.warn(`[Session] Detected level mismatch for ${characterId}: client ${level}, confirmed ${confirmedLevel}. Queuing catch-up events.`);
-      let baseLevel = existingQueue.length > 0 ? existingQueue[existingQueue.length - 1].newLevel : level;
+      console.warn(
+        `[Session] Detected level mismatch for ${characterId}: client ${level}, confirmed ${confirmedLevel}. Queuing catch-up events.`
+      );
+      let baseLevel =
+        existingQueue.length > 0 ? existingQueue[existingQueue.length - 1].newLevel : level;
       for (let nextLevel = baseLevel + 1; nextLevel <= confirmedLevel; nextLevel++) {
         existingQueue.push({
           characterId,
           newLevel: nextLevel,
           grantedBy: 'RESYNC',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
       pendingLevelUps.set(characterId, existingQueue);
       effectiveLevel = confirmedLevel;
     }
-    
+
     activePlayers.set(socket.id, {
       characterId,
       name,
@@ -1799,13 +1889,13 @@ io.on('connection', (socket) => {
       focus: focus || { current: 0, max: 0 },
       investiture: investiture || { current: 0, max: 0 },
       joinedAt: new Date().toISOString(),
-      socketId: socket.id
+      socketId: socket.id,
     });
 
     lastConfirmedLevels.set(characterId, effectiveLevel);
-    
+
     console.log(`[Session] Player joined: ${name} (${characterId})`);
-    
+
     // Broadcast updated player list to all GM clients
     io.emit('player-joined', activePlayers.get(socket.id));
     io.emit('active-players', Array.from(activePlayers.values()));
@@ -1821,11 +1911,11 @@ io.on('connection', (socket) => {
   socket.on('player-leave', (data) => {
     const { characterId } = data;
     const player = activePlayers.get(socket.id);
-    
+
     if (player) {
       console.log(`[Session] Player left: ${player.name} (${characterId})`);
       activePlayers.delete(socket.id);
-      
+
       // Broadcast updated player list
       io.emit('player-left', { characterId, socketId: socket.id });
       io.emit('active-players', Array.from(activePlayers.values()));
@@ -1836,29 +1926,29 @@ io.on('connection', (socket) => {
   socket.on('resource-update', (data) => {
     const { characterId, health, focus, investiture } = data;
     const player = activePlayers.get(socket.id);
-    
+
     if (player) {
       // Update cached player resources
       player.health = health;
       player.focus = focus;
       player.investiture = investiture;
-      
+
       // Broadcast to all GM clients
       io.emit('player-resource-update', {
         characterId,
         socketId: socket.id,
         health,
         focus,
-        investiture
+        investiture,
       });
-      
+
       // Critical alert for zero health
       if (health.current === 0) {
         console.log(`[CRITICAL] ${player.name} has reached 0 health!`);
         io.emit('player-critical', {
           characterId,
           playerName: player.name,
-          message: `${player.name} has reached 0 health!`
+          message: `${player.name} has reached 0 health!`,
         });
       }
     }
@@ -1872,16 +1962,16 @@ io.on('connection', (socket) => {
   // Handle request for current store state
   socket.on('request-store-state', () => {
     console.log('[WebSocket] 📥 Store state requested by:', socket.id);
-    
+
     // Send current state of all stores
     Object.entries(storeState).forEach(([storeId, enabled]) => {
       socket.emit('store-toggle', {
         storeId,
         enabled,
-        toggledBy: 'SERVER'
+        toggledBy: 'SERVER',
       });
     });
-    
+
     console.log('[WebSocket] 📤 Sent current store state:', storeState);
   });
 
@@ -1892,20 +1982,22 @@ io.on('connection', (socket) => {
     console.log(`[GM Action] Granting ${order} spren to character ${characterId}`);
     // Always accept and queue spren grants; client handles idempotency.
     const targetSocket = findSocketIdByCharacterId(characterId);
-    
+
     const payload = {
       characterId,
       order,
       sprenType,
       surgePair,
-      philosophy
+      philosophy,
     };
 
     // Queue the grant
     const queue = pendingSprenGrants.get(characterId) || [];
     queue.push(payload);
     pendingSprenGrants.set(characterId, queue);
-    console.log(`[GM Action] ⭐ Spren grant queued for ${characterId}. Queue size: ${queue.length}`);
+    console.log(
+      `[GM Action] ⭐ Spren grant queued for ${characterId}. Queue size: ${queue.length}`
+    );
 
     // Send if player is online
     if (targetSocket) {
@@ -1919,7 +2011,7 @@ io.on('connection', (socket) => {
   socket.on('store-transaction', (data) => {
     const { storeId, characterId, items, totalCost, timestamp } = data;
     console.log(`[Store] Transaction at ${storeId} by ${characterId}: ${totalCost}mk`);
-    
+
     // Broadcast to all GM clients for tracking
     io.emit('store-transaction', data);
 
@@ -1930,7 +2022,7 @@ io.on('connection', (socket) => {
       storeId,
       characterId,
       totalCost,
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     });
   });
 
@@ -1938,15 +2030,15 @@ io.on('connection', (socket) => {
   socket.on('gm-grant-item', (data) => {
     const { characterId, itemId, quantity, timestamp } = data;
     console.log(`[GM Action] 🎁 Granting ${quantity}x ${itemId} to character ${characterId}`);
-    
+
     const targetSocket = findSocketIdByCharacterId(characterId);
-    
+
     const payload = {
       characterId,
       itemId,
       quantity,
       grantedBy: 'GM',
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     };
 
     // Add to queue
@@ -1967,29 +2059,29 @@ io.on('connection', (socket) => {
   socket.on('gm-toggle-store', (data) => {
     const { storeId, enabled } = data;
     console.log(`[GM Action] 🏪 Store ${storeId} toggled: ${enabled ? 'OPEN' : 'CLOSED'}`);
-    
+
     // Update server-side store state
     storeState[storeId] = enabled;
-    
+
     // Broadcast to all clients
     io.emit('store-toggle', {
       storeId,
       enabled,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
   });
   // GM grants expertise to a player
   socket.on('gm-grant-expertise', (data) => {
     const { characterId, expertiseName, timestamp } = data;
     console.log(`[GM Action] 📚 Granting expertise "${expertiseName}" to character ${characterId}`);
-    
+
     const targetSocket = findSocketIdByCharacterId(characterId);
-    
+
     const payload = {
       characterId,
       expertiseName,
       grantedBy: 'GM',
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     };
 
     // Add to queue
@@ -2010,10 +2102,10 @@ io.on('connection', (socket) => {
   socket.on('gm-grant-level-up', (data) => {
     const { characterId, timestamp } = data;
     console.log(`[GM Action] 🆙 Granting level-up to character ${characterId}`);
-    
+
     const targetSocket = findSocketIdByCharacterId(characterId);
     const player = targetSocket ? activePlayers.get(targetSocket) : null;
-    
+
     if (player) {
       const queue = pendingLevelUps.get(characterId) || [];
       const baseLevel = queue.length > 0 ? queue[queue.length - 1].newLevel : player.level;
@@ -2022,7 +2114,7 @@ io.on('connection', (socket) => {
         characterId,
         newLevel,
         grantedBy: 'GM',
-        timestamp: timestamp || new Date().toISOString()
+        timestamp: timestamp || new Date().toISOString(),
       };
 
       queue.push(payload);
@@ -2030,7 +2122,9 @@ io.on('connection', (socket) => {
 
       // Keep GM dashboards optimistic while we wait for ack
       player.level = Math.max(player.level, newLevel);
-      console.log(`[GM Action] 🆙 Queue size for ${characterId}: ${queue.length}. Next level: ${newLevel}`);
+      console.log(
+        `[GM Action] 🆙 Queue size for ${characterId}: ${queue.length}. Next level: ${newLevel}`
+      );
 
       sendPendingLevelUp(characterId);
 
@@ -2044,7 +2138,9 @@ io.on('connection', (socket) => {
   socket.on('level-up-ack', ({ characterId, newLevel }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(`[LevelUp] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      console.warn(
+        `[LevelUp] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
+      );
       return;
     }
 
@@ -2052,11 +2148,13 @@ io.on('connection', (socket) => {
     if (queue.length > 0 && queue[0].newLevel === newLevel) {
       queue.shift();
     } else {
-      const idx = queue.findIndex(entry => entry.newLevel === newLevel);
+      const idx = queue.findIndex((entry) => entry.newLevel === newLevel);
       if (idx !== -1) {
         queue.splice(idx, 1);
       } else {
-        console.warn(`[LevelUp] ⚠️ Received ack for unexpected level ${newLevel} on character ${characterId}`);
+        console.warn(
+          `[LevelUp] ⚠️ Received ack for unexpected level ${newLevel} on character ${characterId}`
+        );
       }
     }
     pendingLevelUps.set(characterId, queue);
@@ -2064,7 +2162,9 @@ io.on('connection', (socket) => {
     player.level = Math.max(player.level, newLevel);
     lastConfirmedLevels.set(characterId, newLevel);
 
-    console.log(`[LevelUp] ✅ Ack received for ${characterId} level ${newLevel}. Remaining queue: ${queue.length}`);
+    console.log(
+      `[LevelUp] ✅ Ack received for ${characterId} level ${newLevel}. Remaining queue: ${queue.length}`
+    );
     io.emit('player-joined', player);
     io.emit('active-players', Array.from(activePlayers.values()));
 
@@ -2075,12 +2175,14 @@ io.on('connection', (socket) => {
   socket.on('spren-grant-ack', ({ characterId, order }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(`[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      console.warn(
+        `[Spren] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
+      );
       return;
     }
 
     console.log(`[Spren] ✅ Ack received for ${characterId} spren: ${order}`);
-    
+
     // Mark first confirmation and dequeue current pending grant
     if (!confirmedSprenGrants.has(characterId)) {
       confirmedSprenGrants.add(characterId);
@@ -2099,7 +2201,9 @@ io.on('connection', (socket) => {
   socket.on('expertise-grant-ack', ({ characterId, expertiseName }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(`[Expertise] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      console.warn(
+        `[Expertise] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
+      );
       return;
     }
 
@@ -2107,11 +2211,13 @@ io.on('connection', (socket) => {
     if (queue.length > 0 && queue[0].expertiseName === expertiseName) {
       queue.shift();
     } else {
-      const idx = queue.findIndex(entry => entry.expertiseName === expertiseName);
+      const idx = queue.findIndex((entry) => entry.expertiseName === expertiseName);
       if (idx !== -1) {
         queue.splice(idx, 1);
       } else {
-        console.warn(`[Expertise] ⚠️ Received ack for unexpected expertise ${expertiseName} on character ${characterId}`);
+        console.warn(
+          `[Expertise] ⚠️ Received ack for unexpected expertise ${expertiseName} on character ${characterId}`
+        );
       }
     }
     pendingExpertiseGrants.set(characterId, queue);
@@ -2121,7 +2227,9 @@ io.on('connection', (socket) => {
     confirmed.add(expertiseName);
     confirmedExpertiseGrants.set(characterId, confirmed);
 
-    console.log(`[Expertise] ✅ Ack received for ${characterId} expertise: ${expertiseName}. Remaining queue: ${queue.length}`);
+    console.log(
+      `[Expertise] ✅ Ack received for ${characterId} expertise: ${expertiseName}. Remaining queue: ${queue.length}`
+    );
 
     // Send next queued expertise if any
     sendPendingExpertiseGrants(characterId);
@@ -2130,7 +2238,9 @@ io.on('connection', (socket) => {
   socket.on('item-grant-ack', ({ characterId, itemId, quantity }) => {
     const player = activePlayers.get(socket.id);
     if (!player || player.characterId !== characterId) {
-      console.warn(`[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`);
+      console.warn(
+        `[Item] ⚠️ Ack from unknown player/socket ${socket.id} for character ${characterId}`
+      );
       return;
     }
 
@@ -2138,16 +2248,22 @@ io.on('connection', (socket) => {
     if (queue.length > 0 && queue[0].itemId === itemId && queue[0].quantity === quantity) {
       queue.shift();
     } else {
-      const idx = queue.findIndex(entry => entry.itemId === itemId && entry.quantity === quantity);
+      const idx = queue.findIndex(
+        (entry) => entry.itemId === itemId && entry.quantity === quantity
+      );
       if (idx !== -1) {
         queue.splice(idx, 1);
       } else {
-        console.warn(`[Item] ⚠️ Received ack for unexpected item ${itemId} x${quantity} on character ${characterId}`);
+        console.warn(
+          `[Item] ⚠️ Received ack for unexpected item ${itemId} x${quantity} on character ${characterId}`
+        );
       }
     }
     pendingItemGrants.set(characterId, queue);
 
-    console.log(`[Item] ✅ Ack received for ${characterId} item: ${itemId} x${quantity}. Remaining queue: ${queue.length}`);
+    console.log(
+      `[Item] ✅ Ack received for ${characterId} item: ${itemId} x${quantity}. Remaining queue: ${queue.length}`
+    );
 
     // Send next queued item if any
     sendPendingItemGrants(characterId);
@@ -2156,15 +2272,15 @@ io.on('connection', (socket) => {
   // Handle highstorm toggle from GM
   socket.on('gm-toggle-highstorm', ({ active, timestamp }) => {
     console.log(`[GM Action] ⚡ GM toggling highstorm: ${active}`);
-    
+
     highstormActive = active;
-    
+
     const payload = {
       active,
       triggeredBy: 'GM',
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     };
-    
+
     // Broadcast to all connected clients
     io.emit('highstorm-toggle', payload);
     console.log(`[GM Action] ⚡ Highstorm ${active ? 'activated' : 'ended'}`);
@@ -2173,11 +2289,11 @@ io.on('connection', (socket) => {
   // Handle combat start from GM
   socket.on('gm-start-combat', ({ timestamp }) => {
     console.log(`[Combat] ⚔️ GM starting combat`);
-    
+
     const payload = {
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     };
-    
+
     // Broadcast to all connected clients
     io.emit('combat-start', payload);
     console.log(`[Combat] ⚔️ Combat started`);
@@ -2186,13 +2302,13 @@ io.on('connection', (socket) => {
   // Handle turn speed selection from player
   socket.on('player-select-turn-speed', ({ characterId, turnSpeed, timestamp }) => {
     console.log(`[Combat] 🔄 Player ${characterId} selected ${turnSpeed} turn`);
-    
+
     const payload = {
       characterId,
       turnSpeed,
-      timestamp: timestamp || new Date().toISOString()
+      timestamp: timestamp || new Date().toISOString(),
     };
-    
+
     // Broadcast to all connected clients (GM needs to see updates)
     io.emit('turn-speed-selection', payload);
     console.log(`[Combat] 🔄 Turn speed selection broadcasted`);
@@ -2201,11 +2317,11 @@ io.on('connection', (socket) => {
   // Handle disconnect
   socket.on('disconnect', () => {
     const player = activePlayers.get(socket.id);
-    
+
     if (player) {
       console.log(`[WebSocket] Player disconnected: ${player.name} (${socket.id})`);
       activePlayers.delete(socket.id);
-      
+
       // Broadcast updated player list
       io.emit('player-left', { characterId: player.characterId, socketId: socket.id });
       io.emit('active-players', Array.from(activePlayers.values()));
@@ -2218,7 +2334,7 @@ io.on('connection', (socket) => {
 // Start server
 async function startServer() {
   await ensureDirectories();
-  
+
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log('========================================');
     console.log('  Sanderson RPG Character Server');

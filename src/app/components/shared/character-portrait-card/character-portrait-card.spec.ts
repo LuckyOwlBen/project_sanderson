@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -31,7 +31,7 @@ describe('CharacterPortraitCard', () => {
 
   beforeEach(async () => {
     mockDialogRef = {
-      afterClosed: () => of(null)
+      afterClosed: () => of(null),
     };
 
     mockDialog = {
@@ -39,19 +39,17 @@ describe('CharacterPortraitCard', () => {
       openDialogs: [],
       afterOpened: new Subject(),
       afterAllClosed: new Subject(),
-      _getAfterAllClosed: () => new Subject()
+      _getAfterAllClosed: () => new Subject(),
     };
 
     await TestBed.configureTestingModule({
       imports: [CharacterPortraitCard, NoopAnimationsModule],
-      providers: [
-        { provide: MatDialog, useValue: mockDialog }
-      ]
+      providers: [{ provide: MatDialog, useValue: mockDialog }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CharacterPortraitCard);
     component = fixture.componentInstance;
-    
+
     // Create a mock character
     mockCharacter = new Character();
     mockCharacter.name = 'Test Character';

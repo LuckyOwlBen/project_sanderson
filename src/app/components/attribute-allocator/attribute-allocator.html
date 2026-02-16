@@ -3,7 +3,9 @@
     <div class="header">
       <div class="header-text">
         <h2>Distribute Attribute Points</h2>
-        <div class="points-remaining">Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}</div>
+        <div class="points-remaining">
+          Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
+        </div>
       </div>
       <div class="points-display">
         <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
@@ -18,7 +20,8 @@
         [minValue]="getMinValue(attr)"
         [maxValue]="maxValue"
         [pointsRemaining]="remainingPoints"
-        (valueChanged)="onValueChanged($event)">
+        (valueChanged)="onValueChanged($event)"
+      >
       </app-value-stepper>
     </div>
   </div>
@@ -28,7 +31,7 @@
       <h3>Derived Attributes</h3>
       <p class="sidebar-subtitle">Preview of your character's statistics</p>
     </div>
-    
+
     <div class="derived-stats">
       <div class="stat-card">
         <div class="stat-icon">❤️</div>
@@ -37,7 +40,7 @@
           <span class="stat-value">{{ derivedHealth }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">⚡</div>
         <div class="stat-info">
@@ -45,7 +48,7 @@
           <span class="stat-value">{{ derivedFocus }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">🏃</div>
         <div class="stat-info">
@@ -53,7 +56,7 @@
           <span class="stat-value">{{ movementSpeed }}</span>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-icon">🎲</div>
         <div class="stat-info">
@@ -62,7 +65,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="allocation-status" [class.complete]="isComplete">
       <div class="status-message">
         <span *ngIf="!isComplete">⚠️ Allocate all points to continue</span>

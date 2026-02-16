@@ -21,7 +21,7 @@ export class PathsModuleRepository extends BaseModuleRepository {
   ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       paths: [type, sub],
-      mainPathTier0TalentId: tier0TalentId
+      mainPathTier0TalentId: tier0TalentId,
     });
   }
 
@@ -36,11 +36,11 @@ export class PathsModuleRepository extends BaseModuleRepository {
   } | null> {
     const char = await this.loadCharacterData(characterId);
     if (!char) return null;
-    
+
     const paths = char.paths || [];
     return {
       type: paths[0] ?? null,
-      sub: paths[1] ?? null
+      sub: paths[1] ?? null,
     };
   }
 }

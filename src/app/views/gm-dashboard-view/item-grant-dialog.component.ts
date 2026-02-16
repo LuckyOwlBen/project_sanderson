@@ -26,7 +26,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
     MatIconModule,
     MatChipsModule,
     MatCardModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   template: `
     <h2 mat-dialog-title>
@@ -53,48 +53,46 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       <!-- Search -->
       <mat-form-field class="search-field">
         <mat-label>Search items</mat-label>
-        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="filterItems()" placeholder="Search by name...">
+        <input
+          matInput
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="filterItems()"
+          placeholder="Search by name..."
+        />
         <mat-icon matPrefix>search</mat-icon>
       </mat-form-field>
 
       <!-- Rarity Filter -->
       <mat-chip-set class="rarity-chips">
-        <mat-chip 
-          [class.active]="showCommon"
-          (click)="toggleCommon()">
-          Common Items
-        </mat-chip>
-        <mat-chip 
-          [class.active]="showRewardOnly"
-          (click)="toggleRewardOnly()">
+        <mat-chip [class.active]="showCommon" (click)="toggleCommon()"> Common Items </mat-chip>
+        <mat-chip [class.active]="showRewardOnly" (click)="toggleRewardOnly()">
           Reward Only
         </mat-chip>
-        <mat-chip 
-          [class.active]="showTalentOnly"
-          (click)="toggleTalentOnly()">
+        <mat-chip [class.active]="showTalentOnly" (click)="toggleTalentOnly()">
           Talent Only
         </mat-chip>
       </mat-chip-set>
 
       <!-- Item List -->
       <div class="item-list">
-        <mat-card 
+        <mat-card
           *ngFor="let item of getFilteredItems()"
           class="item-card"
           [class.selected]="selectedItem?.id === item.id"
           [class.reward-only]="item.rarity === 'reward-only'"
           [class.talent-only]="item.rarity === 'talent-only'"
-          (click)="selectItem(item)">
-          
+          (click)="selectItem(item)"
+        >
           <div class="item-header">
             <mat-icon [class]="'item-icon ' + item.type">{{ getItemIcon(item) }}</mat-icon>
             <div class="item-info">
               <span class="item-name">{{ item.name }}</span>
               <span class="item-type">{{ item.type }}</span>
             </div>
-            <mat-chip 
+            <mat-chip
               *ngIf="item.rarity !== 'common'"
-              [color]="item.rarity === 'reward-only' ? 'accent' : 'warn'">
+              [color]="item.rarity === 'reward-only' ? 'accent' : 'warn'"
+            >
               {{ item.rarity }}
             </mat-chip>
           </div>
@@ -111,7 +109,8 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
             <span *ngIf="item.type === 'pet' && item.properties">
               <span class="pet-property">🧬 {{ item.properties['species'] }}</span>
               <span class="pet-property" *ngIf="item.properties['intelligence']">
-                {{ item.properties['intelligence'] === 'sapient' ? '🧠' : '🦅' }} {{ item.properties['intelligence'] }}
+                {{ item.properties['intelligence'] === 'sapient' ? '🧠' : '🦅' }}
+                {{ item.properties['intelligence'] }}
               </span>
               <span class="pet-property" *ngIf="item.properties['flyingSpeed']">
                 ✈️ {{ item.properties['flyingSpeed'] }} ft/round
@@ -135,7 +134,7 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
       <!-- Quantity Selector -->
       <mat-form-field class="quantity-field" *ngIf="selectedItem">
         <mat-label>Quantity</mat-label>
-        <input matInput type="number" [(ngModel)]="quantity" min="1" max="99">
+        <input matInput type="number" [(ngModel)]="quantity" min="1" max="99" />
       </mat-form-field>
 
       <!-- Warning for special items -->
@@ -144,10 +143,12 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
         <div>
           <strong>Special Item Warning</strong>
           <p *ngIf="selectedItem.rarity === 'reward-only'">
-            This item is marked as "Reward Only" and should only be granted for significant achievements or story milestones.
+            This item is marked as "Reward Only" and should only be granted for significant
+            achievements or story milestones.
           </p>
           <p *ngIf="selectedItem.rarity === 'talent-only'">
-            This item is marked as "Talent Only" and is typically granted through character advancement, not directly by the GM.
+            This item is marked as "Talent Only" and is typically granted through character
+            advancement, not directly by the GM.
           </p>
         </div>
       </div>
@@ -155,294 +156,304 @@ import { PlayerJoinedEvent } from '../../services/websocket.service';
 
     <mat-dialog-actions>
       <button mat-button (click)="cancel()">Cancel</button>
-      <button 
-        mat-raised-button 
-        color="primary"
-        [disabled]="!selectedItem"
-        (click)="confirm()">
+      <button mat-raised-button color="primary" [disabled]="!selectedItem" (click)="confirm()">
         <mat-icon>redeem</mat-icon>
         Grant {{ quantity }}x {{ selectedItem?.name || 'Item' }}
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
-    :host {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-      background-color: var(--gpSystemDarkerGrey);
-    }
-
-    h2[mat-dialog-title] {
-      background-color: var(--gpSystemDarkerGrey);
-      color: #fff;
-      padding: 1rem 1.5rem;
-      margin: 0 -1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-
-      mat-icon {
-        color: var(--gpColor-ChalkyBlue);
+  styles: [
+    `
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background-color: var(--gpSystemDarkerGrey);
       }
-    }
 
-    mat-dialog-content {
-      min-width: 500px;
-      max-width: 600px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1rem 1.5rem !important;
-      overflow-y: auto;
-      background-color: var(--gpSystemDarkerGrey);
-    }
-
-    mat-dialog-actions {
-      background-color: var(--gpSystemDarkerGrey);
-      padding: 1rem 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      gap: 0.5rem;
-      flex-shrink: 0;
-      margin-top: auto;
-      justify-content: flex-end;
-      align-items: center;
-      min-height: 56px;
-      position: relative;
-      z-index: 10;
-    }
-
-    .category-select,
-    .search-field,
-    .quantity-field {
-      width: 100%;
-    }
-
-    .rarity-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-
-      mat-chip {
-        cursor: pointer;
-        background-color: rgba(255, 255, 255, 0.1);
+      h2[mat-dialog-title] {
+        background-color: var(--gpSystemDarkerGrey);
         color: #fff;
-        pointer-events: auto;
-        transition: all 0.2s ease;
+        padding: 1rem 1.5rem;
+        margin: 0 -1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.15);
+        mat-icon {
+          color: var(--gpColor-ChalkyBlue);
         }
-
-        &.active {
-          background-color: var(--gpColor-ChalkyBlue);
-          color: #000;
-        }
-      }
-    }
-
-    .item-list {
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      max-height: 250px;
-      padding-right: 0.5rem;
-    }
-
-    .item-card {
-      cursor: pointer;
-      transition: all 0.2s ease;
-      padding: 1rem;
-      background-color: rgba(0, 0, 0, 0.3);
-      color: #fff;
-
-      &:hover {
-        transform: translateX(4px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-        background-color: rgba(0, 0, 0, 0.4);
       }
 
-      &.selected {
-        border: 2px solid var(--gpColor-ChalkyBlue);
-        background-color: var(--gpSystemDarkGrey) !important;
-      }
-
-      &.reward-only {
-        border-left: 4px solid #ff9800;
-      }
-
-      &.talent-only {
-        border-left: 4px solid #9c27b0;
-      }
-    }
-
-    .item-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-
-      .item-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
-
-        &.weapon { color: var(--gpColor-ChalkyBlue); }
-        &.armor { color: var(--gpColor-LightGreen); }
-        &.equipment { color: #ffa726; }
-        &.fabrial { color: gold; }
-        &.mount { color: #8d6e63; }
-        &.pet { color: #ff6b9d; }
-      }
-
-      .item-info {
+      mat-dialog-content {
+        min-width: 500px;
+        max-width: 600px;
         flex: 1;
         display: flex;
         flex-direction: column;
+        gap: 1rem;
+        padding: 1rem 1.5rem !important;
+        overflow-y: auto;
+        background-color: var(--gpSystemDarkerGrey);
+      }
 
-        .item-name {
-          font-weight: 600;
-          font-size: 1.1rem;
+      mat-dialog-actions {
+        background-color: var(--gpSystemDarkerGrey);
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        margin-top: auto;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: 56px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .category-select,
+      .search-field,
+      .quantity-field {
+        width: 100%;
+      }
+
+      .rarity-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+
+        mat-chip {
+          cursor: pointer;
+          background-color: rgba(255, 255, 255, 0.1);
           color: #fff;
-        }
+          pointer-events: auto;
+          transition: all 0.2s ease;
 
-        .item-type {
-          font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.6);
-          text-transform: capitalize;
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+          }
+
+          &.active {
+            background-color: var(--gpColor-ChalkyBlue);
+            color: #000;
+          }
         }
       }
 
-      mat-chip {
-        font-size: 0.7rem;
-        min-height: 24px;
-        padding: 0 8px;
-        pointer-events: none;
-        cursor: default;
+      .item-list {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-height: 250px;
+        padding-right: 0.5rem;
       }
-    }
 
-    .item-description {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.9rem;
-      margin: 0.5rem 0;
-    }
+      .item-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.3);
+        color: #fff;
 
-    .item-stats {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.6);
-      padding-top: 0.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      flex-wrap: wrap;
+        &:hover {
+          transform: translateX(4px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+          background-color: rgba(0, 0, 0, 0.4);
+        }
 
-      span {
+        &.selected {
+          border: 2px solid var(--gpColor-ChalkyBlue);
+          background-color: var(--gpSystemDarkGrey) !important;
+        }
+
+        &.reward-only {
+          border-left: 4px solid #ff9800;
+        }
+
+        &.talent-only {
+          border-left: 4px solid #9c27b0;
+        }
+      }
+
+      .item-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+
+        .item-icon {
+          font-size: 2rem;
+          width: 2rem;
+          height: 2rem;
+
+          &.weapon {
+            color: var(--gpColor-ChalkyBlue);
+          }
+          &.armor {
+            color: var(--gpColor-LightGreen);
+          }
+          &.equipment {
+            color: #ffa726;
+          }
+          &.fabrial {
+            color: gold;
+          }
+          &.mount {
+            color: #8d6e63;
+          }
+          &.pet {
+            color: #ff6b9d;
+          }
+        }
+
+        .item-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+
+          .item-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+          }
+
+          .item-type {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: capitalize;
+          }
+        }
+
+        mat-chip {
+          font-size: 0.7rem;
+          min-height: 24px;
+          padding: 0 8px;
+          pointer-events: none;
+          cursor: default;
+        }
+      }
+
+      .item-description {
         color: rgba(255, 255, 255, 0.7);
-      }
-
-      .pet-property {
-        background-color: rgba(26, 159, 255, 0.15);
-        color: var(--gpColor-ChalkyBlue);
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid rgba(26, 159, 255, 0.3);
-        font-size: 0.8rem;
-      }
-
-      .item-price {
-        color: gold;
-        font-weight: 600;
-      }
-
-      .item-price-free {
-        color: rgba(91, 163, 43, 0.8);
-        font-weight: 600;
-      }
-    }
-
-    .no-results {
-      text-align: center;
-      padding: 2rem;
-      color: rgba(255, 255, 255, 0.5);
-
-      mat-icon {
-        font-size: 3rem;
-        width: 3rem;
-        height: 3rem;
-        opacity: 0.3;
-        color: rgba(255, 255, 255, 0.3);
-      }
-
-      p {
-        color: rgba(255, 255, 255, 0.5);
-      }
-    }
-
-    .warning-box {
-      display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      background-color: rgba(255, 152, 0, 0.15);
-      border: 1px solid rgba(255, 152, 0, 0.5);
-      border-radius: 4px;
-
-      mat-icon {
-        color: #ffa726;
-      }
-
-      strong {
-        color: #ffa726;
-      }
-
-      p {
-        color: rgba(255, 255, 255, 0.8);
-        margin: 0.25rem 0 0 0;
-      }
-    }
-
-    .no-results {
-      text-align: center;
-      padding: 2rem;
-      color: var(--gpSystemLightGrey);
-
-      mat-icon {
-        font-size: 3rem;
-        width: 3rem;
-        height: 3rem;
-        opacity: 0.5;
-      }
-    }
-
-    .warning-box {
-      display: flex;
-      gap: 1rem;
-      padding: 1rem;
-      background-color: rgba(255, 152, 0, 0.1);
-      border: 1px solid #ff9800;
-      border-radius: 4px;
-
-      mat-icon {
-        color: #ff9800;
-      }
-
-      strong {
-        color: #ff9800;
-      }
-
-      p {
-        margin: 0.5rem 0 0 0;
         font-size: 0.9rem;
+        margin: 0.5rem 0;
       }
-    }
-  `]
+
+      .item-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        flex-wrap: wrap;
+
+        span {
+          color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pet-property {
+          background-color: rgba(26, 159, 255, 0.15);
+          color: var(--gpColor-ChalkyBlue);
+          padding: 4px 8px;
+          border-radius: 4px;
+          border: 1px solid rgba(26, 159, 255, 0.3);
+          font-size: 0.8rem;
+        }
+
+        .item-price {
+          color: gold;
+          font-weight: 600;
+        }
+
+        .item-price-free {
+          color: rgba(91, 163, 43, 0.8);
+          font-weight: 600;
+        }
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.5);
+
+        mat-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+          opacity: 0.3;
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        p {
+          color: rgba(255, 255, 255, 0.5);
+        }
+      }
+
+      .warning-box {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: rgba(255, 152, 0, 0.15);
+        border: 1px solid rgba(255, 152, 0, 0.5);
+        border-radius: 4px;
+
+        mat-icon {
+          color: #ffa726;
+        }
+
+        strong {
+          color: #ffa726;
+        }
+
+        p {
+          color: rgba(255, 255, 255, 0.8);
+          margin: 0.25rem 0 0 0;
+        }
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: var(--gpSystemLightGrey);
+
+        mat-icon {
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+          opacity: 0.5;
+        }
+      }
+
+      .warning-box {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: rgba(255, 152, 0, 0.1);
+        border: 1px solid #ff9800;
+        border-radius: 4px;
+
+        mat-icon {
+          color: #ff9800;
+        }
+
+        strong {
+          color: #ff9800;
+        }
+
+        p {
+          margin: 0.5rem 0 0 0;
+          font-size: 0.9rem;
+        }
+      }
+    `,
+  ],
 })
 export class ItemGrantDialogComponent implements OnInit {
   selectedItem: InventoryItem | null = null;
@@ -477,12 +488,12 @@ export class ItemGrantDialogComponent implements OnInit {
         console.error('Failed to load items:', err);
         this.allItems = [];
         this.filteredItems = [];
-      }
+      },
     });
   }
 
   filterItems(): void {
-    this.filteredItems = this.allItems.filter(item => {
+    this.filteredItems = this.allItems.filter((item) => {
       // Category filter
       if (this.selectedCategory !== 'all' && item.type !== this.selectedCategory) {
         return false;
@@ -496,8 +507,9 @@ export class ItemGrantDialogComponent implements OnInit {
       // Search filter
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        return item.name.toLowerCase().includes(query) || 
-               item.description.toLowerCase().includes(query);
+        return (
+          item.name.toLowerCase().includes(query) || item.description.toLowerCase().includes(query)
+        );
       }
 
       return true;
@@ -529,15 +541,24 @@ export class ItemGrantDialogComponent implements OnInit {
 
   getItemIcon(item: InventoryItem): string {
     switch (item.type) {
-      case 'weapon': return 'swords';
-      case 'armor': return 'shield';
-      case 'equipment': return 'backpack';
-      case 'consumable': return 'science';
-      case 'fabrial': return 'auto_awesome';
-      case 'mount': return 'pets';
-      case 'vehicle': return 'directions_boat';
-      case 'pet': return 'cruelty_free';
-      default: return 'inventory_2';
+      case 'weapon':
+        return 'swords';
+      case 'armor':
+        return 'shield';
+      case 'equipment':
+        return 'backpack';
+      case 'consumable':
+        return 'science';
+      case 'fabrial':
+        return 'auto_awesome';
+      case 'mount':
+        return 'pets';
+      case 'vehicle':
+        return 'directions_boat';
+      case 'pet':
+        return 'cruelty_free';
+      default:
+        return 'inventory_2';
     }
   }
 
@@ -549,7 +570,7 @@ export class ItemGrantDialogComponent implements OnInit {
     if (this.selectedItem) {
       this.dialogRef.close({
         itemId: this.selectedItem.id,
-        quantity: this.quantity
+        quantity: this.quantity,
       });
     }
   }

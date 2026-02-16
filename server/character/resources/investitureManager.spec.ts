@@ -185,7 +185,7 @@ describe('InvestitureManager', () => {
       const state = {
         isActive: true,
         current: 3,
-        max: 6
+        max: 6,
       };
       investitureManager.fromJSON(state);
       expect(investitureManager.isActive()).toBe(true);

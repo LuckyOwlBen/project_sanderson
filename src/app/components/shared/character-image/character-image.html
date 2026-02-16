@@ -5,15 +5,16 @@
   </div>
 
   <!-- Image (lazy loaded) -->
-  <img 
-    *ngIf="imageUrl && !imageError" 
-    [src]="getFullImageUrl()" 
+  <img
+    *ngIf="imageUrl && !imageError"
+    [src]="getFullImageUrl()"
     [alt]="characterName + ' portrait'"
     [class.visible]="imageLoaded"
     (load)="onImageLoad()"
     (error)="onImageError()"
-    class="portrait-image">
-  
+    class="portrait-image"
+  />
+
   <!-- Error State -->
   <div *ngIf="imageError" class="error-placeholder">
     <mat-icon>broken_image</mat-icon>

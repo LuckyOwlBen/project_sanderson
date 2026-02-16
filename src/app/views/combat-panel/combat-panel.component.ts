@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
     MatInputModule,
     MatDividerModule,
     MatIconModule,
-    MatBadgeModule
+    MatBadgeModule,
   ],
   template: `
     <mat-card class="combat-panel">
@@ -203,150 +203,152 @@ import { takeUntil } from 'rxjs/operators';
       </mat-card-content>
     </mat-card>
   `,
-  styles: [`
-    .combat-panel {
-      margin: 20px;
-      max-width: 600px;
-    }
+  styles: [
+    `
+      .combat-panel {
+        margin: 20px;
+        max-width: 600px;
+      }
 
-    mat-card-header {
-      margin-bottom: 20px;
-    }
+      mat-card-header {
+        margin-bottom: 20px;
+      }
 
-    mat-card-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 20px;
-      margin: 0;
-    }
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 20px;
+        margin: 0;
+      }
 
-    .combat-toggle {
-      margin-left: 16px;
-    }
+      .combat-toggle {
+        margin-left: 16px;
+      }
 
-    .npc-management-section h3 {
-      margin-top: 20px;
-      margin-bottom: 12px;
-      font-size: 18px;
-    }
+      .npc-management-section h3 {
+        margin-top: 20px;
+        margin-bottom: 12px;
+        font-size: 18px;
+      }
 
-    .npc-form {
-      display: flex;
-      gap: 12px;
-      margin: 16px 0;
-      align-items: flex-end;
-    }
+      .npc-form {
+        display: flex;
+        gap: 12px;
+        margin: 16px 0;
+        align-items: flex-end;
+      }
 
-    .full-width {
-      flex: 1;
-    }
+      .full-width {
+        flex: 1;
+      }
 
-    .count-field {
-      width: 100px;
-    }
+      .count-field {
+        width: 100px;
+      }
 
-    .npc-cards-list {
-      margin: 16px 0;
-    }
+      .npc-cards-list {
+        margin: 16px 0;
+      }
 
-    .npc-card {
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 12px;
-      margin-bottom: 12px;
-      background-color: #f5f5f5;
-    }
+      .npc-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 12px;
+        background-color: #f5f5f5;
+      }
 
-    .npc-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+      .npc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
 
-    .npc-name {
-      font-weight: bold;
-      font-size: 16px;
-    }
+      .npc-name {
+        font-weight: bold;
+        font-size: 16px;
+      }
 
-    .npc-count {
-      font-size: 14px;
-    }
+      .npc-count {
+        font-size: 14px;
+      }
 
-    .npc-controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+      .npc-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
 
-    .count-update-field {
-      width: 80px;
-    }
+      .count-update-field {
+        width: 80px;
+      }
 
-    .turn-order-section {
-      margin-top: 20px;
-    }
+      .turn-order-section {
+        margin-top: 20px;
+      }
 
-    .turn-order-section h3 {
-      margin: 20px 0 12px 0;
-      font-size: 18px;
-    }
+      .turn-order-section h3 {
+        margin: 20px 0 12px 0;
+        font-size: 18px;
+      }
 
-    .turn-group {
-      margin: 16px 0;
-      padding: 12px;
-      border-left: 4px solid #3f51b5;
-      background-color: rgba(63, 81, 181, 0.05);
-      border-radius: 4px;
-    }
+      .turn-group {
+        margin: 16px 0;
+        padding: 12px;
+        border-left: 4px solid #3f51b5;
+        background-color: rgba(63, 81, 181, 0.05);
+        border-radius: 4px;
+      }
 
-    .turn-group.uninitialized {
-      border-left-color: #ff9800;
-      background-color: rgba(255, 152, 0, 0.05);
-    }
+      .turn-group.uninitialized {
+        border-left-color: #ff9800;
+        background-color: rgba(255, 152, 0, 0.05);
+      }
 
-    .group-header {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
+      .group-header {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
 
-    .group-content {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+      .group-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
 
-    .player-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      background-color: #3f51b5;
-      color: white;
-      border-radius: 12px;
-      font-size: 12px;
-    }
+      .player-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: #3f51b5;
+        color: white;
+        border-radius: 12px;
+        font-size: 12px;
+      }
 
-    .npc-badge {
-      display: inline-block;
-      padding: 6px 12px;
-      background-color: #d32f2f;
-      color: white;
-      border-radius: 12px;
-      font-size: 12px;
-    }
+      .npc-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background-color: #d32f2f;
+        color: white;
+        border-radius: 12px;
+        font-size: 12px;
+      }
 
-    .player-badge.awaiting {
-      background-color: #ff9800;
-    }
+      .player-badge.awaiting {
+        background-color: #ff9800;
+      }
 
-    .end-combat-button {
-      width: 100%;
-      margin-top: 20px;
-    }
-  `]
+      .end-combat-button {
+        width: 100%;
+        margin-top: 20px;
+      }
+    `,
+  ],
 })
 export class CombatPanelComponent implements OnInit, OnDestroy {
   @Input() activePlayers: Map<string, any> = new Map();
@@ -358,17 +360,12 @@ export class CombatPanelComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private playerList: Map<string, string> = new Map();
 
-  constructor(
-    private combatService: CombatService,
-    private websocketService: WebsocketService
-  ) {}
+  constructor(private combatService: CombatService, private websocketService: WebsocketService) {}
 
   ngOnInit(): void {
-    this.combatService.combatActive$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(isActive => {
-        this.isCombatActive = isActive;
-      });
+    this.combatService.combatActive$.pipe(takeUntil(this.destroy$)).subscribe((isActive) => {
+      this.isCombatActive = isActive;
+    });
   }
 
   toggleCombat(active: boolean): void {
@@ -397,9 +394,8 @@ export class CombatPanelComponent implements OnInit, OnDestroy {
   }
 
   updateNPCCardCount(npcId: string, eventOrCount: any): void {
-    const rawValue = typeof eventOrCount === 'number'
-      ? eventOrCount
-      : eventOrCount?.target?.value ?? eventOrCount;
+    const rawValue =
+      typeof eventOrCount === 'number' ? eventOrCount : eventOrCount?.target?.value ?? eventOrCount;
     const newCount = parseInt(rawValue, 10);
     if (newCount > 0) {
       this.combatService.updateNPCCardCount(npcId, newCount);

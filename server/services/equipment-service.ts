@@ -1,4 +1,8 @@
-import { InventoryModuleRepository, InventoryDTO, InventoryItemDTO } from '../repositories/modules/inventory-repository';
+import {
+  InventoryModuleRepository,
+  InventoryDTO,
+  InventoryItemDTO,
+} from '../repositories/modules/inventory-repository';
 import { getItemById, STARTING_KITS, ALL_ITEMS } from 'shared/data/items/item-definitions';
 import { loadCharacter, saveCharacter } from '../database';
 
@@ -28,7 +32,7 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
     return {
       inventory: null,
       inventoryItems: [],
-      currency: 0
+      currency: 0,
     };
   }
 
@@ -37,13 +41,13 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
     .map((item: any) => {
       const baseId = item.id.split('-')[0];
       const itemDef = getItemById(baseId);
-      
+
       // Only include items with valid definitions
       if (!itemDef) {
         console.warn(`[Equipment] Invalid item definition for baseId: ${baseId}`);
         return null;
       }
-      
+
       return {
         id: item.id,
         name: itemDef.name,
@@ -53,7 +57,7 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
         price: itemDef.price ?? 0,
         weight: itemDef.weight,
         baseId,
-        quantity: item.quantity ?? 1
+        quantity: item.quantity ?? 1,
       };
     })
     .filter((item): item is InventoryViewItem => item !== null);
@@ -61,7 +65,7 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
   return {
     inventory: char.inventory || null,
     inventoryItems,
-    currency: char.inventory?.currencyInChips ?? 0
+    currency: char.inventory?.currencyInChips ?? 0,
   };
 }
 
@@ -103,7 +107,7 @@ export async function purchaseItemForCharacter(
     if (!item) {
       return {
         success: false,
-        error: 'Item not found'
+        error: 'Item not found',
       };
     }
 
@@ -112,7 +116,7 @@ export async function purchaseItemForCharacter(
     if (!char) {
       return {
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       };
     }
 
@@ -123,14 +127,14 @@ export async function purchaseItemForCharacter(
     if (currentCurrency < cost) {
       return {
         success: false,
-        error: 'Cannot afford item'
+        error: 'Cannot afford item',
       };
     }
 
     // Deduct currency and add item
     const newCurrency = currentCurrency - cost;
     const newItems = [...(char.inventory?.items ?? [])];
-    
+
     const existingIndex = newItems.findIndex((inv: any) => inv.id === itemId);
     if (existingIndex >= 0) {
       newItems[existingIndex].quantity = (newItems[existingIndex].quantity || 1) + quantity;
@@ -138,17 +142,19 @@ export async function purchaseItemForCharacter(
       newItems.push({
         id: itemId,
         quantity,
-        customData: {}
+        customData: {},
       });
     }
 
     char.inventory = {
       ...char.inventory,
       items: newItems,
-      currencyInChips: newCurrency
+      currencyInChips: newCurrency,
     };
 
-    console.log(`[Equipment] Purchase: Character ${characterId} bought ${quantity}x ${item.name} for ${cost}`);
+    console.log(
+      `[Equipment] Purchase: Character ${characterId} bought ${quantity}x ${item.name} for ${cost}`
+    );
 
     // Save
     await saveCharacter(char);
@@ -159,13 +165,13 @@ export async function purchaseItemForCharacter(
       inventory: char.inventory,
       inventoryItems: result.inventoryItems,
       currency: newCurrency,
-      message: `Purchased ${quantity}x ${item.name}`
+      message: `Purchased ${quantity}x ${item.name}`,
     };
   } catch (error) {
     console.error('[Equipment] Error purchasing item:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -191,18 +197,18 @@ export async function sellItemForCharacter(
     if (!char) {
       return {
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       };
     }
 
     // Find the item in inventory
     const newItems = [...(char.inventory?.items ?? [])];
     const itemIndex = newItems.findIndex((inv: any) => inv.id === itemId);
-    
+
     if (itemIndex < 0) {
       return {
         success: false,
-        error: 'Item not found in inventory'
+        error: 'Item not found in inventory',
       };
     }
 
@@ -210,7 +216,7 @@ export async function sellItemForCharacter(
     if (currentQuantity < quantity) {
       return {
         success: false,
-        error: `Not enough items to sell (have ${currentQuantity}, trying to sell ${quantity})`
+        error: `Not enough items to sell (have ${currentQuantity}, trying to sell ${quantity})`,
       };
     }
 
@@ -219,7 +225,7 @@ export async function sellItemForCharacter(
     if (!item) {
       return {
         success: false,
-        error: 'Item definition not found'
+        error: 'Item definition not found',
       };
     }
 
@@ -243,10 +249,12 @@ export async function sellItemForCharacter(
     char.inventory = {
       ...char.inventory,
       items: newItems,
-      currencyInChips: newCurrency
+      currencyInChips: newCurrency,
     };
 
-    console.log(`[Equipment] Sell: Character ${characterId} sold ${quantity}x ${item.name} for ${totalSalePrice} (${salePrice} each)`);
+    console.log(
+      `[Equipment] Sell: Character ${characterId} sold ${quantity}x ${item.name} for ${totalSalePrice} (${salePrice} each)`
+    );
 
     // Save
     await saveCharacter(char);
@@ -257,13 +265,13 @@ export async function sellItemForCharacter(
       inventory: char.inventory,
       inventoryItems: result.inventoryItems,
       currency: newCurrency,
-      message: `Sold ${quantity}x ${item.name} for ${totalSalePrice}`
+      message: `Sold ${quantity}x ${item.name} for ${totalSalePrice}`,
     };
   } catch (error) {
     console.error('[Equipment] Error selling item:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -271,9 +279,12 @@ export async function sellItemForCharacter(
 /**
  * Helper: Add items from a kit array to inventory
  */
-function addKitItemsToInventory(items: any[], kitItems: { itemId: string; quantity: number }[] | undefined): void {
+function addKitItemsToInventory(
+  items: any[],
+  kitItems: { itemId: string; quantity: number }[] | undefined
+): void {
   if (!kitItems) return;
-  
+
   for (const { itemId, quantity } of kitItems) {
     const existingIndex = items.findIndex((inv: any) => inv.id === itemId);
     if (existingIndex >= 0) {
@@ -282,7 +293,7 @@ function addKitItemsToInventory(items: any[], kitItems: { itemId: string; quanti
       items.push({
         id: itemId,
         quantity,
-        customData: {}
+        customData: {},
       });
     }
   }
@@ -304,11 +315,11 @@ export async function applyStartingKitForCharacter(
 }> {
   try {
     // Validate kit exists
-    const kit = STARTING_KITS.find(k => k.id === kitId);
+    const kit = STARTING_KITS.find((k) => k.id === kitId);
     if (!kit) {
       return {
         success: false,
-        error: 'Starting kit not found'
+        error: 'Starting kit not found',
       };
     }
 
@@ -317,7 +328,7 @@ export async function applyStartingKitForCharacter(
     if (!char) {
       return {
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       };
     }
 
@@ -333,7 +344,7 @@ export async function applyStartingKitForCharacter(
     char.inventory = {
       ...char.inventory,
       items: newItems,
-      currencyInChips: kitCurrencyInChips
+      currencyInChips: kitCurrencyInChips,
     };
 
     console.log(`[Equipment] Applied kit '${kit.name}' to character ${characterId}`);
@@ -347,13 +358,13 @@ export async function applyStartingKitForCharacter(
       inventory: char.inventory,
       inventoryItems: result.inventoryItems,
       currency: char.inventory.currencyInChips,
-      message: `Applied ${kit.name}`
+      message: `Applied ${kit.name}`,
     };
   } catch (error) {
     console.error('[Equipment] Error applying kit:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -361,9 +372,7 @@ export async function applyStartingKitForCharacter(
 /**
  * Refund a starting kit (clear inventory, restore currency to 0)
  */
-export async function refundStartingKitForCharacter(
-  characterId: string
-): Promise<{
+export async function refundStartingKitForCharacter(characterId: string): Promise<{
   success: boolean;
   inventory?: InventoryDTO;
   inventoryItems?: InventoryViewItem[];
@@ -377,7 +386,7 @@ export async function refundStartingKitForCharacter(
     if (!char) {
       return {
         success: false,
-        error: 'Character not found'
+        error: 'Character not found',
       };
     }
 
@@ -385,7 +394,7 @@ export async function refundStartingKitForCharacter(
     char.inventory = {
       items: [],
       equippedItems: [],
-      currencyInChips: 0
+      currencyInChips: 0,
     };
 
     console.log(`[Equipment] Refunded starting kit for character ${characterId}`);
@@ -399,13 +408,13 @@ export async function refundStartingKitForCharacter(
       inventory: char.inventory,
       inventoryItems: result.inventoryItems,
       currency: 0,
-      message: 'Starting kit refunded'
+      message: 'Starting kit refunded',
     };
   } catch (error) {
     console.error('[Equipment] Error refunding kit:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

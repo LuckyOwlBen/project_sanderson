@@ -13,7 +13,7 @@ export function createEmptyNameDTO(): NameDTO {
   return {
     name: '',
     level: 1,
-    cultures: []
+    cultures: [],
   };
 }
 
@@ -45,6 +45,6 @@ export async function setNameByCharacterId(
   return {
     name,
     level,
-    cultures
+    cultures,
   };
 }

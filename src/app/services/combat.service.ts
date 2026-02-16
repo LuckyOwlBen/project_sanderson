@@ -22,7 +22,7 @@ export interface TurnSpeedChangeEvent {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CombatService {
   // Combat state
@@ -73,13 +73,13 @@ export class CombatService {
   // Turn Speed Management
   setTurnSpeed(characterId: string, turnSpeed: 'fast' | 'slow'): void {
     const currentSpeed = this.playerTurnSpeeds.get(characterId);
-    
+
     // Only emit if speed is actually changing
     if (currentSpeed !== turnSpeed) {
       this.playerTurnSpeeds.set(characterId, turnSpeed);
       this.turnSpeedChangedSubject.next({
         characterId,
-        turnSpeed
+        turnSpeed,
       });
     }
   }
@@ -140,7 +140,7 @@ export class CombatService {
       fastNPC: [],
       slowPC: [],
       slowNPC: [],
-      uninitialized: []
+      uninitialized: [],
     };
 
     // Organize players
@@ -187,7 +187,6 @@ export class CombatService {
   }
 
   getUninitializedPlayers(allPlayerIds: string[]): string[] {
-    return allPlayerIds.filter(id => !this.playerTurnSpeeds.has(id));
+    return allPlayerIds.filter((id) => !this.playerTurnSpeeds.has(id));
   }
-
 }

@@ -15,9 +15,7 @@ describe('InventoryManager - Expertise Validation', () => {
   describe('Expert Trait Validation', () => {
     it('should allow using expert traits when character has expertise', () => {
       // Add Dueling expertise (for sword-type weapons)
-      character.selectedExpertises = [
-        ExpertiseSourceHelper.create('Dueling', 'talent')
-      ];
+      character.selectedExpertises = [ExpertiseSourceHelper.create('Dueling', 'talent')];
 
       // Add iron-sword which has expertTraits
       character.inventory.addItem('iron-sword', 1);
@@ -71,7 +69,7 @@ describe('InventoryManager - Expertise Validation', () => {
       // Test knife (which exists in item definitions)
       character.inventory.addItem('knife', 1);
       const result = inventoryManager.canUseExpertTraits('knife');
-      
+
       // If knife has expert traits, should require Knife Fighting
       if (result.missingExpertises.length > 0) {
         expect(result.canUse).toBe(false);
@@ -84,16 +82,14 @@ describe('InventoryManager - Expertise Validation', () => {
       character.inventory.addItem('rapier', 1);
 
       let result = inventoryManager.canUseExpertTraits('rapier');
-      
+
       // Only test if rapier has expert traits
       const hasExpertTraits = result.missingExpertises.length > 0;
       if (hasExpertTraits) {
         expect(result.canUse).toBe(false);
 
         // Grant Dueling expertise
-        character.selectedExpertises = [
-          ExpertiseSourceHelper.create('Dueling', 'talent')
-        ];
+        character.selectedExpertises = [ExpertiseSourceHelper.create('Dueling', 'talent')];
 
         result = inventoryManager.canUseExpertTraits('rapier');
         expect(result.canUse).toBe(true);
@@ -114,7 +110,7 @@ describe('InventoryManager - Expertise Validation', () => {
       character.inventory.addItem('leather-armor', 1);
 
       const result = inventoryManager.canUseExpertTraits('leather-armor');
-      
+
       // Leather armor might require Light Armor expertise if it has expert traits
       if (result.missingExpertises.length > 0) {
         expect(result.missingExpertises).toContain('Light Armor');
@@ -122,9 +118,7 @@ describe('InventoryManager - Expertise Validation', () => {
     });
 
     it('should allow armor expert traits with appropriate expertise', () => {
-      character.selectedExpertises = [
-        ExpertiseSourceHelper.create('Light Armor', 'culture')
-      ];
+      character.selectedExpertises = [ExpertiseSourceHelper.create('Light Armor', 'culture')];
       character.inventory.addItem('leather-armor', 1);
 
       const result = inventoryManager.canUseExpertTraits('leather-armor');
@@ -134,9 +128,7 @@ describe('InventoryManager - Expertise Validation', () => {
 
   describe('Equipment Flow', () => {
     it('should allow full flow: add item -> check expertise -> equip', () => {
-      character.selectedExpertises = [
-        ExpertiseSourceHelper.create('Dueling', 'talent')
-      ];
+      character.selectedExpertises = [ExpertiseSourceHelper.create('Dueling', 'talent')];
 
       // Add weapon (use iron-sword which exists)
       const added = character.inventory.addItem('iron-sword', 1);

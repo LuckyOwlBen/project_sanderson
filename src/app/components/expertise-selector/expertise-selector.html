@@ -9,9 +9,9 @@
 
   <div class="expertise-info">
     <p>
-      Select expertises based on your character's background and training. 
-      You receive <strong>2 cultural expertises</strong> from your chosen culture(s) automatically, 
-      plus additional expertises equal to your <strong>Intellect score ({{ totalPoints }})</strong>.
+      Select expertises based on your character's background and training. You receive
+      <strong>2 cultural expertises</strong> from your chosen culture(s) automatically, plus
+      additional expertises equal to your <strong>Intellect score ({{ totalPoints }})</strong>.
     </p>
     <p *ngIf="culturalExpertises.length > 0" class="cultural-info">
       <mat-icon>public</mat-icon>
@@ -34,9 +34,9 @@
           <p class="category-description">{{ getCategoryDescription(category) }}</p>
         </div>
       </div>
-      
+
       <div class="expertise-grid">
-        <mat-card 
+        <mat-card
           *ngFor="let expertise of getExpertisesByCategory(category)"
           class="expertise-card"
           [class.selected]="isExpertiseSelected(expertise)"
@@ -44,8 +44,8 @@
           [class.available]="canSelectExpertise(expertise)"
           [class.locked]="!canSelectExpertise(expertise) && !isExpertiseSelected(expertise)"
           [attr.data-category]="category"
-          (click)="toggleExpertise(expertise)">
-          
+          (click)="toggleExpertise(expertise)"
+        >
           <mat-card-header>
             <mat-card-title>
               <mat-icon class="expertise-icon">{{ getCategoryIcon(category) }}</mat-icon>
@@ -56,25 +56,27 @@
               </mat-chip>
             </mat-card-title>
           </mat-card-header>
-          
+
           <mat-card-content>
             <p>{{ expertise.description }}</p>
           </mat-card-content>
-          
+
           <mat-card-actions>
-            <button 
-              mat-button 
+            <button
+              mat-button
               *ngIf="isExpertiseSelected(expertise)"
               (click)="toggleExpertise(expertise); $event.stopPropagation()"
-              color="warn">
+              color="warn"
+            >
               <mat-icon>remove_circle</mat-icon>
               Remove
             </button>
-            <button 
-              mat-button 
+            <button
+              mat-button
               *ngIf="!isExpertiseSelected(expertise) && canSelectExpertise(expertise)"
               (click)="toggleExpertise(expertise); $event.stopPropagation()"
-              color="primary">
+              color="primary"
+            >
               <mat-icon>add_circle</mat-icon>
               Select
             </button>
@@ -87,10 +89,11 @@
   <div class="selected-summary">
     <h3>Selected Expertises ({{ selectedExpertises.length }})</h3>
     <mat-chip-set>
-      <mat-chip 
+      <mat-chip
         *ngFor="let expertise of selectedExpertises"
         [removable]="canRemoveExpertise(expertise.name)"
-        (removed)="removeExpertiseByName(expertise.name)">
+        (removed)="removeExpertiseByName(expertise.name)"
+      >
         {{ expertise.name }}
         <span class="expertise-source-badge" [class]="'badge-' + expertise.source">
           {{ getSourceBadge(expertise.name) }}

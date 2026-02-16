@@ -1,4 +1,4 @@
 export enum Ancestry {
-    HUMAN = 'human',
-    SINGER = 'singer',
+  HUMAN = 'human',
+  SINGER = 'singer',
 }

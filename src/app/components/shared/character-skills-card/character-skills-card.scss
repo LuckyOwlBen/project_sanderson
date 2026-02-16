@@ -26,7 +26,7 @@
 
   .card-content {
     overflow: hidden;
-    
+
     .skills-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -92,7 +92,6 @@
         }
 
         .skill-details {
-
           .skill-breakdown {
             font-size: 0.85rem;
             color: #888;
@@ -111,10 +110,8 @@
   }
 }
 
-
 @media (max-width: 760px) {
   .card-content {
     overflow: visible;
-    
   }
 }

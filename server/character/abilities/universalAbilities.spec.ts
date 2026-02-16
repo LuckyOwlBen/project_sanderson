@@ -1,33 +1,35 @@
-import { 
-  UniversalAbility, 
-  getAvailableAbilities, 
+import {
+  UniversalAbility,
+  getAvailableAbilities,
   getSingerFormAbilities,
   formatActionCost,
   RADIANT_UNIVERSAL_ABILITIES,
   SINGER_FORMS,
-  SINGER_FORM_ABILITIES
+  SINGER_FORM_ABILITIES,
 } from './universalAbilities';
 
 describe('Universal Abilities', () => {
   describe('RADIANT_UNIVERSAL_ABILITIES', () => {
     it('should contain Breathe Stormlight, Enhance, and Regenerate', () => {
       expect(RADIANT_UNIVERSAL_ABILITIES).toHaveLength(3);
-      
-      const abilityIds = RADIANT_UNIVERSAL_ABILITIES.map(a => a.id);
+
+      const abilityIds = RADIANT_UNIVERSAL_ABILITIES.map((a) => a.id);
       expect(abilityIds).toContain('breathe_stormlight');
       expect(abilityIds).toContain('enhance');
       expect(abilityIds).toContain('regenerate');
     });
 
     it('should have Breathe Stormlight with 2 action cost', () => {
-      const breatheStormlight = RADIANT_UNIVERSAL_ABILITIES.find(a => a.id === 'breathe_stormlight');
+      const breatheStormlight = RADIANT_UNIVERSAL_ABILITIES.find(
+        (a) => a.id === 'breathe_stormlight'
+      );
       expect(breatheStormlight).toBeDefined();
       expect(breatheStormlight!.actionCost).toBe(2);
       expect(breatheStormlight!.canUseWhileUnconscious).toBe(true);
     });
 
     it('should have Enhance with Investiture cost', () => {
-      const enhance = RADIANT_UNIVERSAL_ABILITIES.find(a => a.id === 'enhance');
+      const enhance = RADIANT_UNIVERSAL_ABILITIES.find((a) => a.id === 'enhance');
       expect(enhance).toBeDefined();
       expect(enhance!.actionCost).toBe(1);
       expect(enhance!.resourceCost).toBeDefined();
@@ -36,7 +38,7 @@ describe('Universal Abilities', () => {
     });
 
     it('should have Regenerate as free action', () => {
-      const regenerate = RADIANT_UNIVERSAL_ABILITIES.find(a => a.id === 'regenerate');
+      const regenerate = RADIANT_UNIVERSAL_ABILITIES.find((a) => a.id === 'regenerate');
       expect(regenerate).toBeDefined();
       expect(regenerate!.actionCost).toBe('free');
       expect(regenerate!.canUseWhileUnconscious).toBe(true);
@@ -46,8 +48,8 @@ describe('Universal Abilities', () => {
   describe('SINGER_FORMS', () => {
     it('should contain all 13 Singer forms', () => {
       expect(SINGER_FORMS).toHaveLength(13);
-      
-      const formIds = SINGER_FORMS.map(f => f.id);
+
+      const formIds = SINGER_FORMS.map((f) => f.id);
       expect(formIds).toContain('nimbleform');
       expect(formIds).toContain('artform');
       expect(formIds).toContain('meditationform');
@@ -63,20 +65,20 @@ describe('Universal Abilities', () => {
     });
 
     it('should have all forms as passive abilities', () => {
-      SINGER_FORMS.forEach(form => {
+      SINGER_FORMS.forEach((form) => {
         expect(form.actionCost).toBe('passive');
       });
     });
 
     it('should have correct effects for nimbleform', () => {
-      const nimbleform = SINGER_FORMS.find(f => f.id === 'nimbleform');
+      const nimbleform = SINGER_FORMS.find((f) => f.id === 'nimbleform');
       expect(nimbleform).toBeDefined();
       expect(nimbleform!.effects).toContain('Speed +1');
       expect(nimbleform!.effects).toContain('Focus +2');
     });
 
     it('should have correct effects for stormform', () => {
-      const stormform = SINGER_FORMS.find(f => f.id === 'stormform');
+      const stormform = SINGER_FORMS.find((f) => f.id === 'stormform');
       expect(stormform).toBeDefined();
       expect(stormform!.effects).toContain('Strength +1');
       expect(stormform!.effects).toContain('Speed +1');
@@ -88,20 +90,20 @@ describe('Universal Abilities', () => {
   describe('SINGER_FORM_ABILITIES', () => {
     it('should contain Change Form and Unleash Lightning', () => {
       expect(SINGER_FORM_ABILITIES).toHaveLength(2);
-      
-      const abilityIds = SINGER_FORM_ABILITIES.map(a => a.id);
+
+      const abilityIds = SINGER_FORM_ABILITIES.map((a) => a.id);
       expect(abilityIds).toContain('change_form');
       expect(abilityIds).toContain('unleash_lightning');
     });
 
     it('should have Change Form with 3 action cost', () => {
-      const changeForm = SINGER_FORM_ABILITIES.find(a => a.id === 'change_form');
+      const changeForm = SINGER_FORM_ABILITIES.find((a) => a.id === 'change_form');
       expect(changeForm).toBeDefined();
       expect(changeForm!.actionCost).toBe(3);
     });
 
     it('should have Unleash Lightning with resource cost', () => {
-      const unleashLightning = SINGER_FORM_ABILITIES.find(a => a.id === 'unleash_lightning');
+      const unleashLightning = SINGER_FORM_ABILITIES.find((a) => a.id === 'unleash_lightning');
       expect(unleashLightning).toBeDefined();
       expect(unleashLightning!.actionCost).toBe(2);
       expect(unleashLightning!.resourceCost).toBeDefined();
@@ -130,46 +132,46 @@ describe('Universal Abilities', () => {
 
     it('should include Change Form when any form is unlocked', () => {
       const abilities = getSingerFormAbilities(['nimbleform']);
-      
-      const changeForm = abilities.find(a => a.id === 'change_form');
+
+      const changeForm = abilities.find((a) => a.id === 'change_form');
       expect(changeForm).toBeDefined();
     });
 
     it('should return correct forms when multiple forms unlocked', () => {
       const abilities = getSingerFormAbilities(['nimbleform', 'artform']);
-      
+
       expect(abilities.length).toBeGreaterThanOrEqual(3); // 2 forms + change form
-      expect(abilities.find(a => a.id === 'nimbleform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'artform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'change_form')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'nimbleform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'artform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'change_form')).toBeDefined();
     });
 
     it('should include Unleash Lightning when stormform unlocked', () => {
       const abilities = getSingerFormAbilities(['stormform']);
-      
-      expect(abilities.find(a => a.id === 'stormform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'unleash_lightning')).toBeDefined();
+
+      expect(abilities.find((a) => a.id === 'stormform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'unleash_lightning')).toBeDefined();
     });
 
     it('should not include Unleash Lightning for other forms', () => {
       const abilities = getSingerFormAbilities(['nimbleform', 'warform']);
-      
-      expect(abilities.find(a => a.id === 'unleash_lightning')).toBeUndefined();
+
+      expect(abilities.find((a) => a.id === 'unleash_lightning')).toBeUndefined();
     });
 
     it('should handle all Forms of Finesse', () => {
       const abilities = getSingerFormAbilities(['nimbleform', 'artform']);
-      
-      expect(abilities.find(a => a.id === 'nimbleform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'artform')).toBeDefined();
+
+      expect(abilities.find((a) => a.id === 'nimbleform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'artform')).toBeDefined();
     });
 
     it('should handle all Forms of Destruction', () => {
       const abilities = getSingerFormAbilities(['direform', 'stormform']);
-      
-      expect(abilities.find(a => a.id === 'direform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'stormform')).toBeDefined();
-      expect(abilities.find(a => a.id === 'unleash_lightning')).toBeDefined();
+
+      expect(abilities.find((a) => a.id === 'direform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'stormform')).toBeDefined();
+      expect(abilities.find((a) => a.id === 'unleash_lightning')).toBeDefined();
     });
   });
 

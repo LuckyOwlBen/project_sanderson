@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -26,12 +26,12 @@ describe('RadiantPathNotifications', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RadiantPathNotifications]
+      imports: [RadiantPathNotifications],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RadiantPathNotifications);
     component = fixture.componentInstance;
-    
+
     // Create a mock character
     mockCharacter = new Character();
   });
@@ -45,7 +45,7 @@ describe('RadiantPathNotifications', () => {
       component.pendingSprenGrant = {
         order: 'Windrunner',
         sprenType: 'Honorspren',
-        philosophy: 'I will protect those who cannot protect themselves.'
+        philosophy: 'I will protect those who cannot protect themselves.',
       };
       fixture.detectChanges();
 
@@ -68,7 +68,7 @@ describe('RadiantPathNotifications', () => {
       component.pendingSprenGrant = {
         order: 'Windrunner',
         sprenType: 'Honorspren',
-        philosophy: 'I will protect those who cannot protect themselves.'
+        philosophy: 'I will protect those who cannot protect themselves.',
       };
       fixture.detectChanges();
 
@@ -83,9 +83,9 @@ describe('RadiantPathNotifications', () => {
 
     it('should call dismissSprenGrant when dismiss event is triggered', () => {
       const emitSpy = vi.spyOn(component.sprenDismissed, 'emit');
-      
+
       component.dismissSprenGrant();
-      
+
       expect(emitSpy).toHaveBeenCalled();
     });
   });
@@ -124,7 +124,7 @@ describe('RadiantPathNotifications', () => {
 
     it('should emit idealSpoken when Speak the Words button is clicked', () => {
       fixture.detectChanges();
-      
+
       const emitSpy = vi.spyOn(component.idealSpoken, 'emit');
 
       const button = fixture.debugElement.query(By.css('.ideal-prompt button'));
@@ -138,12 +138,12 @@ describe('RadiantPathNotifications', () => {
       mockCharacter.radiantPath.grantSpren('Windrunner');
       component.character = mockCharacter;
       fixture.detectChanges();
-      
+
       // Get initial count AFTER granting spren (which may add skills)
       const initialSkillCount = Object.keys(mockCharacter.skills).length;
-      
+
       component.speakFirstIdeal();
-      
+
       const newSkillCount = Object.keys(mockCharacter.skills).length;
       // Speaking the ideal should set hasSpokenIdeal to true
       expect(mockCharacter.radiantPath.hasSpokenIdeal()).toBeTruthy();
@@ -156,12 +156,12 @@ describe('RadiantPathNotifications', () => {
       mockCharacter.radiantPath.grantSpren('Windrunner');
       component.character = mockCharacter;
       fixture.detectChanges();
-      
+
       // Investiture should not be active before speaking ideal
       expect(mockCharacter.resources.investiture.isActive()).toBeFalsy();
-      
+
       component.speakFirstIdeal();
-      
+
       // Investiture should be active after speaking ideal
       expect(mockCharacter.resources.investiture.isActive()).toBeTruthy();
       // Max investiture should be calculated (2 + max(awareness, presence))
@@ -189,14 +189,14 @@ describe('RadiantPathNotifications', () => {
 
     it('should correctly check if character has spren', () => {
       expect(component.hasSpren()).toBeTruthy();
-      
+
       component.character = new Character();
       expect(component.hasSpren()).toBeFalsy();
     });
 
     it('should correctly check if ideal has been spoken', () => {
       expect(component.hasSpokenIdeal()).toBeFalsy();
-      
+
       mockCharacter.radiantPath.speakIdeal(mockCharacter.skills);
       expect(component.hasSpokenIdeal()).toBeTruthy();
     });
@@ -210,31 +210,38 @@ describe('RadiantPathNotifications', () => {
 
   describe('Lifecycle', () => {
     it('should clean up timer on destroy', () => {
-      component.pendingSprenGrant = { order: 'Windrunner', sprenType: 'Honorspren', philosophy: 'Test' };
+      component.pendingSprenGrant = {
+        order: 'Windrunner',
+        sprenType: 'Honorspren',
+        philosophy: 'Test',
+      };
       component.ngOnInit();
-      
+
       const timerSpy = vi.spyOn(window, 'clearTimeout');
-      
+
       component.ngOnDestroy();
-      
+
       expect(timerSpy).toHaveBeenCalled();
     });
 
     it('should set up timer when pendingSprenGrant changes', () => {
       const timerSpy = vi.spyOn(window, 'setTimeout');
-      
-      component.pendingSprenGrant = { order: 'Windrunner', sprenType: 'Honorspren', philosophy: 'Test' };
+
+      component.pendingSprenGrant = {
+        order: 'Windrunner',
+        sprenType: 'Honorspren',
+        philosophy: 'Test',
+      };
       component.ngOnChanges({
         pendingSprenGrant: {
           currentValue: component.pendingSprenGrant,
           previousValue: null,
           firstChange: true,
-          isFirstChange: () => true
-        }
+          isFirstChange: () => true,
+        },
       });
-      
+
       expect(timerSpy).toHaveBeenCalled();
     });
   });
 });
-

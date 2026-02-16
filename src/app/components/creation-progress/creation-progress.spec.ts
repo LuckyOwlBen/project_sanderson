@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -33,20 +33,20 @@ describe('CreationProgressComponent', () => {
     currentStepSubject = new BehaviorSubject<number>(0);
 
     mockRouter = {
-      navigate: vi.fn()
+      navigate: vi.fn(),
     };
 
     mockFlowService = {
       currentStep$: currentStepSubject.asObservable(),
-      getCurrentStep: vi.fn(() => currentStepSubject.value)
+      getCurrentStep: vi.fn(() => currentStepSubject.value),
     };
 
     TestBed.configureTestingModule({
       imports: [CreationProgressComponent],
       providers: [
         { provide: Router, useValue: mockRouter },
-        { provide: CharacterCreationFlowService, useValue: mockFlowService }
-      ]
+        { provide: CharacterCreationFlowService, useValue: mockFlowService },
+      ],
     });
 
     const fixture = TestBed.createComponent(CreationProgressComponent);
@@ -64,10 +64,18 @@ describe('CreationProgressComponent', () => {
 
   it('should have correct step routes', () => {
     component.ngOnInit();
-    const routes = component.steps.map(s => s.route);
+    const routes = component.steps.map((s) => s.route);
     expect(routes).toEqual([
-      'ancestry', 'culture', 'name', 'attributes', 'skills', 
-      'expertises', 'paths', 'talents', 'equipment', 'review'
+      'ancestry',
+      'culture',
+      'name',
+      'attributes',
+      'skills',
+      'expertises',
+      'paths',
+      'talents',
+      'equipment',
+      'review',
     ]);
   });
 
@@ -82,9 +90,9 @@ describe('CreationProgressComponent', () => {
   it('should navigate to step when navigateToStep is called', () => {
     component.ngOnInit();
     const step = component.steps[3];
-    
+
     component.navigateToStep(step);
-    
+
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/character-creator-view', 'attributes']);
   });
 

@@ -9,26 +9,26 @@ const pathsRepository = new PathsModuleRepository();
 
 // Mapping of path types to their tier 0 talents
 const PATH_TIER0_TALENTS: Record<string, string> = {
-  'warrior': 'vigilant_stance',
-  'scholar': 'education',
-  'hunter': 'seek_quarry',
-  'leader': 'decisive_command',
-  'envoy': 'rousing_presence',
-  'agent': 'opportunist'
+  warrior: 'vigilant_stance',
+  scholar: 'education',
+  hunter: 'seek_quarry',
+  leader: 'decisive_command',
+  envoy: 'rousing_presence',
+  agent: 'opportunist',
 };
 
 // Mapping of radiant orders to their tier 0 talents
 const RADIANT_TIER0_TALENTS: Record<string, string> = {
-  'windrunner': 'windrunner_key_talent',
-  'skybreaker': 'skybreaker_key_talent',
-  'dustbringer': 'dustbringer_key_talent',
-  'edgedancer': 'edgedancer_key_talent',
-  'truthwatcher': 'truthwatcher_key_talent',
-  'lightweaver': 'lightweaver_key_talent',
-  'elsecaller': 'elsecaller_key_talent',
-  'willshaper': 'willshaper_key_talent',
-  'stoneward': 'stoneward_key_talent',
-  'bondsmith': 'bondsmith_key_talent'
+  windrunner: 'windrunner_key_talent',
+  skybreaker: 'skybreaker_key_talent',
+  dustbringer: 'dustbringer_key_talent',
+  edgedancer: 'edgedancer_key_talent',
+  truthwatcher: 'truthwatcher_key_talent',
+  lightweaver: 'lightweaver_key_talent',
+  elsecaller: 'elsecaller_key_talent',
+  willshaper: 'willshaper_key_talent',
+  stoneward: 'stoneward_key_talent',
+  bondsmith: 'bondsmith_key_talent',
 };
 
 export { RADIANT_TIER0_TALENTS };
@@ -36,7 +36,7 @@ export { RADIANT_TIER0_TALENTS };
 export function createEmptyPathsDTO(): PathsDTO {
   return {
     type: null,
-    sub: null
+    sub: null,
   };
 }
 
@@ -58,6 +58,6 @@ export async function setPathsByCharacterId(
 
   return {
     type,
-    sub
+    sub,
   };
 }

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -34,12 +34,11 @@ describe('SkillSelector', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: of({})
-          }
-        }
-      ]
-    })
-    .compileComponents();
+            queryParams: of({}),
+          },
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SkillSelector);
     component = fixture.componentInstance;

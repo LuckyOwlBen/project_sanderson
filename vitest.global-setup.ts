@@ -8,14 +8,10 @@ import {
 
 export async function setup() {
   console.log('[vitest.global-setup] Setting up Angular TestBed globally...');
-  getTestBed().initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
   console.log('[vitest.global-setup] Angular TestBed initialized');
 }
 
 export async function teardown() {
   console.log('[vitest.global-setup] Teardown complete');
 }
-

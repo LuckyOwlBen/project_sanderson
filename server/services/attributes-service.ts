@@ -6,7 +6,7 @@ import { FocusManager } from '../character/resources/focusManager';
 
 /**
  * Attributes Service - Backend calculations for derived attributes
- * 
+ *
  * Responsible for:
  * - Calculating derived attributes (health, focus, movement, recovery)
  * - Validating attribute allocations
@@ -55,16 +55,14 @@ export class AttributesService {
       health: healthManager.max,
       focus: focusManager.max,
       movement: this.movementCalculator.getMovementSpeed(model.speed),
-      recovery: this.recoveryCalculator.getRecoveryDie(model.willpower)
+      recovery: this.recoveryCalculator.getRecoveryDie(model.willpower),
     };
   }
 
   /**
    * Validate attribute allocation
    */
-  validateAttributeAllocation(
-    attributes: Attributes
-  ): { valid: boolean; errors: string[] } {
+  validateAttributeAllocation(attributes: Attributes): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     // Check all 6 attributes exist
@@ -85,7 +83,7 @@ export class AttributesService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 

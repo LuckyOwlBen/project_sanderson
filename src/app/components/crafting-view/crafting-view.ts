@@ -2,23 +2,25 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { Character } from '../../character/character';
-import { Recipe, CraftingResult, MaterialRequirement } from '../../character/crafting/craftingManager';
+import {
+  Recipe,
+  CraftingResult,
+  MaterialRequirement,
+} from '../../character/crafting/craftingManager';
 import { CharacterStateService } from '../../character/characterStateService';
 
 @Component({
   selector: 'app-crafting-view',
   standalone: true,
-  imports: [
-    CommonModule
-  ],
+  imports: [CommonModule],
   templateUrl: './crafting-view.html',
-  styleUrls: ['./crafting-view.scss']
+  styleUrls: ['./crafting-view.scss'],
 })
 export class CraftingView implements OnInit, OnDestroy {
   @Input() character: Character | null = null;
 
   private destroy$ = new Subject<void>();
-  
+
   availableRecipes: Recipe[] = [];
   allRecipes: Recipe[] = [];
   selectedCategory: Recipe['category'] | 'all' = 'all';
@@ -27,14 +29,12 @@ export class CraftingView implements OnInit, OnDestroy {
   constructor(private characterState: CharacterStateService) {}
 
   ngOnInit(): void {
-    this.characterState.character$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(character => {
-        if (character) {
-          this.character = character;
-          this.refreshRecipes();
-        }
-      });
+    this.characterState.character$.pipe(takeUntil(this.destroy$)).subscribe((character) => {
+      if (character) {
+        this.character = character;
+        this.refreshRecipes();
+      }
+    });
 
     if (this.character) {
       this.refreshRecipes();
@@ -48,7 +48,7 @@ export class CraftingView implements OnInit, OnDestroy {
 
   refreshRecipes(): void {
     if (!this.character) return;
-    
+
     this.availableRecipes = this.character.crafting.getAvailableRecipes();
     this.allRecipes = this.character.crafting.getAllRecipes();
   }
@@ -57,7 +57,7 @@ export class CraftingView implements OnInit, OnDestroy {
     if (this.selectedCategory === 'all') {
       return this.availableRecipes;
     }
-    return this.availableRecipes.filter(r => r.category === this.selectedCategory);
+    return this.availableRecipes.filter((r) => r.category === this.selectedCategory);
   }
 
   selectCategory(category: Recipe['category'] | 'all'): void {
@@ -73,15 +73,15 @@ export class CraftingView implements OnInit, OnDestroy {
   getCraftabilityMessage(recipeId: string): string {
     if (!this.character) return 'No character loaded';
     const result = this.character.crafting.canCraft(recipeId);
-    return result.canCraft ? 'Ready to craft' : (result.reason || 'Cannot craft');
+    return result.canCraft ? 'Ready to craft' : result.reason || 'Cannot craft';
   }
 
   craftItem(recipe: Recipe): void {
     if (!this.character) return;
-    
+
     const result = this.character.crafting.craftItem(recipe.id);
     this.lastCraftResult = result;
-    
+
     if (result.success) {
       this.characterState.updateCharacter(this.character);
       this.refreshRecipes();
@@ -103,11 +103,11 @@ export class CraftingView implements OnInit, OnDestroy {
 
   getMaterialStatus(recipe: Recipe): { available: number; required: number; itemId: string }[] {
     if (!this.character) return [];
-    
-    return recipe.materials.map(mat => ({
+
+    return recipe.materials.map((mat) => ({
       itemId: mat.itemId,
       required: mat.quantity,
-      available: this.character!.inventory.getItemQuantity(mat.itemId)
+      available: this.character!.inventory.getItemQuantity(mat.itemId),
     }));
   }
 
@@ -119,43 +119,43 @@ export class CraftingView implements OnInit, OnDestroy {
 
   getDifficultyColor(difficulty: Recipe['difficulty']): string {
     const colorMap = {
-      'trivial': 'primary',
-      'easy': 'primary',
-      'moderate': 'accent',
-      'hard': 'warn',
+      trivial: 'primary',
+      easy: 'primary',
+      moderate: 'accent',
+      hard: 'warn',
       'very-hard': 'warn',
-      'masterwork': 'warn'
+      masterwork: 'warn',
     };
     return colorMap[difficulty];
   }
 
   getCategoryIcon(category: Recipe['category']): string {
     const iconMap = {
-      'weapon': 'swords',
-      'armor': 'shield',
-      'utility': 'construction',
-      'consumable': 'science',
-      'fabrial': 'auto_awesome',
-      'equipment': 'handyman'
+      weapon: 'swords',
+      armor: 'shield',
+      utility: 'construction',
+      consumable: 'science',
+      fabrial: 'auto_awesome',
+      equipment: 'handyman',
     };
     return iconMap[category];
   }
 
   getCategoryCount(category: Recipe['category']): number {
-    return this.availableRecipes.filter(r => r.category === category).length;
+    return this.availableRecipes.filter((r) => r.category === category).length;
   }
 
   formatItemName(itemId: string): string {
     return itemId
       .split(/[-_]/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
   formatDifficulty(difficulty: Recipe['difficulty']): string {
     return difficulty
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 

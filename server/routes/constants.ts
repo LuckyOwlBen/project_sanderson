@@ -1,9 +1,9 @@
 /**
  * Calculation Constants Routes
- * 
+ *
  * Exposes point-per-level arrays and calculation functions via API
  * This is the single source of truth for character progression calculations
- * 
+ *
  * GET /api/constants/point-tables
  * Returns all calculation constants as JSON
  */
@@ -15,9 +15,9 @@ function createConstantsRoutes(app) {
 
   /**
    * GET /api/constants/point-tables
-   * 
+   *
    * Returns all point-per-level tables and health/skill progression data
-   * 
+   *
    * Response:
    * {
    *   attributePointsPerLevel: number[],
@@ -34,13 +34,13 @@ function createConstantsRoutes(app) {
       const tables = getAllCalculationTables();
       res.json({
         success: true,
-        data: tables
+        data: tables,
       });
     } catch (error) {
       console.error('[Routes] Error fetching constants:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch calculation constants'
+        error: 'Failed to fetch calculation constants',
       });
     }
   });
@@ -54,13 +54,13 @@ function createConstantsRoutes(app) {
       const tables = getAllCalculationTables();
       res.json({
         success: true,
-        data: tables.attributePointsPerLevel
+        data: tables.attributePointsPerLevel,
       });
     } catch (error) {
       console.error('[Routes] Error fetching attribute constants:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch attribute constants'
+        error: 'Failed to fetch attribute constants',
       });
     }
   });
@@ -74,13 +74,13 @@ function createConstantsRoutes(app) {
       const tables = getAllCalculationTables();
       res.json({
         success: true,
-        data: tables.skillPointsPerLevel
+        data: tables.skillPointsPerLevel,
       });
     } catch (error) {
       console.error('[Routes] Error fetching skill constants:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch skill constants'
+        error: 'Failed to fetch skill constants',
       });
     }
   });
@@ -94,13 +94,13 @@ function createConstantsRoutes(app) {
       const tables = getAllCalculationTables();
       res.json({
         success: true,
-        data: tables.talentPointsPerLevel
+        data: tables.talentPointsPerLevel,
       });
     } catch (error) {
       console.error('[Routes] Error fetching talent constants:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch talent constants'
+        error: 'Failed to fetch talent constants',
       });
     }
   });

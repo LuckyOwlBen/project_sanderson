@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -48,7 +48,7 @@ describe('CharacterReview', () => {
       cultures: ['test-culture'],
       paths: {
         main: 'Radiant',
-        specialization: 'Windrunner'
+        specialization: 'Windrunner',
       },
       attributes: {
         strength: 10,
@@ -56,20 +56,20 @@ describe('CharacterReview', () => {
         intellect: 10,
         willpower: 10,
         awareness: 10,
-        presence: 10
+        presence: 10,
       },
       skills: {
         total: 5,
-        allocated: 5
+        allocated: 5,
       },
       talents: {
         total: 2,
-        selected: ['talent1', 'talent2']
+        selected: ['talent1', 'talent2'],
       },
       expertises: {
         total: 1,
-        selected: ['expertise1']
-      }
+        selected: ['expertise1'],
+      },
     };
 
     identityServiceSubject = new BehaviorSubject<string | null>('test-character-id');
@@ -79,20 +79,20 @@ describe('CharacterReview', () => {
       setCurrentCharacterId: vi.fn(),
       clearCurrentCharacterId: vi.fn(),
       currentCharacterId$: identityServiceSubject.asObservable(),
-      waitingForIdentity$: of(false)
+      waitingForIdentity$: of(false),
     };
 
     mockFinalizeApi = {
       getCompleteCharacter: vi.fn(() => of(mockCompleteCharacter)),
-      finalizeCharacter: vi.fn(() => of(true))
+      finalizeCharacter: vi.fn(() => of(true)),
     };
 
     mockNavFinalized = {
-      loadNavFinalized: vi.fn(() => of({}))
+      loadNavFinalized: vi.fn(() => of({})),
     };
 
     mockRouter = {
-      navigate: vi.fn()
+      navigate: vi.fn(),
     };
 
     activatedRouteSubject = new BehaviorSubject({});
@@ -104,7 +104,7 @@ describe('CharacterReview', () => {
         MatButtonModule,
         MatIconModule,
         MatDividerModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
       ],
       providers: [
         { provide: CharacterIdentityService, useValue: mockIdentityService },
@@ -114,10 +114,10 @@ describe('CharacterReview', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: activatedRouteSubject.asObservable()
-          }
-        }
-      ]
+            queryParams: activatedRouteSubject.asObservable(),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CharacterReview);
@@ -148,14 +148,14 @@ describe('CharacterReview', () => {
 
     component.finalizeCharacter();
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(mockFinalizeApi.finalizeCharacter).toHaveBeenCalledWith('test-character-id');
     expect(mockNavFinalized.loadNavFinalized).toHaveBeenCalledWith('test-character-id');
     expect(mockRouter.navigate).toHaveBeenCalledWith(
       ['/character-sheet', 'test-character-id'],
       expect.objectContaining({
-        queryParams: { created: 'true' }
+        queryParams: { created: 'true' },
       })
     );
   });
@@ -166,7 +166,7 @@ describe('CharacterReview', () => {
     fixture.detectChanges();
     component.finalizeCharacter();
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(component.characterLoadError).toContain('Failed to finalize');
   });
@@ -181,7 +181,7 @@ describe('CharacterReview', () => {
     // Simulate ID arriving asynchronously
     identityServiceSubject.next('test-character-id');
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(mockFinalizeApi.getCompleteCharacter).toHaveBeenCalledWith('test-character-id');
     expect(component.completeCharacter).toBeTruthy();

@@ -5,9 +5,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Character } from '../../../character/character';
 import { TalentNode, TalentTree, ActionCostCode } from '../../../../../shared/types/talents';
-import { ALL_TALENT_PATHS, getTalentTree, getTalentPath } from '../../../../../shared/data/talents/talentTrees';
-import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
-import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
+import {
+  ALL_TALENT_PATHS,
+  getTalentTree,
+  getTalentPath,
+} from '../../../../../shared/data/talents/talentTrees';
+import {
+  ExpertiseSource,
+  ExpertiseSourceHelper,
+} from '../../../character/expertises/expertiseSource';
+import {
+  UniversalAbility,
+  formatActionCost,
+} from '../../../character/abilities/universalAbilities';
 import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
 import { StanceSelectorComponent } from '../stance-selector/stance-selector';
 
@@ -20,7 +30,7 @@ import { StanceSelectorComponent } from '../stance-selector/stance-selector';
     MatIconModule,
     MatExpansionModule,
     CharacterAttacksComponent,
-    StanceSelectorComponent
+    StanceSelectorComponent,
   ],
   templateUrl: './character-powers-tab.html',
   styleUrl: './character-powers-tab.scss',
@@ -63,13 +73,13 @@ export class CharacterPowersTab {
         powerIds = this.character.unlockedTalents;
       }
     }
-    
+
     const powers: TalentNode[] = [];
     const allTrees: TalentTree[] = [];
-    
+
     // Load all talent paths (main core + specialization)
     if (this.character?.paths && this.character.paths.length > 0) {
-      this.character.paths.forEach(pathName => {
+      this.character.paths.forEach((pathName) => {
         const path = getTalentPath(pathName);
         if (path) {
           if (path.talentNodes) {
@@ -81,9 +91,9 @@ export class CharacterPowersTab {
         }
       });
     }
-    
+
     // Also load all other paths from ALL_TALENT_PATHS as fallback
-    Object.values(ALL_TALENT_PATHS).forEach(path => {
+    Object.values(ALL_TALENT_PATHS).forEach((path) => {
       if (path.talentNodes) {
         allTrees.push({ pathName: path.name, nodes: path.talentNodes });
       }
@@ -91,32 +101,32 @@ export class CharacterPowersTab {
         allTrees.push(...path.paths);
       }
     });
-    
+
     // Add ancestry tree if applicable
     const ancestryTree = getTalentTree('singer');
     if (ancestryTree) {
       allTrees.push(ancestryTree);
     }
-    
+
     // Find and add all talents
-    powerIds.forEach(powerId => {
+    powerIds.forEach((powerId) => {
       for (const tree of allTrees) {
-        const power = tree.nodes.find(n => n.id === powerId);
+        const power = tree.nodes.find((n) => n.id === powerId);
         if (power) {
           powers.push(power);
           break;
         }
       }
     });
-    
+
     // If the character has spoken the First Ideal, ensure base surge powers are shown
     if (this.character?.radiantPath.hasSpokenIdeal()) {
       const surgeTreeIds = this.character.radiantPath.getSurgeTrees();
-      surgeTreeIds.forEach(treeId => {
+      surgeTreeIds.forEach((treeId) => {
         const surgeTree = getTalentTree(treeId);
         if (surgeTree) {
-          const baseNode = surgeTree.nodes.find(n => n.tier === 0);
-          if (baseNode && !powers.some(p => p.id === baseNode.id)) {
+          const baseNode = surgeTree.nodes.find((n) => n.tier === 0);
+          if (baseNode && !powers.some((p) => p.id === baseNode.id)) {
             powers.push(baseNode);
           }
         }
@@ -144,46 +154,46 @@ export class CharacterPowersTab {
     if (!power.bonuses || power.bonuses.length === 0) {
       return [];
     }
-    
-    return power.bonuses.map(bonus => {
+
+    return power.bonuses.map((bonus) => {
       const parts: string[] = [];
-      
+
       if (bonus.value !== undefined) {
         const sign = bonus.value >= 0 ? '+' : '';
         parts.push(`${sign}${bonus.value}`);
       }
-      
+
       if (bonus.type) {
         parts.push(bonus.type.toString());
       }
-      
+
       if (bonus.target) {
         parts.push(`to ${bonus.target}`);
       }
-      
+
       if (bonus.condition) {
         parts.push(`(${bonus.condition})`);
       }
-      
+
       return parts.join(' ');
     });
   }
 
   getOtherEffects(power: TalentNode): string[] {
     const effects: string[] = [];
-    
+
     if (power.grantsAdvantage && power.grantsAdvantage.length > 0) {
       effects.push(`Grants Advantage on: ${power.grantsAdvantage.join(', ')}`);
     }
-    
+
     if (power.grantsDisadvantage && power.grantsDisadvantage.length > 0) {
       effects.push(`Grants Disadvantage on: ${power.grantsDisadvantage.join(', ')}`);
     }
-    
+
     if (power.otherEffects && power.otherEffects.length > 0) {
       effects.push(...power.otherEffects);
     }
-    
+
     return effects;
   }
 

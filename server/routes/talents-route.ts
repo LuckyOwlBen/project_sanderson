@@ -1,5 +1,12 @@
 import { Express } from 'express';
-import { getTalents, setTalents, getTalentParent, getBonusClasses, finalizeTalents, getTalentUI } from '../controllers/talents-controller';
+import {
+  getTalents,
+  setTalents,
+  getTalentParent,
+  getBonusClasses,
+  finalizeTalents,
+  getTalentUI,
+} from '../controllers/talents-controller';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**
@@ -54,5 +61,7 @@ export default function createTalentsRoute(app: Express, broadcaster: SocketBroa
    * Finalize talents for a character (merge pending to total)
    * Called during character finalization step
    */
-  app.post('/api/characters/:id/talents/finalize', (req, res) => finalizeTalents(req, res, broadcaster));
+  app.post('/api/characters/:id/talents/finalize', (req, res) =>
+    finalizeTalents(req, res, broadcaster)
+  );
 }

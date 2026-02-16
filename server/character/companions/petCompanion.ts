@@ -102,7 +102,7 @@ export class PetCompanion {
   }
 
   getAbilityById(abilityId: string): PetAbility | undefined {
-    return this.statBlock.abilities.find(a => a.id === abilityId);
+    return this.statBlock.abilities.find((a) => a.id === abilityId);
   }
 
   canUseAbility(abilityId: string): boolean {
@@ -137,7 +137,7 @@ export class PetCompanion {
       id: this.id,
       statBlock: this.statBlock,
       currentHealth: this.currentHealth,
-      currentFocus: this.currentFocus
+      currentFocus: this.currentFocus,
     };
   }
 

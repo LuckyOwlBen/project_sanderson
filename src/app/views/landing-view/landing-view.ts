@@ -7,20 +7,13 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 @Component({
   selector: 'app-landing-view',
   standalone: true,
-  imports: [
-    MatCardModule,
-    MatIconModule
-  ],
+  imports: [MatCardModule, MatIconModule],
   templateUrl: './landing-view.html',
   styleUrl: './landing-view.scss',
 })
 export class LandingView {
+  constructor(private router: Router, private characterIdentity: CharacterIdentityService) {}
 
-  constructor(
-    private router: Router,
-    private characterIdentity: CharacterIdentityService
-  ) {}
-  
   async newCharacter() {
     try {
       await this.characterIdentity.newIdentity();
@@ -33,10 +26,10 @@ export class LandingView {
   }
 
   loadCharacter() {
-    this.router.navigateByUrl('/load-character')
+    this.router.navigateByUrl('/load-character');
   }
 
   viewSheet() {
-    this.router.navigateByUrl('/character-sheet')
+    this.router.navigateByUrl('/character-sheet');
   }
 }

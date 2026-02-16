@@ -1,29 +1,34 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { WebsocketService, SprenGrantEvent, ExpertiseGrantEvent, ItemGrantEvent } from './websocket.service';
+import {
+  WebsocketService,
+  SprenGrantEvent,
+  ExpertiseGrantEvent,
+  ItemGrantEvent,
+} from './websocket.service';
 
 describe('WebsocketService - Grant Acknowledgments', () => {
   let service: WebsocketService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [WebsocketService]
+      providers: [WebsocketService],
     });
     service = TestBed.inject(WebsocketService);
   });
@@ -52,11 +57,11 @@ describe('WebsocketService - Grant Acknowledgments', () => {
         order: 'Windrunner',
         sprenType: 'Honorspren',
         surgePair: ['Adhesion', 'Gravitation'],
-        philosophy: 'I will protect those who cannot protect themselves'
+        philosophy: 'I will protect those who cannot protect themselves',
       };
 
       let receivedEvent: SprenGrantEvent | undefined;
-      service.sprenGrant$.subscribe(event => {
+      service.sprenGrant$.subscribe((event) => {
         receivedEvent = event;
       });
 
@@ -88,11 +93,11 @@ describe('WebsocketService - Grant Acknowledgments', () => {
         characterId: 'test-char-123',
         expertiseName: 'Alchemy',
         grantedBy: 'GM',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       let receivedEvent: ExpertiseGrantEvent | undefined;
-      service.expertiseGrant$.subscribe(event => {
+      service.expertiseGrant$.subscribe((event) => {
         receivedEvent = event;
       });
 
@@ -125,11 +130,11 @@ describe('WebsocketService - Grant Acknowledgments', () => {
         itemId: 'iron-sword',
         quantity: 1,
         grantedBy: 'GM',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       let receivedEvent: ItemGrantEvent | undefined;
-      service.itemGrant$.subscribe(event => {
+      service.itemGrant$.subscribe((event) => {
         receivedEvent = event;
       });
 

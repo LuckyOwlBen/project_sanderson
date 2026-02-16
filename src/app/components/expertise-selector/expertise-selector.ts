@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,30 +18,28 @@ import { CharacterIdentityService } from '../../services/character-identity.serv
 import { Character } from '../../character/character';
 import { StepValidationService } from '../../services/step-validation.service';
 import { ExpertiseApiService } from '../../services/expertise-api.service';
-import { ALL_EXPERTISES, CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../character/expertises/allExpertises';
+import {
+  ALL_EXPERTISES,
+  CULTURAL_EXPERTISES,
+  ExpertiseDefinition,
+} from '../../character/expertises/allExpertises';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { CharacterStorageService } from '../../services/character-storage.service';
 
 @Component({
   selector: 'app-expertise-selector',
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatChipsModule, MatIconModule],
   templateUrl: './expertise-selector.html',
   styleUrl: './expertise-selector.scss',
 })
 export class ExpertiseSelector implements OnInit, OnDestroy {
   @Output() pendingChange = new EventEmitter<boolean>();
-  
+
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 4; // Expertises is now step 4 (0-indexed)
   private isInitialized = false;
-  
+
   character: Character | null = null;
   availableExpertises: ExpertiseDefinition[] = ALL_EXPERTISES;
   selectedExpertises: ExpertiseSource[] = [];
@@ -58,11 +63,9 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Listen to points changed events from LevelUpManager
-    this.levelUpManager.pointsChanged$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.checkPendingStatus();
-      });
+    this.levelUpManager.pointsChanged$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.checkPendingStatus();
+    });
 
     // Scroll to top when component loads
     setTimeout(() => {
@@ -85,49 +88,48 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       });
 
     // Subscribe to route params to detect level-up mode.
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
-        if (!this.characterId) {
-          this.character = this.characterState.getCharacter();
-          this.characterId = (this.character as any)?.id || null;
-          if (this.characterId) {
-            this.fetchCharacterFromApi(this.characterId);
-          } else {
-            console.warn('[ExpertiseSelector] No character ID found; cannot load from API');
-            this.syncLocalCharacterState();
-          }
+    this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.isLevelUpMode = params['levelUp'] === 'true';
+      if (!this.characterId) {
+        this.character = this.characterState.getCharacter();
+        this.characterId = (this.character as any)?.id || null;
+        if (this.characterId) {
+          this.fetchCharacterFromApi(this.characterId);
+        } else {
+          console.warn('[ExpertiseSelector] No character ID found; cannot load from API');
+          this.syncLocalCharacterState();
         }
-      });
+      }
+    });
   }
 
   private fetchCharacterFromApi(characterId: string): void {
     // Load expertise state from API - this is our source of truth
-    this.expertiseApiService.getExpertise(characterId)
+    this.expertiseApiService
+      .getExpertise(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (expertiseState) => {
           console.log('[ExpertiseSelector] Loaded expertise state from API:', expertiseState);
-          
+
           // Set expertise data from API response
           this.totalPoints = expertiseState.totalPoints;
-          this.selectedExpertises = expertiseState.expertise.map(exp => ({
+          this.selectedExpertises = expertiseState.expertise.map((exp) => ({
             name: exp.name,
             source: (exp.source || 'manual') as 'culture' | 'talent' | 'gm' | 'manual',
-            sourceId: exp.sourceId
+            sourceId: exp.sourceId,
           }));
-          
+
           // Load character for culture info (needed for extracting cultural expertises)
           const char = this.characterState.getCharacter();
           if (char) {
             this.character = char;
             this.extractCulturalExpertises();
           }
-          
+
           this.calculateAvailablePoints();
           this.updateValidation();
-          
+
           // Trigger change detection to update the template
           this.cdr.detectChanges();
         },
@@ -143,7 +145,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
             this.updateValidation();
             this.cdr.detectChanges();
           }
-        }
+        },
       });
   }
 
@@ -168,38 +170,40 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
 
   private extractCulturalExpertises(): void {
     if (!this.character) return;
-    
+
     // Extract cultural expertise names from selected cultures
     this.culturalExpertises = this.character.cultures
-      .map(culture => culture.name)
-      .filter(name => CULTURAL_EXPERTISES.some(exp => exp.name === name));
+      .map((culture) => culture.name)
+      .filter((name) => CULTURAL_EXPERTISES.some((exp) => exp.name === name));
   }
 
   private calculateAvailablePoints(): void {
     if (!this.character) return;
-    
+
     // Don't recalculate totalPoints - trust the API value
     // totalPoints comes from the API response and represents current Intellect
-    
+
     // Available points = totalPoints - pointsSpent (non-cultural expertise count)
     const nonCulturalSelections = this.selectedExpertises.filter(
-      exp => exp.source !== 'culture'
+      (exp) => exp.source !== 'culture'
     ).length;
-    
+
     this.availablePoints = this.totalPoints - nonCulturalSelections;
   }
 
   private updateValidation(): void {
     const isValid = this.availablePoints >= 0;
-    
+
     if (this.availablePoints < 0) {
-      this.validationMessage = `You have selected too many expertises. Remove ${Math.abs(this.availablePoints)} expertise(s).`;
+      this.validationMessage = `You have selected too many expertises. Remove ${Math.abs(
+        this.availablePoints
+      )} expertise(s).`;
     } else if (this.availablePoints > 0) {
       this.validationMessage = `You have ${this.availablePoints} expertise point(s) remaining to spend.`;
     } else {
       this.validationMessage = 'All expertise points have been allocated.';
     }
-    
+
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
     this.checkPendingStatus();
   }
@@ -211,7 +215,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   isExpertiseSelected(expertise: ExpertiseDefinition): boolean {
-    return this.selectedExpertises.some(e => e.name === expertise.name);
+    return this.selectedExpertises.some((e) => e.name === expertise.name);
   }
 
   isCulturalExpertise(expertise: ExpertiseDefinition): boolean {
@@ -223,7 +227,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     if (this.isCulturalExpertise(expertise)) {
       return true;
     }
-    
+
     // Can select if not already selected and have points available
     return !this.isExpertiseSelected(expertise) && this.availablePoints > 0;
   }
@@ -242,13 +246,13 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   private selectExpertise(expertise: ExpertiseDefinition): void {
-    if (!this.selectedExpertises.some(e => e.name === expertise.name)) {
+    if (!this.selectedExpertises.some((e) => e.name === expertise.name)) {
       // Only add to local selectedExpertises array
       // Don't add to character state yet - wait until persistStep is called
       this.selectedExpertises.push({
         name: expertise.name,
         source: 'manual',
-        sourceId: undefined
+        sourceId: undefined,
       });
       this.calculateAvailablePoints();
       this.updateValidation();
@@ -258,13 +262,13 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   private deselectExpertise(expertise: ExpertiseDefinition): void {
     // Remove from local selectedExpertises array only
     // Character state will be updated on persistStep
-    this.selectedExpertises = this.selectedExpertises.filter(e => e.name !== expertise.name);
+    this.selectedExpertises = this.selectedExpertises.filter((e) => e.name !== expertise.name);
     this.calculateAvailablePoints();
     this.updateValidation();
   }
 
   getExpertisesByCategory(category: string): ExpertiseDefinition[] {
-    return this.availableExpertises.filter(exp => exp.category === category);
+    return this.availableExpertises.filter((exp) => exp.category === category);
   }
 
   removeExpertiseByName(expertiseName: string): void {
@@ -272,44 +276,44 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   getSourceBadge(expertiseName: string): string {
-    const expertise = this.selectedExpertises.find(e => e.name === expertiseName);
+    const expertise = this.selectedExpertises.find((e) => e.name === expertiseName);
     return expertise ? ExpertiseSourceHelper.getSourceBadge(expertise.source) : '';
   }
 
   canRemoveExpertise(expertiseName: string): boolean {
-    const expertise = this.selectedExpertises.find(e => e.name === expertiseName);
+    const expertise = this.selectedExpertises.find((e) => e.name === expertiseName);
     return expertise ? ExpertiseSourceHelper.canRemove(expertise) : false;
   }
 
   getCategoryIcon(category: string): string {
     const icons: { [key: string]: string } = {
-      'cultural': 'public',
-      'weapon': 'military_tech',
-      'armor': 'shield',
-      'utility': 'construction',
-      'specialist': 'engineering'
+      cultural: 'public',
+      weapon: 'military_tech',
+      armor: 'shield',
+      utility: 'construction',
+      specialist: 'engineering',
     };
     return icons[category] || 'help';
   }
 
   getCategoryTitle(category: string): string {
     const titles: { [key: string]: string } = {
-      'cultural': 'Cultural Expertises',
-      'weapon': 'Weapon Proficiencies',
-      'armor': 'Armor Proficiencies',
-      'utility': 'Utility Proficiencies',
-      'specialist': 'Crafting Specializations'
+      cultural: 'Cultural Expertises',
+      weapon: 'Weapon Proficiencies',
+      armor: 'Armor Proficiencies',
+      utility: 'Utility Proficiencies',
+      specialist: 'Crafting Specializations',
     };
     return titles[category] || category;
   }
 
   getCategoryDescription(category: string): string {
     const descriptions: { [key: string]: string } = {
-      'cultural': 'Knowledge and understanding of different cultures and their customs.',
-      'weapon': 'Proficiency with various types of weapons in combat.',
-      'armor': 'Training in wearing and maintaining different types of armor.',
-      'utility': 'Skills in using specialized tools and equipment.',
-      'specialist': 'Advanced knowledge in crafting and creating items.'
+      cultural: 'Knowledge and understanding of different cultures and their customs.',
+      weapon: 'Proficiency with various types of weapons in combat.',
+      armor: 'Training in wearing and maintaining different types of armor.',
+      utility: 'Skills in using specialized tools and equipment.',
+      specialist: 'Advanced knowledge in crafting and creating items.',
     };
     return descriptions[category] || '';
   }
@@ -324,35 +328,41 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
       // First, sync local selectedExpertises to character state
       // This ensures character.selectedExpertises matches what was selected in the UI
       this.character.selectedExpertises = [...this.selectedExpertises];
-      
+
       // Convert ExpertiseSource objects to ExpertiseSelection for API
-      const expertiseForApi = this.selectedExpertises.map(exp => ({
+      const expertiseForApi = this.selectedExpertises.map((exp) => ({
         name: exp.name,
         source: exp.source || 'manual',
-        sourceId: exp.sourceId
+        sourceId: exp.sourceId,
       }));
-      
+
       // Save expertises via API
-      this.expertiseApiService.updateExpertise(this.characterId, expertiseForApi)
-        .subscribe({
-          next: (result) => {
-            console.log(`[ExpertiseSelector] Expertises saved via API for ${this.characterId}`, result);
-            
-            // Add expertise skills to character's skill ranks
-            // These should be loaded from the backend, but if not available, add them locally
-            if (this.character) {
-              this.selectedExpertises.forEach(exp => {
-                // Set initial rank to 0 for newly selected expertise skills
-                this.character!.skills.setSkillRank(exp.name, 0);
-              });
-              console.log(`[ExpertiseSelector] Added ${this.selectedExpertises.length} expertise skill(s) to character`);
-            }
-          },
-          error: (err) => {
-            console.warn(`[ExpertiseSelector] API error, falling back to storage:`, err);
-            this.storageService.saveCharacter(this.character!).subscribe({ next: () => {}, error: () => {} });
+      this.expertiseApiService.updateExpertise(this.characterId, expertiseForApi).subscribe({
+        next: (result) => {
+          console.log(
+            `[ExpertiseSelector] Expertises saved via API for ${this.characterId}`,
+            result
+          );
+
+          // Add expertise skills to character's skill ranks
+          // These should be loaded from the backend, but if not available, add them locally
+          if (this.character) {
+            this.selectedExpertises.forEach((exp) => {
+              // Set initial rank to 0 for newly selected expertise skills
+              this.character!.skills.setSkillRank(exp.name, 0);
+            });
+            console.log(
+              `[ExpertiseSelector] Added ${this.selectedExpertises.length} expertise skill(s) to character`
+            );
           }
-        });
+        },
+        error: (err) => {
+          console.warn(`[ExpertiseSelector] API error, falling back to storage:`, err);
+          this.storageService
+            .saveCharacter(this.character!)
+            .subscribe({ next: () => {}, error: () => {} });
+        },
+      });
     }
   }
 }

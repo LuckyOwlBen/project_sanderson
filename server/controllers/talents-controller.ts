@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { 
+import {
   getTalentsByCharacterId,
   getTalentUIResponseForCharacterId,
-  setTalentsByCharacterId, 
-  findParentPath, 
+  setTalentsByCharacterId,
+  findParentPath,
   getAvailableBonusClasses,
-  finalizeTalentsByCharacterId
+  finalizeTalentsByCharacterId,
 } from '../services/talents-service';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
@@ -16,15 +16,16 @@ export async function getTalents(req: Request, res: Response): Promise<void> {
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     console.error('Error loading talents:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
   }
 }
@@ -41,15 +42,16 @@ export async function getTalentUI(req: Request, res: Response): Promise<void> {
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     console.error('Error loading talent UI response:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
   }
 }
@@ -68,16 +70,17 @@ export function getTalentParent(req: Request, res: Response): void {
       success: true,
       data: {
         treeId,
-        parent: parent || null
-      }
+        parent: parent || null,
+      },
     });
   } catch (error) {
     console.error('Error finding talent parent:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
   }
 }
@@ -91,7 +94,7 @@ export function getBonusClasses(req: Request, res: Response): void {
   try {
     const mainPath = req.query.mainPath as string | undefined;
     const specialty = req.query.specialty as string | undefined;
-    
+
     const bonusClasses = getAvailableBonusClasses(mainPath || null, specialty || null);
 
     res.json({
@@ -99,16 +102,17 @@ export function getBonusClasses(req: Request, res: Response): void {
       data: {
         mainPath: mainPath || null,
         specialty: specialty || null,
-        available: bonusClasses
-      }
+        available: bonusClasses,
+      },
     });
   } catch (error) {
     console.error('Error getting bonus classes:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
   }
 }
@@ -118,7 +122,11 @@ export function getBonusClasses(req: Request, res: Response): void {
  * Finalize talents for a character (merge pending to total)
  * Called during character finalization step
  */
-export async function finalizeTalents(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
+export async function finalizeTalents(
+  req: Request,
+  res: Response,
+  broadcaster: SocketBroadcaster
+): Promise<void> {
   try {
     const { id } = req.params;
     const result = await finalizeTalentsByCharacterId(id);
@@ -128,17 +136,24 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     console.error('Error finalizing talents:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
-  }}export async function setTalents(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
+  }
+}
+export async function setTalents(
+  req: Request,
+  res: Response,
+  broadcaster: SocketBroadcaster
+): Promise<void> {
   try {
     const { id } = req.params;
     const { talents } = req.body ?? {};
@@ -146,7 +161,7 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
     if (!talents || typeof talents !== 'object' || Array.isArray(talents)) {
       res.status(400).json({
         success: false,
-        error: 'talents must be an object'
+        error: 'talents must be an object',
       });
       return;
     }
@@ -154,7 +169,7 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
     if (talents.totalTalents !== undefined && !Array.isArray(talents.totalTalents)) {
       res.status(400).json({
         success: false,
-        error: 'talents.totalTalents must be an array'
+        error: 'talents.totalTalents must be an array',
       });
       return;
     }
@@ -162,7 +177,7 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
     if (talents.pendingTalents !== undefined && !Array.isArray(talents.pendingTalents)) {
       res.status(400).json({
         success: false,
-        error: 'talents.pendingTalents must be an array'
+        error: 'talents.pendingTalents must be an array',
       });
       return;
     }
@@ -170,27 +185,28 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
     if (talents.pendingTrees !== undefined && !Array.isArray(talents.pendingTrees)) {
       res.status(400).json({
         success: false,
-        error: 'talents.pendingTrees must be an array'
+        error: 'talents.pendingTrees must be an array',
       });
       return;
     }
 
     const updated = await setTalentsByCharacterId(id, talents);
-    
+
     // Broadcast character update via WebSocket
     broadcaster.scheduleCharacterUpdate(id);
 
     res.json({
       success: true,
-      data: updated
+      data: updated,
     });
   } catch (error) {
     console.error('Error saving talents:', error);
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error:
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : String(error),
     });
   }
 }

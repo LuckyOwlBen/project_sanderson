@@ -3,10 +3,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Character } from './character';
 import { Ancestry } from './ancestry/ancestry';
 import { CulturalInterface } from './culture/culturalInterface';
-import { ExpertiseSource, ExpertiseSourceType, ExpertiseSourceHelper } from './expertises/expertiseSource';
+import {
+  ExpertiseSource,
+  ExpertiseSourceType,
+  ExpertiseSourceHelper,
+} from './expertises/expertiseSource';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CharacterStateService {
   private character: Character;
@@ -36,7 +40,7 @@ export class CharacterStateService {
   // Specific update methods
   setAncestry(ancestry: Ancestry): void {
     this.character.ancestry = ancestry;
-    
+
     // Set default dullform for Singer ancestry
     if (ancestry === Ancestry.SINGER) {
       // Always set dullform if no form is active
@@ -44,7 +48,7 @@ export class CharacterStateService {
         this.character.setActiveForm('dullform');
       }
     }
-    
+
     this.characterSubject.next(this.character);
   }
 
@@ -56,7 +60,7 @@ export class CharacterStateService {
   }
 
   removeCulture(culture: CulturalInterface): void {
-    const index = this.character.cultures.findIndex(c => c.name === culture.name);
+    const index = this.character.cultures.findIndex((c) => c.name === culture.name);
     if (index !== -1) {
       this.character.cultures.splice(index, 1);
       this.characterSubject.next(this.character);
@@ -88,10 +92,16 @@ export class CharacterStateService {
   /**
    * Add an expertise with source tracking for cascade removal
    */
-  addExpertise(expertiseName: string, source: ExpertiseSourceType = 'manual', sourceId?: string): void {
+  addExpertise(
+    expertiseName: string,
+    source: ExpertiseSourceType = 'manual',
+    sourceId?: string
+  ): void {
     // Check if expertise already exists
-    const existingIndex = this.character.selectedExpertises.findIndex(e => e.name === expertiseName);
-    
+    const existingIndex = this.character.selectedExpertises.findIndex(
+      (e) => e.name === expertiseName
+    );
+
     if (existingIndex === -1) {
       // Add new expertise
       this.character.selectedExpertises.push(
@@ -114,7 +124,7 @@ export class CharacterStateService {
    * Remove a specific expertise by name (only if manually removable)
    */
   removeExpertise(expertiseName: string): void {
-    const index = this.character.selectedExpertises.findIndex(e => e.name === expertiseName);
+    const index = this.character.selectedExpertises.findIndex((e) => e.name === expertiseName);
     if (index !== -1 && ExpertiseSourceHelper.canRemove(this.character.selectedExpertises[index])) {
       this.character.selectedExpertises.splice(index, 1);
       this.characterSubject.next(this.character);
@@ -127,9 +137,9 @@ export class CharacterStateService {
   removeExpertisesBySource(sourceId: string): void {
     const originalLength = this.character.selectedExpertises.length;
     this.character.selectedExpertises = this.character.selectedExpertises.filter(
-      e => e.sourceId !== sourceId
+      (e) => e.sourceId !== sourceId
     );
-    
+
     if (this.character.selectedExpertises.length !== originalLength) {
       this.characterSubject.next(this.character);
     }

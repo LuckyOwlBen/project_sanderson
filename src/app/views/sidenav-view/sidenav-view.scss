@@ -1,7 +1,7 @@
 .sidenav-header {
   padding: 1.5rem 1rem;
   text-align: center;
-  
+
   h2 {
     margin: 0;
     font-size: 1.5rem;
@@ -12,30 +12,30 @@
 
 .sidenav-nav {
   padding: 0;
-  
+
   mat-nav-list {
     padding: 0;
   }
-  
+
   mat-list-item {
     cursor: pointer;
     transition: background-color 0.2s ease;
     color: var(--gpSystemLightestGrey);
-    
+
     &:hover {
       background-color: var(--gpSystemDarkGrey);
     }
-    
+
     mat-icon {
       color: var(--gpColor-ChalkyBlue);
     }
-    
+
     span {
       font-size: 1rem;
       color: var(--gpSystemLightestGrey);
     }
   }
-  
+
   mat-divider {
     margin: 0.5rem 0;
     background-color: var(--gpSystemDarkGrey);
@@ -59,22 +59,22 @@
   .creation-accordion {
     box-shadow: none;
     background-color: transparent;
-    
+
     mat-expansion-panel {
       box-shadow: none;
       background-color: transparent;
       color: var(--gpSystemLightestGrey);
-      
+
       mat-expansion-panel-header {
         padding: 0 1rem;
-        
+
         mat-panel-title {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           font-weight: 500;
           color: var(--gpSystemLightestGrey);
-          
+
           mat-icon {
             color: var(--gpColor-ChalkyBlue);
           }
@@ -85,7 +85,7 @@
 
   .step-list {
     padding: 0.5rem 0;
-    
+
     .creation-step {
       cursor: pointer;
       transition: all 0.2s ease;
@@ -93,37 +93,37 @@
       min-height: 40px;
       height: auto;
       color: var(--gpSystemLightestGrey);
-      
+
       mat-icon[matListItemIcon] {
         color: var(--gpStoreLighterGrey);
       }
-      
+
       span {
         color: var(--gpSystemLightestGrey);
       }
-      
+
       &:hover {
         background-color: var(--gpSystemDarkGrey);
       }
-      
+
       &.completed {
         mat-icon[matListItemIcon] {
           color: var(--gpColor-Green);
         }
-        
+
         .check-icon {
           color: var(--gpColor-Green);
           font-size: 20px;
           width: 20px;
           height: 20px;
         }
-        
+
         span {
           font-weight: 500;
           color: var(--gpColor-Green);
         }
       }
-      
+
       mat-icon[matListItemIcon] {
         color: #999;
         font-size: 18px;
@@ -131,7 +131,7 @@
         height: 18px;
         margin-right: 8px;
       }
-      
+
       span {
         font-size: 0.85rem;
         color: #666;

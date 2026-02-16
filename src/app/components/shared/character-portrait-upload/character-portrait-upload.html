@@ -7,7 +7,8 @@
   <mat-dialog-content>
     <div class="dialog-content">
       <p class="instruction-text">
-        Upload a character portrait image. It will be automatically compressed to WebP format for optimal storage.
+        Upload a character portrait image. It will be automatically compressed to WebP format for
+        optimal storage.
       </p>
 
       <app-image-uploader
@@ -17,7 +18,8 @@
         [label]="'Character Portrait'"
         [showPreview]="true"
         (imageUploaded)="onImageUploaded($event)"
-        (imageRemoved)="onImageRemoved()">
+        (imageRemoved)="onImageRemoved()"
+      >
       </app-image-uploader>
 
       <div class="cached-images-section" *ngIf="cachedImages.length > 0">
@@ -27,26 +29,29 @@
         </h4>
         <p class="helper-text">Click to select, or delete unused portraits to free storage</p>
         <div class="cached-images-grid">
-          <div 
-            *ngFor="let image of cachedImages" 
+          <div
+            *ngFor="let image of cachedImages"
             class="cached-image-item"
-            [class.selected]="uploadedImageUrl === image.url">
-            <img [src]="image.url" [alt]="image.characterName || 'Portrait'">
+            [class.selected]="uploadedImageUrl === image.url"
+          >
+            <img [src]="image.url" [alt]="image.characterName || 'Portrait'" />
             <div class="image-overlay">
               <span class="character-name">{{ image.characterName }}</span>
               <div class="action-buttons">
-                <button 
-                  mat-icon-button 
+                <button
+                  mat-icon-button
                   class="select-btn"
                   [matTooltip]="'Use this portrait'"
-                  (click)="selectCachedImage(image.url)">
+                  (click)="selectCachedImage(image.url)"
+                >
                   <mat-icon>check_circle</mat-icon>
                 </button>
-                <button 
-                  mat-icon-button 
+                <button
+                  mat-icon-button
                   class="delete-btn"
                   [matTooltip]="'Delete this portrait'"
-                  (click)="deleteCachedImage(image, $event)">
+                  (click)="deleteCachedImage(image, $event)"
+                >
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -68,9 +73,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()">
-      Cancel
-    </button>
+    <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-raised-button color="primary" (click)="onSave()">
       <mat-icon>check</mat-icon>
       Save Portrait

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -26,22 +26,21 @@ describe('CharacterResourcesBar', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CharacterResourcesBar, ResourceTracker]
-    })
-    .compileComponents();
+      imports: [CharacterResourcesBar, ResourceTracker],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CharacterResourcesBar);
     component = fixture.componentInstance;
-    
+
     // Create a mock character with initialized resources
     mockCharacter = new Character();
     mockCharacter.name = 'Test Character';
     mockCharacter.level = 5;
-    
+
     // Initialize investiture as active for most tests
     mockCharacter.resources.investiture.unlock();
     mockCharacter.recalculateResources();
-    
+
     // Set up initial resource values AFTER recalculation
     (mockCharacter.resources.health as any).currentValue = 15;
     (mockCharacter.resources.health as any).maxValue = 20;
@@ -49,7 +48,7 @@ describe('CharacterResourcesBar', () => {
     (mockCharacter.resources.focus as any).maxValue = 10;
     (mockCharacter.resources.investiture as any).currentValue = 5;
     (mockCharacter.resources.investiture as any).maxValue = 5;
-    
+
     component.character = mockCharacter;
     fixture.detectChanges();
   });
@@ -61,7 +60,7 @@ describe('CharacterResourcesBar', () => {
   describe('healthResource getter', () => {
     it('should return correct health resource data', () => {
       const healthResource = component.healthResource;
-      
+
       expect(healthResource.name).toBe('Health');
       expect(healthResource.current).toBe(15);
       expect(healthResource.max).toBe(20);
@@ -72,7 +71,7 @@ describe('CharacterResourcesBar', () => {
     it('should return zero values when character is not set', () => {
       component.character = null as any;
       const healthResource = component.healthResource;
-      
+
       expect(healthResource.current).toBe(0);
       expect(healthResource.max).toBe(0);
     });
@@ -81,7 +80,7 @@ describe('CharacterResourcesBar', () => {
   describe('focusResource getter', () => {
     it('should return correct focus resource data', () => {
       const focusResource = component.focusResource;
-      
+
       expect(focusResource.name).toBe('Focus');
       expect(focusResource.current).toBe(8);
       expect(focusResource.max).toBe(10);
@@ -92,7 +91,7 @@ describe('CharacterResourcesBar', () => {
     it('should return zero values when character is not set', () => {
       component.character = null as any;
       const focusResource = component.focusResource;
-      
+
       expect(focusResource.current).toBe(0);
       expect(focusResource.max).toBe(0);
     });
@@ -101,7 +100,7 @@ describe('CharacterResourcesBar', () => {
   describe('investitureResource getter', () => {
     it('should return correct investiture resource data', () => {
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.name).toBe('Investiture');
       expect(investitureResource.current).toBe(5);
       expect(investitureResource.max).toBe(5);
@@ -112,7 +111,7 @@ describe('CharacterResourcesBar', () => {
     it('should return zero values when character is not set', () => {
       component.character = null as any;
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.current).toBe(0);
       expect(investitureResource.max).toBe(0);
     });
@@ -123,7 +122,7 @@ describe('CharacterResourcesBar', () => {
       // Create a new character with inactive investiture
       const inactiveCharacter = new Character();
       component.character = inactiveCharacter;
-      
+
       expect(component.showInvestiture).toBe(false);
     });
 
@@ -144,9 +143,9 @@ describe('CharacterResourcesBar', () => {
       (mockCharacter.resources.investiture as any).currentValue = 3;
       // Max is 5, so need 15 marks (5 * 3)
       mockCharacter.inventory.setCurrency(15);
-      
+
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.canRestore).toBe(true);
       expect(investitureResource.restoreWarning).toBeUndefined();
     });
@@ -156,9 +155,9 @@ describe('CharacterResourcesBar', () => {
       (mockCharacter.resources.investiture as any).currentValue = 3;
       // Max is 5, so need 15 marks but only have 10
       mockCharacter.inventory.setCurrency(10);
-      
+
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.canRestore).toBe(false);
       expect(investitureResource.restoreWarning).toContain('Need 5 more marks');
       expect(investitureResource.restoreWarning).toContain('requires 15 marks total');
@@ -170,9 +169,9 @@ describe('CharacterResourcesBar', () => {
       (mockCharacter.resources.investiture as any).maxValue = 5;
       // No wealth needed when already full
       mockCharacter.inventory.setCurrency(0);
-      
+
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.canRestore).toBe(true);
       expect(investitureResource.restoreWarning).toBeUndefined();
     });
@@ -183,9 +182,9 @@ describe('CharacterResourcesBar', () => {
       (mockCharacter.resources.investiture as any).maxValue = 10;
       // Need 30 marks (10 * 3), have 20
       mockCharacter.inventory.setCurrency(20);
-      
+
       const investitureResource = component.investitureResource;
-      
+
       expect(investitureResource.canRestore).toBe(false);
       expect(investitureResource.restoreWarning).toContain('Need 10 more marks');
       expect(investitureResource.restoreWarning).toContain('requires 30 marks total');
@@ -238,15 +237,15 @@ describe('CharacterResourcesBar', () => {
       // Create a completely fresh fixture for this test
       const testFixture = TestBed.createComponent(CharacterResourcesBar);
       const testComponent = testFixture.componentInstance;
-      
+
       // Create a new character with inactive investiture
       const inactiveCharacter = new Character();
       testComponent.character = inactiveCharacter;
       testFixture.detectChanges();
-      
+
       const compiled = testFixture.nativeElement as HTMLElement;
       const resourceTrackers = compiled.querySelectorAll('app-resource-tracker');
-      
+
       expect(resourceTrackers.length).toBe(2);
     });
 
@@ -254,14 +253,14 @@ describe('CharacterResourcesBar', () => {
       // mockCharacter already has investiture active from beforeEach
       const compiled = fixture.nativeElement as HTMLElement;
       const resourceTrackers = compiled.querySelectorAll('app-resource-tracker');
-      
+
       expect(resourceTrackers.length).toBe(3);
     });
 
     it('should have correct container class', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       const container = compiled.querySelector('.character-resources-bar');
-      
+
       expect(container).toBeTruthy();
     });
   });

@@ -10,19 +10,14 @@ export interface Resource {
   max: number;
   icon?: string;
   color?: string;
-  canRestore?: boolean;  // For investiture - can the player afford to restore it?
-  restoreWarning?: string;  // Warning message when restoration is blocked
+  canRestore?: boolean; // For investiture - can the player afford to restore it?
+  restoreWarning?: string; // Warning message when restoration is blocked
 }
 
 @Component({
   selector: 'app-resource-tracker',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './resource-tracker.html',
   styleUrl: './resource-tracker.scss',
 })
@@ -37,7 +32,7 @@ export class ResourceTracker {
 
   get barColor(): string {
     if (this.resource.color) return this.resource.color;
-    
+
     const percentage = this.percentage;
     if (percentage > 66) return '#4caf50'; // Green
     if (percentage > 33) return '#ff9800'; // Orange
@@ -47,10 +42,10 @@ export class ResourceTracker {
   get canIncrement(): boolean {
     // Can't increment if at max
     if (this.resource.current === this.resource.max) return false;
-    
+
     // Check if restoration is blocked (e.g., investiture wealth requirement)
     if (this.resource.canRestore === false) return false;
-    
+
     return true;
   }
 
@@ -58,11 +53,11 @@ export class ResourceTracker {
     if (this.resource.current === this.resource.max) {
       return 'Already at maximum';
     }
-    
+
     if (this.resource.canRestore === false && this.resource.restoreWarning) {
       return this.resource.restoreWarning;
     }
-    
+
     return 'Increase by 1';
   }
 
@@ -70,11 +65,11 @@ export class ResourceTracker {
     if (this.resource.current === this.resource.max) {
       return 'Already at maximum';
     }
-    
+
     if (this.resource.canRestore === false && this.resource.restoreWarning) {
       return this.resource.restoreWarning;
     }
-    
+
     return 'Increase by 5';
   }
 
@@ -83,7 +78,7 @@ export class ResourceTracker {
     if (this.resource.canRestore === false) {
       return;
     }
-    
+
     const newValue = Math.min(this.resource.current + amount, this.resource.max);
     this.resource.current = newValue;
     this.valueChanged.emit(newValue);

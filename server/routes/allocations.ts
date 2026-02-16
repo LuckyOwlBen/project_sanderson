@@ -1,9 +1,9 @@
 /**
  * Point Allocation Routes
- * 
+ *
  * REST endpoints for getting and validating point allocations.
  * These are used during character creation and level-up to ensure accuracy.
- * 
+ *
  * GET /api/characters/:id/allocations/attributes/level/:level
  * GET /api/characters/:id/allocations/skills/level/:level
  * GET /api/characters/:id/allocations/talents/level/:level
@@ -19,10 +19,10 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
   /**
    * GET /api/characters/:id/allocations/attributes/level/:level
-   * 
+   *
    * Get attribute allocation state for a specific level
    * Returns current allocations and available points
-   * 
+   *
    * Response:
    * {
    *   currentLevel: number,
@@ -43,7 +43,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (isNaN(levelNum) || levelNum < 1 || levelNum > 21) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid level: must be 1-21'
+          error: 'Invalid level: must be 1-21',
         });
       }
 
@@ -53,20 +53,20 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: slice
+        data: slice,
       });
     } catch (error) {
       console.error('[Routes] Error getting attribute slice:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to get attribute allocation state'
+        error: 'Failed to get attribute allocation state',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/allocations/skills/level/:level
-   * 
+   *
    * Get skill allocation state for a specific level
    */
   app.get('/api/characters/:id/allocations/skills/level/:level', async (req, res) => {
@@ -77,7 +77,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (isNaN(levelNum) || levelNum < 1 || levelNum > 21) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid level: must be 1-21'
+          error: 'Invalid level: must be 1-21',
         });
       }
 
@@ -85,22 +85,22 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: slice
+        data: slice,
       });
     } catch (error) {
       console.error('[Routes] Error getting skill slice:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to get skill allocation state'
+        error: 'Failed to get skill allocation state',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/allocations/talents/level/:level
-   * 
+   *
    * Get talent allocation state for a specific level
-   * 
+   *
    * Query params:
    *   tier0TalentId: string (optional) - the tier 0 talent id for this character
    */
@@ -113,7 +113,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (isNaN(levelNum) || levelNum < 1 || levelNum > 21) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid level: must be 1-21'
+          error: 'Invalid level: must be 1-21',
         });
       }
 
@@ -127,29 +127,29 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: slice
+        data: slice,
       });
     } catch (error) {
       console.error('[Routes] Error getting talent slice:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to get talent allocation state'
+        error: 'Failed to get talent allocation state',
       });
     }
   });
 
   /**
    * POST /api/characters/:id/allocations/attributes/validate
-   * 
+   *
    * Validate an attribute allocation
-   * 
+   *
    * Request body:
    * {
    *   level: number,
    *   attributes: {str, qck, int, awr, wil, prs},
    *   previousAttributes: {str, qck, int, awr, wil, prs} (optional)
    * }
-   * 
+   *
    * Response:
    * {
    *   valid: boolean,
@@ -164,7 +164,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (!level || !attributes) {
         return res.status(400).json({
           success: false,
-          error: 'level and attributes are required'
+          error: 'level and attributes are required',
         });
       }
 
@@ -176,22 +176,22 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: validation
+        data: validation,
       });
     } catch (error) {
       console.error('[Routes] Error validating attributes:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to validate attribute allocation'
+        error: 'Failed to validate attribute allocation',
       });
     }
   });
 
   /**
    * POST /api/characters/:id/allocations/skills/validate
-   * 
+   *
    * Validate a skill allocation
-   * 
+   *
    * Request body:
    * {
    *   level: number,
@@ -206,7 +206,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (!level || !skills) {
         return res.status(400).json({
           success: false,
-          error: 'level and skills are required'
+          error: 'level and skills are required',
         });
       }
 
@@ -218,22 +218,22 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: validation
+        data: validation,
       });
     } catch (error) {
       console.error('[Routes] Error validating skills:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to validate skill allocation'
+        error: 'Failed to validate skill allocation',
       });
     }
   });
 
   /**
    * POST /api/characters/:id/allocations/talents/validate
-   * 
+   *
    * Validate a talent allocation
-   * 
+   *
    * Request body:
    * {
    *   level: number,
@@ -249,7 +249,7 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
       if (!level || !talents) {
         return res.status(400).json({
           success: false,
-          error: 'level and talents are required'
+          error: 'level and talents are required',
         });
       }
 
@@ -262,13 +262,13 @@ function createAllocationRoutes(app, CHARACTERS_DIR) {
 
       res.json({
         success: true,
-        data: validation
+        data: validation,
       });
     } catch (error) {
       console.error('[Routes] Error validating talents:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to validate talent allocation'
+        error: 'Failed to validate talent allocation',
       });
     }
   });

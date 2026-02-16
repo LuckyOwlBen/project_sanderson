@@ -14,7 +14,25 @@
     "test:watch": "vitest -c vitest.angular.config.ts",
     "test:ui": "vitest run -c vitest.angular.config.ts",
     "test:server": "vitest run -c vitest.server.config.ts",
+    "lint": "eslint \"src/**/*.{ts,js}\" --ext .ts,.js",
+    "format": "prettier --write \"**/*.{ts,js,json,scss,html,css,md}\"",
+    "prepare": "husky install",
+    "detect-chrome": "node ./tools/detect-chrome.js",
     "serve:prod": "cd server && NODE_ENV=production node server.js"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md,scss,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "prettier": {
     "printWidth": 100,
@@ -49,14 +67,25 @@
     "zone.js": "^0.15.0"
   },
   "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^1.20.3",
+    "@analogjs/vitest-angular": "^1.20.3",
+    "@angular-eslint/eslint-plugin": "^21.2.0",
+    "@angular-eslint/eslint-plugin-template": "^21.2.0",
+    "@angular-eslint/template-parser": "^21.2.0",
     "@angular/build": "^21.0.0",
     "@angular/cli": "^21.0.0",
     "@angular/compiler-cli": "^21.0.0",
-    "@analogjs/vite-plugin-angular": "^1.20.3",
-    "@analogjs/vitest-angular": "^1.20.3",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
     "baseline-browser-mapping": "^2.9.17",
     "concurrently": "^8.2.2",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
     "jsdom": "^27.1.0",
+    "lint-staged": "^14.0.0",
+    "prettier": "^2.8.8",
     "prisma": "^7.3.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"

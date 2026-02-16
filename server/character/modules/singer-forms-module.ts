@@ -69,9 +69,7 @@ export class SingerFormsModule {
    * Get list of available Singer forms for selection
    */
   getAvailableForms(): UniversalAbility[] {
-    return SINGER_FORMS.filter(form => 
-      form.id === 'dullform' || this.hasForm(form.id)
-    );
+    return SINGER_FORMS.filter((form) => form.id === 'dullform' || this.hasForm(form.id));
   }
 
   /**
@@ -79,7 +77,7 @@ export class SingerFormsModule {
    */
   getActiveFormInfo(): UniversalAbility | undefined {
     if (!this.activeForm) return undefined;
-    return SINGER_FORMS.find(f => f.id === this.activeForm);
+    return SINGER_FORMS.find((f) => f.id === this.activeForm);
   }
 
   /**
@@ -95,53 +93,125 @@ export class SingerFormsModule {
   private applyActiveFormBonuses(): void {
     if (!this.activeForm || !this.bonusManager) return;
 
-    const form = SINGER_FORMS.find(f => f.id === this.activeForm);
+    const form = SINGER_FORMS.find((f) => f.id === this.activeForm);
     if (!form) return;
 
     const source = this.getActiveFormSource();
 
     switch (this.activeForm) {
       case 'nimbleform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'agility',
+          value: 1,
+        });
         break;
       case 'artform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'presence',
+          value: 1,
+        });
         break;
       case 'meditationform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'willpower',
+          value: 1,
+        });
         break;
       case 'scholarform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'intellect',
+          value: 1,
+        });
         break;
       case 'warform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'strength',
+          value: 2,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'vitality',
+          value: 1,
+        });
         break;
       case 'workform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'strength',
+          value: 1,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'vitality',
+          value: 1,
+        });
         break;
       case 'direform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'strength',
+          value: 1,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'agility',
+          value: 1,
+        });
         break;
       case 'stormform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 2 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'strength',
+          value: 2,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'vitality',
+          value: 2,
+        });
         break;
       case 'decayform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'vitality', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'vitality',
+          value: 1,
+        });
         break;
       case 'envoyform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'presence', value: 2 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'presence',
+          value: 2,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'intellect',
+          value: 1,
+        });
         break;
       case 'nightform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'agility', value: 2 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'agility',
+          value: 2,
+        });
         break;
       case 'relayform':
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'intellect', value: 1 });
-        this.bonusManager.bonuses.addBonus(source, { type: BonusType.ATTRIBUTE, target: 'willpower', value: 1 });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'intellect',
+          value: 1,
+        });
+        this.bonusManager.bonuses.addBonus(source, {
+          type: BonusType.ATTRIBUTE,
+          target: 'willpower',
+          value: 1,
+        });
         break;
     }
   }
@@ -163,7 +233,7 @@ export class SingerFormsModule {
     if (!this.activeForm) return [];
 
     const bonuses: any[] = [];
-    
+
     switch (this.activeForm) {
       case 'dullform':
         return [];

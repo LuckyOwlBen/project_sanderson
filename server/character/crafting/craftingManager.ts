@@ -4,7 +4,13 @@ import { InventoryManager } from '../inventory/inventoryManager';
 /**
  * Difficulty levels for crafting recipes
  */
-export type CraftingDifficulty = 'trivial' | 'easy' | 'moderate' | 'hard' | 'very-hard' | 'masterwork';
+export type CraftingDifficulty =
+  | 'trivial'
+  | 'easy'
+  | 'moderate'
+  | 'hard'
+  | 'very-hard'
+  | 'masterwork';
 
 /**
  * Material requirement for a recipe
@@ -48,14 +54,14 @@ export interface CraftingResult {
 
 /**
  * Manages crafting recipes and item creation
- * 
+ *
  * The CraftingManager handles:
  * - Recipe storage and retrieval
  * - Expertise validation for crafting
  * - Material requirement checking
  * - Item creation with material consumption
  * - Rollback on crafting failures
- * 
+ *
  * Flow: Character with expertise + materials → canCraft() check → craftItem() → new item created
  */
 export class CraftingManager {
@@ -83,13 +89,13 @@ export class CraftingManager {
       requiredExpertise: 'Weapon Crafting',
       materials: [
         { itemId: 'iron-ingot', quantity: 3 },
-        { itemId: 'leather-strip', quantity: 1 }
+        { itemId: 'leather-strip', quantity: 1 },
       ],
       resultItemId: 'iron-sword',
       resultQuantity: 1,
       difficulty: 'easy',
       craftingTime: '4 hours',
-      category: 'weapon'
+      category: 'weapon',
     });
 
     this.addRecipe({
@@ -99,13 +105,13 @@ export class CraftingManager {
       requiredExpertise: 'Weapon Crafting',
       materials: [
         { itemId: 'steel-ingot', quantity: 3 },
-        { itemId: 'leather-strip', quantity: 2 }
+        { itemId: 'leather-strip', quantity: 2 },
       ],
       resultItemId: 'steel-sword',
       resultQuantity: 1,
       difficulty: 'moderate',
       craftingTime: '6 hours',
-      category: 'weapon'
+      category: 'weapon',
     });
 
     // Armor crafting recipes
@@ -116,13 +122,13 @@ export class CraftingManager {
       requiredExpertise: 'Armor Crafting',
       materials: [
         { itemId: 'leather', quantity: 5 },
-        { itemId: 'thread', quantity: 3 }
+        { itemId: 'thread', quantity: 3 },
       ],
       resultItemId: 'leather-armor',
       resultQuantity: 1,
       difficulty: 'easy',
       craftingTime: '8 hours',
-      category: 'armor'
+      category: 'armor',
     });
 
     // Fabrial crafting recipes
@@ -134,13 +140,13 @@ export class CraftingManager {
       materials: [
         { itemId: 'gemstone-ruby', quantity: 1 },
         { itemId: 'metal-housing', quantity: 1 },
-        { itemId: 'copper-wire', quantity: 2 }
+        { itemId: 'copper-wire', quantity: 2 },
       ],
       resultItemId: 'heating-fabrial',
       resultQuantity: 1,
       difficulty: 'hard',
       craftingTime: '12 hours',
-      category: 'fabrial'
+      category: 'fabrial',
     });
 
     // Utility crafting recipes
@@ -151,13 +157,13 @@ export class CraftingManager {
       requiredExpertise: 'Equipment Crafting',
       materials: [
         { itemId: 'medicinal-herbs', quantity: 2 },
-        { itemId: 'water-flask', quantity: 1 }
+        { itemId: 'water-flask', quantity: 1 },
       ],
       resultItemId: 'health-potion',
       resultQuantity: 1,
       difficulty: 'moderate',
       craftingTime: '2 hours',
-      category: 'consumable'
+      category: 'consumable',
     });
   }
 
@@ -185,7 +191,7 @@ export class CraftingManager {
    * @returns Array of recipes the character has expertise to craft
    */
   getAvailableRecipes(): Recipe[] {
-    return this.getAllRecipes().filter(recipe => 
+    return this.getAllRecipes().filter((recipe) =>
       this.character.hasExpertise(recipe.requiredExpertise)
     );
   }
@@ -196,7 +202,7 @@ export class CraftingManager {
    * @returns Array of recipes matching the specified category
    */
   getRecipesByCategory(category: Recipe['category']): Recipe[] {
-    return this.getAllRecipes().filter(recipe => recipe.category === category);
+    return this.getAllRecipes().filter((recipe) => recipe.category === category);
   }
 
   /**
@@ -213,16 +219,16 @@ export class CraftingManager {
    */
   canCraft(recipeId: string): { canCraft: boolean; reason?: string } {
     const recipe = this.recipes.get(recipeId);
-    
+
     if (!recipe) {
       return { canCraft: false, reason: 'Recipe not found' };
     }
 
     // Check expertise requirement
     if (!this.character.hasExpertise(recipe.requiredExpertise)) {
-      return { 
-        canCraft: false, 
-        reason: `Requires ${recipe.requiredExpertise} expertise` 
+      return {
+        canCraft: false,
+        reason: `Requires ${recipe.requiredExpertise} expertise`,
       };
     }
 
@@ -230,9 +236,9 @@ export class CraftingManager {
     for (const material of recipe.materials) {
       const available = this.character.inventory.getItemQuantity(material.itemId);
       if (available < material.quantity) {
-        return { 
-          canCraft: false, 
-          reason: `Insufficient materials: need ${material.quantity} ${material.itemId}, have ${available}` 
+        return {
+          canCraft: false,
+          reason: `Insufficient materials: need ${material.quantity} ${material.itemId}, have ${available}`,
         };
       }
     }
@@ -242,14 +248,14 @@ export class CraftingManager {
 
   /**
    * Craft an item from a recipe
-   * 
+   *
    * Process:
    * 1. Validates recipe exists
    * 2. Checks expertise and materials via canCraft()
    * 3. Consumes materials from inventory
    * 4. Adds crafted item to inventory
    * 5. Rolls back materials if any step fails
-   * 
+   *
    * @param recipeId - The ID of the recipe to craft
    * @returns CraftingResult with success status, message, and crafted item details
    * @example
@@ -260,11 +266,11 @@ export class CraftingManager {
    */
   craftItem(recipeId: string): CraftingResult {
     const recipe = this.recipes.get(recipeId);
-    
+
     if (!recipe) {
       return {
         success: false,
-        message: 'Recipe not found'
+        message: 'Recipe not found',
       };
     }
 
@@ -273,7 +279,7 @@ export class CraftingManager {
     if (!validation.canCraft) {
       return {
         success: false,
-        message: validation.reason || 'Cannot craft this item'
+        message: validation.reason || 'Cannot craft this item',
       };
     }
 
@@ -290,7 +296,7 @@ export class CraftingManager {
         }
         return {
           success: false,
-          message: `Failed to consume ${material.itemId}`
+          message: `Failed to consume ${material.itemId}`,
         };
       }
     }
@@ -307,8 +313,8 @@ export class CraftingManager {
       expertiseUsed: recipe.requiredExpertise,
       difficultyCheck: {
         required: recipe.difficulty,
-        passed: true
-      }
+        passed: true,
+      },
     };
   }
 
@@ -317,12 +323,12 @@ export class CraftingManager {
    */
   getDifficultyDC(difficulty: CraftingDifficulty): number {
     const dcMap: Record<CraftingDifficulty, number> = {
-      'trivial': 5,
-      'easy': 10,
-      'moderate': 15,
-      'hard': 20,
+      trivial: 5,
+      easy: 10,
+      moderate: 15,
+      hard: 20,
       'very-hard': 25,
-      'masterwork': 30
+      masterwork: 30,
     };
     return dcMap[difficulty];
   }
@@ -357,7 +363,7 @@ export class CraftingManager {
       if (available < material.quantity) {
         missing.push({
           itemId: material.itemId,
-          quantity: material.quantity - available
+          quantity: material.quantity - available,
         });
       }
     }

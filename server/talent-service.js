@@ -1,6 +1,6 @@
 /**
  * Talent Service Bridge
- * 
+ *
  * Provides JavaScript access to TalentService business logic.
  * Pure utility functions for talent calculations and state management.
  * Does not depend on database layer - that's handled by server.js.
@@ -9,28 +9,41 @@
 // Talent points per level (from talent-rules.js)
 const TALENT_POINTS_PER_LEVEL = [
   2, // Level 1
-  1, 1, 1, 1, // Levels 2-5
+  1,
+  1,
+  1,
+  1, // Levels 2-5
   2, // Level 6 (bonus)
-  1, 1, 1, 1, // Levels 7-10
+  1,
+  1,
+  1,
+  1, // Levels 7-10
   2, // Level 11 (bonus)
-  1, 1, 1, 1, // Levels 12-15
+  1,
+  1,
+  1,
+  1, // Levels 12-15
   2, // Level 16 (bonus)
-  1, 1, 1, 1, 1 // Levels 17-21
+  1,
+  1,
+  1,
+  1,
+  1, // Levels 17-21
 ];
 
 // Get tier 0 talent for path
 function getTier0TalentForPath(pathId) {
   if (!pathId) return null;
-  
+
   const PATH_TIER0_TALENTS = {
-    'warrior': 'vigilant_stance',
-    'scholar': 'education',
-    'hunter': 'seek_quarry',
-    'leader': 'decisive_command',
-    'envoy': 'rousing_presence',
-    'agent': 'opportunist'
+    warrior: 'vigilant_stance',
+    scholar: 'education',
+    hunter: 'seek_quarry',
+    leader: 'decisive_command',
+    envoy: 'rousing_presence',
+    agent: 'opportunist',
   };
-  
+
   return PATH_TIER0_TALENTS[pathId] || null;
 }
 
@@ -39,7 +52,7 @@ function getTier0TalentForPath(pathId) {
  */
 function calculateTotalTalentPoints(level) {
   if (level < 1 || level > 21) return 0;
-  
+
   let total = 0;
   for (let i = 0; i < level; i++) {
     total += TALENT_POINTS_PER_LEVEL[i];
@@ -67,7 +80,7 @@ function requiresSingerSelection(ancestry, level) {
  */
 function countSpentTalentPoints(unlockedTalents, mainPath) {
   const tier0Talent = getTier0TalentForPath(mainPath);
-  
+
   return unlockedTalents.filter((talentId) => talentId !== tier0Talent).length;
 }
 
@@ -99,12 +112,7 @@ function calculateAvailableTalentPoints(
 /**
  * Validate that talent selections don't exceed available points
  */
-function validateTalentPoints(
-  level,
-  unlockedTalents,
-  mainPath,
-  previouslySelectedTalents = []
-) {
+function validateTalentPoints(level, unlockedTalents, mainPath, previouslySelectedTalents = []) {
   const availablePoints = calculateAvailableTalentPoints(
     level,
     unlockedTalents,
@@ -116,7 +124,7 @@ function validateTalentPoints(
     const overspent = Math.abs(availablePoints);
     return {
       valid: false,
-      message: `Talent point limit exceeded by ${overspent} point(s)`
+      message: `Talent point limit exceeded by ${overspent} point(s)`,
     };
   }
 
@@ -193,7 +201,7 @@ function getTalentSelectionState(character, level, isCreationMode) {
     spentPoints: { talents: spentTalents },
     lockedTalents: isCreationMode ? [] : previouslySelected,
     requiresSingerSelection: requiresSingerSelection(character.ancestry, level),
-    tier0TalentId
+    tier0TalentId,
   };
 }
 
@@ -205,7 +213,7 @@ function saveTalentSelections(character, talentIds, level, mainPath) {
   // Validate point allocation
   const unlockedTalents = character.unlockedTalents || [];
   const validation = validateTalentPoints(level, talentIds, mainPath, []);
-  
+
   if (!validation.valid) {
     return { success: false, error: validation.message };
   }
@@ -217,7 +225,7 @@ function saveTalentSelections(character, talentIds, level, mainPath) {
       talentsToUnlock: talentIds,
       level: level,
       mainPath: mainPath,
-      message: `Ready to save ${talentIds.length} talents at level ${level}`
+      message: `Ready to save ${talentIds.length} talents at level ${level}`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
@@ -232,10 +240,10 @@ function saveTalentSelections(character, talentIds, level, mainPath) {
 function validateTalentSelection(character, talentIds, level, mainPath) {
   const unlockedTalents = character.unlockedTalents || [];
   const validation = validateTalentPoints(level, talentIds, mainPath, []);
-  
+
   return {
     isValid: validation.valid,
-    error: validation.message
+    error: validation.message,
   };
 }
 
@@ -251,5 +259,5 @@ module.exports = {
   ensureTier0Unlocked,
   getTalentSelectionState,
   saveTalentSelections,
-  validateTalentSelection
+  validateTalentSelection,
 };

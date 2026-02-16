@@ -11,10 +11,7 @@ export class AttributesModuleRepository extends BaseModuleRepository {
    * @param characterId - Character ID
    * @param attributes - Attributes object
    */
-  async save(
-    characterId: string,
-    attributes: Record<string, number>
-  ): Promise<SaveResult> {
+  async save(characterId: string, attributes: Record<string, number>): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, { attributes });
   }
 

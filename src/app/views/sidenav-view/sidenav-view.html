@@ -10,12 +10,12 @@
       <mat-icon matListItemIcon>home</mat-icon>
       <span matListItemTitle>Home</span>
     </mat-list-item>
-    
+
     <mat-list-item (click)="navigateTo('/character-creator-view')">
       <mat-icon matListItemIcon>person_add</mat-icon>
       <span matListItemTitle>Create Character</span>
     </mat-list-item>
-    
+
     <mat-list-item (click)="navigateTo('/character-list')">
       <mat-icon matListItemIcon>list</mat-icon>
       <span matListItemTitle>Character List</span>
@@ -25,21 +25,21 @@
       <mat-icon matListItemIcon>receipt_long</mat-icon>
       <span matListItemTitle>Server Logs</span>
     </mat-list-item>
-    
+
     <mat-divider *ngIf="hasCharacter"></mat-divider>
-    
+
     <mat-list-item *ngIf="hasCharacter" (click)="navigateTo('/character-sheet')">
       <mat-icon matListItemIcon>assignment</mat-icon>
       <span matListItemTitle>Character Sheet</span>
     </mat-list-item>
-    
+
     <mat-list-item *ngIf="hasCharacter" (click)="navigateTo('/store')">
       <mat-icon matListItemIcon>store</mat-icon>
       <span matListItemTitle>Store</span>
     </mat-list-item>
-    
+
     <mat-divider></mat-divider>
-    
+
     <mat-list-item (click)="navigateTo('/gm-control-center')">
       <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
       <span matListItemTitle>GM Dashboard</span>
@@ -50,7 +50,6 @@
 <!-- Character Creation Progress -->
 <div class="character-progress" *ngIf="shouldShowNavigationProgress()">
   <mat-divider></mat-divider>
-  
-  <app-creation-progress
-    [displayMode]="'navigation-grid'">
-  </app-creation-progress>
+
+  <app-creation-progress [displayMode]="'navigation-grid'"> </app-creation-progress>
+</div>

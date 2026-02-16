@@ -63,9 +63,10 @@ export interface TalentForLevelResponse {
 
 @Injectable({ providedIn: 'root' })
 export class LevelUpApiService {
-  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api'
-    : '/api';
+  private apiBase =
+    window.location.hostname === 'localhost' && window.location.port === '4200'
+      ? 'http://localhost:3000/api'
+      : '/api';
   private levelUpUrl = `${this.apiBase}/levelup`;
   private charactersUrl = `${this.apiBase}/characters`;
 
@@ -79,7 +80,10 @@ export class LevelUpApiService {
     return this.http.get<LevelSummary>(`${this.charactersUrl}/${id}/level/summary`);
   }
 
-  initializeLevel(id: string, targetLevel: number): Observable<{ success: boolean; level: number; message: string }> {
+  initializeLevel(
+    id: string,
+    targetLevel: number
+  ): Observable<{ success: boolean; level: number; message: string }> {
     return this.http.post<{ success: boolean; level: number; message: string }>(
       `${this.charactersUrl}/${id}/creation-init`,
       { targetLevel }
@@ -87,49 +91,76 @@ export class LevelUpApiService {
   }
 
   getAttributeSlice(id: string, isCreationMode: boolean = false): Observable<AttributeSlice> {
-    const url = `${this.charactersUrl}/${id}/level/attributes${isCreationMode ? '?isCreationMode=true' : ''}`;
+    const url = `${this.charactersUrl}/${id}/level/attributes${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     console.log('[LevelUpApiService] getAttributeSlice - Making HTTP GET to:', url);
     return this.http.get<AttributeSlice>(url);
   }
 
   getSkillSlice(id: string, isCreationMode: boolean = false): Observable<SkillSlice> {
-    const url = `${this.charactersUrl}/${id}/level/skills${isCreationMode ? '?isCreationMode=true' : ''}`;
+    const url = `${this.charactersUrl}/${id}/level/skills${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     return this.http.get<SkillSlice>(url);
   }
 
   getTalentSlice(id: string, isCreationMode: boolean = false): Observable<TalentSlice> {
-    const url = `${this.charactersUrl}/${id}/level/talents${isCreationMode ? '?isCreationMode=true' : ''}`;
+    const url = `${this.charactersUrl}/${id}/level/talents${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     return this.http.get<TalentSlice>(url);
   }
 
-  getTalentForLevel(id: string, isCreationMode: boolean = false): Observable<TalentForLevelResponse> {
-    const url = `${this.charactersUrl}/${id}/talents/forLevel${isCreationMode ? '?isCreationMode=true' : ''}`;
+  getTalentForLevel(
+    id: string,
+    isCreationMode: boolean = false
+  ): Observable<TalentForLevelResponse> {
+    const url = `${this.charactersUrl}/${id}/talents/forLevel${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     return this.http.get<TalentForLevelResponse>(url);
   }
 
-  updateAttributeSlice(id: string, attributes: Record<string, number>, isCreationMode: boolean = false): Observable<AttributeSlice> {
-    const url = `${this.charactersUrl}/${id}/level/attributes${isCreationMode ? '?isCreationMode=true' : ''}`;
+  updateAttributeSlice(
+    id: string,
+    attributes: Record<string, number>,
+    isCreationMode: boolean = false
+  ): Observable<AttributeSlice> {
+    const url = `${this.charactersUrl}/${id}/level/attributes${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     return this.http.patch<AttributeSlice>(url, { attributes });
   }
 
-  updateSkillSlice(id: string, skills: Record<string, number>, isCreationMode: boolean = false): Observable<SkillSlice> {
-    const url = `${this.charactersUrl}/${id}/level/skills${isCreationMode ? '?isCreationMode=true' : ''}`;
+  updateSkillSlice(
+    id: string,
+    skills: Record<string, number>,
+    isCreationMode: boolean = false
+  ): Observable<SkillSlice> {
+    const url = `${this.charactersUrl}/${id}/level/skills${
+      isCreationMode ? '?isCreationMode=true' : ''
+    }`;
     return this.http.patch<SkillSlice>(url, { skills });
   }
 
-  updateTalentSlice(
-    id: string,
-    unlockedTalents: string[]
-  ): Observable<TalentSlice> {
+  updateTalentSlice(id: string, unlockedTalents: string[]): Observable<TalentSlice> {
     return this.http.patch<TalentSlice>(`${this.charactersUrl}/${id}/level/talents`, {
-      unlockedTalents
+      unlockedTalents,
     });
   }
 
-  submitPaths(id: string, mainPath: string, specialization: string): Observable<{ success: boolean; unlockedTalent?: string; paths?: string[]; }> {
-    return this.http.post<{ success: boolean; unlockedTalent?: string; paths?: string[]; }>(`${this.charactersUrl}/${id}/paths`, {
-      mainPath,
-      specialization
-    });
+  submitPaths(
+    id: string,
+    mainPath: string,
+    specialization: string
+  ): Observable<{ success: boolean; unlockedTalent?: string; paths?: string[] }> {
+    return this.http.post<{ success: boolean; unlockedTalent?: string; paths?: string[] }>(
+      `${this.charactersUrl}/${id}/paths`,
+      {
+        mainPath,
+        specialization,
+      }
+    );
   }
 }

@@ -6,7 +6,9 @@
     </div>
     <div class="header-actions">
       <button class="ghost" (click)="onRefresh()" [disabled]="vm.loading">Refresh</button>
-      <span *ngIf="vm.lastUpdated" class="timestamp">Updated {{ vm.lastUpdated | date:'shortTime' }}</span>
+      <span *ngIf="vm.lastUpdated" class="timestamp"
+        >Updated {{ vm.lastUpdated | date : 'shortTime' }}</span
+      >
     </div>
   </div>
 
@@ -22,7 +24,7 @@
       <div class="log-row" *ngFor="let log of getPagedLogs(vm.logs); trackBy: trackByLogId">
         <span class="icon" [ngClass]="log.level" aria-hidden="true">●</span>
         <div class="log-meta">
-          <span class="timestamp">{{ log.timestamp | date:'short' }}</span>
+          <span class="timestamp">{{ log.timestamp | date : 'short' }}</span>
           <span class="level" [ngClass]="log.level">{{ log.level }}</span>
         </div>
         <div class="message">{{ log.message }}</div>
@@ -32,7 +34,13 @@
     <div class="pagination">
       <button class="pager" (click)="prevPage()" [disabled]="currentPage <= 1">← Prev</button>
       <span class="page-info">Page {{ currentPage }} of {{ getTotalPages(vm.logs.length) }}</span>
-      <button class="pager" (click)="nextPage(vm.logs.length)" [disabled]="currentPage >= getTotalPages(vm.logs.length)">Next →</button>
+      <button
+        class="pager"
+        (click)="nextPage(vm.logs.length)"
+        [disabled]="currentPage >= getTotalPages(vm.logs.length)"
+      >
+        Next →
+      </button>
     </div>
   </div>
 

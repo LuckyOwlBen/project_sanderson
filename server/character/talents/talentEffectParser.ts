@@ -1,7 +1,7 @@
 /**
  * Parser for extracting structured effects from talent otherEffects strings.
  * This converts narrative text like "Gain Light Weaponry expertise" into actionable data.
- * 
+ *
  * DEPRECATION NOTICE: This text-based parser is being phased out in favor of
  * structured ExpertiseGrant fields on TalentNode. New talents should use the
  * structured fields instead of relying on text parsing.
@@ -20,7 +20,7 @@ export class TalentEffectParser {
   /**
    * Extract expertise grants from a talent.
    * Prioritizes structured expertiseGrants field, falls back to parsing otherEffects.
-   * 
+   *
    * @param talent - The talent node to extract expertise grants from
    * @returns Array of expertise grants in legacy format
    */
@@ -32,7 +32,9 @@ export class TalentEffectParser {
 
     // Fallback to text parsing (deprecated)
     if (talent.otherEffects && talent.otherEffects.length > 0) {
-      console.warn(`[DEPRECATED] Talent '${talent.id}' is using text-based expertise grants. Please migrate to structured expertiseGrants field.`);
+      console.warn(
+        `[DEPRECATED] Talent '${talent.id}' is using text-based expertise grants. Please migrate to structured expertiseGrants field.`
+      );
       return this.parseExpertiseGrants(talent.otherEffects);
     }
 
@@ -42,8 +44,10 @@ export class TalentEffectParser {
   /**
    * Convert structured ExpertiseGrant to legacy format
    */
-  private static convertStructuredGrants(structuredGrants: StructuredExpertiseGrant[]): ExpertiseGrant[] {
-    return structuredGrants.map(grant => {
+  private static convertStructuredGrants(
+    structuredGrants: StructuredExpertiseGrant[]
+  ): ExpertiseGrant[] {
+    return structuredGrants.map((grant) => {
       if (grant.type === 'fixed') {
         // Fixed grants become 'single' type
         return {
@@ -55,7 +59,7 @@ export class TalentEffectParser {
         return {
           type: 'choice',
           expertises: grant.options || [],
-          choiceCount: grant.choiceCount || 1
+          choiceCount: grant.choiceCount || 1,
         };
       } else if (grant.type === 'category') {
         // Category grants expand to options
@@ -63,7 +67,7 @@ export class TalentEffectParser {
         return {
           type: 'choice',
           expertises: options,
-          choiceCount: grant.choiceCount || 1
+          choiceCount: grant.choiceCount || 1,
         };
       }
       return { type: 'single', expertises: [] };
@@ -72,20 +76,20 @@ export class TalentEffectParser {
 
   /**
    * Extract expertise grants from talent otherEffects array (LEGACY)
-   * 
+   *
    * @deprecated Use parseExpertiseGrantsFromTalent() instead which prioritizes structured data
-   * 
+   *
    * Patterns supported:
    * - "Gain [Name] expertise" → single expertise
    * - "Gain a weapon expertise" → choice from category
-   * - "Gain an armor expertise" → choice from category  
+   * - "Gain an armor expertise" → choice from category
    * - "choose one: [A], [B], or [C]" → choice from list
    * - "Gain [A] or [B] expertise" → choice between two
    */
   static parseExpertiseGrants(otherEffects: string[]): ExpertiseGrant[] {
     const grants: ExpertiseGrant[] = [];
 
-    otherEffects.forEach(effect => {
+    otherEffects.forEach((effect) => {
       const lowerEffect = effect.toLowerCase();
 
       // Pattern 1: "choose one: [A], [B], or [C]" or "(...) (choose one)"
@@ -98,7 +102,7 @@ export class TalentEffectParser {
           grants.push({
             type: 'choice',
             expertises: options,
-            choiceCount: 1
+            choiceCount: 1,
           });
           return;
         }
@@ -114,7 +118,7 @@ export class TalentEffectParser {
           grants.push({
             type: 'choice',
             expertises: options,
-            choiceCount: count
+            choiceCount: count,
           });
           return;
         }
@@ -127,7 +131,7 @@ export class TalentEffectParser {
         grants.push({
           type: 'choice',
           expertises: [orMatch[1].trim(), orMatch[2].trim()],
-          choiceCount: 1
+          choiceCount: 1,
         });
         return;
       }
@@ -142,7 +146,7 @@ export class TalentEffectParser {
           grants.push({
             type: 'choice',
             expertises: categoryOptions,
-            choiceCount: 1
+            choiceCount: 1,
           });
           return;
         }
@@ -158,7 +162,7 @@ export class TalentEffectParser {
         if (!expertiseName.match(/^(a|an)\s/i)) {
           grants.push({
             type: 'single',
-            expertises: [expertiseName]
+            expertises: [expertiseName],
           });
           return;
         }
@@ -176,7 +180,7 @@ export class TalentEffectParser {
   private static parseCommaSeparatedList(text: string): string[] {
     // Remove parentheticals and extra whitespace
     const cleaned = text.replace(/\([^)]*\)/g, '').trim();
-    
+
     // Check for slash-separated format with common suffix (e.g., "Armor/Equipment/Weapon Crafting")
     // Pattern: word1/word2/word3 suffix
     const slashWithSuffixMatch = cleaned.match(/^(.+?)\/(.+?)\s+(\S+)$/);
@@ -184,29 +188,31 @@ export class TalentEffectParser {
       // Extract all slash-separated prefixes and the common suffix
       const allPrefixes = slashWithSuffixMatch[0].split(/\s+/)[0]; // Get the "Armor/Equipment/Weapon" part
       const suffix = slashWithSuffixMatch[3]; // Get "Crafting"
-      
+
       const prefixes = allPrefixes.split('/');
-      
+
       // Combine each prefix with the suffix
-      return prefixes.map(prefix => {
+      return prefixes.map((prefix) => {
         const combined = `${prefix.trim()} ${suffix}`;
         // Capitalize properly
-        return combined.split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        return combined
+          .split(' ')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' ');
       });
     }
-    
+
     // Standard parsing with commas, "and", "or"
     const parts = cleaned.split(/,|\s+and\s+|\s+or\s+/i);
-    
+
     return parts
-      .map(p => p.trim())
-      .filter(p => p.length > 0 && !p.match(/^(a|an|the)\s/i))
-      .map(p => {
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0 && !p.match(/^(a|an|the)\s/i))
+      .map((p) => {
         // Capitalize first letter of each word
-        return p.split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        return p
+          .split(' ')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' ');
       });
   }
@@ -224,8 +230,21 @@ export class TalentEffectParser {
       case 'crafting':
         return ['Armor Crafting', 'Weapon Crafting', 'Equipment Crafting', 'Fabrial Crafting'];
       case 'cultural':
-        return ['Alethi', 'Azish', 'Herdazian', 'Iriali', 'Kharbranthian', 'Listener', 
-                'Natan', 'Reshi', 'Shin', 'Thaylen', 'Unkalaki', 'Veden', 'Wayfarer'];
+        return [
+          'Alethi',
+          'Azish',
+          'Herdazian',
+          'Iriali',
+          'Kharbranthian',
+          'Listener',
+          'Natan',
+          'Reshi',
+          'Shin',
+          'Thaylen',
+          'Unkalaki',
+          'Veden',
+          'Wayfarer',
+        ];
       case 'specialist':
         return ['Grandbows', 'Shardblades', 'Warhammers', 'Shardplate'];
       default:
@@ -245,8 +264,8 @@ export class TalentEffectParser {
    */
   static getAllExpertiseOptions(grants: ExpertiseGrant[]): string[] {
     const allOptions = new Set<string>();
-    grants.forEach(grant => {
-      grant.expertises.forEach(exp => allOptions.add(exp));
+    grants.forEach((grant) => {
+      grant.expertises.forEach((exp) => allOptions.add(exp));
     });
     return Array.from(allOptions);
   }

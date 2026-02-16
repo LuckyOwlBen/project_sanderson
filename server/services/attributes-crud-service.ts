@@ -3,7 +3,7 @@ import {
   getAttributesRecord,
   createAttributesRecord,
   updateAttributesRecord,
-  loadCharacter
+  loadCharacter,
 } from '../database';
 import { attributesService } from './attributes-service';
 import { attributesFinalizationService } from './attributes-finalization';
@@ -56,14 +56,14 @@ export function createEmptyAttributesDTO(characterId: string): AttributesStateDT
       health: 10,
       focus: 0,
       movement: 0,
-      recovery: '1d6'
-    }
+      recovery: '1d6',
+    },
   };
 }
 
 export async function getAttributesByCharacterId(characterId: string): Promise<AttributesStateDTO> {
   console.log(`[Attributes] Getting attributes for character: ${characterId}`);
-  
+
   // Load attributes record from database (created during character creation)
   let attributesRecord = await getAttributesRecord(characterId);
   console.log(`[Attributes] Loaded attributes record:`, attributesRecord);
@@ -71,7 +71,9 @@ export async function getAttributesByCharacterId(characterId: string): Promise<A
   // Record must exist (created during character creation at level 1)
   // Trust the database values - levelup-manager has already set pointsRemaining correctly
   if (!attributesRecord) {
-    throw new Error(`Attributes record not found for character ${characterId}. Character may not have completed creation flow.`);
+    throw new Error(
+      `Attributes record not found for character ${characterId}. Character may not have completed creation flow.`
+    );
   }
 
   // Calculate derived attributes
@@ -81,7 +83,7 @@ export async function getAttributesByCharacterId(characterId: string): Promise<A
     awareness: attributesRecord.awareness,
     intellect: attributesRecord.intellect,
     willpower: attributesRecord.willpower,
-    presence: attributesRecord.presence
+    presence: attributesRecord.presence,
   });
 
   const result = {
@@ -100,10 +102,10 @@ export async function getAttributesByCharacterId(characterId: string): Promise<A
       health: derived.health,
       focus: derived.focus,
       movement: derived.movement,
-      recovery: derived.recovery
-    }
+      recovery: derived.recovery,
+    },
   };
-  
+
   console.log(`[Attributes] Returning attributes response:`, result);
   return result;
 }
@@ -165,7 +167,7 @@ export async function setAttributesByCharacterId(
     awareness: Number(attributes.awareness),
     presence: Number(attributes.presence),
     pointsSpent,
-    pointsRemaining
+    pointsRemaining,
   });
 
   // Save to character JSON file via repository
@@ -175,7 +177,7 @@ export async function setAttributesByCharacterId(
     intellect: attributesRecord.intellect,
     willpower: attributesRecord.willpower,
     awareness: attributesRecord.awareness,
-    presence: attributesRecord.presence
+    presence: attributesRecord.presence,
   });
 
   // Calculate derived attributes
@@ -185,7 +187,7 @@ export async function setAttributesByCharacterId(
     awareness: attributesRecord.awareness,
     intellect: attributesRecord.intellect,
     willpower: attributesRecord.willpower,
-    presence: attributesRecord.presence
+    presence: attributesRecord.presence,
   });
 
   return {
@@ -204,12 +206,14 @@ export async function setAttributesByCharacterId(
       health: derived.health,
       focus: derived.focus,
       movement: derived.movement,
-      recovery: derived.recovery
-    }
+      recovery: derived.recovery,
+    },
   };
 }
 
-export async function finalizeAttributesByCharacterId(characterId: string): Promise<{ characterId: string; finalized: boolean }> {
+export async function finalizeAttributesByCharacterId(
+  characterId: string
+): Promise<{ characterId: string; finalized: boolean }> {
   const attributesRecord = await getAttributesRecord(characterId);
 
   if (!attributesRecord) {
@@ -226,6 +230,6 @@ export async function finalizeAttributesByCharacterId(characterId: string): Prom
 
   return {
     characterId,
-    finalized: true
+    finalized: true,
   };
 }

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -31,19 +31,19 @@ describe('FormSelectorComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FormSelectorComponent],
-      providers: [CharacterStateService]
+      providers: [CharacterStateService],
     }).compileComponents();
 
     characterStateService = TestBed.inject(CharacterStateService);
-    
+
     character = new Character();
     character.name = 'Test Singer';
     applyTalentEffects(character, 'forms_of_finesse');
     applyTalentEffects(character, 'forms_of_wisdom');
-    
+
     // Update the service's character
     characterStateService.updateCharacter(character);
-    
+
     fixture = TestBed.createComponent(FormSelectorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -62,13 +62,13 @@ describe('FormSelectorComponent', () => {
       character.setActiveForm('nimbleform');
       characterStateService.updateCharacter(character);
       fixture.detectChanges();
-      
+
       expect(component.selectedFormId).toBe('nimbleform');
     });
 
     it('should allow selecting a form', () => {
       component.onFormSelected('artform');
-      
+
       // Character should be updated via the service
       expect(component.selectedFormId).toBe('artform');
     });
@@ -77,11 +77,11 @@ describe('FormSelectorComponent', () => {
       character.setActiveForm('nimbleform');
       characterStateService.updateCharacter(character);
       fixture.detectChanges();
-      
+
       expect(component.selectedFormId).toBe('nimbleform');
-      
+
       component.onFormSelected(undefined);
-      
+
       expect(component.selectedFormId).toBeUndefined();
     });
 
@@ -95,14 +95,14 @@ describe('FormSelectorComponent', () => {
   describe('Form Display', () => {
     it('should display form names correctly', () => {
       const forms = component.availableForms;
-      
+
       expect(forms.some((f: any) => f.name === 'Nimbleform')).toBe(true);
       expect(forms.some((f: any) => f.name === 'Artform')).toBe(true);
     });
 
     it('should show form description on hover or selection', () => {
       const nimbleform = component.availableForms.find((f: any) => f.id === 'nimbleform');
-      
+
       expect(nimbleform?.name).toBe('Nimbleform');
       expect(nimbleform?.description).toBeTruthy();
     });
@@ -110,7 +110,7 @@ describe('FormSelectorComponent', () => {
     it('should indicate which forms grant bonuses', () => {
       character.setActiveForm('nimbleform');
       fixture.detectChanges();
-      
+
       const bonuses = character.getActiveFormBonuses();
       expect(bonuses.length).toBeGreaterThan(0);
     });
@@ -122,7 +122,7 @@ describe('FormSelectorComponent', () => {
       noFormCharacter.ancestry = Ancestry.SINGER;
       characterStateService.updateCharacter(noFormCharacter);
       fixture.detectChanges();
-      
+
       // Dullform is always available
       expect(component.availableForms.length).toBe(1);
       expect(component.availableForms[0].id).toBe('dullform');
@@ -133,7 +133,7 @@ describe('FormSelectorComponent', () => {
       noFormCharacter.ancestry = Ancestry.SINGER;
       characterStateService.updateCharacter(noFormCharacter);
       fixture.detectChanges();
-      
+
       // Dullform is always available
       expect(component.availableForms.length).toBe(1);
       expect(component.availableForms[0].id).toBe('dullform');
@@ -146,19 +146,19 @@ describe('FormSelectorComponent', () => {
       character.setActiveForm('nimbleform');
       characterStateService.updateCharacter(character);
       fixture.detectChanges();
-      
+
       expect(component.selectedFormId).toBe('nimbleform');
     });
 
     it('should emit change event when form is selected', () => {
       let emittedValue: string | undefined;
-      
+
       component.formChanged.subscribe((formId: string | undefined) => {
         emittedValue = formId;
       });
-      
+
       component.onFormSelected('artform');
-      
+
       expect(emittedValue).toBe('artform');
     });
   });

@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -38,7 +38,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject = new Subject<StoreToggleEvent>();
 
     mockCharacterState = {
-      character$: characterSubject.asObservable()
+      character$: characterSubject.asObservable(),
     };
 
     mockWebsocketService = {
@@ -46,16 +46,16 @@ describe('StoreView - Category Filtering', () => {
       connected$: of(true),
       storeToggle$: storeToggleSubject.asObservable(),
       emitStoreTransaction: vi.fn(),
-      requestStoreState: vi.fn()
+      requestStoreState: vi.fn(),
     };
 
     mockActivatedRoute = {
       paramMap: of(null),
-      data: of({})
+      data: of({}),
     };
 
     mockChangeDetectorRef = {
-      detectChanges: vi.fn()
+      detectChanges: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -64,8 +64,8 @@ describe('StoreView - Category Filtering', () => {
         { provide: CharacterStateService, useValue: mockCharacterState },
         { provide: WebsocketService, useValue: mockWebsocketService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef }
-      ]
+        { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef },
+      ],
     });
 
     component = TestBed.inject(StoreView);
@@ -82,7 +82,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'main-store',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     expect(component.storeEnabled).toBe(false);
@@ -94,7 +94,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'main-store',
       enabled: true,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     expect(component.storeEnabled).toBe(true);
@@ -104,7 +104,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -115,7 +115,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'armor-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -126,7 +126,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'equipment-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -137,7 +137,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'consumables-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -148,7 +148,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'fabrials-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -159,7 +159,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'mounts-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -170,13 +170,13 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     storeToggleSubject.next({
       storeId: 'armor-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const disabled = component.getDisabledCategories();
@@ -190,7 +190,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     let disabled = component.getDisabledCategories();
@@ -200,7 +200,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: true,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     disabled = component.getDisabledCategories();
@@ -216,7 +216,7 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const message = component.getDisabledCategoriesMessage();
@@ -229,13 +229,13 @@ describe('StoreView - Category Filtering', () => {
     storeToggleSubject.next({
       storeId: 'weapons-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     storeToggleSubject.next({
       storeId: 'fabrials-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     const message = component.getDisabledCategoriesMessage();
@@ -253,7 +253,7 @@ describe('StoreView - Store Info', () => {
 
   beforeEach(() => {
     mockCharacterState = {
-      character$: of(null)
+      character$: of(null),
     };
 
     mockWebsocketService = {
@@ -261,16 +261,16 @@ describe('StoreView - Store Info', () => {
       connected$: of(true),
       storeToggle$: of(),
       emitStoreTransaction: vi.fn(),
-      requestStoreState: vi.fn()
+      requestStoreState: vi.fn(),
     };
 
     mockActivatedRoute = {
       paramMap: of(null),
-      data: of({})
+      data: of({}),
     };
 
     mockChangeDetectorRef = {
-      detectChanges: vi.fn()
+      detectChanges: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -279,8 +279,8 @@ describe('StoreView - Store Info', () => {
         { provide: CharacterStateService, useValue: mockCharacterState },
         { provide: WebsocketService, useValue: mockWebsocketService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef }
-      ]
+        { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef },
+      ],
     });
 
     component = TestBed.inject(StoreView);
@@ -296,6 +296,8 @@ describe('StoreView - Store Info', () => {
   });
 
   it('should return store description', () => {
-    expect(component.getStoreDescription()).toBe('Browse and purchase equipment for your adventures');
+    expect(component.getStoreDescription()).toBe(
+      'Browse and purchase equipment for your adventures'
+    );
   });
 });

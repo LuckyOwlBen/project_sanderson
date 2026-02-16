@@ -26,20 +26,14 @@ export interface PathOption {
 
 @Component({
   selector: 'app-path-selector',
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatChipsModule, MatIconModule],
   templateUrl: './path-selector.html',
   styleUrl: './path-selector.scss',
 })
 export class PathSelector implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 6;
-  
+
   character: Character | null = null;
   selectedMainPath: string | null = null;
   selectedSpecialization: string | null = null;
@@ -54,38 +48,38 @@ export class PathSelector implements OnInit, OnDestroy {
       id: 'warrior',
       name: 'Warrior',
       description: 'Masters of combat and physical prowess.',
-      icon: 'shield'
+      icon: 'shield',
     },
     {
       id: 'scholar',
       name: 'Scholar',
       description: 'Students of knowledge and artifice.',
-      icon: 'school'
+      icon: 'school',
     },
     {
       id: 'hunter',
       name: 'Hunter',
       description: 'Trackers and precision specialists.',
-      icon: 'gps_fixed'
+      icon: 'gps_fixed',
     },
     {
       id: 'leader',
       name: 'Leader',
       description: 'Inspirers and commanders.',
-      icon: 'groups'
+      icon: 'groups',
     },
     {
       id: 'envoy',
       name: 'Envoy',
       description: 'Diplomats and spiritual guides.',
-      icon: 'record_voice_over'
+      icon: 'record_voice_over',
     },
     {
       id: 'agent',
       name: 'Agent',
       description: 'Shadowy operatives and investigators.',
-      icon: 'visibility'
-    }
+      icon: 'visibility',
+    },
   ];
 
   constructor(
@@ -101,18 +95,14 @@ export class PathSelector implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Monitor the waiting flag from identity service
-    this.identityService.waitingForIdentity$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((waiting) => {
-        this.isWaitingForIdentity = waiting;
-      });
+    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
+      this.isWaitingForIdentity = waiting;
+    });
 
     // Subscribe to route params to detect level-up mode
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
-      });
+    this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.isLevelUpMode = params['levelUp'] === 'true';
+    });
 
     // Once we have a character ID, load paths from API
     this.identityService.currentCharacterId$
@@ -129,7 +119,8 @@ export class PathSelector implements OnInit, OnDestroy {
 
   private loadPathsFromApi(characterId: string): void {
     console.log('[PathSelector] Loading paths from API for character:', characterId);
-    this.pathsApiService.getPaths(characterId)
+    this.pathsApiService
+      .getPaths(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (paths) => {
@@ -137,7 +128,7 @@ export class PathSelector implements OnInit, OnDestroy {
           if (paths.type && paths.sub) {
             this.selectedMainPath = paths.type;
             this.selectedSpecialization = paths.sub;
-            
+
             // Load specializations for the selected main path
             const talentPath = getTalentPath(paths.type);
             if (talentPath) {
@@ -149,7 +140,11 @@ export class PathSelector implements OnInit, OnDestroy {
           }
           this.updateValidation();
           this.isWaitingForIdentity = false;
-          console.log('[PathSelector] Updated paths:', this.selectedMainPath, this.selectedSpecialization);
+          console.log(
+            '[PathSelector] Updated paths:',
+            this.selectedMainPath,
+            this.selectedSpecialization
+          );
         },
         error: (err) => {
           console.error('[PathSelector] Error loading paths from API:', err);
@@ -157,7 +152,7 @@ export class PathSelector implements OnInit, OnDestroy {
           this.selectedSpecialization = null;
           this.updateValidation();
           this.isWaitingForIdentity = false;
-        }
+        },
       });
   }
 
@@ -170,7 +165,7 @@ export class PathSelector implements OnInit, OnDestroy {
     // Ensure path ID is lowercase for consistent backend lookup
     this.selectedMainPath = pathId.toLowerCase();
     this.selectedSpecialization = null;
-    
+
     // Load specializations for this path
     const talentPath = getTalentPath(pathId.toLowerCase());
     if (talentPath) {
@@ -211,7 +206,7 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   getPathName(pathId: string): string {
-    const path = this.availablePaths.find(p => p.id === pathId);
+    const path = this.availablePaths.find((p) => p.id === pathId);
     return path?.name || pathId;
   }
 
@@ -219,22 +214,29 @@ export class PathSelector implements OnInit, OnDestroy {
   public persistStep(): Promise<void> {
     console.log('[PathSelector] persistStep called');
     return new Promise((resolve, reject) => {
-      this.identityService.currentCharacterId$.pipe(take(1)).subscribe(characterId => {
+      this.identityService.currentCharacterId$.pipe(take(1)).subscribe((characterId) => {
         if (!characterId) {
           console.warn('[PathSelector] No character ID available for saving');
           resolve();
           return;
         }
-        
+
         if (!this.selectedMainPath || !this.selectedSpecialization) {
           console.warn('[PathSelector] No path selection to save');
           resolve();
           return;
         }
 
-        console.log('[PathSelector] Saving paths:', this.selectedMainPath, this.selectedSpecialization, 'for character:', characterId);
+        console.log(
+          '[PathSelector] Saving paths:',
+          this.selectedMainPath,
+          this.selectedSpecialization,
+          'for character:',
+          characterId
+        );
         this.isLoading = true;
-        this.pathsApiService.savePaths(characterId, this.selectedMainPath, this.selectedSpecialization)
+        this.pathsApiService
+          .savePaths(characterId, this.selectedMainPath, this.selectedSpecialization)
           .subscribe({
             next: (response) => {
               console.log('[PathSelector] Paths saved to server:', response);
@@ -245,7 +247,7 @@ export class PathSelector implements OnInit, OnDestroy {
               console.error('[PathSelector] Failed to save paths:', error);
               this.isLoading = false;
               reject(error);
-            }
+            },
           });
       });
     });

@@ -27,7 +27,7 @@ interface CachedImage {
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    ImageUploader
+    ImageUploader,
   ],
   templateUrl: './character-portrait-upload.html',
   styleUrl: './character-portrait-upload.scss',
@@ -67,7 +67,9 @@ export class CharacterPortraitUpload implements OnInit {
       this.uploadedImageUrl = imageUrl;
     } catch (error: any) {
       if (error.name === 'QuotaExceededError' || error.code === 22) {
-        alert('Storage quota exceeded. Please delete some old character portraits or clear browser data.');
+        alert(
+          'Storage quota exceeded. Please delete some old character portraits or clear browser data.'
+        );
       }
       console.error('Error saving image:', error);
     }
@@ -101,7 +103,9 @@ export class CharacterPortraitUpload implements OnInit {
       this.dialogRef.close(this.uploadedImageUrl);
     } catch (error: any) {
       if (error.name === 'QuotaExceededError' || error.code === 22) {
-        alert('Storage quota exceeded. Unable to save portrait. Please delete some old character portraits or clear browser data.');
+        alert(
+          'Storage quota exceeded. Unable to save portrait. Please delete some old character portraits or clear browser data.'
+        );
       }
       console.error('Error saving portrait:', error);
     }

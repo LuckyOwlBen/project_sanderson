@@ -1,9 +1,9 @@
 /**
  * Skill Calculations Routes
- * 
+ *
  * REST endpoints for skill total calculations.
  * Provides the single source of truth for all skill calculations.
- * 
+ *
  * GET /api/characters/:id/calculations/skills/single/:skillName
  * POST /api/characters/:id/calculations/skills/single
  * GET /api/characters/:id/calculations/skills/all
@@ -20,9 +20,9 @@ function createSkillCalculationsRoutes(app) {
 
   /**
    * GET /api/characters/:id/calculations/skills/single/:skillName
-   * 
+   *
    * Calculate total for a single skill
-   * 
+   *
    * Query params:
    *   rank: number (default 0)
    *   strength: number
@@ -31,7 +31,7 @@ function createSkillCalculationsRoutes(app) {
    *   awareness: number
    *   willpower: number
    *   presence: number
-   * 
+   *
    * Response:
    * {
    *   skillName: string,
@@ -53,14 +53,14 @@ function createSkillCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : undefined,
         awareness: awareness ? parseInt(awareness as string, 10) : undefined,
         willpower: willpower ? parseInt(willpower as string, 10) : undefined,
-        presence: presence ? parseInt(presence as string, 10) : undefined
+        presence: presence ? parseInt(presence as string, 10) : undefined,
       };
 
       const validation = skillCalculationsService.validateAttributes(attrs);
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
@@ -68,7 +68,7 @@ function createSkillCalculationsRoutes(app) {
       if (!rankValidation.valid) {
         return res.status(400).json({
           success: false,
-          error: rankValidation.error
+          error: rankValidation.error,
         });
       }
 
@@ -76,22 +76,22 @@ function createSkillCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating single skill:', error);
       res.status(400).json({
         success: false,
-        error: error.message || 'Failed to calculate skill total'
+        error: error.message || 'Failed to calculate skill total',
       });
     }
   });
 
   /**
    * POST /api/characters/:id/calculations/skills/single
-   * 
+   *
    * Calculate total for a single skill (preferred method)
-   * 
+   *
    * Request body:
    * {
    *   skillName: string,
@@ -106,7 +106,7 @@ function createSkillCalculationsRoutes(app) {
       if (!skillName) {
         return res.status(400).json({
           success: false,
-          error: 'skillName required'
+          error: 'skillName required',
         });
       }
 
@@ -114,30 +114,34 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
-      const result = skillCalculationsService.calculateSkillTotal(skillName, rank || 0, attributes || {});
+      const result = skillCalculationsService.calculateSkillTotal(
+        skillName,
+        rank || 0,
+        attributes || {}
+      );
 
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating single skill:', error);
       res.status(400).json({
         success: false,
-        error: error.message || 'Failed to calculate skill total'
+        error: error.message || 'Failed to calculate skill total',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/skills/all
-   * 
+   *
    * Calculate totals for all skills
-   * 
+   *
    * Query params:
    *   strength: number
    *   quickness: number
@@ -146,7 +150,7 @@ function createSkillCalculationsRoutes(app) {
    *   willpower: number
    *   presence: number
    *   skills: JSON string with {skillName: rank}
-   * 
+   *
    * Response: {skillName: SkillTotal}
    */
   app.get('/api/characters/:id/calculations/skills/all', (req, res) => {
@@ -159,7 +163,7 @@ function createSkillCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : undefined,
         awareness: awareness ? parseInt(awareness as string, 10) : undefined,
         willpower: willpower ? parseInt(willpower as string, 10) : undefined,
-        presence: presence ? parseInt(presence as string, 10) : undefined
+        presence: presence ? parseInt(presence as string, 10) : undefined,
       };
 
       let skillRanks = {};
@@ -169,7 +173,7 @@ function createSkillCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid skills JSON'
+            error: 'Invalid skills JSON',
           });
         }
       }
@@ -178,7 +182,7 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
@@ -186,22 +190,22 @@ function createSkillCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: results
+        data: results,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating all skills:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate all skill totals'
+        error: 'Failed to calculate all skill totals',
       });
     }
   });
 
   /**
    * POST /api/characters/:id/calculations/skills/all
-   * 
+   *
    * Calculate totals for all skills (preferred method)
-   * 
+   *
    * Request body:
    * {
    *   attributes: {strength?, quickness?, ...},
@@ -216,30 +220,33 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
-      const results = skillCalculationsService.calculateAllSkillTotals(skillRanks || {}, attributes || {});
+      const results = skillCalculationsService.calculateAllSkillTotals(
+        skillRanks || {},
+        attributes || {}
+      );
 
       res.json({
         success: true,
-        data: results
+        data: results,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating all skills:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate all skill totals'
+        error: 'Failed to calculate all skill totals',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/skills/by-attribute/:attribute
-   * 
+   *
    * Get all skills for a specific attribute
-   * 
+   *
    * Query params:
    *   strength, quickness, intellect, awareness, willpower, presence
    *   skills: JSON string
@@ -255,7 +262,7 @@ function createSkillCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : undefined,
         awareness: awareness ? parseInt(awareness as string, 10) : undefined,
         willpower: willpower ? parseInt(willpower as string, 10) : undefined,
-        presence: presence ? parseInt(presence as string, 10) : undefined
+        presence: presence ? parseInt(presence as string, 10) : undefined,
       };
 
       let skillRanks = {};
@@ -265,7 +272,7 @@ function createSkillCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid skills JSON'
+            error: 'Invalid skills JSON',
           });
         }
       }
@@ -274,7 +281,7 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
@@ -286,22 +293,22 @@ function createSkillCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: results
+        data: results,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating skills by attribute:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate skills'
+        error: 'Failed to calculate skills',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/skills/surge-only
-   * 
+   *
    * Get only surge skill totals
-   * 
+   *
    * Query params: same as /all
    */
   app.get('/api/characters/:id/calculations/skills/surge-only', (req, res) => {
@@ -314,7 +321,7 @@ function createSkillCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : undefined,
         awareness: awareness ? parseInt(awareness as string, 10) : undefined,
         willpower: willpower ? parseInt(willpower as string, 10) : undefined,
-        presence: presence ? parseInt(presence as string, 10) : undefined
+        presence: presence ? parseInt(presence as string, 10) : undefined,
       };
 
       let skillRanks = {};
@@ -324,7 +331,7 @@ function createSkillCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid skills JSON'
+            error: 'Invalid skills JSON',
           });
         }
       }
@@ -333,7 +340,7 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
@@ -341,22 +348,22 @@ function createSkillCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: results
+        data: results,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating surge skills:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate surge skill totals'
+        error: 'Failed to calculate surge skill totals',
       });
     }
   });
 
   /**
    * GET /api/characters/:id/calculations/skills/non-surge-only
-   * 
+   *
    * Get only non-surge skill totals
-   * 
+   *
    * Query params: same as /all
    */
   app.get('/api/characters/:id/calculations/skills/non-surge-only', (req, res) => {
@@ -369,7 +376,7 @@ function createSkillCalculationsRoutes(app) {
         intellect: intellect ? parseInt(intellect as string, 10) : undefined,
         awareness: awareness ? parseInt(awareness as string, 10) : undefined,
         willpower: willpower ? parseInt(willpower as string, 10) : undefined,
-        presence: presence ? parseInt(presence as string, 10) : undefined
+        presence: presence ? parseInt(presence as string, 10) : undefined,
       };
 
       let skillRanks = {};
@@ -379,7 +386,7 @@ function createSkillCalculationsRoutes(app) {
         } catch (e) {
           return res.status(400).json({
             success: false,
-            error: 'Invalid skills JSON'
+            error: 'Invalid skills JSON',
           });
         }
       }
@@ -388,7 +395,7 @@ function createSkillCalculationsRoutes(app) {
       if (!validation.valid) {
         return res.status(400).json({
           success: false,
-          error: validation.error
+          error: validation.error,
         });
       }
 
@@ -396,13 +403,13 @@ function createSkillCalculationsRoutes(app) {
 
       res.json({
         success: true,
-        data: results
+        data: results,
       });
     } catch (error: any) {
       console.error('[Routes] Error calculating non-surge skills:', error);
       res.status(500).json({
         success: false,
-        error: 'Failed to calculate non-surge skill totals'
+        error: 'Failed to calculate non-surge skill totals',
       });
     }
   });

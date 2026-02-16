@@ -19,7 +19,7 @@ export class SingerFormsModuleRepository extends BaseModuleRepository {
   ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       unlockedSingerForms: unlockedForms,
-      activeForm
+      activeForm,
     });
   }
 
@@ -36,7 +36,7 @@ export class SingerFormsModuleRepository extends BaseModuleRepository {
     if (!char) return null;
     return {
       unlockedSingerForms: char.unlockedSingerForms || [],
-      activeForm: char.activeForm
+      activeForm: char.activeForm,
     };
   }
 }

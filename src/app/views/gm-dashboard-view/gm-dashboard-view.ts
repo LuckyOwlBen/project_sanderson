@@ -16,7 +16,7 @@ import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 import { ItemGrantDialogComponent } from './item-grant-dialog.component';
 import { ExpertiseGrantDialogComponent } from './expertise-grant-dialog.component';
 import { MoneyGrantDialogComponent } from './money-grant-dialog.component';
-import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
+import { CombatPanelComponent } from '../combat-panel/combat-panel.component';
 
 @Component({
   selector: 'app-gm-dashboard-view',
@@ -32,14 +32,14 @@ import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
     MatDialogModule,
     MatListModule,
     MatSnackBarModule,
-    CombatPanelComponent
-],
+    CombatPanelComponent,
+  ],
   templateUrl: './gm-dashboard-view.html',
   styleUrl: './gm-dashboard-view.scss',
 })
 export class GmDashboardView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   activePlayers = new Map<string, PlayerJoinedEvent>();
   isConnected = false;
   isHighstormActive = false;
@@ -52,7 +52,7 @@ export class GmDashboardView implements OnInit, OnDestroy {
     ['consumables-shop', true],
     ['fabrials-shop', true],
     ['mounts-shop', true],
-    ['pets-shop', true]
+    ['pets-shop', true],
   ]);
 
   constructor(
@@ -64,45 +64,39 @@ export class GmDashboardView implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to connection status FIRST before connecting
-    this.websocketService.connected$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(connected => {
-        console.log('[GM Dashboard] Connection status changed:', connected);
-        this.isConnected = connected;
-        // Manually trigger change detection to update UI immediately
-        this.cdr.detectChanges();
-        if (connected) {
-          // Request current active players when connected
-          console.log('[GM Dashboard] Requesting active players');
-          this.websocketService.requestActivePlayers();
-        }
-      });
+    this.websocketService.connected$.pipe(takeUntil(this.destroy$)).subscribe((connected) => {
+      console.log('[GM Dashboard] Connection status changed:', connected);
+      this.isConnected = connected;
+      // Manually trigger change detection to update UI immediately
+      this.cdr.detectChanges();
+      if (connected) {
+        // Request current active players when connected
+        console.log('[GM Dashboard] Requesting active players');
+        this.websocketService.requestActivePlayers();
+      }
+    });
 
     // Connect to WebSocket after subscriptions are set up
     this.websocketService.connect();
 
     // Subscribe to player joined events
-    this.websocketService.playerJoined$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(player => {
-        this.activePlayers.set(player.characterId, player);
-        this.checkCriticalHealth(player);
-        this.cdr.detectChanges();
-      });
+    this.websocketService.playerJoined$.pipe(takeUntil(this.destroy$)).subscribe((player) => {
+      this.activePlayers.set(player.characterId, player);
+      this.checkCriticalHealth(player);
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to player left events
-    this.websocketService.playerLeft$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        this.activePlayers.delete(event.characterId);
-        this.criticalPlayers.delete(event.characterId);
-        this.cdr.detectChanges();
-      });
+    this.websocketService.playerLeft$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      this.activePlayers.delete(event.characterId);
+      this.criticalPlayers.delete(event.characterId);
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to resource updates
     this.websocketService.playerResourceUpdate$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(update => {
+      .subscribe((update) => {
         const player = this.activePlayers.get(update.characterId);
         if (player) {
           player.health = update.health;
@@ -114,74 +108,58 @@ export class GmDashboardView implements OnInit, OnDestroy {
       });
 
     // Subscribe to active players list
-    this.websocketService.activePlayers$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(players => {
-        this.activePlayers.clear();
-        players.forEach(player => {
-          this.activePlayers.set(player.characterId, player);
-          this.checkCriticalHealth(player);
-        });
-        this.cdr.detectChanges();
+    this.websocketService.activePlayers$.pipe(takeUntil(this.destroy$)).subscribe((players) => {
+      this.activePlayers.clear();
+      players.forEach((player) => {
+        this.activePlayers.set(player.characterId, player);
+        this.checkCriticalHealth(player);
       });
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to critical alerts
-    this.websocketService.playerCritical$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(alert => {
-        console.log('[GM Dashboard] CRITICAL ALERT:', alert.message);
-        this.criticalPlayers.add(alert.characterId);
-        this.cdr.detectChanges();
-      });
+    this.websocketService.playerCritical$.pipe(takeUntil(this.destroy$)).subscribe((alert) => {
+      console.log('[GM Dashboard] CRITICAL ALERT:', alert.message);
+      this.criticalPlayers.add(alert.characterId);
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to level-up events
-    this.websocketService.levelUp$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[GM Dashboard] 🆙 Level-up event received:', event);
-        const player = this.activePlayers.get(event.characterId);
-        if (player) {
-          this.snackBar.open(
-            `${player.name} leveled up to ${event.newLevel}!`,
-            'Close',
-            { duration: 5000 }
-          );
-        }
-      });
+    this.websocketService.levelUp$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('[GM Dashboard] 🆙 Level-up event received:', event);
+      const player = this.activePlayers.get(event.characterId);
+      if (player) {
+        this.snackBar.open(`${player.name} leveled up to ${event.newLevel}!`, 'Close', {
+          duration: 5000,
+        });
+      }
+    });
 
     // Subscribe to highstorm events
-    this.websocketService.highstorm$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[GM Dashboard] ⚡ Highstorm event received:', event);
-        this.isHighstormActive = event.active;
-        this.cdr.detectChanges();
-      });
+    this.websocketService.highstorm$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('[GM Dashboard] ⚡ Highstorm event received:', event);
+      this.isHighstormActive = event.active;
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to store toggle events to keep GM dashboard in sync
-    this.websocketService.storeToggle$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[GM Dashboard] 🏪 Store toggle event received:', event);
-        this.storeEnabled.set(event.storeId, event.enabled);
-        this.cdr.detectChanges();
-      });
+    this.websocketService.storeToggle$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('[GM Dashboard] 🏪 Store toggle event received:', event);
+      this.storeEnabled.set(event.storeId, event.enabled);
+      this.cdr.detectChanges();
+    });
 
     // Subscribe to turn speed selection events to update combat panel
-    this.websocketService.turnSpeedSelection$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[GM Dashboard] 🔄 Turn speed selected:', event);
-        this.cdr.markForCheck();
-      });
+    this.websocketService.turnSpeedSelection$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('[GM Dashboard] 🔄 Turn speed selected:', event);
+      this.cdr.markForCheck();
+    });
 
     // Subscribe to combat start events
-    this.websocketService.combatStart$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(event => {
-        console.log('[GM Dashboard] ⚔️ Combat started');
-        this.cdr.markForCheck();
-      });
+    this.websocketService.combatStart$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('[GM Dashboard] ⚔️ Combat started');
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -191,15 +169,14 @@ export class GmDashboardView implements OnInit, OnDestroy {
   }
 
   getActivePlayersArray(): PlayerJoinedEvent[] {
-    return Array.from(this.activePlayers.values())
-      .sort((a, b) => {
-        // Sort critical players first
-        const aCritical = this.criticalPlayers.has(a.characterId);
-        const bCritical = this.criticalPlayers.has(b.characterId);
-        if (aCritical && !bCritical) return -1;
-        if (!aCritical && bCritical) return 1;
-        return a.name.localeCompare(b.name);
-      });
+    return Array.from(this.activePlayers.values()).sort((a, b) => {
+      // Sort critical players first
+      const aCritical = this.criticalPlayers.has(a.characterId);
+      const bCritical = this.criticalPlayers.has(b.characterId);
+      if (aCritical && !bCritical) return -1;
+      if (!aCritical && bCritical) return 1;
+      return a.name.localeCompare(b.name);
+    });
   }
 
   isCritical(characterId: string): boolean {
@@ -245,10 +222,10 @@ export class GmDashboardView implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(SprenGrantDialogComponent, {
       width: '600px',
       maxHeight: '90vh',
-      data: { player }
+      data: { player },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // result contains: { order: string, orderInfo: RadiantOrderInfo }
         this.websocketService.grantSpren(player.characterId, result.order, result.orderInfo);
@@ -260,17 +237,13 @@ export class GmDashboardView implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ItemGrantDialogComponent, {
       width: '700px',
       maxHeight: '90vh',
-      data: { player }
+      data: { player },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('[GM Dashboard] Granting item:', result);
-        this.websocketService.grantItem(
-          player.characterId,
-          result.itemId,
-          result.quantity
-        );
+        this.websocketService.grantItem(player.characterId, result.itemId, result.quantity);
       }
     });
   }
@@ -279,16 +252,13 @@ export class GmDashboardView implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(ExpertiseGrantDialogComponent, {
       width: '700px',
       maxHeight: '90vh',
-      data: { player }
+      data: { player },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('[GM Dashboard] Granting expertise:', result);
-        this.websocketService.grantExpertise(
-          player.characterId,
-          result.expertiseName
-        );
+        this.websocketService.grantExpertise(player.characterId, result.expertiseName);
       }
     });
   }
@@ -297,17 +267,13 @@ export class GmDashboardView implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(MoneyGrantDialogComponent, {
       width: '500px',
       maxHeight: '90vh',
-      data: { player }
+      data: { player },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('[GM Dashboard] Granting money:', result);
-        this.websocketService.grantMoney(
-          player.characterId,
-          result.amount,
-          result.operation
-        );
+        this.websocketService.grantMoney(player.characterId, result.amount, result.operation);
       }
     });
   }
@@ -320,7 +286,7 @@ export class GmDashboardView implements OnInit, OnDestroy {
   toggleHighstorm(): void {
     console.log('[GM Dashboard] Toggling highstorm:', !this.isHighstormActive);
     this.websocketService.toggleHighstorm(!this.isHighstormActive);
-    
+
     this.snackBar.open(
       this.isHighstormActive ? 'Highstorm ended' : 'Highstorm triggered!',
       'Close',

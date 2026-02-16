@@ -5,7 +5,16 @@
 
 export type ActionCost = 'free' | '1-action' | '2-actions';
 export type AbilityType = 'attack' | 'utility' | 'passive' | 'reaction';
-export type DamageType = 'keen' | 'fire' | 'frost' | 'spark' | 'sonic' | 'force' | 'poison' | 'light' | 'dark';
+export type DamageType =
+  | 'keen'
+  | 'fire'
+  | 'frost'
+  | 'spark'
+  | 'sonic'
+  | 'force'
+  | 'poison'
+  | 'light'
+  | 'dark';
 
 export interface DamageRoll {
   statistic: string; // e.g., 'keen', 'fire'

@@ -1,24 +1,26 @@
 <div class="value-stepper">
   <label class="stepper-label">{{ label }}</label>
-  
+
   <div class="stepper-controls">
-    <button 
+    <button
       class="decrement-btn"
       (click)="decrement()"
       [disabled]="!canDecrement"
-      aria-label="Decrease {{ label }}">
+      aria-label="Decrease {{ label }}"
+    >
       ←
     </button>
-    
+
     <div class="value-display">
       {{ display }}
     </div>
-    
-    <button 
+
+    <button
       class="increment-btn"
       (click)="increment()"
       [disabled]="!canIncrement"
-      aria-label="Increase {{ label }}">
+      aria-label="Increase {{ label }}"
+    >
       →
     </button>
   </div>

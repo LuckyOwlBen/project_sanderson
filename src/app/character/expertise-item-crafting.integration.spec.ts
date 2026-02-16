@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -33,16 +33,16 @@ describe('Expertise-Item-Crafting Integration', () => {
       character.cultures = [ALETHI_CULTURE];
       character.selectedExpertises = [
         ExpertiseSourceHelper.create('Armor Crafting', 'culture', 'alethi'),
-        ExpertiseSourceHelper.create('Light Armor', 'culture', 'alethi')
+        ExpertiseSourceHelper.create('Light Armor', 'culture', 'alethi'),
       ];
-      
+
       // Verify culture granted expertise
       expect(character.hasExpertise('Armor Crafting')).toBe(true);
       expect(character.hasExpertise('Light Armor')).toBe(true);
 
       // Step 2: Verify recipe is now available
       const availableRecipes = character.crafting.getAvailableRecipes();
-      const leatherArmorRecipe = availableRecipes.find(r => r.resultItemId === 'leather-armor');
+      const leatherArmorRecipe = availableRecipes.find((r) => r.resultItemId === 'leather-armor');
       expect(leatherArmorRecipe).toBeDefined();
 
       // Step 3: Add materials to inventory (recipe requires 5 leather + 3 thread)
@@ -73,15 +73,15 @@ describe('Expertise-Item-Crafting Integration', () => {
       expect(equippedItem?.id).toBe('leather-armor');
 
       // Step 7: Add expert trait to leather armor and verify unlocked with Light Armor expertise
-      const leatherArmor = ALL_ITEMS.find(i => i.id === 'leather-armor');
+      const leatherArmor = ALL_ITEMS.find((i) => i.id === 'leather-armor');
       if (leatherArmor && leatherArmor.armorProperties) {
         leatherArmor.armorProperties.expertTraits = ['+1 Agility defense'];
       }
-      
+
       const expertTraitCheck = character.inventory.canUseExpertTraits('leather-armor');
       expect(expertTraitCheck.canUse).toBe(true);
       expect(expertTraitCheck.missingExpertises).toEqual([]);
-      
+
       // Clean up
       if (leatherArmor && leatherArmor.armorProperties) {
         leatherArmor.armorProperties.expertTraits = [];
@@ -95,7 +95,7 @@ describe('Expertise-Item-Crafting Integration', () => {
       // Add materials for iron sword
       character.inventory.addItem('iron-ingot', 10);
       character.inventory.addItem('leather-strip', 5);
-      
+
       // Verify cannot craft (missing expertise)
       const canCraft = character.crafting.canCraft('craft-iron-sword');
       expect(canCraft.canCraft).toBe(false);
@@ -105,14 +105,14 @@ describe('Expertise-Item-Crafting Integration', () => {
       const craftResult = character.crafting.craftItem('craft-iron-sword');
       expect(craftResult.success).toBe(false);
       expect(craftResult.message).toContain('Weapon Crafting');
-      
+
       // Verify materials NOT consumed
       expect(character.inventory.getItemQuantity('iron-ingot')).toBe(10);
     });
 
     it('should unlock expert traits when expertise is granted', () => {
       // Step 1: Add expert trait to the iron sword for this test
-      const ironSword = ALL_ITEMS.find(i => i.id === 'iron-sword');
+      const ironSword = ALL_ITEMS.find((i) => i.id === 'iron-sword');
       if (ironSword && ironSword.weaponProperties) {
         ironSword.weaponProperties.expertTraits = ['+1 to hit when using Dueling'];
       }
@@ -127,16 +127,14 @@ describe('Expertise-Item-Crafting Integration', () => {
       expect(lockedCheck.missingExpertises).toContain('Dueling');
 
       // Step 3: Manually grant Dueling expertise (simulating GM grant or talent)
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Dueling', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Dueling', 'manual'));
 
       // Step 4: Verify expert traits are now unlocked
       expect(character.hasExpertise('Dueling')).toBe(true);
       const unlockedCheck = character.inventory.canUseExpertTraits('iron-sword');
       expect(unlockedCheck.canUse).toBe(true);
       expect(unlockedCheck.missingExpertises).toEqual([]);
-      
+
       // Clean up
       if (ironSword && ironSword.weaponProperties) {
         ironSword.weaponProperties.expertTraits = [];
@@ -146,32 +144,30 @@ describe('Expertise-Item-Crafting Integration', () => {
     it('should support multiple expertise sources unlocking same crafting recipe', () => {
       // Start with no Armor Crafting
       expect(character.hasExpertise('Armor Crafting')).toBe(false);
-      
+
       // Grant from talent
       character.selectedExpertises.push(
         ExpertiseSourceHelper.create('Armor Crafting', 'talent', 'master-craftsman')
       );
-      
+
       expect(character.hasExpertise('Armor Crafting')).toBe(true);
-      const sources = character.selectedExpertises.filter(e => e.name === 'Armor Crafting');
+      const sources = character.selectedExpertises.filter((e) => e.name === 'Armor Crafting');
       expect(sources.length).toBe(1);
       expect(sources[0].source).toBe('talent');
 
       // Verify can now see armor recipes
       const recipes = character.crafting.getAvailableRecipes();
-      const armorRecipes = recipes.filter(r => r.requiredExpertise === 'Armor Crafting');
+      const armorRecipes = recipes.filter((r) => r.requiredExpertise === 'Armor Crafting');
       expect(armorRecipes.length).toBeGreaterThan(0);
 
       // Grant same expertise from GM (duplicate source)
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Armor Crafting', 'gm')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Armor Crafting', 'gm'));
 
       // Should now have 2 sources for same expertise
-      const allSources = character.selectedExpertises.filter(e => e.name === 'Armor Crafting');
+      const allSources = character.selectedExpertises.filter((e) => e.name === 'Armor Crafting');
       expect(allSources.length).toBe(2);
-      expect(allSources.some(e => e.source === 'talent')).toBe(true);
-      expect(allSources.some(e => e.source === 'gm')).toBe(true);
+      expect(allSources.some((e) => e.source === 'talent')).toBe(true);
+      expect(allSources.some((e) => e.source === 'gm')).toBe(true);
 
       // Still has access to recipes (multiple sources don't break anything)
       expect(character.hasExpertise('Armor Crafting')).toBe(true);
@@ -185,23 +181,21 @@ describe('Expertise-Item-Crafting Integration', () => {
 
       weaponTests.forEach(({ itemId, expertise, trait }) => {
         // Add expert trait to the item
-        const item = ALL_ITEMS.find(i => i.id === itemId);
+        const item = ALL_ITEMS.find((i) => i.id === itemId);
         if (item && item.weaponProperties) {
           item.weaponProperties.expertTraits = [trait];
         }
 
         // Add item
         character.inventory.addItem(itemId, 1);
-        
+
         // Check locked state
         const locked = character.inventory.canUseExpertTraits(itemId);
         expect(locked.canUse).toBe(false);
         expect(locked.missingExpertises).toContain(expertise);
 
         // Grant expertise
-        character.selectedExpertises.push(
-          ExpertiseSourceHelper.create(expertise, 'manual')
-        );
+        character.selectedExpertises.push(ExpertiseSourceHelper.create(expertise, 'manual'));
 
         // Check unlocked state
         const unlocked = character.inventory.canUseExpertTraits(itemId);
@@ -210,7 +204,7 @@ describe('Expertise-Item-Crafting Integration', () => {
 
         // Clean up
         character.selectedExpertises = character.selectedExpertises.filter(
-          e => !(e.name === expertise && e.source === 'manual')
+          (e) => !(e.name === expertise && e.source === 'manual')
         );
         if (item && item.weaponProperties) {
           item.weaponProperties.expertTraits = [];
@@ -220,26 +214,24 @@ describe('Expertise-Item-Crafting Integration', () => {
 
     it('should verify expert traits require correct armor expertise', () => {
       // Add expert trait to leather armor for this test
-      const leatherArmor = ALL_ITEMS.find(i => i.id === 'leather-armor');
+      const leatherArmor = ALL_ITEMS.find((i) => i.id === 'leather-armor');
       if (leatherArmor && leatherArmor.armorProperties) {
         leatherArmor.armorProperties.expertTraits = ['+1 Agility defense'];
       }
 
       character.inventory.addItem('leather-armor', 1);
-      
+
       const locked = character.inventory.canUseExpertTraits('leather-armor');
       expect(locked.canUse).toBe(false);
       expect(locked.missingExpertises).toContain('Light Armor');
 
       // Grant Light Armor
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Light Armor', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Light Armor', 'manual'));
 
       const unlocked = character.inventory.canUseExpertTraits('leather-armor');
       expect(unlocked.canUse).toBe(true);
       expect(unlocked.missingExpertises).toEqual([]);
-      
+
       // Clean up
       if (leatherArmor && leatherArmor.armorProperties) {
         leatherArmor.armorProperties.expertTraits = [];
@@ -250,14 +242,12 @@ describe('Expertise-Item-Crafting Integration', () => {
   describe('Crafting Material Management', () => {
     it('should rollback materials on craft failure', () => {
       // Grant expertise
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Weapon Crafting', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Weapon Crafting', 'manual'));
 
       // Add materials
       character.inventory.addItem('iron-ingot', 3);
       character.inventory.addItem('leather-strip', 1);
-      
+
       // Attempt to craft (should succeed)
       const result = character.crafting.craftItem('craft-iron-sword');
       expect(result.success).toBe(true);
@@ -267,16 +257,14 @@ describe('Expertise-Item-Crafting Integration', () => {
       const failedResult = character.crafting.craftItem('craft-iron-sword');
       expect(failedResult.success).toBe(false);
       expect(failedResult.message).toContain('Insufficient materials');
-      
+
       // Verify materials not consumed (rollback worked)
       expect(character.inventory.getItemQuantity('iron-ingot')).toBe(0);
     });
 
     it('should handle multiple material requirements', () => {
       // Iron sword requires iron-ingot (3) + leather-strip (1)
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Weapon Crafting', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Weapon Crafting', 'manual'));
 
       // Add insufficient materials
       character.inventory.addItem('iron-ingot', 1); // Need 3
@@ -308,49 +296,41 @@ describe('Expertise-Item-Crafting Integration', () => {
       expect(noRecipes.length).toBe(0);
 
       // Grant Weapon Crafting
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Weapon Crafting', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Weapon Crafting', 'manual'));
 
       const weaponRecipes = character.crafting.getAvailableRecipes();
       expect(weaponRecipes.length).toBeGreaterThan(0);
-      expect(weaponRecipes.every(r => r.requiredExpertise === 'Weapon Crafting')).toBe(true);
+      expect(weaponRecipes.every((r) => r.requiredExpertise === 'Weapon Crafting')).toBe(true);
 
       // Grant Armor Crafting
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Armor Crafting', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Armor Crafting', 'manual'));
 
       const allRecipes = character.crafting.getAvailableRecipes();
       expect(allRecipes.length).toBeGreaterThan(weaponRecipes.length);
-      
-      const armorRecipes = allRecipes.filter(r => r.requiredExpertise === 'Armor Crafting');
+
+      const armorRecipes = allRecipes.filter((r) => r.requiredExpertise === 'Armor Crafting');
       expect(armorRecipes.length).toBeGreaterThan(0);
     });
 
     it('should categorize recipes correctly', () => {
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Weapon Crafting', 'manual')
-      );
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Armor Crafting', 'manual')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Weapon Crafting', 'manual'));
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Armor Crafting', 'manual'));
 
       const recipes = character.crafting.getAvailableRecipes();
-      
-      const weaponRecipes = recipes.filter(r => r.category === 'weapon');
-      const armorRecipes = recipes.filter(r => r.category === 'armor');
-      
+
+      const weaponRecipes = recipes.filter((r) => r.category === 'weapon');
+      const armorRecipes = recipes.filter((r) => r.category === 'armor');
+
       expect(weaponRecipes.length).toBeGreaterThan(0);
       expect(armorRecipes.length).toBeGreaterThan(0);
-      
+
       // Verify weapon recipes require Weapon Crafting
-      weaponRecipes.forEach(recipe => {
+      weaponRecipes.forEach((recipe) => {
         expect(recipe.requiredExpertise).toBe('Weapon Crafting');
       });
 
       // Verify armor recipes require Armor Crafting
-      armorRecipes.forEach(recipe => {
+      armorRecipes.forEach((recipe) => {
         expect(recipe.requiredExpertise).toBe('Armor Crafting');
       });
     });
@@ -365,11 +345,11 @@ describe('Expertise-Item-Crafting Integration', () => {
         'steel-sword',
         'leather-armor',
         'heating-fabrial',
-        'health-potion'
+        'health-potion',
       ];
 
-      craftingMaterials.forEach(materialId => {
-        const item = ALL_ITEMS.find(i => i.id === materialId);
+      craftingMaterials.forEach((materialId) => {
+        const item = ALL_ITEMS.find((i) => i.id === materialId);
         expect(item).toBeDefined();
         expect(item?.id).toBe(materialId);
       });
@@ -377,16 +357,16 @@ describe('Expertise-Item-Crafting Integration', () => {
 
     it('should verify crafted items have proper expert traits structure', () => {
       // Weapons have expertTraits arrays (may be empty initially)
-      const ironSword = ALL_ITEMS.find(i => i.id === 'iron-sword');
+      const ironSword = ALL_ITEMS.find((i) => i.id === 'iron-sword');
       expect(ironSword?.weaponProperties?.expertTraits).toBeDefined();
       expect(Array.isArray(ironSword?.weaponProperties?.expertTraits)).toBe(true);
 
-      const steelSword = ALL_ITEMS.find(i => i.id === 'steel-sword');
+      const steelSword = ALL_ITEMS.find((i) => i.id === 'steel-sword');
       expect(steelSword?.weaponProperties?.expertTraits).toBeDefined();
       expect(Array.isArray(steelSword?.weaponProperties?.expertTraits)).toBe(true);
 
       // Armor has expertTraits arrays (may be empty initially)
-      const leatherArmor = ALL_ITEMS.find(i => i.id === 'leather-armor');
+      const leatherArmor = ALL_ITEMS.find((i) => i.id === 'leather-armor');
       expect(leatherArmor?.armorProperties?.expertTraits).toBeDefined();
       expect(Array.isArray(leatherArmor?.armorProperties?.expertTraits)).toBe(true);
     });
@@ -399,8 +379,8 @@ describe('Expertise-Item-Crafting Integration', () => {
       character.selectedExpertises.push(
         ExpertiseSourceHelper.create('Light Armor', 'culture', 'alethi')
       );
-      
-      const cultureExpertises = character.selectedExpertises.filter(e => e.source === 'culture');
+
+      const cultureExpertises = character.selectedExpertises.filter((e) => e.source === 'culture');
       expect(cultureExpertises.length).toBe(1);
 
       // Step 2: Talent grants expertise (simulate)
@@ -408,16 +388,14 @@ describe('Expertise-Item-Crafting Integration', () => {
         ExpertiseSourceHelper.create('Weapon Crafting', 'talent', 'smithing-talent')
       );
 
-      const talentExpertises = character.selectedExpertises.filter(e => e.source === 'talent');
+      const talentExpertises = character.selectedExpertises.filter((e) => e.source === 'talent');
       expect(talentExpertises.length).toBe(1);
       expect(talentExpertises[0].name).toBe('Weapon Crafting');
 
       // Step 3: GM grants expertise
-      character.selectedExpertises.push(
-        ExpertiseSourceHelper.create('Fabrial Crafting', 'gm')
-      );
+      character.selectedExpertises.push(ExpertiseSourceHelper.create('Fabrial Crafting', 'gm'));
 
-      const gmExpertises = character.selectedExpertises.filter(e => e.source === 'gm');
+      const gmExpertises = character.selectedExpertises.filter((e) => e.source === 'gm');
       expect(gmExpertises.length).toBe(1);
       expect(gmExpertises[0].name).toBe('Fabrial Crafting');
 
@@ -428,7 +406,7 @@ describe('Expertise-Item-Crafting Integration', () => {
       // Step 5: Use expertise from different sources in crafting
       character.inventory.addItem('iron-ingot', 10);
       character.inventory.addItem('leather-strip', 5);
-      
+
       const canCraft = character.crafting.canCraft('craft-iron-sword');
       expect(canCraft.canCraft).toBe(true); // Has Weapon Crafting from talent
 

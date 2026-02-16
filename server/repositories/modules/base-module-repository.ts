@@ -1,6 +1,6 @@
 /**
  * BaseModuleRepository - Shared utilities for module repositories
- * 
+ *
  * Provides common functionality for loading and partially updating characters
  */
 
@@ -36,7 +36,7 @@ export abstract class BaseModuleRepository {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -56,18 +56,18 @@ export abstract class BaseModuleRepository {
       if (!char) {
         return { success: false, error: 'Character not found' };
       }
-      
+
       const updated = {
         ...char,
         ...updates,
-        lastModified: new Date().toISOString()
+        lastModified: new Date().toISOString(),
       };
-      
+
       return await this.saveCharacterData(updated);
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }

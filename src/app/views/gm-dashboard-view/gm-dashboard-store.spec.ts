@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -69,19 +69,19 @@ describe('GmDashboardView - Store Toggle', () => {
       toggleStore: vi.fn(),
       toggleHighstorm: vi.fn(),
       connect: vi.fn(),
-      requestActivePlayers: vi.fn()
+      requestActivePlayers: vi.fn(),
     };
 
     mockCdr = {
-      detectChanges: vi.fn()
+      detectChanges: vi.fn(),
     };
 
     mockDialog = {
-      open: vi.fn()
+      open: vi.fn(),
     };
 
     mockSnackBar = {
-      open: vi.fn()
+      open: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -90,8 +90,8 @@ describe('GmDashboardView - Store Toggle', () => {
         { provide: WebsocketService, useValue: mockWebsocketService },
         { provide: ChangeDetectorRef, useValue: mockCdr },
         { provide: MatDialog, useValue: mockDialog },
-        { provide: MatSnackBar, useValue: mockSnackBar }
-      ]
+        { provide: MatSnackBar, useValue: mockSnackBar },
+      ],
     });
 
     component = TestBed.inject(GmDashboardView);
@@ -139,7 +139,7 @@ describe('GmDashboardView - Store Toggle', () => {
     storeToggleSubject.next({
       storeId: 'armor-shop',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     expect(component.storeEnabled.get('armor-shop')).toBe(false);
@@ -182,7 +182,7 @@ describe('GmDashboardView - Store Toggle', () => {
     storeToggleSubject.next({
       storeId: 'main-store',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     expect(component.storeEnabled.get('main-store')).toBe(false);
@@ -203,7 +203,7 @@ describe('GmDashboardView - Store Toggle', () => {
     storeToggleSubject.next({
       storeId: 'main-store',
       enabled: false,
-      toggledBy: 'GM'
+      toggledBy: 'GM',
     });
 
     expect(mockCdr.detectChanges).toHaveBeenCalled();

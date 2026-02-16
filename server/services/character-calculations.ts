@@ -1,9 +1,9 @@
 /**
  * Character Calculations Service
- * 
+ *
  * Handles derived attribute calculations that depend on base attributes.
  * Consolidates duplicate calculation logic from frontend into single backend source.
- * 
+ *
  * Includes:
  * - Defense calculations (Physics Defense formula)
  * - Derived attributes (Movement Speed, Recovery Die)
@@ -62,9 +62,9 @@ export class CharacterCalculationsService {
 
   /**
    * Calculate physics defense
-   * 
+   *
    * Formula: Physics Defense = 10 + Speed modifier + Strength modifier + Bonuses
-   * 
+   *
    * @param attributes - Character's base attributes
    * @param bonuses - Map of bonus sources {sourceName: value}
    * @returns Defense values breakdown
@@ -97,26 +97,23 @@ export class CharacterCalculationsService {
       baseDef: 10,
       speedBonus,
       strengthBonus,
-      bonuses: totalBonuses
+      bonuses: totalBonuses,
     };
   }
 
   /**
    * Calculate movement speed
-   * 
+   *
    * Speed is based on Quickness attribute
    * Standard human base speed is 30 feet per round
    * Each point of Quickness above 10 adds 5 feet
    * Each point below 10 subtracts 5 feet
-   * 
+   *
    * @param quickness - Quickness attribute value
    * @param bonuses - Movement speed bonuses from items/effects
    * @returns Movement speed in feet
    */
-  calculateMovementSpeed(
-    quickness: number = 0,
-    bonuses: number = 0
-  ): number {
+  calculateMovementSpeed(quickness: number = 0, bonuses: number = 0): number {
     if (quickness < 0) {
       throw new Error('Quickness cannot be negative');
     }
@@ -132,24 +129,21 @@ export class CharacterCalculationsService {
 
   /**
    * Calculate recovery die
-   * 
+   *
    * Recovery die improves with Strength:
    * - STR 1-5: d4
    * - STR 6-10: d6
    * - STR 11-15: d8
    * - STR 16-20: d10
    * - STR 21+: d12
-   * 
+   *
    * Bonuses add flat amount to die rolls, or upgrade die type
-   * 
+   *
    * @param strength - Strength attribute value
    * @param bonuses - Recovery die bonuses/upgrades
    * @returns Recovery die string (e.g., 'd6', 'd8+2')
    */
-  calculateRecoveryDie(
-    strength: number = 0,
-    bonuses: string = ''
-  ): string {
+  calculateRecoveryDie(strength: number = 0, bonuses: string = ''): string {
     if (strength < 0) {
       throw new Error('Strength cannot be negative');
     }
@@ -176,7 +170,7 @@ export class CharacterCalculationsService {
 
   /**
    * Get all derived attributes for a character
-   * 
+   *
    * @param attributes - Character's base attributes
    * @param movementBonuses - Bonuses to movement speed (numeric)
    * @param recoveryBonuses - Bonuses to recovery die (string like '+2')
@@ -202,13 +196,13 @@ export class CharacterCalculationsService {
       movementSpeed,
       recoveryDie,
       baseRecoveryDie,
-      speedModifier
+      speedModifier,
     };
   }
 
   /**
    * Calculate all character stats (defense + derived attributes)
-   * 
+   *
    * @param attributes - Base attributes
    * @param defBonuses - Defense bonuses {source: value}
    * @param movementBonuses - Movement speed bonuses
@@ -223,7 +217,7 @@ export class CharacterCalculationsService {
   ): CharacterCalculations {
     return {
       defense: this.calculatePhysicsDefense(attributes, defBonuses),
-      derived: this.getDerivedAttributes(attributes, movementBonuses, recoveryBonuses)
+      derived: this.getDerivedAttributes(attributes, movementBonuses, recoveryBonuses),
     };
   }
 

@@ -1,22 +1,22 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
 
 /**
  * Integration Test Suite: Backend API + Frontend
- * 
+ *
  * Tests the complete backend-frontend integration by calling the backend
  * attack calculation APIs and validating the responses.
  */
@@ -70,16 +70,16 @@ describe('Backend-Frontend Integration Tests', () => {
       expect(attack.attackRoll.finalRoll).toBeGreaterThanOrEqual(1);
       expect(attack.attackRoll.finalRoll).toBeLessThanOrEqual(20);
       expect(attack.attackRoll.total).toBe(
-        attack.attackRoll.finalRoll + attack.attackRoll.skillModifier + attack.attackRoll.bonusModifiers
+        attack.attackRoll.finalRoll +
+          attack.attackRoll.skillModifier +
+          attack.attackRoll.bonusModifiers
       );
 
       // Validate damage roll structure
       expect(attack.damageRoll.diceNotation).toBe('d6+1');
       expect(Array.isArray(attack.damageRoll.diceRolls)).toBe(true);
       expect(attack.damageRoll.diceTotal).toBeGreaterThanOrEqual(0);
-      expect(attack.damageRoll.total).toBe(
-        attack.damageRoll.diceTotal + attack.damageRoll.bonuses
-      );
+      expect(attack.damageRoll.total).toBe(attack.damageRoll.diceTotal + attack.damageRoll.bonuses);
 
       // Validate combat result
       expect(attack.combat.vsDefense).toBe(12);
@@ -111,7 +111,11 @@ describe('Backend-Frontend Integration Tests', () => {
       expect(attack.attackRoll.finalRoll).toBe(Math.min(...attack.attackRoll.rollsGenerated));
 
       console.log('✓ Disadvantage roll (2d20 worst) executed correctly');
-      console.log(`  Rolls: [${attack.attackRoll.rollsGenerated.join(', ')}], Kept: ${attack.attackRoll.finalRoll}`);
+      console.log(
+        `  Rolls: [${attack.attackRoll.rollsGenerated.join(', ')}], Kept: ${
+          attack.attackRoll.finalRoll
+        }`
+      );
     });
 
     it('should detect critical hits (natural 20)', async () => {
@@ -169,7 +173,11 @@ describe('Backend-Frontend Integration Tests', () => {
 
       console.log('✓ Attack combination executed successfully');
       console.log(`  Attacks: 3, Hits: ${summary.hitCount}, Misses: ${summary.missCount}`);
-      console.log(`  Total Damage: ${summary.totalDamage}, Average: ${summary.averageDamagePerAttack.toFixed(2)}`);
+      console.log(
+        `  Total Damage: ${summary.totalDamage}, Average: ${summary.averageDamagePerAttack.toFixed(
+          2
+        )}`
+      );
     });
 
     it('should handle large attack counts', async () => {
@@ -189,7 +197,11 @@ describe('Backend-Frontend Integration Tests', () => {
       expect(response.combination.summary.hitCount).toBeLessThanOrEqual(5);
 
       console.log('✓ Large attack combination handled correctly');
-      console.log(`  Attacks: 5, Success Rate: ${(response.combination.summary.hitCount / 5 * 100).toFixed(1)}%`);
+      console.log(
+        `  Attacks: 5, Success Rate: ${((response.combination.summary.hitCount / 5) * 100).toFixed(
+          1
+        )}%`
+      );
     });
   });
 
@@ -253,7 +265,11 @@ describe('Backend-Frontend Integration Tests', () => {
       expect(results.length).toBe(10);
       expect(results.every((r: any) => r.success)).toBe(true);
 
-      console.log(`✓ 10 sequential requests completed in ${elapsed}ms (${(elapsed / 10).toFixed(1)}ms average)`);
+      console.log(
+        `✓ 10 sequential requests completed in ${elapsed}ms (${(elapsed / 10).toFixed(
+          1
+        )}ms average)`
+      );
     });
   });
 
@@ -299,7 +315,9 @@ describe('Backend-Frontend Integration Tests', () => {
       expect(response.attack.combat.attackTotal).toBeLessThan(200); // Still possible to miss
 
       console.log('✓ Extreme values handled correctly');
-      console.log(`  Skill: 100, Bonus: 50, Attack Roll: ${response.attack.combat.attackTotal} vs Defense: 200`);
+      console.log(
+        `  Skill: 100, Bonus: 50, Attack Roll: ${response.attack.combat.attackTotal} vs Defense: 200`
+      );
     });
   });
 });

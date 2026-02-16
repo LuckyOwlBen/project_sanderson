@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -26,12 +26,12 @@ describe('CharacterDefensesCard', () => {
 
   beforeEach(async () => {
     await TestBedInstance.configureTestingModule({
-      imports: [CharacterDefensesCard]
+      imports: [CharacterDefensesCard],
     }).compileComponents();
 
     fixture = TestBedInstance.createComponent(CharacterDefensesCard);
     component = fixture.componentInstance;
-    
+
     // Create a mock character
     mockCharacter = new Character();
   });
@@ -66,7 +66,7 @@ describe('CharacterDefensesCard', () => {
 
     it('should return 0 for all defenses when character is null', () => {
       component.character = null;
-      
+
       expect(component.getPhysicalDefense()).toBe(0);
       expect(component.getCognitiveDefense()).toBe(0);
       expect(component.getSpiritualDefense()).toBe(0);
@@ -103,15 +103,15 @@ describe('CharacterDefensesCard', () => {
       const char1 = new Character();
       const char2 = new Character();
       char2.attributes.strength = 16;
-      
+
       // Test with first character
       component.character = char1;
       const defense1 = component.getPhysicalDefense();
-      
+
       // Test with second character
       component.character = char2;
       const defense2 = component.getPhysicalDefense();
-      
+
       // Defense values should be different
       expect(defense1).not.toBe(defense2);
       expect(typeof defense1).toBe('number');

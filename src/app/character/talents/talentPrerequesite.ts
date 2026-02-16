@@ -15,7 +15,7 @@ export class TalentPrerequisiteChecker {
     let andGroup: (string | TalentPrerequisite)[] = [];
     let orGroup: (string | TalentPrerequisite)[] = [];
 
-    talentNode.prerequisites.forEach(prereq => {
+    talentNode.prerequisites.forEach((prereq) => {
       if (typeof prereq === 'string' || prereq.operator !== 'OR') {
         andGroup.push(prereq);
       } else {
@@ -24,10 +24,10 @@ export class TalentPrerequisiteChecker {
     });
 
     // All AND prerequisites must pass
-    const andPass = andGroup.every(prereq => this.checkPrerequisite(prereq));
-    
+    const andPass = andGroup.every((prereq) => this.checkPrerequisite(prereq));
+
     // At least one OR prerequisite must pass (if any exist)
-    const orPass = orGroup.length === 0 || orGroup.some(prereq => this.checkPrerequisite(prereq));
+    const orPass = orGroup.length === 0 || orGroup.some((prereq) => this.checkPrerequisite(prereq));
 
     return andPass && orPass;
   }
@@ -45,12 +45,15 @@ export class TalentPrerequisiteChecker {
 
       case 'skill':
         const skillname = this.character.skills.checkStringForMatchingSkill(prereq.target);
-        if (!skillname) { return false; }
+        if (!skillname) {
+          return false;
+        }
         const skillRanks = this.character.skills.getSkillRank(skillname);
         return skillRanks >= (prereq.value ?? 0);
 
       case 'attribute':
-        const attrValue = this.character.attributes[prereq.target as keyof typeof this.character.attributes];
+        const attrValue =
+          this.character.attributes[prereq.target as keyof typeof this.character.attributes];
         return typeof attrValue === 'number' && attrValue >= (prereq.value ?? 0);
 
       case 'level':

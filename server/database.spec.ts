@@ -4,17 +4,17 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, beforeAll, vi } from 'vitest';
-import { 
-  loadCharacter, 
-  saveCharacter, 
-  listCharacters, 
+import {
+  loadCharacter,
+  saveCharacter,
+  listCharacters,
   deleteCharacter,
   unlockTalent,
   getTalentPoints,
   getSpentPoints,
   clearDatabase,
   initDatabase,
-  initializeSchema
+  initializeSchema,
 } from './database.js';
 
 describe('Database Service', () => {
@@ -53,7 +53,7 @@ describe('Database Service', () => {
           intellect: 2,
           willpower: 2,
           awareness: 2,
-          presence: 2
+          presence: 2,
         },
         skills: {
           AGILITY: 0,
@@ -83,7 +83,7 @@ describe('Database Service', () => {
           TRANSFORMATION: 0,
           TRANSPORTATION: 0,
           COHESION: 0,
-          TENSION: 0
+          TENSION: 0,
         },
         unlockedTalents: [],
         selectedExpertises: [],
@@ -91,8 +91,8 @@ describe('Database Service', () => {
         resources: {
           health: { current: 10, max: 10 },
           focus: { current: 2, max: 2 },
-          investiture: { current: 0, max: 0, isActive: false }
-        }
+          investiture: { current: 0, max: 0, isActive: false },
+        },
       };
 
       // Act
@@ -120,8 +120,8 @@ describe('Database Service', () => {
 
       // Assert
       expect(list.length).toBe(2);
-      expect(list.some(c => c.name === 'Kaladin')).toBe(true);
-      expect(list.some(c => c.name === 'Shallan')).toBe(true);
+      expect(list.some((c) => c.name === 'Kaladin')).toBe(true);
+      expect(list.some((c) => c.name === 'Shallan')).toBe(true);
     });
 
     it('should delete a character', async () => {
@@ -167,19 +167,34 @@ describe('Database Service', () => {
         lastModified: new Date().toISOString(),
         cultures: [],
         paths: ['warrior'],
-        attributes: { strength: 2, speed: 2, intellect: 2, willpower: 2, awareness: 2, presence: 2 },
+        attributes: {
+          strength: 2,
+          speed: 2,
+          intellect: 2,
+          willpower: 2,
+          awareness: 2,
+          presence: 2,
+        },
         skills: {},
         unlockedTalents: [],
         selectedExpertises: [],
         inventory: [],
-        resources: { health: { current: 10, max: 10 }, focus: { current: 2, max: 2 }, investiture: { current: 0, max: 0, isActive: false } }
+        resources: {
+          health: { current: 10, max: 10 },
+          focus: { current: 2, max: 2 },
+          investiture: { current: 0, max: 0, isActive: false },
+        },
       };
       await saveCharacter(char);
     });
 
     it('should unlock a talent atomically', async () => {
       // Act - unlock two talents in transaction
-      const result = await unlockTalent('talent-test-char', ['shard_training', 'vigilant_stance'], 1);
+      const result = await unlockTalent(
+        'talent-test-char',
+        ['shard_training', 'vigilant_stance'],
+        1
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -202,7 +217,7 @@ describe('Database Service', () => {
       // Assert
       expect(result.success).toBe(true);
       const loaded = await loadCharacter('talent-test-char');
-      expect(loaded.unlockedTalents.filter(t => t === 'shard_training').length).toBe(1);
+      expect(loaded.unlockedTalents.filter((t) => t === 'shard_training').length).toBe(1);
     });
 
     it('should track which level a talent was unlocked at', async () => {
@@ -211,7 +226,7 @@ describe('Database Service', () => {
 
       // Assert
       const loaded = await loadCharacter('talent-test-char');
-      const talent = loaded.unlockedTalents.find(t => t === 'shard_training');
+      const talent = loaded.unlockedTalents.find((t) => t === 'shard_training');
       expect(talent).toBeDefined();
       // Note: loaded talents should have level info available
     });
@@ -258,12 +273,23 @@ describe('Database Service', () => {
         lastModified: new Date().toISOString(),
         cultures: [],
         paths: ['warrior'],
-        attributes: { strength: 2, speed: 2, intellect: 2, willpower: 2, awareness: 2, presence: 2 },
+        attributes: {
+          strength: 2,
+          speed: 2,
+          intellect: 2,
+          willpower: 2,
+          awareness: 2,
+          presence: 2,
+        },
         skills: {},
         unlockedTalents: [],
         selectedExpertises: [],
         inventory: [],
-        resources: { health: { current: 10, max: 10 }, focus: { current: 2, max: 2 }, investiture: { current: 0, max: 0, isActive: false } }
+        resources: {
+          health: { current: 10, max: 10 },
+          focus: { current: 2, max: 2 },
+          investiture: { current: 0, max: 0, isActive: false },
+        },
       };
       await saveCharacter(char);
     });
@@ -339,19 +365,30 @@ describe('Database Service', () => {
         lastModified: new Date().toISOString(),
         cultures: [],
         paths: ['warrior'],
-        attributes: { strength: 2, speed: 2, intellect: 2, willpower: 2, awareness: 2, presence: 2 },
+        attributes: {
+          strength: 2,
+          speed: 2,
+          intellect: 2,
+          willpower: 2,
+          awareness: 2,
+          presence: 2,
+        },
         skills: {},
         unlockedTalents: [],
         selectedExpertises: [],
         inventory: [],
-        resources: { health: { current: 10, max: 10 }, focus: { current: 2, max: 2 }, investiture: { current: 0, max: 0, isActive: false } }
+        resources: {
+          health: { current: 10, max: 10 },
+          focus: { current: 2, max: 2 },
+          investiture: { current: 0, max: 0, isActive: false },
+        },
       };
       await saveCharacter(char);
 
       // Act - simulate concurrent unlocks
       const [result1, result2] = await Promise.all([
         unlockTalent('concurrent-test', ['talent-a'], 1),
-        unlockTalent('concurrent-test', ['talent-b'], 1)
+        unlockTalent('concurrent-test', ['talent-b'], 1),
       ]);
 
       // Assert - both should succeed
@@ -377,12 +414,23 @@ describe('Database Service', () => {
         lastModified: new Date().toISOString(),
         cultures: [],
         paths: ['warrior'],
-        attributes: { strength: 2, speed: 2, intellect: 2, willpower: 2, awareness: 2, presence: 2 },
+        attributes: {
+          strength: 2,
+          speed: 2,
+          intellect: 2,
+          willpower: 2,
+          awareness: 2,
+          presence: 2,
+        },
         skills: { ATHLETICS: 1 },
         unlockedTalents: [],
         selectedExpertises: [],
         inventory: [],
-        resources: { health: { current: 10, max: 10 }, focus: { current: 2, max: 2 }, investiture: { current: 0, max: 0, isActive: false } }
+        resources: {
+          health: { current: 10, max: 10 },
+          focus: { current: 2, max: 2 },
+          investiture: { current: 0, max: 0, isActive: false },
+        },
       };
       await saveCharacter(char);
 

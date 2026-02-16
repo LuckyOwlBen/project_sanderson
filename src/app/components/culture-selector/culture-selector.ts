@@ -25,19 +25,14 @@ interface CultureInfo {
 @Component({
   selector: 'app-culture-selector',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule
-  ],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule],
   templateUrl: './culture-selector.html',
-  styleUrls: ['./culture-selector.scss']
+  styleUrls: ['./culture-selector.scss'],
 })
 export class CultureSelector implements OnInit, OnDestroy {
   private readonly STEP_INDEX = 1; // Culture is step 1
   private destroy$ = new Subject<void>();
-  
+
   allCultureInfos: CultureInfo[] = [];
   selectedCulture: CultureInfo | null = null;
   selectedCultureNames: string[] = [];
@@ -47,7 +42,7 @@ export class CultureSelector implements OnInit, OnDestroy {
   showValidation = false;
   isLoading = false;
   isWaitingForIdentity = false;
-  
+
   constructor(
     private router: Router,
     private validationService: StepValidationService,
@@ -64,22 +59,23 @@ export class CultureSelector implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   get canProgress(): boolean {
     return this.selectedCultureNames.length > 0;
   }
-  
+
   get isMaxCulturesSelected(): boolean {
     return this.selectedCultureNames.length >= 2;
   }
 
   private updateCultureLists(): void {
     // Filter by both selection status and ancestry restrictions
-    this.availableCultureInfos = this.allCultureInfos.filter(info => 
-      !this.selectedCultureNames.includes(info.culture.name) &&
-      this.isCultureAvailable(info.culture)
+    this.availableCultureInfos = this.allCultureInfos.filter(
+      (info) =>
+        !this.selectedCultureNames.includes(info.culture.name) &&
+        this.isCultureAvailable(info.culture)
     );
-    this.selectedCultureInfos = this.allCultureInfos.filter(info => 
+    this.selectedCultureInfos = this.allCultureInfos.filter((info) =>
       this.selectedCultureNames.includes(info.culture.name)
     );
   }
@@ -95,11 +91,9 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Monitor the waiting flag from identity service
-    this.identityService.waitingForIdentity$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((waiting) => {
-        this.isWaitingForIdentity = waiting;
-      });
+    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
+      this.isWaitingForIdentity = waiting;
+    });
 
     // Once we have a character ID, load cultures from API
     this.identityService.currentCharacterId$
@@ -116,7 +110,8 @@ export class CultureSelector implements OnInit, OnDestroy {
 
   private loadCulturesFromApi(characterId: string): void {
     console.log('[CultureSelector] Loading cultures for character:', characterId);
-    this.cultureApiService.getCultures(characterId)
+    this.cultureApiService
+      .getCultures(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -141,7 +136,7 @@ export class CultureSelector implements OnInit, OnDestroy {
           this.isWaitingForIdentity = false;
           this.cdr.detectChanges();
           this.router.navigate(['/']);
-        }
+        },
       });
   }
 
@@ -153,21 +148,20 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   private initializeCultureInfos(): void {
-    this.allCultureInfos = this.culturesService.getAllCultures()
-      .map(culture => ({
-        culture: culture,
-        name: culture.name,
-        expertise: culture.expertise,
-        description: culture.description,
-        imagePlaceholder: this.culturesService.getImagePlaceholder(culture.name),
-        imageUrl: this.culturesService.getImageUrl(culture.name),
-        suggestedNames: culture.suggestedNames
-      }));
+    this.allCultureInfos = this.culturesService.getAllCultures().map((culture) => ({
+      culture: culture,
+      name: culture.name,
+      expertise: culture.expertise,
+      description: culture.description,
+      imagePlaceholder: this.culturesService.getImagePlaceholder(culture.name),
+      imageUrl: this.culturesService.getImageUrl(culture.name),
+      suggestedNames: culture.suggestedNames,
+    }));
   }
 
   viewCultureDetails(cultureInfo: CultureInfo): void {
     this.selectedCulture = cultureInfo;
-    
+
     // Scroll to top when details open
     setTimeout(() => {
       const detailsSection = document.querySelector('.culture-details');
@@ -190,7 +184,7 @@ export class CultureSelector implements OnInit, OnDestroy {
       this.updateValidation();
       this.selectedCulture = null;
       this.showValidation = false;
-      
+
       // Scroll to selected cultures section after a brief delay
       setTimeout(() => {
         const selectedSection = document.querySelector('.selected-cultures-section');
@@ -206,7 +200,9 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   removeCulture(cultureInfo: CultureInfo): void {
-    this.selectedCultureNames = this.selectedCultureNames.filter(name => name !== cultureInfo.culture.name);
+    this.selectedCultureNames = this.selectedCultureNames.filter(
+      (name) => name !== cultureInfo.culture.name
+    );
     this.updateCultureLists();
     this.updateValidation();
   }
@@ -214,32 +210,40 @@ export class CultureSelector implements OnInit, OnDestroy {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     console.log('[CultureSelector] persistStep called');
-    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
-      if (!characterId) {
-        console.warn('[CultureSelector] No character ID available for saving');
-        return;
-      }
-      
-      if (this.selectedCultureNames.length === 0) {
-        console.warn('[CultureSelector] No cultures selected for saving');
-        return;
-      }
+    this.identityService.currentCharacterId$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((characterId) => {
+        if (!characterId) {
+          console.warn('[CultureSelector] No character ID available for saving');
+          return;
+        }
 
-      console.log('[CultureSelector] Saving cultures:', this.selectedCultureNames, 'for character:', characterId);
-      this.isLoading = true;
-      this.cultureApiService.saveCultures(characterId, this.selectedCultureNames)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            console.log('[CultureSelector] Cultures saved to server:', response);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('[CultureSelector] Failed to save cultures:', error);
-            this.isLoading = false;
-            this.router.navigate(['/']);
-          }
-        });
-    });
+        if (this.selectedCultureNames.length === 0) {
+          console.warn('[CultureSelector] No cultures selected for saving');
+          return;
+        }
+
+        console.log(
+          '[CultureSelector] Saving cultures:',
+          this.selectedCultureNames,
+          'for character:',
+          characterId
+        );
+        this.isLoading = true;
+        this.cultureApiService
+          .saveCultures(characterId, this.selectedCultureNames)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              console.log('[CultureSelector] Cultures saved to server:', response);
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('[CultureSelector] Failed to save cultures:', error);
+              this.isLoading = false;
+              this.router.navigate(['/']);
+            },
+          });
+      });
   }
 }

@@ -17,7 +17,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   border-radius: 8px;
-  
+
   .loading-spinner {
     font-size: 48px;
     width: 48px;
@@ -25,7 +25,7 @@
     color: #ffd700;
     animation: spin 2s linear infinite;
   }
-  
+
   p {
     color: #ffffff;
     font-size: 1.2rem;
@@ -34,8 +34,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .talent-header {
@@ -56,7 +60,7 @@
     font-size: 1.1rem;
     font-weight: 500;
     color: #ffffff;
-    
+
     mat-icon {
       color: #ffd700;
     }
@@ -108,7 +112,6 @@
   }
 
   .core-path-card {
-
     cursor: pointer;
     transition: all 0.3s ease;
     border: 2px solid transparent;
@@ -165,7 +168,7 @@
       display: flex;
       justify-content: center;
       padding: 1rem;
-      
+
       button {
         width: 100%;
       }
@@ -189,20 +192,20 @@
     cursor: pointer;
     font-size: 1rem;
     background-color: var(--gpSystemDarkGrey);
-    
+
     ::ng-deep {
       .mdc-evolution-chip__text-label {
         color: #ffffff !important;
       }
     }
-    
+
     &:hover {
       background-color: var(--gpSystemGrey);
     }
-    
+
     &[highlighted] {
       background-color: var(--gpColor-ChalkyBlue);
-      
+
       ::ng-deep {
         .mdc-evolution-chip__text-label {
           color: #ffffff !important;
@@ -257,7 +260,7 @@
   &.baseline-locked {
     border-color: #9e9e9e;
     opacity: 0.85;
-    
+
     mat-card-header mat-card-title::after {
       content: ' 🔒';
       font-size: 0.8em;
@@ -281,7 +284,7 @@
 
   mat-card-content {
     flex-grow: 1;
-    
+
     p {
       line-height: 1.6;
       color: #e8e8e8;
@@ -331,11 +334,11 @@
       gap: 0.25rem;
       background-color: var(--gpSystemDarkGrey);
       color: #ffffff;
-      
+
       &:hover:not([disabled]) {
         background-color: var(--gpSystemGrey);
       }
-      
+
       mat-icon {
         font-size: 20px;
         width: 20px;
@@ -477,7 +480,8 @@
 }
 
 // Radiant Path Styles
-.spren-notification, .ideal-prompt {
+.spren-notification,
+.ideal-prompt {
   margin-bottom: 2rem;
   background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(63, 81, 181, 0.1) 100%);
   border: 2px solid #9c27b0;
@@ -488,7 +492,8 @@
     padding: 1rem;
     margin: -16px -16px 16px -16px;
 
-    .spren-icon, .ideal-icon {
+    .spren-icon,
+    .ideal-icon {
       font-size: 32px;
       width: 32px;
       height: 32px;
@@ -505,7 +510,8 @@
   mat-card-content {
     padding: 1.5rem;
 
-    .spren-message, .ideal-message {
+    .spren-message,
+    .ideal-message {
       font-size: 1.1rem;
       margin-bottom: 1rem;
       color: #ffffff;
@@ -570,7 +576,7 @@
 }
 
 @media (max-width: 768px) {
- .talent-view-container {
-  padding-bottom: 6rem;
- }
+  .talent-view-container {
+    padding-bottom: 6rem;
+  }
 }

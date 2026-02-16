@@ -1,6 +1,6 @@
 /**
  * SprenGrantService - Manages spren grant queuing and delivery
- * 
+ *
  * Handles:
  * - Queuing spren grants to database
  * - Sending pending spren grants to players via WebSocket
@@ -14,10 +14,10 @@ import { RADIANT_TIER0_TALENTS } from './paths-service';
 
 export interface SprenGrantPayload {
   characterId: string;
-  order: string;                    // e.g., "Windrunner"
-  sprenType: string;                // e.g., "Honorspren"
-  surgePair: string[];              // Array of two surges
-  philosophy: string;               // First Ideal philosophy
+  order: string; // e.g., "Windrunner"
+  sprenType: string; // e.g., "Honorspren"
+  surgePair: string[]; // Array of two surges
+  philosophy: string; // First Ideal philosophy
 }
 
 /**
@@ -52,7 +52,7 @@ export class SprenGrantService {
     findSocketId: (characterId: string) => string | undefined
   ): Promise<{ success: boolean; queued: boolean; sent: boolean }> {
     const { characterId, order, sprenType, surgePair, philosophy } = payload;
-    
+
     console.log(`[Spren] 🔄 Queueing spren grant for ${characterId}: ${order}`);
 
     try {
@@ -65,7 +65,7 @@ export class SprenGrantService {
       // Try to persist to database (for recovery if server restarts)
       // This would go to PendingGrantQueue table in full implementation
       // For now, we queue and try to send immediately
-      
+
       // If player is online, send immediately
       const targetSocket = findSocketId(characterId);
       if (targetSocket) {
@@ -104,10 +104,7 @@ export class SprenGrantService {
    * @param order - Order that was granted
    * @returns Success status
    */
-  async handleSprenAck(
-    characterId: string,
-    order: string
-  ): Promise<{ success: boolean }> {
+  async handleSprenAck(characterId: string, order: string): Promise<{ success: boolean }> {
     try {
       console.log(`[Spren] ✅ Ack received for ${characterId}: ${order}`);
 
@@ -122,10 +119,10 @@ export class SprenGrantService {
         const confirmed = queue.shift();
         if (confirmed && confirmed.order === order) {
           console.log(`[Spren] ✔️ Removed ${order} from queue for ${characterId}`);
-          
+
           // Look up tier 0 talent ID for this radiant order
           const tier0TalentId = RADIANT_TIER0_TALENTS[confirmed.order.toLowerCase()] || null;
-          
+
           // Persist spren to database
           await this.radiantPathRepository.addSpren(
             characterId,
@@ -155,7 +152,9 @@ export class SprenGrantService {
   async resendPendingOnReconnect(characterId: string, socketId: string): Promise<void> {
     const queue = inMemorySprenQueue.get(characterId);
     if (queue && queue.length > 0) {
-      console.log(`[Spren] 🔁 Resending ${queue.length} pending spren grant(s) for ${characterId} on reconnect`);
+      console.log(
+        `[Spren] 🔁 Resending ${queue.length} pending spren grant(s) for ${characterId} on reconnect`
+      );
       this.sendPendingSprenGrant(characterId, socketId);
     }
   }
@@ -168,7 +167,7 @@ export class SprenGrantService {
     const queue = inMemorySprenQueue.get(characterId) || [];
     return {
       pending: queue.length,
-      confirmed: confirmedSprenGrants.has(characterId)
+      confirmed: confirmedSprenGrants.has(characterId),
     };
   }
 }

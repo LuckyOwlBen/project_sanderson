@@ -8,7 +8,7 @@
 // Test single attack
 async function testAttack() {
   console.log('\nTesting backend API...\n');
-  
+
   try {
     const body = JSON.stringify({
       skillTotal: 8,
@@ -16,15 +16,15 @@ async function testAttack() {
       damageNotation: 'd6+1',
       damageBonus: 0,
       targetDefense: 12,
-      advantageMode: 'normal'
+      advantageMode: 'normal',
     });
 
     const response = await fetch('http://localhost:3000/api/calculations/attack/execute', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: body
+      body: body,
     });
 
     if (!response.ok) {

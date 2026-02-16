@@ -33,12 +33,12 @@
     mat-chip {
       font-weight: 500;
       padding: 8px 16px;
-      
+
       &.connected {
         background-color: #4caf50 !important;
         color: white !important;
       }
-      
+
       &.disconnected {
         background-color: #f44336 !important;
         color: white !important;
@@ -53,33 +53,33 @@
 
 .world-events-section {
   margin-bottom: 32px;
-  
+
   .world-event-card {
     background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 40, 0.9) 100%);
     border: 2px solid rgba(150, 150, 150, 0.3);
     transition: all 0.3s ease;
-    
+
     &.highstorm-card {
       .event-icon {
         background: rgba(150, 150, 150, 0.2);
         color: #b0b0b0;
       }
-      
+
       &.active {
         border-color: rgba(255, 215, 0, 0.6);
         box-shadow: 0 4px 30px rgba(255, 215, 0, 0.3);
-        
+
         .event-icon {
           background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
           color: #000;
         }
-        
+
         mat-card-title {
           color: #ffd700;
         }
       }
     }
-    
+
     .event-description {
       color: #e8e8e8;
       margin: 0;
@@ -110,7 +110,7 @@
   &.critical {
     border-color: #f44336 !important;
     animation: pulse-critical 1.5s ease-in-out infinite;
-    
+
     .critical-badge {
       display: flex;
     }
@@ -169,7 +169,8 @@
 }
 
 @keyframes pulse-critical {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
   }
   50% {

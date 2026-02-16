@@ -12,10 +12,7 @@ const testBed = getTestBed();
 console.log('test-setup.ts: Initializing TestBed');
 
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
   console.log('test-setup.ts: TestBed initialized successfully');
 } catch (e: any) {
   console.log('test-setup.ts: TestBed already initialized, skipping');

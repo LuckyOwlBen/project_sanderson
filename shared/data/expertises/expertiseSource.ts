@@ -1,6 +1,6 @@
 /**
  * Expertise source tracking for automatic removal when prerequisites are lost.
- * 
+ *
  * Sources:
  * - 'culture': Auto-granted from culture selection (e.g., Alethi, Azish)
  * - 'talent': Granted by unlocking talents (e.g., Combat Training, Plausible Excuse)
@@ -11,7 +11,7 @@ export type ExpertiseSourceType = 'culture' | 'talent' | 'gm' | 'manual';
 
 /**
  * Represents an expertise with its source for cascade removal.
- * 
+ *
  * @property name - The expertise name (e.g., "Alethi", "Sleight of Hand", "Light Weaponry")
  * @property source - Where the expertise came from
  * @property sourceId - Optional identifier for the source (e.g., talent ID, culture name)
@@ -54,11 +54,16 @@ export class ExpertiseSourceHelper {
    */
   static getSourceBadge(source: ExpertiseSourceType): string {
     switch (source) {
-      case 'culture': return 'Culture';
-      case 'talent': return 'Talent';
-      case 'gm': return 'GM';
-      case 'manual': return 'Manual';
-      default: return '';
+      case 'culture':
+        return 'Culture';
+      case 'talent':
+        return 'Talent';
+      case 'gm':
+        return 'GM';
+      case 'manual':
+        return 'Manual';
+      default:
+        return '';
     }
   }
 
@@ -74,10 +79,10 @@ export class ExpertiseSourceHelper {
    * Defaults to 'manual' source for backward compatibility
    */
   static migrateFromStringArray(expertises: string[]): ExpertiseSource[] {
-    return expertises.map(name => ({
+    return expertises.map((name) => ({
       name,
       source: 'manual' as ExpertiseSourceType,
-      sourceId: undefined
+      sourceId: undefined,
     }));
   }
 
@@ -85,6 +90,6 @@ export class ExpertiseSourceHelper {
    * Extract just the expertise names from ExpertiseSource array
    */
   static toStringArray(expertises: ExpertiseSource[]): string[] {
-    return expertises.map(e => e.name);
+    return expertises.map((e) => e.name);
   }
 }

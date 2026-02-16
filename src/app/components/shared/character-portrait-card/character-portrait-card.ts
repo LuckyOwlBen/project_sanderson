@@ -17,7 +17,7 @@ import { CharacterPortraitUpload } from '../character-portrait-upload/character-
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    CharacterImage
+    CharacterImage,
   ],
   templateUrl: './character-portrait-card.html',
   styleUrl: './character-portrait-card.scss',
@@ -26,13 +26,10 @@ export class CharacterPortraitCard {
   @Input() character: Character | null = null;
   @Input() characterId: string = '';
   @Input() portraitUrl: string | null = null;
-  
+
   @Output() portraitChanged = new EventEmitter<string | null>();
 
-  constructor(
-    private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef) {}
 
   openPortraitUpload(): void {
     if (!this.character) return;
@@ -42,8 +39,8 @@ export class CharacterPortraitCard {
       data: {
         currentImageUrl: (this.character as any).portraitUrl || null,
         characterId: this.characterId || (this.character as any).id,
-        characterName: this.character.name || 'Character'
-      }
+        characterName: this.character.name || 'Character',
+      },
     });
 
     dialogRef.afterClosed().subscribe((imageUrl: string | null | undefined) => {

@@ -33,9 +33,10 @@ interface AvailableExpertiseResponse {
 
 @Injectable({ providedIn: 'root' })
 export class ExpertiseApiService {
-  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api'
-    : '/api';
+  private apiBase =
+    window.location.hostname === 'localhost' && window.location.port === '4200'
+      ? 'http://localhost:3000/api'
+      : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}
@@ -46,7 +47,10 @@ export class ExpertiseApiService {
       .pipe(map((response) => response.data));
   }
 
-  updateExpertise(characterId: string, expertise: ExpertiseSelection[]): Observable<ExpertiseState> {
+  updateExpertise(
+    characterId: string,
+    expertise: ExpertiseSelection[]
+  ): Observable<ExpertiseState> {
     return this.http
       .post<ExpertiseStateResponse>(`${this.charactersUrl}/${characterId}/expertise`, { expertise })
       .pipe(map((response) => response.data));

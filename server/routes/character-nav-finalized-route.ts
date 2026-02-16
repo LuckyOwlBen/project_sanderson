@@ -1,6 +1,6 @@
 /**
  * Character Navigation Finalized Route
- * 
+ *
  * API endpoint for frontend to get navigation finalization status
  */
 
@@ -15,10 +15,10 @@ export default function createCharacterNavFinalizedRoute(app: Express): void {
   /**
    * GET /api/character/:id/isNavFinalized
    * Get navigation finalization status for a character
-   * 
+   *
    * Returns which creation steps are finalized for the character.
    * Green buttons = finalized, Gold buttons = not finalized.
-   * 
+   *
    * @returns {
    *   ancestry: boolean,
    *   culture: boolean,
@@ -46,7 +46,7 @@ export default function createCharacterNavFinalizedRoute(app: Express): void {
 
       res.status(500).json({
         success: false,
-        error: message
+        error: message,
       });
     }
   });

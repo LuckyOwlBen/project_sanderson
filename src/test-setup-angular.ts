@@ -15,10 +15,7 @@ export function ensureTestBedInitialized() {
   }
 
   const testBed = getTestBed();
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
   testBedInitialized = true;
 }
 

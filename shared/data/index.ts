@@ -1,6 +1,6 @@
 /**
  * Shared Data - Main Export
- * 
+ *
  * Central export point for all shared data definitions (talents, cultures, expertises, etc.)
  * Import from 'shared/data' instead of individual folders
  */

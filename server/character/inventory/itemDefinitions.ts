@@ -23,8 +23,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Thrown[30/120]'],
-      expertTraits: ['Indirect']
-    }
+      expertTraits: ['Indirect'],
+    },
   },
   {
     id: 'knife',
@@ -44,8 +44,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Discreet'],
-      expertTraits: ['Offhand', 'Thrown[20/60]']
-    }
+      expertTraits: ['Offhand', 'Thrown[20/60]'],
+    },
   },
   {
     id: 'mace',
@@ -65,8 +65,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: [],
-      expertTraits: ['Momentum']
-    }
+      expertTraits: ['Momentum'],
+    },
   },
   {
     id: 'rapier',
@@ -86,8 +86,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'shortspear',
@@ -107,8 +107,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Unique: loses Two-Handed trait']
-    }
+      expertTraits: ['Unique: loses Two-Handed trait'],
+    },
   },
   {
     id: 'sidesword',
@@ -128,8 +128,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'staff',
@@ -149,8 +149,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Discreet', 'Two-Handed'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'shortbow',
@@ -170,8 +170,8 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Ranged[80/320]',
       traits: ['Two-Handed'],
-      expertTraits: ['Quickdraw']
-    }
+      expertTraits: ['Quickdraw'],
+    },
   },
   {
     id: 'sling',
@@ -191,9 +191,9 @@ export const LIGHT_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Ranged[30/120]',
       traits: ['Discreet'],
-      expertTraits: ['Indirect']
-    }
-  }
+      expertTraits: ['Indirect'],
+    },
+  },
 ];
 
 export const HEAVY_WEAPONS: InventoryItem[] = [
@@ -215,8 +215,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Thrown[20/60]'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'greatsword',
@@ -236,8 +236,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Deadly']
-    }
+      expertTraits: ['Deadly'],
+    },
   },
   {
     id: 'hammer',
@@ -257,8 +257,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Momentum']
-    }
+      expertTraits: ['Momentum'],
+    },
   },
   {
     id: 'longspear',
@@ -278,8 +278,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee[+5]',
       traits: ['Two-Handed'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'longsword',
@@ -299,8 +299,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw', 'Two-Handed'],
-      expertTraits: ['Unique: loses Two-handed Trait']
-    }
+      expertTraits: ['Unique: loses Two-handed Trait'],
+    },
   },
   {
     id: 'poleaxe',
@@ -320,8 +320,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Unique: Melee[+5]']
-    }
+      expertTraits: ['Unique: Melee[+5]'],
+    },
   },
   {
     id: 'shield',
@@ -341,8 +341,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Defensive'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'crossbow',
@@ -362,8 +362,8 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Ranged[100/400]',
       traits: ['Loaded[1]', 'Two-Handed'],
-      expertTraits: ['Deadly']
-    }
+      expertTraits: ['Deadly'],
+    },
   },
   {
     id: 'longbow',
@@ -383,9 +383,9 @@ export const HEAVY_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Ranged[150/600]',
       traits: ['Two-Handed'],
-      expertTraits: ['Indirect']
-    }
-  }
+      expertTraits: ['Indirect'],
+    },
+  },
 ];
 
 export const SPECIAL_WEAPONS: InventoryItem[] = [
@@ -407,13 +407,13 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Defensive', 'Two-Handed', 'Unique'],
-      expertTraits: ['Momentum']
+      expertTraits: ['Momentum'],
     },
     fabrialProperties: {
       charges: 1,
       currentCharges: 1,
-      effect: 'Can expend a charge to increase deflect by 10 against one attack'
-    }
+      effect: 'Can expend a charge to increase deflect by 10 against one attack',
+    },
   },
   {
     id: 'shardblade',
@@ -423,7 +423,8 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
     weight: 4,
     price: 0,
     rarity: 'reward-only',
-    description: 'A priceless blade that cuts through soul rather than flesh. Can be summoned from thin air.',
+    description:
+      'A priceless blade that cuts through soul rather than flesh. Can be summoned from thin air.',
     equipable: true,
     stackable: false,
     slot: 'mainHand',
@@ -433,8 +434,8 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
       damageType: 'spirit',
       range: 'Melee',
       traits: ['Dangerous', 'Deadly', 'Unique'],
-      expertTraits: ['Unique: loses Dangerous Trait']
-    }
+      expertTraits: ['Unique: loses Dangerous Trait'],
+    },
   },
   {
     id: 'shardblade-radiant',
@@ -444,7 +445,8 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
     weight: 0,
     price: 0,
     rarity: 'talent-only',
-    description: 'A living Shardblade formed from a bonded spren. Can be instantly summoned and reshaped.',
+    description:
+      'A living Shardblade formed from a bonded spren. Can be instantly summoned and reshaped.',
     equipable: true,
     stackable: false,
     slot: 'mainHand',
@@ -454,8 +456,8 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
       damageType: 'spirit',
       range: 'Melee',
       traits: ['Deadly', 'Unique'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'warhammer',
@@ -475,8 +477,8 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Cumbersome[5]', 'Two-Handed'],
-      expertTraits: ['Unique']
-    }
+      expertTraits: ['Unique'],
+    },
   },
   {
     id: 'grandbow',
@@ -496,9 +498,9 @@ export const SPECIAL_WEAPONS: InventoryItem[] = [
       damageType: 'keen',
       range: 'Ranged[200/800]',
       traits: ['Cumbersome[5]', 'Two-Handed'],
-      expertTraits: ['Pierce']
-    }
-  }
+      expertTraits: ['Pierce'],
+    },
+  },
 ];
 
 // ===== ARMOR =====
@@ -516,14 +518,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 0 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 0 }],
     armorProperties: {
       deflectValue: 0,
       traits: ['Presentable'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'leather-armor',
@@ -537,14 +537,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 1 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 1 }],
     armorProperties: {
       deflectValue: 1,
       traits: [],
-      expertTraits: ['Presentable']
-    }
+      expertTraits: ['Presentable'],
+    },
   },
   {
     id: 'chain-armor',
@@ -558,14 +556,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 2 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 2 }],
     armorProperties: {
       deflectValue: 2,
       traits: ['Cumbersome[3]'],
-      expertTraits: ['Unique: loses Cumbersome Trait']
-    }
+      expertTraits: ['Unique: loses Cumbersome Trait'],
+    },
   },
   {
     id: 'breastplate',
@@ -579,14 +575,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 2 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 2 }],
     armorProperties: {
       deflectValue: 2,
       traits: ['Cumbersome[3]'],
-      expertTraits: ['Presentable']
-    }
+      expertTraits: ['Presentable'],
+    },
   },
   {
     id: 'half-plate',
@@ -600,14 +594,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 3 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 3 }],
     armorProperties: {
       deflectValue: 3,
       traits: ['Cumbersome[4]'],
-      expertTraits: ['Unique: Cumbersome[3] instead of Cumbersome[4]']
-    }
+      expertTraits: ['Unique: Cumbersome[3] instead of Cumbersome[4]'],
+    },
   },
   {
     id: 'full-plate',
@@ -621,14 +613,12 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     equipable: true,
     stackable: false,
     slot: 'armor',
-    bonuses: [
-      { type: BonusType.DEFLECT, target: 'all', value: 4 }
-    ],
+    bonuses: [{ type: BonusType.DEFLECT, target: 'all', value: 4 }],
     armorProperties: {
       deflectValue: 4,
       traits: ['Cumbersome[5]'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'shardplate',
@@ -645,18 +635,18 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     bonuses: [
       { type: BonusType.DEFLECT, target: 'all', value: 5 },
       { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 },
-      { type: BonusType.ATTRIBUTE, target: 'speed', value: 2 }
+      { type: BonusType.ATTRIBUTE, target: 'speed', value: 2 },
     ],
     armorProperties: {
       deflectValue: 5,
       traits: ['Dangerous', 'Unique'],
-      expertTraits: ['Unique: loses Dangerous Trait']
+      expertTraits: ['Unique: loses Dangerous Trait'],
     },
     fabrialProperties: {
       charges: 4,
       currentCharges: 4,
-      effect: 'Can expend a charge to increase deflect by 10 against one attack'
-    }
+      effect: 'Can expend a charge to increase deflect by 10 against one attack',
+    },
   },
   {
     id: 'shardplate-radiant',
@@ -673,19 +663,19 @@ export const ARMOR_ITEMS: InventoryItem[] = [
     bonuses: [
       { type: BonusType.DEFLECT, target: 'all', value: 5 },
       { type: BonusType.ATTRIBUTE, target: 'strength', value: 2 },
-      { type: BonusType.ATTRIBUTE, target: 'speed', value: 2 }
+      { type: BonusType.ATTRIBUTE, target: 'speed', value: 2 },
     ],
     armorProperties: {
       deflectValue: 5,
       traits: ['Unique'],
-      expertTraits: []
+      expertTraits: [],
     },
     fabrialProperties: {
       charges: 4,
       currentCharges: 4,
-      effect: 'Can expend a charge to increase deflect by 10. Regains all charges after long rest.'
-    }
-  }
+      effect: 'Can expend a charge to increase deflect by 10. Regains all charges after long rest.',
+    },
+  },
 ];
 
 // ===== EQUIPMENT =====
@@ -701,7 +691,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A sturdy pack for carrying supplies.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'rope',
@@ -713,7 +703,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Seasilk rope, strong and reliable.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'blanket',
@@ -725,7 +715,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A wool blanket for warmth.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'waterskin',
@@ -737,7 +727,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A leather bag for carrying water.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'flint-steel',
@@ -749,7 +739,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'For starting fires.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'whetstone',
@@ -761,7 +751,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'For sharpening blades.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'food-ration',
@@ -773,7 +763,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Preserved food for travel.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'food-street',
@@ -785,7 +775,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Fresh street food from vendors.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'ink-pen',
@@ -797,7 +787,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A writing implement.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'ink-bottle',
@@ -809,7 +799,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'One ounce of ink.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'paper',
@@ -821,7 +811,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A single sheet of paper.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'vial-empty',
@@ -833,7 +823,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A small glass vial.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'wax-block',
@@ -845,7 +835,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'For sealing letters.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'reference-book',
@@ -857,7 +847,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A book on a specific topic.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'poison-weak',
@@ -869,7 +859,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Causes 1d6 vital damage on DC 12 Athletics test.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'common-clothing',
@@ -881,7 +871,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Plain, everyday clothes.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'fine-clothing',
@@ -893,7 +883,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'High-quality clothing for formal occasions.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'surgical-supplies',
@@ -906,7 +896,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     description: 'Bandages, salves, and splints. Can be used 10 times.',
     equipable: false,
     stackable: false,
-    properties: { uses: 10 }
+    properties: { uses: 10 },
   },
   {
     id: 'antiseptic-weak',
@@ -919,7 +909,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     description: 'Restores 1d6 health after a short rest.',
     equipable: false,
     stackable: true,
-    properties: { doses: 5 }
+    properties: { doses: 5 },
   },
   {
     id: 'antiseptic-potent',
@@ -932,7 +922,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     description: 'Restores 2d6 health after a short rest.',
     equipable: false,
     stackable: true,
-    properties: { doses: 5 }
+    properties: { doses: 5 },
   },
   {
     id: 'candle',
@@ -944,7 +934,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Burns for 6 hours, sheds light in 15-foot radius.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'oil-lantern',
@@ -956,7 +946,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Sheds light in 30-foot radius for 6 hours per pint of oil.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'oil-flask',
@@ -968,7 +958,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'One pint of oil for lanterns or improvised weapons.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'crowbar',
@@ -980,7 +970,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Grants advantage on Athletics tests for leverage.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'lockpick',
@@ -992,7 +982,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Grants advantage on Thievery tests to pick locks.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'manacles',
@@ -1004,7 +994,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Metal restraints with a key.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'musical-instrument',
@@ -1016,7 +1006,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A typical musical instrument.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'scale',
@@ -1028,7 +1018,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'For weighing objects up to 2 pounds.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'tuning-fork',
@@ -1040,7 +1030,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Can transfer Stormlight between gems.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'unencased-gem',
@@ -1052,7 +1042,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Can recharge fabrials or provide Stormlight to Radiants.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'alcohol-bottle',
@@ -1064,7 +1054,7 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A bottle of Vorin wine.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'grappling-hook',
@@ -1076,8 +1066,8 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'Grants advantage on climbing tests when anchored.',
     equipable: false,
-    stackable: false
-  }
+    stackable: false,
+  },
 ];
 
 // ===== FABRIAL ITEMS =====
@@ -1097,8 +1087,8 @@ export const FABRIAL_ITEMS: InventoryItem[] = [
     fabrialProperties: {
       charges: 3,
       currentCharges: 3,
-      effect: 'Allows written communication over long distances. Expends 1 charge per 5 days.'
-    }
+      effect: 'Allows written communication over long distances. Expends 1 charge per 5 days.',
+    },
   },
   {
     id: 'heatrial',
@@ -1114,8 +1104,9 @@ export const FABRIAL_ITEMS: InventoryItem[] = [
     fabrialProperties: {
       charges: 5,
       currentCharges: 5,
-      effect: 'Generates heat. Expends 1 charge per day for ambient warmth, or per hour for cooking.'
-    }
+      effect:
+        'Generates heat. Expends 1 charge per day for ambient warmth, or per hour for cooking.',
+    },
   },
   {
     id: 'soulcaster',
@@ -1132,9 +1123,9 @@ export const FABRIAL_ITEMS: InventoryItem[] = [
     fabrialProperties: {
       charges: 5,
       currentCharges: 5,
-      effect: 'Allows use of Transformation surge to convert materials to one Essence type.'
-    }
-  }
+      effect: 'Allows use of Transformation surge to convert materials to one Essence type.',
+    },
+  },
 ];
 
 // ===== MOUNTS & VEHICLES =====
@@ -1153,8 +1144,8 @@ export const MOUNT_ITEMS: InventoryItem[] = [
     stackable: false,
     properties: {
       travelSpeed: '2mph',
-      carryCapacity: 1500
-    }
+      carryCapacity: 1500,
+    },
   },
   {
     id: 'horse',
@@ -1169,8 +1160,8 @@ export const MOUNT_ITEMS: InventoryItem[] = [
     stackable: false,
     properties: {
       travelSpeed: '4mph',
-      carryCapacity: 500
-    }
+      carryCapacity: 500,
+    },
   },
   {
     id: 'ryshadium',
@@ -1180,14 +1171,15 @@ export const MOUNT_ITEMS: InventoryItem[] = [
     weight: 0,
     price: 0,
     rarity: 'reward-only',
-    description: 'A rare, sapient breed of horse that chooses its rider. Travel speed: 6mph, Carry capacity: 1,000lb.',
+    description:
+      'A rare, sapient breed of horse that chooses its rider. Travel speed: 6mph, Carry capacity: 1,000lb.',
     equipable: false,
     stackable: false,
     properties: {
       travelSpeed: '6mph',
-      carryCapacity: 1000
-    }
-  }
+      carryCapacity: 1000,
+    },
+  },
 ];
 
 export const VEHICLE_ITEMS: InventoryItem[] = [
@@ -1201,7 +1193,7 @@ export const VEHICLE_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A cart pulled by a chull. Travel speed: 2mph.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'rowboat',
@@ -1213,8 +1205,8 @@ export const VEHICLE_ITEMS: InventoryItem[] = [
     rarity: 'common',
     description: 'A small boat for water travel. Travel speed: 3mph downstream, 1mph upstream.',
     equipable: false,
-    stackable: false
-  }
+    stackable: false,
+  },
 ];
 
 // ===== STARTING KITS =====
@@ -1224,12 +1216,8 @@ export const STARTING_KITS: StartingKit[] = [
     id: 'academic-kit',
     name: 'Academic Kit',
     description: 'Equipment for scholars and researchers.',
-    weapons: [
-      { itemId: 'knife', quantity: 1 }
-    ],
-    armor: [
-      { itemId: 'uniform', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'knife', quantity: 1 }],
+    armor: [{ itemId: 'uniform', quantity: 1 }],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
       { itemId: 'common-clothing', quantity: 1 },
@@ -1239,21 +1227,17 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'vial-empty', quantity: 3 },
       { itemId: 'wax-block', quantity: 1 },
       { itemId: 'reference-book', quantity: 1 },
-      { itemId: 'poison-weak', quantity: 1 }
+      { itemId: 'poison-weak', quantity: 1 },
     ],
     currency: 18, // 3d12 average
-    additionalExpertise: 'Literature'
+    additionalExpertise: 'Literature',
   },
   {
     id: 'artisan-kit',
     name: 'Artisan Kit',
     description: 'Tools for crafters and artisans.',
-    weapons: [
-      { itemId: 'hammer', quantity: 1 }
-    ],
-    armor: [
-      { itemId: 'leather-armor', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'hammer', quantity: 1 }],
+    armor: [{ itemId: 'leather-armor', quantity: 1 }],
     equipment: [
       { itemId: 'common-clothing', quantity: 1 },
       { itemId: 'surgical-supplies', quantity: 1 },
@@ -1266,9 +1250,9 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'vial-empty', quantity: 3 },
       { itemId: 'tuning-fork', quantity: 1 },
       { itemId: 'musical-instrument', quantity: 1 },
-      { itemId: 'scale', quantity: 1 }
+      { itemId: 'scale', quantity: 1 },
     ],
-    currency: 16 // 4d8 average
+    currency: 16, // 4d8 average
   },
   {
     id: 'military-kit',
@@ -1276,11 +1260,11 @@ export const STARTING_KITS: StartingKit[] = [
     description: 'Standard equipment for soldiers.',
     weapons: [
       { itemId: 'longsword', quantity: 1 },
-      { itemId: 'shield', quantity: 1 }
+      { itemId: 'shield', quantity: 1 },
     ],
     armor: [
       { itemId: 'uniform', quantity: 1 },
-      { itemId: 'chain-armor', quantity: 1 }
+      { itemId: 'chain-armor', quantity: 1 },
     ],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
@@ -1289,24 +1273,22 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'flint-steel', quantity: 1 },
       { itemId: 'whetstone', quantity: 1 },
       { itemId: 'blanket', quantity: 1 },
-      { itemId: 'food-ration', quantity: 10 }
+      { itemId: 'food-ration', quantity: 10 },
     ],
-    currency: 7 // 2d6 average
+    currency: 7, // 2d6 average
   },
   {
     id: 'courtier-kit',
     name: 'Courtier Kit',
     description: 'Fine attire and accoutrements for nobles.',
-    weapons: [
-      { itemId: 'sidesword', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'sidesword', quantity: 1 }],
     armor: [],
     equipment: [
       { itemId: 'alcohol-bottle', quantity: 1 },
-      { itemId: 'fine-clothing', quantity: 1 }
+      { itemId: 'fine-clothing', quantity: 1 },
     ],
     currency: 40, // 4d20 average
-    connection: 'Supported by a patron of your noble house.'
+    connection: 'Supported by a patron of your noble house.',
   },
   {
     id: 'prisoner-kit',
@@ -1314,22 +1296,16 @@ export const STARTING_KITS: StartingKit[] = [
     description: 'The bare minimum for those who have lost everything.',
     weapons: [],
     armor: [],
-    equipment: [
-      { itemId: 'manacles', quantity: 1 }
-    ],
+    equipment: [{ itemId: 'manacles', quantity: 1 }],
     currency: 0,
-    connection: "You've attracted a Radiant spren through your trials."
+    connection: "You've attracted a Radiant spren through your trials.",
   },
   {
     id: 'underworld-kit',
     name: 'Underworld Kit',
     description: 'Tools for thieves and rogues.',
-    weapons: [
-      { itemId: 'knife', quantity: 2 }
-    ],
-    armor: [
-      { itemId: 'leather-armor', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'knife', quantity: 2 }],
+    armor: [{ itemId: 'leather-armor', quantity: 1 }],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
       { itemId: 'common-clothing', quantity: 1 },
@@ -1340,10 +1316,10 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'flint-steel', quantity: 1 },
       { itemId: 'oil-lantern', quantity: 1 },
       { itemId: 'oil-flask', quantity: 1 },
-      { itemId: 'food-street', quantity: 5 }
+      { itemId: 'food-street', quantity: 5 },
     ],
-    currency: 10 // 1d20 average
-  }
+    currency: 10, // 1d20 average
+  },
 ];
 
 // ===== CRAFTING MATERIALS =====
@@ -1359,7 +1335,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'leather-strip',
@@ -1371,7 +1347,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'leather',
@@ -1383,7 +1359,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'thread',
@@ -1395,7 +1371,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'gemstone-ruby',
@@ -1407,7 +1383,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'metal-housing',
@@ -1419,7 +1395,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'copper-wire',
@@ -1431,7 +1407,7 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'iron-sword',
@@ -1451,8 +1427,8 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
       damageType: 'keen',
       range: 'melee',
       traits: [],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'steel-sword',
@@ -1472,13 +1448,13 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
       damageType: 'keen',
       range: 'melee',
       traits: [],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'leather-armor',
     name: 'Leather Armor',
-    description: 'Supple leather armor that doesn\'t restrict movement.',
+    description: "Supple leather armor that doesn't restrict movement.",
     weight: 10,
     price: 10,
     type: 'armor',
@@ -1490,8 +1466,8 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     armorProperties: {
       deflectValue: 1,
       traits: [],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'heating-fabrial',
@@ -1507,8 +1483,8 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     fabrialProperties: {
       charges: 10,
       currentCharges: 10,
-      effect: 'Generates heat within a 10-foot radius'
-    }
+      effect: 'Generates heat within a 10-foot radius',
+    },
   },
   {
     id: 'health-potion',
@@ -1520,8 +1496,8 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
-  }
+    quantity: 1,
+  },
 ];
 
 // ===== COMBINED EXPORTS =====
@@ -1536,25 +1512,25 @@ export const ALL_ITEMS: InventoryItem[] = [
   ...MOUNT_ITEMS,
   ...VEHICLE_ITEMS,
   ...CRAFTING_MATERIALS,
-  ...PET_ITEMS
+  ...PET_ITEMS,
 ];
 
 export function getItemById(itemId: string): InventoryItem | undefined {
-  return ALL_ITEMS.find(item => item.id === itemId);
+  return ALL_ITEMS.find((item) => item.id === itemId);
 }
 
 export function getItemsByType(type: ItemType): InventoryItem[] {
-  return ALL_ITEMS.filter(item => item.type === type);
+  return ALL_ITEMS.filter((item) => item.type === type);
 }
 
 export function getItemsByRarity(rarity: ItemRarity): InventoryItem[] {
-  return ALL_ITEMS.filter(item => item.rarity === rarity);
+  return ALL_ITEMS.filter((item) => item.rarity === rarity);
 }
 
 export function getEquipableItems(): InventoryItem[] {
-  return ALL_ITEMS.filter(item => item.equipable);
+  return ALL_ITEMS.filter((item) => item.equipable);
 }
 
 export function getKitById(kitId: string): StartingKit | undefined {
-  return STARTING_KITS.find(kit => kit.id === kitId);
+  return STARTING_KITS.find((kit) => kit.id === kitId);
 }

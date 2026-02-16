@@ -36,7 +36,10 @@ export class BonusModule {
    * @param context Character context for formula evaluation (tier, skill ranks, etc)
    * @returns The numeric value of the bonus
    */
-  evaluateBonus(effect: BonusEffect, context?: { tier: number; skillRanks?: Map<string, number> }): number {
+  evaluateBonus(
+    effect: BonusEffect,
+    context?: { tier: number; skillRanks?: Map<string, number> }
+  ): number {
     // If formula is present, evaluate it
     if (effect.formula && context) {
       return this.evaluateFormula(effect.formula, context);
@@ -49,7 +52,10 @@ export class BonusModule {
    * Evaluate a formula string with character context
    * Supports: '1 + tier', 'perception.ranks', 'athletics.ranks / 2', etc.
    */
-  private evaluateFormula(formula: string, context: { tier: number; skillRanks?: Map<string, number> }): number {
+  private evaluateFormula(
+    formula: string,
+    context: { tier: number; skillRanks?: Map<string, number> }
+  ): number {
     try {
       // Replace 'tier' with the character's tier
       let expr = formula.replace(/\btier\b/g, context.tier.toString());
@@ -80,7 +86,11 @@ export class BonusModule {
     }
   }
 
-  getBonusesFor(type: BonusType, target: string, context?: { tier: number; skillRanks?: Map<string, number> }): number {
+  getBonusesFor(
+    type: BonusType,
+    target: string,
+    context?: { tier: number; skillRanks?: Map<string, number> }
+  ): number {
     let total = 0;
     for (const effects of this.activeEffects.values()) {
       for (const e of effects) {

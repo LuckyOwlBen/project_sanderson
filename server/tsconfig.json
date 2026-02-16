@@ -18,6 +18,15 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["*.ts", "services/**/*.ts", "routes/**/*.ts", "controllers/**/*.ts", "repositories/**/*.ts", "character/**/*.ts", "data-access/**/*.ts", "../shared/**/*.ts"],
+  "include": [
+    "*.ts",
+    "services/**/*.ts",
+    "routes/**/*.ts",
+    "controllers/**/*.ts",
+    "repositories/**/*.ts",
+    "character/**/*.ts",
+    "data-access/**/*.ts",
+    "../shared/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]
 }

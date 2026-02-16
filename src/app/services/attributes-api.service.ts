@@ -39,9 +39,10 @@ interface AttributesFinalizeResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AttributesApiService {
-  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api'
-    : '/api';
+  private apiBase =
+    window.location.hostname === 'localhost' && window.location.port === '4200'
+      ? 'http://localhost:3000/api'
+      : '/api';
   private charactersUrl = `${this.apiBase}/characters`;
 
   constructor(private http: HttpClient) {}
@@ -52,7 +53,10 @@ export class AttributesApiService {
       .pipe(map((response) => response.data));
   }
 
-  updateAttributes(characterId: string, attributes: Record<string, number>): Observable<AttributesState> {
+  updateAttributes(
+    characterId: string,
+    attributes: Record<string, number>
+  ): Observable<AttributesState> {
     return this.http
       .post<AttributesResponse>(`${this.charactersUrl}/${characterId}/attributes`, { attributes })
       .pipe(map((response) => response.data));
@@ -60,7 +64,10 @@ export class AttributesApiService {
 
   finalizeAttributes(characterId: string): Observable<boolean> {
     return this.http
-      .post<AttributesFinalizeResponse>(`${this.charactersUrl}/${characterId}/attributes/finalize`, {})
+      .post<AttributesFinalizeResponse>(
+        `${this.charactersUrl}/${characterId}/attributes/finalize`,
+        {}
+      )
       .pipe(map((response) => response?.data?.finalized ?? false));
   }
 }

@@ -3,7 +3,7 @@
     <mat-card-header>
       <mat-card-title>Welcome, Hero</mat-card-title>
     </mat-card-header>
-    
+
     <mat-card-content>
       <div class="intro-text">
         <p>Before we begin your journey through the world of Roshar, tell us...</p>
@@ -23,19 +23,20 @@
 
       <mat-form-field appearance="outline" class="name-input">
         <mat-label>Character Name</mat-label>
-        <input 
-          matInput 
+        <input
+          matInput
           [(ngModel)]="characterName"
           (ngModelChange)="onNameChange()"
           placeholder="Enter your character's name"
           autocomplete="off"
           maxlength="50"
-          #nameInput="ngModel">
+          #nameInput="ngModel"
+        />
         <mat-hint *ngIf="characterName.length > 0">
           {{ characterName.length }}/50 characters
         </mat-hint>
       </mat-form-field>
-      
+
       <!-- Show error message below form field if validation fails -->
       <div class="validation-error" *ngIf="nameError">
         <p class="error-text">{{ nameError }}</p>
@@ -44,12 +45,17 @@
       <div class="hint-text" *ngIf="!characterName">
         <p>Choose a name that reflects your character's heritage and destiny.</p>
         <p class="requirements">
-          <small>Must be 2-50 characters. Only letters, spaces, hyphens, and apostrophes allowed.</small>
+          <small
+            >Must be 2-50 characters. Only letters, spaces, hyphens, and apostrophes allowed.</small
+          >
         </p>
       </div>
 
       <div class="greeting-text" *ngIf="characterName && !nameError">
-        <p>Greetings, <strong>{{ characterName }}</strong>! Let's build your legend.</p>
+        <p>
+          Greetings, <strong>{{ characterName }}</strong
+          >! Let's build your legend.
+        </p>
       </div>
     </mat-card-content>
   </mat-card>
@@ -62,16 +68,17 @@
         Suggested Names
       </mat-card-title>
     </mat-card-header>
-    
+
     <mat-card-content>
       <p class="suggestions-subtitle">Based on your selected culture</p>
-      
+
       <div class="name-chips">
         <mat-chip-set>
-          <mat-chip 
+          <mat-chip
             *ngFor="let name of suggestedNames"
             (click)="selectSuggestedName(name)"
-            class="name-chip">
+            class="name-chip"
+          >
             {{ name }}
           </mat-chip>
         </mat-chip-set>

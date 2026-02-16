@@ -25,7 +25,7 @@ export class IdentityModuleRepository extends BaseModuleRepository {
     if (!char) return null;
     return {
       id: char.id,
-      name: char.name
+      name: char.name,
     };
   }
 }

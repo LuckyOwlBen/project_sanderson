@@ -20,18 +20,14 @@ interface AncestryInfo {
 
 @Component({
   selector: 'app-ancestry-selector',
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-  ],
+  imports: [CommonModule, MatCardModule, MatIconModule],
   templateUrl: './ancestry-selector.html',
   styleUrl: './ancestry-selector.scss',
 })
 export class AncestrySelector implements OnInit, OnDestroy {
   private readonly STEP_INDEX = 0; // Ancestry is step 0
   private destroy$ = new Subject<void>();
-  
+
   selectedAncestry: Ancestry | null = null;
   Ancestry = Ancestry; // Expose enum to template
   isLoading: boolean = false;
@@ -42,29 +38,31 @@ export class AncestrySelector implements OnInit, OnDestroy {
       type: Ancestry.HUMAN,
       title: 'Human',
       shortDesc: 'The most common people of Roshar',
-      fullDesc: 'Humans are the dominant species on Roshar, having arrived on the world long ago. They inhabit every corner of the planet, from the storm-battered eastern kingdoms to the sheltered western lands of Shinovar. Humans display tremendous diversity in culture, appearance, and ambition.',
+      fullDesc:
+        'Humans are the dominant species on Roshar, having arrived on the world long ago. They inhabit every corner of the planet, from the storm-battered eastern kingdoms to the sheltered western lands of Shinovar. Humans display tremendous diversity in culture, appearance, and ambition.',
       features: [
         'Versatile and adaptable to any role',
         'Can pursue any path or profession',
         'Most common ancestry across Roshar',
-        'Wide variety of cultures and traditions'
+        'Wide variety of cultures and traditions',
       ],
-      imagePlaceholder: 'account_circle'
+      imagePlaceholder: 'account_circle',
     },
     {
       type: Ancestry.SINGER,
       title: 'Singer',
       shortDesc: 'Ancient inhabitants with the ability to change forms',
-      fullDesc: 'Singers are humanoid beings with distinctive carapace armor and the extraordinary ability to assume different forms during highstorms by bonding with spren. Once called parshendi or parshmen, they are the original inhabitants of Roshar. In their various forms, singers can adapt their physical and mental capabilities to suit different roles in society.',
+      fullDesc:
+        'Singers are humanoid beings with distinctive carapace armor and the extraordinary ability to assume different forms during highstorms by bonding with spren. Once called parshendi or parshmen, they are the original inhabitants of Roshar. In their various forms, singers can adapt their physical and mental capabilities to suit different roles in society.',
       features: [
         'Can change forms during highstorms',
         'Natural carapace provides protection',
-        'Unique connection to Roshar\'s rhythms',
+        "Unique connection to Roshar's rhythms",
         'Access to specialized form abilities',
-        'Ancient heritage predating humans'
+        'Ancient heritage predating humans',
       ],
-      imagePlaceholder: 'psychology'
-    }
+      imagePlaceholder: 'psychology',
+    },
   ];
 
   constructor(
@@ -77,11 +75,9 @@ export class AncestrySelector implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Monitor the waiting flag from identity service
-    this.identityService.waitingForIdentity$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((waiting) => {
-        this.isWaitingForIdentity = waiting;
-      });
+    this.identityService.waitingForIdentity$.pipe(takeUntil(this.destroy$)).subscribe((waiting) => {
+      this.isWaitingForIdentity = waiting;
+    });
 
     // Once we have a character ID, lazy load ancestry from API
     this.identityService.currentCharacterId$
@@ -98,7 +94,8 @@ export class AncestrySelector implements OnInit, OnDestroy {
 
   private loadAncestryFromApi(characterId: string): void {
     console.log('[AncestrySelector] Loading ancestry from API for character:', characterId);
-    this.ancestryApiService.getAncestry(characterId)
+    this.ancestryApiService
+      .getAncestry(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (ancestry) => {
@@ -120,7 +117,7 @@ export class AncestrySelector implements OnInit, OnDestroy {
           this.isWaitingForIdentity = false;
           this.cdr.detectChanges();
           this.router.navigate(['/']);
-        }
+        },
       });
   }
 
@@ -146,34 +143,40 @@ export class AncestrySelector implements OnInit, OnDestroy {
   // Persist hook for CharacterCreatorView
   public persistStep(): void {
     console.log('[AncestrySelector] persistStep called');
-    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
-      if (!characterId) {
-        console.warn('[AncestrySelector] No character ID available for saving');
-        return;
-      }
-      
-      if (!this.selectedAncestry) {
-        console.warn('[AncestrySelector] No ancestry selected for saving');
-        return;
-      }
+    this.identityService.currentCharacterId$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((characterId) => {
+        if (!characterId) {
+          console.warn('[AncestrySelector] No character ID available for saving');
+          return;
+        }
 
-      console.log('[AncestrySelector] Saving ancestry:', this.selectedAncestry, 'for character:', characterId);
-      this.isLoading = true;
-      this.ancestryApiService.saveAncestry(characterId, this.selectedAncestry)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            console.log('[AncestrySelector] Ancestry saved to server:', response);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('[AncestrySelector] Failed to save ancestry:', error);
-            this.isLoading = false;
-            this.router.navigate(['/']);
-          }
-        });
-    });
+        if (!this.selectedAncestry) {
+          console.warn('[AncestrySelector] No ancestry selected for saving');
+          return;
+        }
+
+        console.log(
+          '[AncestrySelector] Saving ancestry:',
+          this.selectedAncestry,
+          'for character:',
+          characterId
+        );
+        this.isLoading = true;
+        this.ancestryApiService
+          .saveAncestry(characterId, this.selectedAncestry)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              console.log('[AncestrySelector] Ancestry saved to server:', response);
+              this.isLoading = false;
+            },
+            error: (error) => {
+              console.error('[AncestrySelector] Failed to save ancestry:', error);
+              this.isLoading = false;
+              this.router.navigate(['/']);
+            },
+          });
+      });
   }
 }
-
-

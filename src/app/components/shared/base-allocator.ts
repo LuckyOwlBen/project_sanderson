@@ -24,20 +24,24 @@ export abstract class BaseAllocator<TConfig> {
    * Initialize the allocator with items and total points available
    * @param useCurrentAsBaseline - In level-up mode, treat current values as baseline (don't count them as spent)
    */
-  protected initialize(items: TConfig[], totalPoints: number, useCurrentAsBaseline: boolean = false): void {
+  protected initialize(
+    items: TConfig[],
+    totalPoints: number,
+    useCurrentAsBaseline: boolean = false
+  ): void {
     this.items = items;
     this.totalPoints = totalPoints;
-    
+
     // In level-up mode, store current values as baseline
     if (useCurrentAsBaseline) {
       this.baselineValues.clear();
-      items.forEach(item => {
+      items.forEach((item) => {
         this.baselineValues.set(this.getLabel(item), this.getCurrentValue(item));
       });
     } else {
       this.baselineValues.clear();
     }
-    
+
     this.calculatePoints();
   }
 
@@ -57,9 +61,9 @@ export abstract class BaseAllocator<TConfig> {
   /**
    * Handle value change for an item
    */
-  onValueChanged(event: {label: string, value: number}): void {
-    const item = this.items.find(i => this.getLabel(i) === event.label);
-    
+  onValueChanged(event: { label: string; value: number }): void {
+    const item = this.items.find((i) => this.getLabel(i) === event.label);
+
     if (item) {
       const oldValue = this.getCurrentValue(item);
       const newValue = event.value;
@@ -81,7 +85,7 @@ export abstract class BaseAllocator<TConfig> {
    * Reset all allocations to minimum value (or baseline in level-up mode)
    */
   resetAllocations(): void {
-    this.items.forEach(item => {
+    this.items.forEach((item) => {
       const resetValue = this.getMinValue(item);
       this.setCurrentValue(item, resetValue);
     });

@@ -1,5 +1,9 @@
 import { Express } from 'express';
-import { getAvailableExpertise, getExpertise, setExpertise } from '../controllers/expertise-controller';
+import {
+  getAvailableExpertise,
+  getExpertise,
+  setExpertise,
+} from '../controllers/expertise-controller';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
 /**

@@ -4,32 +4,33 @@
     <mat-icon>warning</mat-icon>
     <span>Please select at least one culture before continuing</span>
   </div>
-  
+
   <!-- Available Cultures Grid -->
   <div *ngIf="!selectedCulture">
     <div class="section-header" *ngIf="availableCultureInfos.length > 0">
       <h2>Available Cultures</h2>
       <p class="section-subtitle">Select up to 2 cultures for your character</p>
     </div>
-    
+
     <div class="culture-grid" *ngIf="availableCultureInfos.length > 0">
-      <mat-card 
+      <mat-card
         class="culture-card"
         [class.disabled]="isMaxCulturesSelected"
         *ngFor="let cultureInfo of availableCultureInfos"
-        (click)="!isMaxCulturesSelected && viewCultureDetails(cultureInfo)">
-        
+        (click)="!isMaxCulturesSelected && viewCultureDetails(cultureInfo)"
+      >
         <div class="culture-image-container">
           <div class="image-placeholder" [style.background]="cultureInfo.imagePlaceholder">
-            <img 
-              [src]="cultureInfo.imageUrl" 
+            <img
+              [src]="cultureInfo.imageUrl"
               [alt]="cultureInfo.name"
-              (error)="$any($event.target).style.display='none'"
-              class="culture-image">
+              (error)="$any($event.target).style.display = 'none'"
+              class="culture-image"
+            />
             <mat-icon class="placeholder-icon">public</mat-icon>
           </div>
         </div>
-        
+
         <mat-card-content>
           <h2 class="culture-name">{{ cultureInfo.name }}</h2>
           <p class="culture-expertise">
@@ -47,31 +48,32 @@
       <mat-icon>arrow_back</mat-icon>
       Back to Cultures
     </button>
-    
+
     <mat-card class="detail-card">
       <div class="detail-image-container">
         <div class="detail-image-placeholder" [style.background]="selectedCulture.imagePlaceholder">
-          <img 
-            [src]="selectedCulture.imageUrl" 
+          <img
+            [src]="selectedCulture.imageUrl"
             [alt]="selectedCulture.name"
-            (error)="$any($event.target).style.display='none'"
-            class="detail-image">
+            (error)="$any($event.target).style.display = 'none'"
+            class="detail-image"
+          />
           <mat-icon class="detail-placeholder-icon">public</mat-icon>
         </div>
       </div>
-      
+
       <mat-card-content>
         <h1 class="detail-name">{{ selectedCulture.name }}</h1>
-        
+
         <div class="expertise-section">
           <mat-icon>star</mat-icon>
           <strong>Cultural Expertise:</strong> {{ selectedCulture.expertise }}
         </div>
-        
+
         <div class="description-section">
           <p>{{ selectedCulture.description }}</p>
         </div>
-        
+
         <button mat-raised-button color="primary" class="confirm-button" (click)="confirmCulture()">
           <mat-icon>check_circle</mat-icon>
           Select {{ selectedCulture.name }}
@@ -86,24 +88,22 @@
       <h2>Selected Cultures ({{ selectedCultureInfos.length }}/2)</h2>
       <p class="section-subtitle">Click a culture to view details or remove it</p>
     </div>
-    
+
     <div class="selected-cultures-grid">
-      <mat-card 
-        class="selected-culture-card"
-        *ngFor="let cultureInfo of selectedCultureInfos">
-        
+      <mat-card class="selected-culture-card" *ngFor="let cultureInfo of selectedCultureInfos">
         <div class="selected-culture-content">
           <div class="selected-image-container">
             <div class="image-placeholder" [style.background]="cultureInfo.imagePlaceholder">
-              <img 
-                [src]="cultureInfo.imageUrl" 
+              <img
+                [src]="cultureInfo.imageUrl"
                 [alt]="cultureInfo.name"
-                (error)="$any($event.target).style.display='none'"
-                class="culture-image">
+                (error)="$any($event.target).style.display = 'none'"
+                class="culture-image"
+              />
               <mat-icon class="placeholder-icon">public</mat-icon>
             </div>
           </div>
-          
+
           <div class="selected-info">
             <h3 class="selected-name">{{ cultureInfo.name }}</h3>
             <p class="selected-expertise">
@@ -111,13 +111,14 @@
               {{ cultureInfo.expertise }}
             </p>
           </div>
-          
-          <button 
-            mat-icon-button 
-            color="warn" 
+
+          <button
+            mat-icon-button
+            color="warn"
             class="remove-button"
             (click)="removeCulture(cultureInfo)"
-            [attr.aria-label]="'Remove ' + cultureInfo.name">
+            [attr.aria-label]="'Remove ' + cultureInfo.name"
+          >
             <mat-icon>close</mat-icon>
           </button>
         </div>

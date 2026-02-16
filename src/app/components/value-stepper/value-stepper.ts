@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 
 @Component({
   selector: 'app-value-stepper',
@@ -12,8 +20,8 @@ export class ValueStepper implements OnInit, OnChanges {
   @Input() minValue: number = 0;
   @Input() maxValue: number = 10;
   @Input() pointsRemaining: number = 0;
-  
-  @Output() valueChanged = new EventEmitter<{label: string, value: number}>();
+
+  @Output() valueChanged = new EventEmitter<{ label: string; value: number }>();
 
   private displayValue: number = 0;
 
@@ -31,14 +39,14 @@ export class ValueStepper implements OnInit, OnChanges {
   increment(): void {
     if (this.displayValue < this.maxValue && this.pointsRemaining > 0) {
       this.displayValue++;
-      this.valueChanged.emit({label: this.label, value: this.displayValue});
+      this.valueChanged.emit({ label: this.label, value: this.displayValue });
     }
   }
 
   decrement(): void {
     if (this.displayValue > this.minValue) {
       this.displayValue--;
-      this.valueChanged.emit({label: this.label, value: this.displayValue});
+      this.valueChanged.emit({ label: this.label, value: this.displayValue });
     }
   }
 

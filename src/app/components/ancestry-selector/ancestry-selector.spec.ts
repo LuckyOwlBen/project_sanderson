@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -39,12 +39,12 @@ describe('AncestrySelector', () => {
 
   beforeEach(async () => {
     storageService = {
-      saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' }))
+      saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' })),
     };
 
     ancestryApiService = {
       getAncestry: vi.fn().mockReturnValue(of(Ancestry.SINGER)),
-      saveAncestry: vi.fn().mockReturnValue(of(Ancestry.HUMAN))
+      saveAncestry: vi.fn().mockReturnValue(of(Ancestry.HUMAN)),
     };
 
     const identityId$ = new BehaviorSubject<string | null>('char-123');
@@ -54,11 +54,11 @@ describe('AncestrySelector', () => {
       waitingForIdentity$: waiting$.asObservable(),
       getCurrentCharacterId: vi.fn().mockReturnValue('char-123'),
       setCurrentCharacterId: vi.fn(),
-      newIdentity: vi.fn()
+      newIdentity: vi.fn(),
     };
 
     const routerStub = {
-      navigate: vi.fn()
+      navigate: vi.fn(),
     } as unknown as Router;
 
     await TestBed.configureTestingModule({
@@ -69,10 +69,9 @@ describe('AncestrySelector', () => {
         { provide: CharacterStorageService, useValue: storageService },
         { provide: AncestryApiService, useValue: ancestryApiService },
         { provide: CharacterIdentityService, useValue: identityService },
-        { provide: Router, useValue: routerStub }
-      ]
-    })
-    .compileComponents();
+        { provide: Router, useValue: routerStub },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AncestrySelector);
     component = fixture.componentInstance;

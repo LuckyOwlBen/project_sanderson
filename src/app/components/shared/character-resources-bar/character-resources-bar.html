@@ -1,15 +1,18 @@
 <div class="character-resources-bar" *ngIf="character">
-  <app-resource-tracker 
+  <app-resource-tracker
     [resource]="healthResource"
-    (valueChanged)="onResourceChanged('Health', $event)">
+    (valueChanged)="onResourceChanged('Health', $event)"
+  >
   </app-resource-tracker>
-  <app-resource-tracker 
+  <app-resource-tracker
     [resource]="focusResource"
-    (valueChanged)="onResourceChanged('Focus', $event)">
+    (valueChanged)="onResourceChanged('Focus', $event)"
+  >
   </app-resource-tracker>
-  <app-resource-tracker 
+  <app-resource-tracker
     *ngIf="showInvestiture"
     [resource]="investitureResource"
-    (valueChanged)="onResourceChanged('Investiture', $event)">
+    (valueChanged)="onResourceChanged('Investiture', $event)"
+  >
   </app-resource-tracker>
 </div>

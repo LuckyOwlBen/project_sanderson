@@ -1,231 +1,231 @@
-import { SkillType } from "../skills/skillTypes";
-import { SkillManager } from "../skills/skillManager";
-import { UniversalAbility, getAvailableAbilities } from "../abilities/universalAbilities";
+import { SkillType } from '../skills/skillTypes';
+import { SkillManager } from '../skills/skillManager';
+import { UniversalAbility, getAvailableAbilities } from '../abilities/universalAbilities';
 
 export interface RadiantOrderInfo {
-    order: string;
-    sprenType: string;
-    surgePair: [SkillType, SkillType];
-    philosophy: string;
+  order: string;
+  sprenType: string;
+  surgePair: [SkillType, SkillType];
+  philosophy: string;
 }
 
 export const RADIANT_ORDERS: Record<string, RadiantOrderInfo> = {
-    'Windrunner': {
-        order: 'Windrunner',
-        sprenType: 'Honorspren',
-        surgePair: [SkillType.ADHESION, SkillType.GRAVITATION],
-        philosophy: 'Protect the innocent and the defenseless.'
-    },
-    'Skybreaker': {
-        order: 'Skybreaker',
-        sprenType: 'Highspren',
-        surgePair: [SkillType.DIVISION, SkillType.GRAVITATION],
-        philosophy: 'Enforce the law and strive for justice.'
-    },
-    'Dustbringer': {
-        order: 'Dustbringer',
-        sprenType: 'Ashspren',
-        surgePair: [SkillType.DIVISION, SkillType.ABRASION],
-        philosophy: 'Great power requires strong discipline.'
-    },
-    'Edgedancer': {
-        order: 'Edgedancer',
-        sprenType: 'Cultivationspren',
-        surgePair: [SkillType.ABRASION, SkillType.PROGRESSION],
-        philosophy: 'Remember and serve those who others forget.'
-    },
-    'Truthwatcher': {
-        order: 'Truthwatcher',
-        sprenType: 'Mistspren',
-        surgePair: [SkillType.ILLUMINATION, SkillType.PROGRESSION],
-        philosophy: 'Search for fundamental truth and share it.'
-    },
-    'Lightweaver': {
-        order: 'Lightweaver',
-        sprenType: 'Cryptic',
-        surgePair: [SkillType.ILLUMINATION, SkillType.TRANSFORMATION],
-        philosophy: 'Separate truth from lies.'
-    },
-    'Elsecaller': {
-        order: 'Elsecaller',
-        sprenType: 'Inkspren',
-        surgePair: [SkillType.TRANSFORMATION, SkillType.TRANSPORTATION],
-        philosophy: 'Strive to reach your true potential.'
-    },
-    'Willshaper': {
-        order: 'Willshaper',
-        sprenType: 'Lightspren',
-        surgePair: [SkillType.COHESION, SkillType.TRANSPORTATION],
-        philosophy: 'Seek freedom and choice for all peoples.'
-    },
-    'Stoneward': {
-        order: 'Stoneward',
-        sprenType: 'Peakspren',
-        surgePair: [SkillType.COHESION, SkillType.TENSION],
-        philosophy: 'Be the support on which others can depend.'
-    },
-    'Bondsmith': {
-        order: 'Bondsmith',
-        sprenType: 'Unique spren',
-        surgePair: [SkillType.ADHESION, SkillType.TENSION],
-        philosophy: 'Unite before you divide, and strive for peace before engaging in war.'
-    }
+  Windrunner: {
+    order: 'Windrunner',
+    sprenType: 'Honorspren',
+    surgePair: [SkillType.ADHESION, SkillType.GRAVITATION],
+    philosophy: 'Protect the innocent and the defenseless.',
+  },
+  Skybreaker: {
+    order: 'Skybreaker',
+    sprenType: 'Highspren',
+    surgePair: [SkillType.DIVISION, SkillType.GRAVITATION],
+    philosophy: 'Enforce the law and strive for justice.',
+  },
+  Dustbringer: {
+    order: 'Dustbringer',
+    sprenType: 'Ashspren',
+    surgePair: [SkillType.DIVISION, SkillType.ABRASION],
+    philosophy: 'Great power requires strong discipline.',
+  },
+  Edgedancer: {
+    order: 'Edgedancer',
+    sprenType: 'Cultivationspren',
+    surgePair: [SkillType.ABRASION, SkillType.PROGRESSION],
+    philosophy: 'Remember and serve those who others forget.',
+  },
+  Truthwatcher: {
+    order: 'Truthwatcher',
+    sprenType: 'Mistspren',
+    surgePair: [SkillType.ILLUMINATION, SkillType.PROGRESSION],
+    philosophy: 'Search for fundamental truth and share it.',
+  },
+  Lightweaver: {
+    order: 'Lightweaver',
+    sprenType: 'Cryptic',
+    surgePair: [SkillType.ILLUMINATION, SkillType.TRANSFORMATION],
+    philosophy: 'Separate truth from lies.',
+  },
+  Elsecaller: {
+    order: 'Elsecaller',
+    sprenType: 'Inkspren',
+    surgePair: [SkillType.TRANSFORMATION, SkillType.TRANSPORTATION],
+    philosophy: 'Strive to reach your true potential.',
+  },
+  Willshaper: {
+    order: 'Willshaper',
+    sprenType: 'Lightspren',
+    surgePair: [SkillType.COHESION, SkillType.TRANSPORTATION],
+    philosophy: 'Seek freedom and choice for all peoples.',
+  },
+  Stoneward: {
+    order: 'Stoneward',
+    sprenType: 'Peakspren',
+    surgePair: [SkillType.COHESION, SkillType.TENSION],
+    philosophy: 'Be the support on which others can depend.',
+  },
+  Bondsmith: {
+    order: 'Bondsmith',
+    sprenType: 'Unique spren',
+    surgePair: [SkillType.ADHESION, SkillType.TENSION],
+    philosophy: 'Unite before you divide, and strive for peace before engaging in war.',
+  },
 };
 
 export class RadiantPathManager {
-    private boundOrder: string | null = null;
-    private idealSpoken: boolean = false;
-    private surgePair: [SkillType, SkillType] | null = null;
-    private sprenType: string | null = null;
-    private philosophy: string | null = null;
+  private boundOrder: string | null = null;
+  private idealSpoken: boolean = false;
+  private surgePair: [SkillType, SkillType] | null = null;
+  private sprenType: string | null = null;
+  private philosophy: string | null = null;
 
-    constructor() {}
+  constructor() {}
 
-    /**
-     * Grant a spren bond to the character with optional custom data from GM
-     * @param order - The Radiant Order name
-     * @param customData - Optional custom surgePair and philosophy from GM grant
-     */
-    grantSpren(order: string, customData?: { surgePair?: string[]; philosophy?: string }): void {
-        if (!RADIANT_ORDERS[order]) {
-            throw new Error(`Invalid Radiant Order: ${order}`);
-        }
-
-        const orderInfo = RADIANT_ORDERS[order];
-        this.boundOrder = order;
-        this.sprenType = orderInfo.sprenType;
-        
-        // Use custom surgePair if provided by GM, otherwise use default
-        if (customData?.surgePair && customData.surgePair.length === 2) {
-            this.surgePair = [customData.surgePair[0] as SkillType, customData.surgePair[1] as SkillType];
-        } else {
-            this.surgePair = orderInfo.surgePair;
-        }
-        
-        // Use custom philosophy if provided by GM, otherwise use default
-        this.philosophy = customData?.philosophy || orderInfo.philosophy;
-        this.idealSpoken = false;
+  /**
+   * Grant a spren bond to the character with optional custom data from GM
+   * @param order - The Radiant Order name
+   * @param customData - Optional custom surgePair and philosophy from GM grant
+   */
+  grantSpren(order: string, customData?: { surgePair?: string[]; philosophy?: string }): void {
+    if (!RADIANT_ORDERS[order]) {
+      throw new Error(`Invalid Radiant Order: ${order}`);
     }
 
-    /**
-     * Speak the First Ideal, unlocking surge skills and surge talent trees
-     */
-    speakIdeal(skillManager: SkillManager): void {
-        if (!this.boundOrder || !this.surgePair) {
-            throw new Error('Cannot speak ideal without a bound spren');
-        }
+    const orderInfo = RADIANT_ORDERS[order];
+    this.boundOrder = order;
+    this.sprenType = orderInfo.sprenType;
 
-        if (this.idealSpoken) {
-            console.warn('First Ideal already spoken');
-            return;
-        }
-
-        // Add the two surge skills at rank 1
-        const [surge1, surge2] = this.surgePair;
-        skillManager.setSkillRank(surge1, 1);
-        skillManager.setSkillRank(surge2, 1);
-
-        this.idealSpoken = true;
+    // Use custom surgePair if provided by GM, otherwise use default
+    if (customData?.surgePair && customData.surgePair.length === 2) {
+      this.surgePair = [customData.surgePair[0] as SkillType, customData.surgePair[1] as SkillType];
+    } else {
+      this.surgePair = orderInfo.surgePair;
     }
 
-    /**
-     * Get the surge tree IDs for loading talent trees
-     */
-    getSurgeTrees(): string[] {
-        if (!this.idealSpoken || !this.surgePair) {
-            return [];
-        }
+    // Use custom philosophy if provided by GM, otherwise use default
+    this.philosophy = customData?.philosophy || orderInfo.philosophy;
+    this.idealSpoken = false;
+  }
 
-        // Return surge names in lowercase for tree IDs
-        return this.surgePair.map(surge => surge.toLowerCase());
+  /**
+   * Speak the First Ideal, unlocking surge skills and surge talent trees
+   */
+  speakIdeal(skillManager: SkillManager): void {
+    if (!this.boundOrder || !this.surgePair) {
+      throw new Error('Cannot speak ideal without a bound spren');
     }
 
-    /**
-     * Get the Radiant Order tree ID
-     */
-    getOrderTree(): string | null {
-        if (!this.boundOrder) {
-            return null;
-        }
-        return this.boundOrder.toLowerCase();
+    if (this.idealSpoken) {
+      console.warn('First Ideal already spoken');
+      return;
     }
 
-    /**
-     * Check if character has a bound spren
-     */
-    hasSpren(): boolean {
-        return this.boundOrder !== null;
+    // Add the two surge skills at rank 1
+    const [surge1, surge2] = this.surgePair;
+    skillManager.setSkillRank(surge1, 1);
+    skillManager.setSkillRank(surge2, 1);
+
+    this.idealSpoken = true;
+  }
+
+  /**
+   * Get the surge tree IDs for loading talent trees
+   */
+  getSurgeTrees(): string[] {
+    if (!this.idealSpoken || !this.surgePair) {
+      return [];
     }
 
-    /**
-     * Check if character has spoken the First Ideal
-     */
-    hasSpokenIdeal(): boolean {
-        return this.idealSpoken;
-    }
+    // Return surge names in lowercase for tree IDs
+    return this.surgePair.map((surge) => surge.toLowerCase());
+  }
 
-    /**
-     * Get the current order info
-     */
-    getOrderInfo(): RadiantOrderInfo | null {
-        if (!this.boundOrder) {
-            return null;
-        }
-        const baseInfo = RADIANT_ORDERS[this.boundOrder];
-        // Return custom philosophy if it differs from the default
-        return {
-            ...baseInfo,
-            philosophy: this.philosophy || baseInfo.philosophy
-        };
+  /**
+   * Get the Radiant Order tree ID
+   */
+  getOrderTree(): string | null {
+    if (!this.boundOrder) {
+      return null;
     }
+    return this.boundOrder.toLowerCase();
+  }
 
-    /**
-     * Get universal abilities available to this Radiant
-     * Returns all Radiant universal abilities if the First Ideal has been spoken
-     */
-    getUniversalAbilities(): UniversalAbility[] {
-        return getAvailableAbilities(this.idealSpoken);
-    }
+  /**
+   * Check if character has a bound spren
+   */
+  hasSpren(): boolean {
+    return this.boundOrder !== null;
+  }
 
-    /**
-     * Serialize for character storage
-     */
-    toJSON(): any {
-        return {
-            boundOrder: this.boundOrder,
-            idealSpoken: this.idealSpoken,
-            surgePair: this.surgePair,
-            sprenType: this.sprenType,
-            philosophy: this.philosophy
-        };
-    }
+  /**
+   * Check if character has spoken the First Ideal
+   */
+  hasSpokenIdeal(): boolean {
+    return this.idealSpoken;
+  }
 
-    /**
-     * Deserialize from character storage
-     */
-    fromJSON(data: any): void {
-        this.boundOrder = data.boundOrder || null;
-        this.idealSpoken = data.idealSpoken || false;
-        this.sprenType = data.sprenType || null;
-        
-        // Parse surgePair from string (e.g., "Adhesion/Gravitation") to array
-        if (typeof data.surgePair === 'string' && data.surgePair.length > 0) {
-            const surges = data.surgePair.split('/').map((s: string) => s.trim());
-            this.surgePair = (surges.length === 2) ? [surges[0], surges[1]] : null;
-        } else if (Array.isArray(data.surgePair) && data.surgePair.length === 2) {
-            this.surgePair = [data.surgePair[0], data.surgePair[1]];
-        } else {
-            this.surgePair = null;
-        }
+  /**
+   * Get the current order info
+   */
+  getOrderInfo(): RadiantOrderInfo | null {
+    if (!this.boundOrder) {
+      return null;
     }
+    const baseInfo = RADIANT_ORDERS[this.boundOrder];
+    // Return custom philosophy if it differs from the default
+    return {
+      ...baseInfo,
+      philosophy: this.philosophy || baseInfo.philosophy,
+    };
+  }
 
-    /**
-     * Reset all radiant path data
-     */
-    reset(): void {
-        this.boundOrder = null;
-        this.idealSpoken = false;
-        this.surgePair = null;
-        this.sprenType = null;
+  /**
+   * Get universal abilities available to this Radiant
+   * Returns all Radiant universal abilities if the First Ideal has been spoken
+   */
+  getUniversalAbilities(): UniversalAbility[] {
+    return getAvailableAbilities(this.idealSpoken);
+  }
+
+  /**
+   * Serialize for character storage
+   */
+  toJSON(): any {
+    return {
+      boundOrder: this.boundOrder,
+      idealSpoken: this.idealSpoken,
+      surgePair: this.surgePair,
+      sprenType: this.sprenType,
+      philosophy: this.philosophy,
+    };
+  }
+
+  /**
+   * Deserialize from character storage
+   */
+  fromJSON(data: any): void {
+    this.boundOrder = data.boundOrder || null;
+    this.idealSpoken = data.idealSpoken || false;
+    this.sprenType = data.sprenType || null;
+
+    // Parse surgePair from string (e.g., "Adhesion/Gravitation") to array
+    if (typeof data.surgePair === 'string' && data.surgePair.length > 0) {
+      const surges = data.surgePair.split('/').map((s: string) => s.trim());
+      this.surgePair = surges.length === 2 ? [surges[0], surges[1]] : null;
+    } else if (Array.isArray(data.surgePair) && data.surgePair.length === 2) {
+      this.surgePair = [data.surgePair[0], data.surgePair[1]];
+    } else {
+      this.surgePair = null;
     }
+  }
+
+  /**
+   * Reset all radiant path data
+   */
+  reset(): void {
+    this.boundOrder = null;
+    this.idealSpoken = false;
+    this.surgePair = null;
+    this.sprenType = null;
+  }
 }

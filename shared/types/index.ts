@@ -1,6 +1,6 @@
 /**
  * Shared Type Definitions - Main Export
- * 
+ *
  * Central export point for all shared types
  * Import from 'shared/types' instead of individual files
  */

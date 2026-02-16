@@ -13,20 +13,14 @@ export interface TurnSpeedSelectorData {
 @Component({
   selector: 'app-turn-speed-selector',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule
-  ],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatCardModule],
   template: `
     <div class="turn-speed-dialog">
       <h2 mat-dialog-title>
         <mat-icon>bolt</mat-icon>
         Choose Your Turn Speed
       </h2>
-      
+
       <mat-dialog-content>
         <div class="character-info">
           <strong>{{ data.characterName }}</strong>
@@ -47,9 +41,7 @@ export interface TurnSpeedSelectorData {
             </mat-card-header>
             <mat-card-content>
               <div class="action-count">2 Actions</div>
-              <div class="description">
-                Act before enemies, but with fewer actions
-              </div>
+              <div class="description">Act before enemies, but with fewer actions</div>
               <div class="phase-label">Phase 1: Fast PC Turns</div>
             </mat-card-content>
           </mat-card>
@@ -63,9 +55,7 @@ export interface TurnSpeedSelectorData {
             </mat-card-header>
             <mat-card-content>
               <div class="action-count">3 Actions</div>
-              <div class="description">
-                Act after fast enemies, but with more actions
-              </div>
+              <div class="description">Act after fast enemies, but with more actions</div>
               <div class="phase-label">Phase 3: Slow PC Turns</div>
             </mat-card-content>
           </mat-card>
@@ -85,171 +75,173 @@ export interface TurnSpeedSelectorData {
       </mat-dialog-actions>
     </div>
   `,
-  styles: [`
-    .turn-speed-dialog {
-      max-width: 600px;
-    }
+  styles: [
+    `
+      .turn-speed-dialog {
+        max-width: 600px;
+      }
 
-    h2[mat-dialog-title] {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 24px;
-      margin: -24px -24px 0;
-    }
+      h2[mat-dialog-title] {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 24px;
+        margin: -24px -24px 0;
+      }
 
-    mat-dialog-content {
-      padding: 24px;
-      min-width: 500px;
-    }
+      mat-dialog-content {
+        padding: 24px;
+        min-width: 500px;
+      }
 
-    .character-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 16px;
-    }
+      .character-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 16px;
+      }
 
-    .round-label {
-      color: #666;
-      font-weight: 500;
-    }
+      .round-label {
+        color: #666;
+        font-weight: 500;
+      }
 
-    .rules-reminder {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #555;
-      font-size: 14px;
-    }
+      .rules-reminder {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #555;
+        font-size: 14px;
+      }
 
-    .speed-options {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
+      .speed-options {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
 
-    .speed-card {
-      flex: 1;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 3px solid transparent;
-    }
+      .speed-card {
+        flex: 1;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+      }
 
-    .speed-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    }
+      .speed-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
 
-    .fast-card {
-      border-color: #ff9800;
-    }
+      .fast-card {
+        border-color: #ff9800;
+      }
 
-    .fast-card:hover {
-      border-color: #f57c00;
-      background: #fff3e0;
-    }
+      .fast-card:hover {
+        border-color: #f57c00;
+        background: #fff3e0;
+      }
 
-    .slow-card {
-      border-color: #2196f3;
-    }
+      .slow-card {
+        border-color: #2196f3;
+      }
 
-    .slow-card:hover {
-      border-color: #1976d2;
-      background: #e3f2fd;
-    }
+      .slow-card:hover {
+        border-color: #1976d2;
+        background: #e3f2fd;
+      }
 
-    mat-card-header {
-      margin-bottom: 12px;
-    }
+      mat-card-header {
+        margin-bottom: 12px;
+      }
 
-    mat-card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 20px;
-      font-weight: 600;
-    }
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 20px;
+        font-weight: 600;
+      }
 
-    .fast-card mat-card-title {
-      color: #f57c00;
-    }
+      .fast-card mat-card-title {
+        color: #f57c00;
+      }
 
-    .slow-card mat-card-title {
-      color: #1976d2;
-    }
+      .slow-card mat-card-title {
+        color: #1976d2;
+      }
 
-    .action-count {
-      font-size: 32px;
-      font-weight: bold;
-      text-align: center;
-      margin: 16px 0;
-    }
+      .action-count {
+        font-size: 32px;
+        font-weight: bold;
+        text-align: center;
+        margin: 16px 0;
+      }
 
-    .fast-card .action-count {
-      color: #ff9800;
-    }
+      .fast-card .action-count {
+        color: #ff9800;
+      }
 
-    .slow-card .action-count {
-      color: #2196f3;
-    }
+      .slow-card .action-count {
+        color: #2196f3;
+      }
 
-    .description {
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 12px;
-      min-height: 40px;
-    }
+      .description {
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 12px;
+        min-height: 40px;
+      }
 
-    .phase-label {
-      text-align: center;
-      font-size: 12px;
-      color: #999;
-      font-weight: 500;
-      padding: 8px;
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 4px;
-    }
+      .phase-label {
+        text-align: center;
+        font-size: 12px;
+        color: #999;
+        font-weight: 500;
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+      }
 
-    .note {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      justify-content: center;
-      padding: 12px;
-      background: #e8f5e9;
-      border-radius: 8px;
-      color: #2e7d32;
-      font-size: 14px;
-    }
+      .note {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        padding: 12px;
+        background: #e8f5e9;
+        border-radius: 8px;
+        color: #2e7d32;
+        font-size: 14px;
+      }
 
-    .note mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
+      .note mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
 
-    mat-dialog-actions {
-      padding: 16px 24px;
-      justify-content: center;
-      border-top: 1px solid rgba(0, 0, 0, 0.12);
-      margin: 0 -24px -24px;
-    }
+      mat-dialog-actions {
+        padding: 16px 24px;
+        justify-content: center;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+        margin: 0 -24px -24px;
+      }
 
-    mat-dialog-actions button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-  `]
+      mat-dialog-actions button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    `,
+  ],
 })
 export class TurnSpeedSelector {
   constructor(

@@ -1,12 +1,12 @@
 /**
  * CharacterRepository - Data Access Layer
- * 
+ *
  * Orchestrates loading and saving Character instances with the database.
  * Provides:
  * - Conversion between CharacterDTO (persistence) and Character (domain model)
  * - Module-level repositories for individual character aspects
  * - Full character load/save operations
- * 
+ *
  * The repository bridges the gap between:
  * - CharacterDTO: Flat serializable structure for persistence
  * - Character: Rich domain model with business logic and managers
@@ -19,7 +19,7 @@ import {
   saveCharacter as dbSaveCharacter,
   listCharacters,
   deleteCharacter,
-  unlockTalent
+  unlockTalent,
 } from '../database';
 import { Attributes } from 'shared/character/attributes/attributes';
 
@@ -37,10 +37,9 @@ import {
   CombatModuleRepository,
   InventoryModuleRepository,
   MetadataModuleRepository,
-  RadiantPathModuleRepository
+  RadiantPathModuleRepository,
 } from './modules';
 import { ExpertiseSourceType } from '../character/expertises/expertiseSource';
-
 
 export class CharacterRepository {
   // ============================================================================
@@ -88,7 +87,7 @@ export class CharacterRepository {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -164,7 +163,7 @@ export class CharacterRepository {
     // MODULE 7: EXPERTISES
     character.selectedExpertises = (dto.selectedExpertises || []).map((exp: any) => ({
       ...exp,
-      source: exp.source as ExpertiseSourceType
+      source: exp.source as ExpertiseSourceType,
     }));
 
     // MODULE 8: RESOURCES - ResourceManager handles this internally
@@ -214,7 +213,7 @@ export class CharacterRepository {
 
       // MODULE 3: ANCESTRY/CULTURE
       ancestry: character.ancestry || null,
-      cultures: character.cultures.map(c => c.name),
+      cultures: character.cultures.map((c) => c.name),
       paths: character.paths,
 
       // MODULE 4: ATTRIBUTES
@@ -224,7 +223,7 @@ export class CharacterRepository {
         intellect: character.attributes.intellect,
         willpower: character.attributes.willpower,
         awareness: character.attributes.awareness,
-        presence: character.attributes.presence
+        presence: character.attributes.presence,
       },
 
       // MODULE 5: SKILLS
@@ -243,17 +242,17 @@ export class CharacterRepository {
       resources: {
         health: {
           current: character.resources.health.current,
-          max: character.resources.health.max
+          max: character.resources.health.max,
         },
         focus: {
           current: character.resources.focus.current,
-          max: character.resources.focus.max
+          max: character.resources.focus.max,
         },
         investiture: {
           current: character.resources.investiture.current,
           max: character.resources.investiture.max,
-          isActive: character.resources.investiture.isActive()
-        }
+          isActive: character.resources.investiture.isActive(),
+        },
       },
 
       // MODULE 9: SINGER FORMS
@@ -268,20 +267,20 @@ export class CharacterRepository {
         items: [], // TODO: Extract from inventoryManager
         equipped: {
           armor: null,
-          weapons: []
-        }
+          weapons: [],
+        },
       },
 
       // MODULE 13: RADIANT PATH
       radiantPath: {
         currentIdeal: 1, // TODO: Extract from radiantPathManager
         currentOath: null,
-        hasSpren: false
+        hasSpren: false,
       },
 
       // MODULE 15: METADATA
       sessionNotes: character.sessionNotes,
-      lastModified: character.lastModified
+      lastModified: character.lastModified,
     };
   }
 }

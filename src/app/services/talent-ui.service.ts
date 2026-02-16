@@ -6,9 +6,10 @@ import { TalentTree, TalentPath, RadiantPathData } from '../../../shared/types/t
 
 @Injectable({ providedIn: 'root' })
 export class TalentUIService {
-  private apiBase = window.location.hostname === 'localhost' && window.location.port === '4200'
-    ? 'http://localhost:3000/api'
-    : '/api';
+  private apiBase =
+    window.location.hostname === 'localhost' && window.location.port === '4200'
+      ? 'http://localhost:3000/api'
+      : '/api';
 
   constructor(private http: HttpClient) {}
 
@@ -18,7 +19,7 @@ export class TalentUIService {
    */
   loadTreesForIds(treeIds: string[]): TalentTree[] {
     return treeIds
-      .map(treeId => getTalentTree(treeId.toLowerCase()))
+      .map((treeId) => getTalentTree(treeId.toLowerCase()))
       .filter((tree): tree is TalentTree => tree !== undefined);
   }
 
@@ -32,11 +33,11 @@ export class TalentUIService {
     }
 
     // surgePair is stored with "/" separators like "DIVISION/ABRASION"
-    const surgePairs = radiantPath.surgePair.split('/').filter(s => s.trim());
-    const existingTreeNames = new Set(trees.map(t => t.pathName.toLowerCase()));
+    const surgePairs = radiantPath.surgePair.split('/').filter((s) => s.trim());
+    const existingTreeNames = new Set(trees.map((t) => t.pathName.toLowerCase()));
 
     const surgeTrees = surgePairs
-      .map(surgeName => getTalentTree(surgeName.toLowerCase().trim()))
+      .map((surgeName) => getTalentTree(surgeName.toLowerCase().trim()))
       .filter((tree): tree is TalentTree => {
         return tree !== undefined && !existingTreeNames.has(tree.pathName.toLowerCase());
       });
@@ -56,7 +57,7 @@ export class TalentUIService {
 
     for (const pathId of allPaths) {
       const talentPath = getTalentPath(pathId);
-      if (talentPath?.paths?.some(tree => tree.pathName.toLowerCase() === normalizedTreeId)) {
+      if (talentPath?.paths?.some((tree) => tree.pathName.toLowerCase() === normalizedTreeId)) {
         return pathId;
       }
     }
@@ -74,9 +75,7 @@ export class TalentUIService {
     const normalizedMain = mainPath?.toLowerCase() || null;
     const normalizedSpecialty = specialty?.toLowerCase() || null;
 
-    return allCorePaths.filter(path =>
-      path !== normalizedMain && path !== normalizedSpecialty
-    );
+    return allCorePaths.filter((path) => path !== normalizedMain && path !== normalizedSpecialty);
   }
 
   /**
@@ -98,7 +97,7 @@ export class TalentUIService {
 
     // For singers, prefer the Singer tree
     if (ancestry?.toLowerCase() === 'singer') {
-      const singerTree = trees.find(tree => tree.pathName.toLowerCase().includes('singer'));
+      const singerTree = trees.find((tree) => tree.pathName.toLowerCase().includes('singer'));
       if (singerTree) return singerTree;
     }
 
@@ -111,17 +110,20 @@ export class TalentUIService {
    * Useful if you want to validate against backend registry
    */
   findParentPathViaAPI(treeId: string): Observable<{ treeId: string; parent: string | null }> {
-    return this.http.get<{ success: boolean; data: { treeId: string; parent: string | null } }>(
-      `${this.apiBase}/talents/parent/${treeId}`
-    ).pipe(
-      (source) => new Observable(subscriber => {
-        source.subscribe({
-          next: (response) => subscriber.next(response.data),
-          error: (error) => subscriber.error(error),
-          complete: () => subscriber.complete()
-        });
-      })
-    );
+    return this.http
+      .get<{ success: boolean; data: { treeId: string; parent: string | null } }>(
+        `${this.apiBase}/talents/parent/${treeId}`
+      )
+      .pipe(
+        (source) =>
+          new Observable((subscriber) => {
+            source.subscribe({
+              next: (response) => subscriber.next(response.data),
+              error: (error) => subscriber.error(error),
+              complete: () => subscriber.complete(),
+            });
+          })
+      );
   }
 
   /**
@@ -136,16 +138,20 @@ export class TalentUIService {
     if (mainPath) params.set('mainPath', mainPath);
     if (specialty) params.set('specialty', specialty);
 
-    return this.http.get<{ success: boolean; data: { mainPath: string | null; specialty: string | null; available: string[] } }>(
-      `${this.apiBase}/talents/bonus-classes?${params.toString()}`
-    ).pipe(
-      (source) => new Observable(subscriber => {
-        source.subscribe({
-          next: (response) => subscriber.next(response.data),
-          error: (error) => subscriber.error(error),
-          complete: () => subscriber.complete()
-        });
-      })
-    );
+    return this.http
+      .get<{
+        success: boolean;
+        data: { mainPath: string | null; specialty: string | null; available: string[] };
+      }>(`${this.apiBase}/talents/bonus-classes?${params.toString()}`)
+      .pipe(
+        (source) =>
+          new Observable((subscriber) => {
+            source.subscribe({
+              next: (response) => subscriber.next(response.data),
+              error: (error) => subscriber.error(error),
+              complete: () => subscriber.complete(),
+            });
+          })
+      );
   }
 }

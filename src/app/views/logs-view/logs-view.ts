@@ -18,9 +18,7 @@ interface LogsResponse {
 @Component({
   selector: 'app-logs-view',
   standalone: true,
-  imports: [
-    CommonModule,
-  ],
+  imports: [CommonModule],
   templateUrl: './logs-view.html',
   styleUrl: './logs-view.scss',
 })
@@ -44,7 +42,7 @@ export class LogsView implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap(() => this.fetchLogs())
       )
-      .subscribe(vm => this.vm$.next(vm));
+      .subscribe((vm) => this.vm$.next(vm));
   }
 
   ngOnDestroy(): void {
@@ -84,7 +82,7 @@ export class LogsView implements OnInit, OnDestroy {
 
   private fetchLogs() {
     return this.http.get<LogsResponse>('/api/logs?limit=200').pipe(
-      map(response => {
+      map((response) => {
         console.log('[LogsView] Received logs response:', response);
         return {
           logs: response.logs || [],
@@ -99,7 +97,7 @@ export class LogsView implements OnInit, OnDestroy {
         error: null,
         lastUpdated: this.lastUpdated,
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('[LogsView] Error fetching logs:', error);
         return of({
           logs: [],
@@ -108,7 +106,7 @@ export class LogsView implements OnInit, OnDestroy {
           lastUpdated: this.lastUpdated,
         });
       }),
-      tap(vm => {
+      tap((vm) => {
         this.lastUpdated = vm.lastUpdated ?? this.lastUpdated;
       })
     );

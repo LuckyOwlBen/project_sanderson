@@ -1,12 +1,12 @@
 /**
  * TalentView Component - PHASE 3 REFACTOR
- * 
+ *
  * SIMPLIFIED ARCHITECTURE:
  * - Single API call: getTalentUI() returns all needed data
  * - No local calculations: backend handles all point logic, tier 0 costs, availability
  * - Frontend is display + input layer only
  * - All talent processing pushed to backend
- * 
+ *
  * Data flow:
  * 1. Component loads TalentUIResponse (keywords, points available, unlocked talents)
  * 2. Template displays talents from talentKeywords
@@ -14,7 +14,14 @@
  * 4. Component updates state from response
  */
 
-import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +41,10 @@ import { WebsocketService, SprenGrantEvent } from '../../services/websocket.serv
 import { TalentsApiService } from '../../services/talents-api.service';
 import { TalentEffectParser } from '../../character/talents/talentEffectParser';
 import { applyTalentEffects } from '../../character/talents/talentEffects';
-import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
+import {
+  ExpertiseChoiceDialog,
+  ExpertiseChoiceData,
+} from '../shared/expertise-choice-dialog/expertise-choice-dialog';
 
 @Component({
   selector: 'app-talent-view',
@@ -44,17 +54,17 @@ import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-
     MatButtonModule,
     MatChipsModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   templateUrl: './talent-view.html',
   styleUrl: './talent-view.scss',
 })
 export class TalentView implements OnInit, OnDestroy {
   @Output() pendingChange = new EventEmitter<boolean>();
-  
+
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 7;
-  
+
   // Minimal state from API response
   talentUIState: TalentUIResponse | null = null;
   character: Character | null = null;
@@ -62,15 +72,25 @@ export class TalentView implements OnInit, OnDestroy {
   validationMessage: string = '';
   pendingSprenGrant: SprenGrantEvent | null = null;
   isLevelUpMode: boolean = false;
-  
+
   private characterId: string | null = null;
 
   // Template compatibility properties (derived from talentUIState)
-  get isLoadingTalentData(): boolean { return this.isLoading; }
-  get availableTalentPoints(): number { return this.talentUIState?.pointsAvailable || 0; }
-  get availableTrees(): any[] { return this.buildAvailableTreesFromKeywords(); }
-  get showCorePathSelector(): boolean { return (this.talentUIState?.bonusPathIds?.length || 0) > 0; }
-  get availableCorePaths(): any[] { return this.buildBonusPathOptions(); }
+  get isLoadingTalentData(): boolean {
+    return this.isLoading;
+  }
+  get availableTalentPoints(): number {
+    return this.talentUIState?.pointsAvailable || 0;
+  }
+  get availableTrees(): any[] {
+    return this.buildAvailableTreesFromKeywords();
+  }
+  get showCorePathSelector(): boolean {
+    return (this.talentUIState?.bonusPathIds?.length || 0) > 0;
+  }
+  get availableCorePaths(): any[] {
+    return this.buildBonusPathOptions();
+  }
   selectedTree: any = null;
   cachedVisibleTalents: any[] = [];
 
@@ -87,13 +107,11 @@ export class TalentView implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('[TalentView] ngOnInit called');
-    
+
     // Subscribe to route params to detect level-up mode
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        this.isLevelUpMode = params['levelUp'] === 'true';
-      });
+    this.activatedRoute.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      this.isLevelUpMode = params['levelUp'] === 'true';
+    });
 
     // Load character and fetch talents UI state
     this.identityService.currentCharacterId$
@@ -104,9 +122,10 @@ export class TalentView implements OnInit, OnDestroy {
       .subscribe((characterId) => {
         if (characterId) {
           this.characterId = characterId;
-          
+
           // Load character from storage
-          this.characterStorage.loadCharacter(characterId)
+          this.characterStorage
+            .loadCharacter(characterId)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (character) => {
@@ -114,28 +133,29 @@ export class TalentView implements OnInit, OnDestroy {
                 this.character = character;
                 if (this.character) {
                   // Load talent UI state from API
-                  console.log('[TalentView] Calling loadTalentUIState for character:', this.characterId);
+                  console.log(
+                    '[TalentView] Calling loadTalentUIState for character:',
+                    this.characterId
+                  );
                   this.loadTalentUIState();
                 }
               },
-              error: (error) => console.error('[TalentView] Failed to load character:', error)
+              error: (error) => console.error('[TalentView] Failed to load character:', error),
             });
         }
       });
 
     // Listen for spren grants
-    this.websocketService.sprenGrant$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(grant => {
-        if (this.character && grant.characterId === (this.character as any).id) {
-          this.pendingSprenGrant = grant;
-          setTimeout(() => {
-            if (this.pendingSprenGrant === grant) {
-              this.pendingSprenGrant = null;
-            }
-          }, 30000);
-        }
-      });
+    this.websocketService.sprenGrant$.pipe(takeUntil(this.destroy$)).subscribe((grant) => {
+      if (this.character && grant.characterId === (this.character as any).id) {
+        this.pendingSprenGrant = grant;
+        setTimeout(() => {
+          if (this.pendingSprenGrant === grant) {
+            this.pendingSprenGrant = null;
+          }
+        }, 30000);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -152,18 +172,19 @@ export class TalentView implements OnInit, OnDestroy {
       console.log('[TalentView] loadTalentUIState - no characterId');
       return;
     }
-    
+
     this.isLoading = true;
     console.log('[TalentView] Loading talent UI state for character:', this.characterId);
-    
-    this.talentsApi.getTalentUI(this.characterId)
+
+    this.talentsApi
+      .getTalentUI(this.characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (state) => {
           console.log('[TalentView] API response received');
           this.talentUIState = state;
           this.isLoading = false;
-          
+
           console.log('[TalentView] Loaded talent UI state:', {
             unlockedCount: state.unlockedTalentIds.length,
             pendingCount: state.pendingTalentIds.length,
@@ -171,12 +192,12 @@ export class TalentView implements OnInit, OnDestroy {
             pointsAvailable: state.pointsAvailable,
             unlockedTalentIds: state.unlockedTalentIds,
             pendingTalentIds: state.pendingTalentIds,
-            availableTalentIds: state.availableTalentIds.slice(0, 10)
+            availableTalentIds: state.availableTalentIds.slice(0, 10),
           });
-          
+
           // Auto-select appropriate initial tree
           this.autoSelectInitialTree();
-          
+
           this.updateValidation();
           this.updateVisibleTalentsCache();
           this.cdr.markForCheck();
@@ -187,11 +208,11 @@ export class TalentView implements OnInit, OnDestroy {
             message: err.message,
             status: err.status,
             statusText: err.statusText,
-            url: err.url
+            url: err.url,
           });
           this.isLoading = false;
           this.cdr.markForCheck();
-        }
+        },
       });
   }
 
@@ -210,8 +231,12 @@ export class TalentView implements OnInit, OnDestroy {
    * Shows expertise dialog if needed, then calls backend
    */
   unlockTalent(talent: any): void {
-    console.log('[TalentView] unlockTalent called with:', { talentId: talent.id, talentName: talent.name, pathId: talent.pathId });
-    
+    console.log('[TalentView] unlockTalent called with:', {
+      talentId: talent.id,
+      talentName: talent.name,
+      pathId: talent.pathId,
+    });
+
     if (!this.character) {
       console.log('[TalentView] unlockTalent - no character');
       return;
@@ -230,7 +255,10 @@ export class TalentView implements OnInit, OnDestroy {
     }
 
     // Check prerequisites locally for UX before sending to backend
-    const checker = new TalentPrerequisiteChecker(this.character, new Set(this.talentUIState?.unlockedTalentIds || []));
+    const checker = new TalentPrerequisiteChecker(
+      this.character,
+      new Set(this.talentUIState?.unlockedTalentIds || [])
+    );
     if (!checker.canUnlockTalent(realTalentNode)) {
       console.log('[TalentView] unlockTalent - prerequisite check failed');
       return;
@@ -239,7 +267,7 @@ export class TalentView implements OnInit, OnDestroy {
     console.log('[TalentView] unlockTalent - prerequisites OK, proceeding with unlock');
     // Parse expertise grants from talent
     const expertiseGrants = TalentEffectParser.parseExpertiseGrantsFromTalent(realTalentNode);
-    
+
     if (expertiseGrants.length > 0) {
       console.log('[TalentView] unlockTalent - has expertise grants, showing dialog');
       // Show dialog to collect expertise choices from user
@@ -274,11 +302,13 @@ export class TalentView implements OnInit, OnDestroy {
           talentName: talent.name,
           options: grant.expertises,
           choiceCount: grant.choiceCount || 1,
-          description: `Choose ${grant.choiceCount || 1} expertise${(grant.choiceCount || 1) > 1 ? 's' : ''} from this talent.`
-        } as ExpertiseChoiceData
+          description: `Choose ${grant.choiceCount || 1} expertise${
+            (grant.choiceCount || 1) > 1 ? 's' : ''
+          } from this talent.`,
+        } as ExpertiseChoiceData,
       });
 
-      dialogRef.afterClosed().subscribe(result => {
+      dialogRef.afterClosed().subscribe((result) => {
         if (result && result.selected) {
           result.selected.forEach((expertiseName: string) => {
             this.character!.bonuses.grantExpertise(talent.id, expertiseName);
@@ -291,7 +321,7 @@ export class TalentView implements OnInit, OnDestroy {
 
   private applyTalentUnlock(talent: TalentNode): void {
     console.log('[TalentView] applyTalentUnlock called for:', talent.id);
-    
+
     if (!this.character || !this.characterId) {
       console.log('[TalentView] applyTalentUnlock - no character or characterId');
       return;
@@ -309,25 +339,29 @@ export class TalentView implements OnInit, OnDestroy {
 
     console.log('[TalentView] applyTalentUnlock - sending to server:', {
       talentId: talent.id,
-      newPendingTalents: Array.from(newPending)
+      newPendingTalents: Array.from(newPending),
     });
 
-    this.talentsApi.saveTalents(this.characterId, {
-      pendingTalents: Array.from(newPending)
-    }).subscribe({
-      next: () => {
-        console.log('[TalentView] applyTalentUnlock - server response received, reloading UI state');
-        // Reload UI state from backend with updated values
-        this.loadTalentUIState();
-        this.updateValidation();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('[TalentView] Failed to save talent unlock:', err);
-        this.talentUIState = null;
-        this.loadTalentUIState();
-      }
-    });
+    this.talentsApi
+      .saveTalents(this.characterId, {
+        pendingTalents: Array.from(newPending),
+      })
+      .subscribe({
+        next: () => {
+          console.log(
+            '[TalentView] applyTalentUnlock - server response received, reloading UI state'
+          );
+          // Reload UI state from backend with updated values
+          this.loadTalentUIState();
+          this.updateValidation();
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('[TalentView] Failed to save talent unlock:', err);
+          this.talentUIState = null;
+          this.loadTalentUIState();
+        },
+      });
   }
 
   /**
@@ -349,20 +383,22 @@ export class TalentView implements OnInit, OnDestroy {
     const newPending = new Set(this.talentUIState?.pendingTalentIds || []);
     newPending.delete(talentId);
 
-    this.talentsApi.saveTalents(this.characterId, {
-      pendingTalents: Array.from(newPending)
-    }).subscribe({
-      next: () => {
-        this.loadTalentUIState();
-        this.updateValidation();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('[TalentView] Failed to save talent removal:', err);
-        this.talentUIState = null;
-        this.loadTalentUIState();
-      }
-    });
+    this.talentsApi
+      .saveTalents(this.characterId, {
+        pendingTalents: Array.from(newPending),
+      })
+      .subscribe({
+        next: () => {
+          this.loadTalentUIState();
+          this.updateValidation();
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('[TalentView] Failed to save talent removal:', err);
+          this.talentUIState = null;
+          this.loadTalentUIState();
+        },
+      });
   }
 
   isTalentUnlocked(talentId: string): boolean {
@@ -378,15 +414,18 @@ export class TalentView implements OnInit, OnDestroy {
     if (!this.talentUIState || !this.selectedTree || !this.selectedTree.nodes) {
       return [];
     }
-    
+
     const filtered = this.selectedTree.nodes
-      .filter((talent: any) => talent && talent.id && this.talentUIState!.availableTalentIds.includes(talent.id))
+      .filter(
+        (talent: any) =>
+          talent && talent.id && this.talentUIState!.availableTalentIds.includes(talent.id)
+      )
       .map((talent: any) => ({
         ...talent,
         id: talent.id,
-        pathId: this.selectedTree.mainPathId || this.selectedTree.pathName  // Use mainPathId from tree (which is 'agent' for specializations)
+        pathId: this.selectedTree.mainPathId || this.selectedTree.pathName, // Use mainPathId from tree (which is 'agent' for specializations)
       }));
-    
+
     return filtered;
   }
 
@@ -400,28 +439,28 @@ export class TalentView implements OnInit, OnDestroy {
       case 'talent':
         const talent = this.talentUIState?.talentKeywords[prereq.target];
         return talent?.name || prereq.target;
-      
+
       case 'skill':
         const formattedSkill = this.formatSkillName(prereq.target);
         return `${formattedSkill} (Rank ${prereq.value || 1}+)`;
-      
+
       case 'attribute':
         const formattedAttribute = prereq.target.charAt(0).toUpperCase() + prereq.target.slice(1);
         return `${formattedAttribute} ${prereq.value || 1}+`;
-      
+
       case 'level':
         return `Level ${prereq.value || 1}+`;
-      
+
       case 'ideal':
         const idealNames: Record<string, string> = {
-          'first': 'First Ideal',
-          'second': 'Second Ideal',
-          'third': 'Third Ideal',
-          'fourth': 'Fourth Ideal',
-          'fifth': 'Fifth Ideal'
+          first: 'First Ideal',
+          second: 'Second Ideal',
+          third: 'Third Ideal',
+          fourth: 'Fourth Ideal',
+          fifth: 'Fifth Ideal',
         };
         return idealNames[prereq.target] || `${prereq.target} Ideal`;
-      
+
       default:
         return String(prereq);
     }
@@ -431,7 +470,7 @@ export class TalentView implements OnInit, OnDestroy {
     return skillType
       .toLowerCase()
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -447,7 +486,9 @@ export class TalentView implements OnInit, OnDestroy {
     // In level-up mode: points must be fully spent
     if (this.isLevelUpMode) {
       const pointsSpent = this.talentUIState.pointsAvailable === 0;
-      this.validationMessage = pointsSpent ? '' : `Select ${this.talentUIState.pointsAvailable} more talent(s)`;
+      this.validationMessage = pointsSpent
+        ? ''
+        : `Select ${this.talentUIState.pointsAvailable} more talent(s)`;
       this.validationService.setStepValid(this.STEP_INDEX, pointsSpent);
       this.checkPendingStatus();
       return;
@@ -456,7 +497,7 @@ export class TalentView implements OnInit, OnDestroy {
     // Character creation mode: specific rules
     let isValid = true;
     if (this.talentUIState.requiresSingerSelection) {
-      const hasSingerTalent = this.talentUIState.unlockedTalentIds.some(id => 
+      const hasSingerTalent = this.talentUIState.unlockedTalentIds.some((id) =>
         this.talentUIState!.talentKeywords[id]?.pathId?.includes('singer')
       );
       isValid = hasSingerTalent;
@@ -495,21 +536,26 @@ export class TalentView implements OnInit, OnDestroy {
 
     // Delegate grouping to shared manager — it attaches raw prerequisites but
     // does NOT compute unlocked/available state (backend responsibility)
-    const displayTrees = talentTreeManager.buildDisplayTreesFromKeywords(this.talentUIState.talentKeywords || {});
+    const displayTrees = talentTreeManager.buildDisplayTreesFromKeywords(
+      this.talentUIState.talentKeywords || {}
+    );
 
     // Map manager output to the UI-compatible shape expected by the template
-    return displayTrees.map(dt => ({
-      pathName: dt.pathName,
-      mainPathId: dt.key,
-      nodes: dt.nodes.map((n: any) => ({
-        id: n.id,
-        name: (n.__keywords && n.__keywords.name) || n.name,
-        description: (n.__keywords && n.__keywords.description) || n.description || '',
-        tier: (n.__keywords && n.__keywords.tier) ?? n.tier,
-        expertiseKeywords: (n.__keywords && n.__keywords.expertiseKeywords) || n.expertiseKeywords || [],
-        prerequisites: n.prerequisites || []
+    return displayTrees
+      .map((dt) => ({
+        pathName: dt.pathName,
+        mainPathId: dt.key,
+        nodes: dt.nodes.map((n: any) => ({
+          id: n.id,
+          name: (n.__keywords && n.__keywords.name) || n.name,
+          description: (n.__keywords && n.__keywords.description) || n.description || '',
+          tier: (n.__keywords && n.__keywords.tier) ?? n.tier,
+          expertiseKeywords:
+            (n.__keywords && n.__keywords.expertiseKeywords) || n.expertiseKeywords || [],
+          prerequisites: n.prerequisites || [],
+        })),
       }))
-    })).sort((a, b) => a.pathName.localeCompare(b.pathName));
+      .sort((a, b) => a.pathName.localeCompare(b.pathName));
   }
 
   /**
@@ -518,19 +564,19 @@ export class TalentView implements OnInit, OnDestroy {
   private buildBonusPathOptions(): any[] {
     if (!this.talentUIState) return [];
 
-    return this.talentUIState.bonusPathIds.map(pathId => {
+    return this.talentUIState.bonusPathIds.map((pathId) => {
       const talentPath = talentTreeManager.getTalentPath(pathId);
       const keyTalent = talentPath?.talentNodes?.find((t: TalentNode) => t.tier === 0);
-      
+
       return {
         id: pathId,
         name: this.formatPathName(pathId),
-        keyTalent: keyTalent || { 
+        keyTalent: keyTalent || {
           id: 'unknown',
           name: this.formatPathName(pathId),
-          description: 'Key talent not found'
+          description: 'Key talent not found',
         },
-        isSelected: this.talentUIState?.selectedBonusPathIds.includes(pathId) || false
+        isSelected: this.talentUIState?.selectedBonusPathIds.includes(pathId) || false,
       };
     });
   }
@@ -538,7 +584,7 @@ export class TalentView implements OnInit, OnDestroy {
   private formatPathName(pathId: string): string {
     return pathId
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -585,7 +631,7 @@ export class TalentView implements OnInit, OnDestroy {
       tier: talent.tier,
       actionCost: 0,
       prerequisites: talent.prerequisites || [],
-      bonuses: []
+      bonuses: [],
     };
 
     const canUnlock = checker.canUnlockTalent(talentNode);
@@ -601,28 +647,30 @@ export class TalentView implements OnInit, OnDestroy {
     // Add to selected bonus paths if not already there
     if (!this.talentUIState.selectedBonusPathIds.includes(pathId)) {
       const newSelected = [...this.talentUIState.selectedBonusPathIds, pathId];
-      
+
       // Persist the bonus path selection first
-      this.talentsApi.saveTalents(this.characterId, {
-        pendingTrees: newSelected
-      }).subscribe({
-        next: () => {
-          // After save succeeds, reload to get updated available trees
-          this.loadTalentUIState();
-          
-          // Now try to unlock the key talent for this path
-          const talentPath = talentTreeManager.getTalentPath(pathId);
-          if (talentPath?.talentNodes) {
-            const keyTalent = talentPath.talentNodes.find((t: TalentNode) => t.tier === 0);
-            if (keyTalent && !this.isTalentUnlocked(keyTalent.id)) {
-              this.unlockTalent({ ...keyTalent, pathId: pathId });
+      this.talentsApi
+        .saveTalents(this.characterId, {
+          pendingTrees: newSelected,
+        })
+        .subscribe({
+          next: () => {
+            // After save succeeds, reload to get updated available trees
+            this.loadTalentUIState();
+
+            // Now try to unlock the key talent for this path
+            const talentPath = talentTreeManager.getTalentPath(pathId);
+            if (talentPath?.talentNodes) {
+              const keyTalent = talentPath.talentNodes.find((t: TalentNode) => t.tier === 0);
+              if (keyTalent && !this.isTalentUnlocked(keyTalent.id)) {
+                this.unlockTalent({ ...keyTalent, pathId: pathId });
+              }
             }
-          }
-        },
-        error: (err) => {
-          console.error('[TalentView] Failed to save bonus path selection:', err);
-        }
-      });
+          },
+          error: (err) => {
+            console.error('[TalentView] Failed to save bonus path selection:', err);
+          },
+        });
     }
   }
 
@@ -633,29 +681,31 @@ export class TalentView implements OnInit, OnDestroy {
     if (!this.talentUIState || !this.characterId) return;
 
     // Remove from selected
-    const newSelected = this.talentUIState.selectedBonusPathIds.filter(p => p !== pathId);
+    const newSelected = this.talentUIState.selectedBonusPathIds.filter((p) => p !== pathId);
 
     // First remove the key talent for this path if it's pending
     const talentPath = talentTreeManager.getTalentPath(pathId);
     const keyTalentId = talentPath?.talentNodes?.find((t: TalentNode) => t.tier === 0)?.id;
-    
+
     if (keyTalentId && this.talentUIState.pendingTalentIds.includes(keyTalentId)) {
       // Remove the talent first (which will trigger persistence)
       this.removeTalent(keyTalentId);
     }
-    
+
     // Then persist the bonus path removal
-    this.talentsApi.saveTalents(this.characterId, {
-      pendingTrees: newSelected
-    }).subscribe({
-      next: () => {
-        this.loadTalentUIState();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('[TalentView] Failed to save bonus path removal:', err);
-      }
-    });
+    this.talentsApi
+      .saveTalents(this.characterId, {
+        pendingTrees: newSelected,
+      })
+      .subscribe({
+        next: () => {
+          this.loadTalentUIState();
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('[TalentView] Failed to save bonus path removal:', err);
+        },
+      });
   }
 
   /**
@@ -671,7 +721,7 @@ export class TalentView implements OnInit, OnDestroy {
 
     const trees = this.buildAvailableTreesFromKeywords();
     console.log('[TalentView] autoSelectInitialTree - found', trees.length, 'trees');
-    
+
     if (trees.length === 0) {
       console.log('[TalentView] No trees available to select');
       return;
@@ -679,7 +729,7 @@ export class TalentView implements OnInit, OnDestroy {
 
     // If singer selection required, select singer tree
     if (this.talentUIState.requiresSingerSelection) {
-      const singerTree = trees.find(t => t.pathName.toLowerCase().includes('singer'));
+      const singerTree = trees.find((t) => t.pathName.toLowerCase().includes('singer'));
       if (singerTree) {
         console.log('[TalentView] Selecting singer tree');
         this.selectTree(singerTree);
@@ -692,4 +742,3 @@ export class TalentView implements OnInit, OnDestroy {
     this.selectTree(trees[0]);
   }
 }
-

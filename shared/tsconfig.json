@@ -23,11 +23,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "node_modules"
-  ]
+  "include": ["**/*.ts"],
+  "exclude": ["**/*.spec.ts", "node_modules"]
 }

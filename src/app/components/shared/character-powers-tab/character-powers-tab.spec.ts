@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -29,18 +29,18 @@ describe('CharacterPowersTab', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CharacterPowersTab, NoopAnimationsModule]
+      imports: [CharacterPowersTab, NoopAnimationsModule],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CharacterPowersTab);
     component = fixture.componentInstance;
-    
+
     // Create a mock character
     mockCharacter = new Character();
     mockCharacter.selectedExpertises = [
       ExpertiseSourceHelper.create('Combat', 'manual'),
       ExpertiseSourceHelper.create('Stealth', 'talent', 'talent:spy'),
-      ExpertiseSourceHelper.create('Persuasion', 'culture', 'culture:Alethi')
+      ExpertiseSourceHelper.create('Persuasion', 'culture', 'culture:Alethi'),
     ];
   });
 
@@ -57,9 +57,9 @@ describe('CharacterPowersTab', () => {
     it('should display selected expertises', () => {
       const expertises = component.getSelectedExpertises();
       expect(expertises.length).toBe(3);
-      expect(expertises.some(e => e.name === 'Combat')).toBe(true);
-      expect(expertises.some(e => e.name === 'Stealth')).toBe(true);
-      expect(expertises.some(e => e.name === 'Persuasion')).toBe(true);
+      expect(expertises.some((e) => e.name === 'Combat')).toBe(true);
+      expect(expertises.some((e) => e.name === 'Stealth')).toBe(true);
+      expect(expertises.some((e) => e.name === 'Persuasion')).toBe(true);
     });
 
     it('should return empty array when character has no expertises', () => {
@@ -164,7 +164,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format bonus with value and type', () => {
       const power: any = {
-        bonuses: [{ value: 2, type: 'Strength' }]
+        bonuses: [{ value: 2, type: 'Strength' }],
       };
       const display = component.getBonusDisplay(power);
       expect(display[0]).toContain('+2');
@@ -173,7 +173,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format bonus with negative value', () => {
       const power: any = {
-        bonuses: [{ value: -1, type: 'Speed' }]
+        bonuses: [{ value: -1, type: 'Speed' }],
       };
       const display = component.getBonusDisplay(power);
       expect(display[0]).toContain('-1');
@@ -181,7 +181,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format bonus with target', () => {
       const power: any = {
-        bonuses: [{ value: 3, type: 'bonus', target: 'Attack rolls' }]
+        bonuses: [{ value: 3, type: 'bonus', target: 'Attack rolls' }],
       };
       const display = component.getBonusDisplay(power);
       expect(display[0]).toContain('to Attack rolls');
@@ -189,7 +189,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format bonus with condition', () => {
       const power: any = {
-        bonuses: [{ value: 2, type: 'bonus', condition: 'when flanking' }]
+        bonuses: [{ value: 2, type: 'bonus', condition: 'when flanking' }],
       };
       const display = component.getBonusDisplay(power);
       expect(display[0]).toContain('(when flanking)');
@@ -199,8 +199,8 @@ describe('CharacterPowersTab', () => {
       const power: any = {
         bonuses: [
           { value: 2, type: 'Strength' },
-          { value: 1, type: 'Dexterity' }
-        ]
+          { value: 1, type: 'Dexterity' },
+        ],
       };
       const display = component.getBonusDisplay(power);
       expect(display.length).toBe(2);
@@ -216,7 +216,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format grants advantage', () => {
       const power: any = {
-        grantsAdvantage: ['Stealth', 'Persuasion']
+        grantsAdvantage: ['Stealth', 'Persuasion'],
       };
       const effects = component.getOtherEffects(power);
       expect(effects[0]).toContain('Grants Advantage on:');
@@ -226,7 +226,7 @@ describe('CharacterPowersTab', () => {
 
     it('should format grants disadvantage', () => {
       const power: any = {
-        grantsDisadvantage: ['Intimidation']
+        grantsDisadvantage: ['Intimidation'],
       };
       const effects = component.getOtherEffects(power);
       expect(effects[0]).toContain('Grants Disadvantage on:');
@@ -235,7 +235,7 @@ describe('CharacterPowersTab', () => {
 
     it('should include other effects', () => {
       const power: any = {
-        otherEffects: ['You gain darkvision', 'You can breathe underwater']
+        otherEffects: ['You gain darkvision', 'You can breathe underwater'],
       };
       const effects = component.getOtherEffects(power);
       expect(effects.length).toBe(2);
@@ -247,7 +247,7 @@ describe('CharacterPowersTab', () => {
       const power: any = {
         grantsAdvantage: ['Stealth'],
         grantsDisadvantage: ['Intimidation'],
-        otherEffects: ['Custom effect']
+        otherEffects: ['Custom effect'],
       };
       const effects = component.getOtherEffects(power);
       expect(effects.length).toBe(3);
@@ -286,8 +286,8 @@ describe('CharacterPowersTab', () => {
     it('Packet 6 Integration Test: Set Ironstance → verify bonuses + advantage ribbon', () => {
       // STEP 1: Verify Ironstance is available
       const availableStances = character.getAvailableStances();
-      const ironstance = availableStances.find(s => s.id === 'ironstance');
-      
+      const ironstance = availableStances.find((s) => s.id === 'ironstance');
+
       expect(ironstance).toBeDefined();
       expect(ironstance?.name).toBe('Ironstance');
       expect(ironstance?.description).toContain('Insight');
@@ -330,27 +330,23 @@ describe('CharacterPowersTab', () => {
       }
 
       // STEP 8: Verify advantage ribbon would display by checking template conditions
-      const activeStanceDisplay = fixture.debugElement.query(
-        By.css('.stance-details-section')
-      );
+      const activeStanceDisplay = fixture.debugElement.query(By.css('.stance-details-section'));
       if (activeStanceDisplay && activeStance?.grantsAdvantage?.length) {
         // The template should render the advantage-ribbons div
         fixture.detectChanges();
-        const ribbonContainer = fixture.debugElement.query(
-          By.css('.advantage-ribbons')
-        );
+        const ribbonContainer = fixture.debugElement.query(By.css('.advantage-ribbons'));
         if (ribbonContainer) {
           expect(ribbonContainer).toBeTruthy();
-          const ribbons = fixture.debugElement.queryAll(
-            By.css('.ribbon-corner')
-          );
+          const ribbons = fixture.debugElement.queryAll(By.css('.ribbon-corner'));
           expect(ribbons.length).toBeGreaterThan(0);
           // Verify at least one ribbon contains the advantage ID
-          const ribbonTexts = ribbons.map(r => r.nativeElement.textContent);
-          expect(ribbonTexts.some(text => 
-            text.includes('insight_in_ironstance') || 
-            text.toLowerCase().includes('insight')
-          )).toBe(true);
+          const ribbonTexts = ribbons.map((r) => r.nativeElement.textContent);
+          expect(
+            ribbonTexts.some(
+              (text) =>
+                text.includes('insight_in_ironstance') || text.toLowerCase().includes('insight')
+            )
+          ).toBe(true);
         }
       }
     });
@@ -359,10 +355,10 @@ describe('CharacterPowersTab', () => {
       // Verify character can be set to Ironstance
       const setSuccess = character.setActiveStance('ironstance');
       expect(setSuccess).toBe(true);
-      
+
       // Verify the stance was actually set
       expect(character.activeStanceId).toBe('ironstance');
-      
+
       // Verify we can retrieve the active stance
       const activeStance = character.getActiveStance();
       expect(activeStance?.id).toBe('ironstance');
@@ -378,7 +374,7 @@ describe('CharacterPowersTab', () => {
       expect(activeStance?.grantsAdvantage?.length).toBeGreaterThan(0);
 
       // Verify all advantages are valid strings
-      activeStance?.grantsAdvantage?.forEach(advantage => {
+      activeStance?.grantsAdvantage?.forEach((advantage) => {
         expect(typeof advantage).toBe('string');
         expect(advantage.length).toBeGreaterThan(0);
       });
@@ -393,7 +389,7 @@ describe('CharacterPowersTab', () => {
 
     it('should handle switching from Ironstance to another stance', () => {
       const availableStances = character.getAvailableStances();
-      
+
       // For this test, we need at least one stance available
       if (availableStances.length >= 1) {
         // Set Ironstance
@@ -402,11 +398,11 @@ describe('CharacterPowersTab', () => {
 
         // If multiple stances available, switch to another
         if (availableStances.length > 1) {
-          const otherStance = availableStances.find(s => s.id !== 'ironstance');
+          const otherStance = availableStances.find((s) => s.id !== 'ironstance');
           if (otherStance) {
             character.setActiveStance(otherStance.id);
             expect(character.activeStanceId).toBe(otherStance.id);
-            
+
             // Return to Ironstance
             character.setActiveStance('ironstance');
             expect(character.activeStanceId).toBe('ironstance');
@@ -417,11 +413,11 @@ describe('CharacterPowersTab', () => {
 
     it('should verify Ironstance advantage reminder persists while active', () => {
       character.setActiveStance('ironstance');
-      
+
       // Get active stance multiple times - should remain consistent
       const stance1 = character.getActiveStance();
       const stance2 = character.getActiveStance();
-      
+
       expect(stance1?.id).toBe(stance2?.id);
       expect(stance1?.grantsAdvantage).toEqual(stance2?.grantsAdvantage);
       expect(stance1?.grantsAdvantage).toContain('insight_in_ironstance');

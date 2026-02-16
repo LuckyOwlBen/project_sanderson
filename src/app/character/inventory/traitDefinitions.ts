@@ -1,6 +1,6 @@
 /**
  * Weapon and Armor Trait Definitions
- * 
+ *
  * Defines all weapon and armor traits with structured parameters.
  * Traits are simple descriptive tags that can have optional parameters.
  * This system is intentionally simple and extendable for future enhancements.
@@ -25,13 +25,13 @@ export interface TraitParameters {
   // For Thrown weapons
   shortRange?: number;
   longRange?: number;
-  
+
   // For Melee range modifiers (e.g., "Melee[+5]")
   meleeBonus?: number;
-  
+
   // For Unique traits with special effects
   effect?: string;
-  
+
   // Extensible for future trait parameters
   [key: string]: any;
 }
@@ -51,33 +51,33 @@ export function parseTraitString(traitString: string): TraitDefinition {
       trait: 'Thrown',
       params: {
         shortRange: parseInt(thrownMatch[1]),
-        longRange: parseInt(thrownMatch[2])
-      }
+        longRange: parseInt(thrownMatch[2]),
+      },
     };
   }
-  
+
   // Check for Melee[+X] format
   const meleeMatch = traitString.match(/Melee\[\+(\d+)\]/);
   if (meleeMatch) {
     return {
       trait: 'Melee',
       params: {
-        meleeBonus: parseInt(meleeMatch[1])
-      }
+        meleeBonus: parseInt(meleeMatch[1]),
+      },
     };
   }
-  
+
   // Check for Unique: effect format
   const uniqueMatch = traitString.match(/Unique:\s*(.+)/);
   if (uniqueMatch) {
     return {
       trait: 'Unique',
       params: {
-        effect: uniqueMatch[1]
-      }
+        effect: uniqueMatch[1],
+      },
     };
   }
-  
+
   // Simple trait with no parameters
   return { trait: traitString };
 }
@@ -89,19 +89,19 @@ export function formatTraitString(trait: TraitDefinition): string {
   if (!trait.params) {
     return trait.trait;
   }
-  
+
   if (trait.trait === 'Thrown' && trait.params.shortRange && trait.params.longRange) {
     return `Thrown[${trait.params.shortRange}/${trait.params.longRange}]`;
   }
-  
+
   if (trait.trait === 'Melee' && trait.params.meleeBonus) {
     return `Melee[+${trait.params.meleeBonus}]`;
   }
-  
+
   if (trait.trait === 'Unique' && trait.params.effect) {
     return `Unique: ${trait.params.effect}`;
   }
-  
+
   return trait.trait;
 }
 
@@ -120,5 +120,5 @@ export const KNOWN_TRAITS = [
   'Indirect',
   'Two-Handed',
   'Dangerous',
-  'Unique'
+  'Unique',
 ] as const;

@@ -4,7 +4,14 @@
  * Uses the Skills API as the source of truth for skill allocations.
  */
 
-import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, filter, take } from 'rxjs';
 import { Character } from '../../character/character';
@@ -32,14 +39,14 @@ interface SkillConfig {
   imports: [CommonModule, ValueStepper],
   providers: [],
   templateUrl: './skill-manager.html',
-  styleUrls: ['./skill-manager.scss']
+  styleUrls: ['./skill-manager.scss'],
 })
 export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, OnDestroy {
   @Output() pendingChange = new EventEmitter<boolean>();
-  
+
   private destroy$ = new Subject<void>();
   private readonly STEP_INDEX = 5; // Skills is now step 5 (0-indexed)
-  
+
   character: Character | null = null;
   private skillAssociationTable = new SkillAssociationTable();
   private characterId: string | null = null;
@@ -89,7 +96,8 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     if (this.isFetchingSlice) return;
     this.isFetchingSlice = true;
 
-    this.skillsApi.getSkills(characterId)
+    this.skillsApi
+      .getSkills(characterId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (state: SkillsState) => {
@@ -105,7 +113,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         error: () => {
           console.error('Failed to load skills, server may be down');
           this.isFetchingSlice = false;
-        }
+        },
       });
   }
 
@@ -123,15 +131,14 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
     const payload = this.character.skills.getAllSkillRanks();
     console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
-    this.skillsApi.updateSkills(this.characterId, payload)
-      .subscribe({
-        next: (response) => {
-          console.log('[SkillManager] Skills persisted successfully:', response);
-        },
-        error: (err) => {
-          console.error('[SkillManager] Failed to persist skills:', err);
-        }
-      });
+    this.skillsApi.updateSkills(this.characterId, payload).subscribe({
+      next: (response) => {
+        console.log('[SkillManager] Skills persisted successfully:', response);
+      },
+      error: (err) => {
+        console.error('[SkillManager] Failed to persist skills:', err);
+      },
+    });
   }
 
   // Persist hook called by CharacterCreatorView before navigating to next step
@@ -145,24 +152,24 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     if (!this.character) return;
     if (this.isInitialized) return;
 
-    const skills: SkillConfig[] = Object.values(SkillType).map(skillType => {
+    const skills: SkillConfig[] = Object.values(SkillType).map((skillType) => {
       const currentRank = this.character!.skills?.getSkillRank(skillType) || 0;
       const associatedAttr = this.skillAssociationTable.checkSkillAssociation(skillType);
       const attrValue = this.character!.attributes.getAttribute(associatedAttr);
-      
+
       return {
         name: this.formatSkillName(skillType),
         key: skillType,
         currentValue: currentRank,
         associatedAttribute: this.capitalizeFirst(associatedAttr),
-        total: currentRank + attrValue
+        total: currentRank + attrValue,
       };
     });
 
     const expertiseSkills = this.character.getExpertiseSkills();
     const intellectValue = this.character.attributes.getAttribute('intellect');
-    const existingLabels = new Set(skills.map(skill => skill.name));
-    expertiseSkills.forEach(expertiseName => {
+    const existingLabels = new Set(skills.map((skill) => skill.name));
+    expertiseSkills.forEach((expertiseName) => {
       if (existingLabels.has(expertiseName)) {
         return;
       }
@@ -173,7 +180,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
         currentValue: currentRank,
         associatedAttribute: 'Intellect',
         total: currentRank + intellectValue,
-        isExpertise: true
+        isExpertise: true,
       });
     });
 
@@ -182,39 +189,51 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
     const totalPoints = this.serverSkillPoints ?? 0;
     this.initialize(skills, totalPoints, false);
-    
+
     // Set initialized AFTER everything is setup
     this.isInitialized = true;
   }
 
   private categorizeSkills(skills: SkillConfig[]): void {
     const physical = [
-      SkillType.AGILITY, SkillType.ATHLETICS, SkillType.HEAVY_WEAPONRY,
-      SkillType.LIGHT_WEAPONRY, SkillType.STEALTH, SkillType.THIEVERY
-    ];
-    
-    const mental = [
-      SkillType.CRAFTING, SkillType.DEDUCTION, SkillType.DISCIPLINE,
-      SkillType.INTIMIDATION, SkillType.LORE, SkillType.MEDICINE
-    ];
-    
-    const social = [
-      SkillType.DECEPTION, SkillType.INSIGHT, SkillType.LEADERSHIP,
-      SkillType.PERCEPTION, SkillType.PERSUASION, SkillType.SURVIVAL
+      SkillType.AGILITY,
+      SkillType.ATHLETICS,
+      SkillType.HEAVY_WEAPONRY,
+      SkillType.LIGHT_WEAPONRY,
+      SkillType.STEALTH,
+      SkillType.THIEVERY,
     ];
 
-    const baseSkills = skills.filter(s => !s.isExpertise);
-    this.physicalSkills = baseSkills.filter(s => physical.includes(s.key as SkillType));
-    this.mentalSkills = baseSkills.filter(s => mental.includes(s.key as SkillType));
-    this.socialSkills = baseSkills.filter(s => social.includes(s.key as SkillType));
-    this.specialSkills = skills.filter(s => s.isExpertise);
-    
+    const mental = [
+      SkillType.CRAFTING,
+      SkillType.DEDUCTION,
+      SkillType.DISCIPLINE,
+      SkillType.INTIMIDATION,
+      SkillType.LORE,
+      SkillType.MEDICINE,
+    ];
+
+    const social = [
+      SkillType.DECEPTION,
+      SkillType.INSIGHT,
+      SkillType.LEADERSHIP,
+      SkillType.PERCEPTION,
+      SkillType.PERSUASION,
+      SkillType.SURVIVAL,
+    ];
+
+    const baseSkills = skills.filter((s) => !s.isExpertise);
+    this.physicalSkills = baseSkills.filter((s) => physical.includes(s.key as SkillType));
+    this.mentalSkills = baseSkills.filter((s) => mental.includes(s.key as SkillType));
+    this.socialSkills = baseSkills.filter((s) => social.includes(s.key as SkillType));
+    this.specialSkills = skills.filter((s) => s.isExpertise);
+
     // Include surge skills only if character has spoken the First Ideal
     if (this.character?.radiantPath.hasSpokenIdeal()) {
       const orderInfo = this.character.radiantPath.getOrderInfo();
       if (orderInfo?.surgePair) {
         const surgePair = orderInfo.surgePair;
-        this.surgeSkills = baseSkills.filter(s => surgePair.includes(s.key as SkillType));
+        this.surgeSkills = baseSkills.filter((s) => surgePair.includes(s.key as SkillType));
       }
     } else {
       this.surgeSkills = [];
@@ -225,7 +244,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     return skillType
       .toLowerCase()
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -235,14 +254,16 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
 
   private updateSkillTotals(): void {
     if (!this.character) return;
-    
-    this.items.forEach(skill => {
+
+    this.items.forEach((skill) => {
       if (skill.isExpertise) {
         const attrValue = this.character!.attributes.getAttribute('intellect');
         skill.associatedAttribute = 'Intellect';
         skill.total = skill.currentValue + attrValue;
       } else {
-        const associatedAttr = this.skillAssociationTable.checkSkillAssociation(skill.key as SkillType);
+        const associatedAttr = this.skillAssociationTable.checkSkillAssociation(
+          skill.key as SkillType
+        );
         const attrValue = this.character!.attributes.getAttribute(associatedAttr);
         skill.associatedAttribute = this.capitalizeFirst(associatedAttr);
         skill.total = skill.currentValue + attrValue;
@@ -289,7 +310,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     const isValid = this.remainingPoints === 0;
     this.validationService.setStepValid(this.STEP_INDEX, isValid);
     this.checkPendingStatus();
-    
+
     // Scroll to show navigation buttons when all points are allocated
     if (isValid) {
       setTimeout(() => {

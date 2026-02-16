@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -36,7 +36,7 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
   beforeEach(async () => {
     levelUpApiService = {
       getSkillSlice: vi.fn(),
-      updateSkillSlice: vi.fn()
+      updateSkillSlice: vi.fn(),
     };
 
     queryParamsSubject = new BehaviorSubject({ levelUp: 'true' });
@@ -51,10 +51,10 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: queryParamsSubject.asObservable()
-          }
-        }
-      ]
+            queryParams: queryParamsSubject.asObservable(),
+          },
+        },
+      ],
     }).compileComponents();
 
     levelUpApiService = TestBed.inject(LevelUpApiService);
@@ -79,12 +79,12 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
       level: 1,
       skills: {
         [SkillType.AGILITY]: 1,
-        [SkillType.ATHLETICS]: 1
+        [SkillType.ATHLETICS]: 1,
       },
       pointsForLevel: 5,
       maxRank: 5,
       ranksPerLevel: 1,
-      success: true
+      success: true,
     };
 
     levelUpApiService.getSkillSlice.mockReturnValue(of(slice1));
@@ -122,17 +122,17 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
       id: 'char-123',
       level: 1,
       skills: {
-        [SkillType.AGILITY]: 1
+        [SkillType.AGILITY]: 1,
       },
       pointsForLevel: 5,
       maxRank: 5,
       ranksPerLevel: 1,
-      success: true
+      success: true,
     };
 
     // Set character BEFORE changing route params
     characterStateService.updateCharacter(testCharacter);
-    
+
     levelUpApiService.getSkillSlice.mockReturnValue(of(slice));
 
     // Now emit route params with level-up mode
@@ -170,12 +170,12 @@ describe('SkillManager - Fresh Backend Data on Route Change', () => {
       level: 2,
       skills: {
         [SkillType.AGILITY]: 2,
-        [SkillType.ATHLETICS]: 1
+        [SkillType.ATHLETICS]: 1,
       },
       pointsForLevel: 5, // Server says: 5 points available for THIS level
       maxRank: 5,
       ranksPerLevel: 1,
-      success: true
+      success: true,
     };
 
     levelUpApiService.getSkillSlice.mockReturnValue(of(slice));

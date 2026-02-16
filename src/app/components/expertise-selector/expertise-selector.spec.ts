@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -46,9 +46,9 @@ describe('ExpertiseSelector', () => {
     testCharacter.attributes.intellect = 3;
     testCharacter.cultures = [
       { name: 'Alethi', id: 'alethi' } as any,
-      { name: 'Thaylen', id: 'thaylen' } as any
+      { name: 'Thaylen', id: 'thaylen' } as any,
     ];
-    
+
     queryParamsSubject = new BehaviorSubject<any>({});
     pointsChangedSubject = new Subject<void>();
 
@@ -64,22 +64,22 @@ describe('ExpertiseSelector', () => {
       },
       removeExpertise: (...args: any[]) => {
         removeExpertiseCalls.push(args);
-      }
+      },
     };
 
     mockValidationService = {
       setStepValid: (...args: any[]) => {
         setStepValidCalls.push(args);
-      }
+      },
     };
 
     mockLevelUpManager = {
-      pointsChanged$: pointsChangedSubject
+      pointsChanged$: pointsChangedSubject,
     };
 
     mockStorageService = {
       loadCharacter: () => of(testCharacter),
-      saveCharacter: () => of({ success: true, id: 'char-123' })
+      saveCharacter: () => of({ success: true, id: 'char-123' }),
     };
 
     await TestBed.configureTestingModule({
@@ -92,10 +92,10 @@ describe('ExpertiseSelector', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            queryParams: queryParamsSubject.asObservable()
-          }
-        }
-      ]
+            queryParams: queryParamsSubject.asObservable(),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ExpertiseSelector);
@@ -119,14 +119,14 @@ describe('ExpertiseSelector', () => {
 
     it('should subscribe to character state on init', () => {
       fixture.detectChanges();
-      
+
       expect(component.character).toBeTruthy();
       expect(component.character?.attributes.intellect).toBe(3);
     });
 
     it('should extract cultural expertises from character cultures', () => {
       fixture.detectChanges();
-      
+
       expect(component.culturalExpertises).toContain('Alethi');
       expect(component.culturalExpertises).toContain('Thaylen');
       expect(component.culturalExpertises.length).toBe(2);
@@ -134,14 +134,14 @@ describe('ExpertiseSelector', () => {
 
     it('should auto-add cultural expertises on first initialization', () => {
       fixture.detectChanges();
-      
+
       expect(addExpertiseCalls).toContainEqual(['Alethi', 'culture', 'culture:Alethi']);
       expect(addExpertiseCalls).toContainEqual(['Thaylen', 'culture', 'culture:Thaylen']);
     });
 
     it('should calculate available points based on intellect', () => {
       fixture.detectChanges();
-      
+
       expect(component.totalPoints).toBe(3);
       expect(component.availablePoints).toBe(3); // None selected yet beyond cultural
     });
@@ -184,11 +184,11 @@ describe('ExpertiseSelector', () => {
       const culturalExpertises = component.getExpertisesByCategory('cultural');
       const weaponExpertises = component.getExpertisesByCategory('weapon');
       const armorExpertises = component.getExpertisesByCategory('armor');
-      
-      expect(culturalExpertises.every(e => e.category === 'cultural')).toBe(true);
-      expect(weaponExpertises.every(e => e.category === 'weapon')).toBe(true);
-      expect(armorExpertises.every(e => e.category === 'armor')).toBe(true);
-      
+
+      expect(culturalExpertises.every((e) => e.category === 'cultural')).toBe(true);
+      expect(weaponExpertises.every((e) => e.category === 'weapon')).toBe(true);
+      expect(armorExpertises.every((e) => e.category === 'armor')).toBe(true);
+
       expect(culturalExpertises.length).toBeGreaterThan(0);
       expect(weaponExpertises.length).toBeGreaterThan(0);
       expect(armorExpertises.length).toBeGreaterThan(0);
@@ -206,51 +206,51 @@ describe('ExpertiseSelector', () => {
     });
 
     it('should identify cultural expertise correctly', () => {
-      const alethiExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Alethi')!;
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      
+      const alethiExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Alethi')!;
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+
       expect(component.isCulturalExpertise(alethiExpertise)).toBe(true);
       expect(component.isCulturalExpertise(vedenExpertise)).toBe(false);
     });
 
     it('should allow selecting expertise with available points', () => {
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+
       expect(component.canSelectExpertise(vedenExpertise)).toBe(true);
     });
 
     it('should not allow selecting expertise without available points', () => {
       component.availablePoints = 0;
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+
       expect(component.canSelectExpertise(vedenExpertise)).toBe(false);
     });
 
     it('should always allow selecting cultural expertise', () => {
       component.availablePoints = 0;
-      const alethiExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Alethi')!;
-      
+      const alethiExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Alethi')!;
+
       expect(component.canSelectExpertise(alethiExpertise)).toBe(true);
     });
 
     it('should not allow selecting already selected expertise', () => {
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
       component.selectedExpertises.push({ name: 'Veden', source: 'manual' });
-      
+
       expect(component.canSelectExpertise(vedenExpertise)).toBe(false);
     });
 
     it('should toggle expertise selection on/off', () => {
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+
       // Select
       component.toggleExpertise(vedenExpertise);
       expect(addExpertiseCalls).toContainEqual(['Veden', 'manual']);
-      
+
       // Setup for deselect
       component.selectedExpertises = [{ name: 'Veden', source: 'manual' }];
       removeExpertiseCalls.length = 0;
-      
+
       // Deselect
       component.toggleExpertise(vedenExpertise);
       expect(removeExpertiseCalls).toContainEqual(['Veden']);
@@ -259,20 +259,20 @@ describe('ExpertiseSelector', () => {
     it('should identify selected expertise correctly', () => {
       component.selectedExpertises = [
         { name: 'Veden', source: 'manual' },
-        { name: 'Light Weaponry', source: 'manual' }
+        { name: 'Light Weaponry', source: 'manual' },
       ];
-      
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      const alethiExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Alethi')!;
-      
+
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+      const alethiExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Alethi')!;
+
       expect(component.isExpertiseSelected(vedenExpertise)).toBe(true);
       expect(component.isExpertiseSelected(alethiExpertise)).toBe(false);
     });
 
     it('should allow deselecting selected expertise', () => {
       component.selectedExpertises = [{ name: 'Veden', source: 'manual' }];
-      const vedenExpertise = CULTURAL_EXPERTISES.find(e => e.name === 'Veden')!;
-      
+      const vedenExpertise = CULTURAL_EXPERTISES.find((e) => e.name === 'Veden')!;
+
       expect(component.canDeselectExpertise(vedenExpertise)).toBe(true);
     });
 
@@ -295,23 +295,21 @@ describe('ExpertiseSelector', () => {
       component.selectedExpertises = [
         { name: 'Alethi', source: 'culture', sourceId: 'culture:Alethi' },
         { name: 'Thaylen', source: 'culture', sourceId: 'culture:Thaylen' },
-        { name: 'Veden', source: 'manual' }
+        { name: 'Veden', source: 'manual' },
       ];
-      
+
       // Manually trigger calculation
       (component as any).calculateAvailablePoints();
-      
+
       expect(component.availablePoints).toBe(2); // 3 total - 1 manual selection
     });
 
     it('should update available points after selection', () => {
       const initialPoints = component.availablePoints;
-      component.selectedExpertises = [
-        { name: 'Veden', source: 'manual' }
-      ];
-      
+      component.selectedExpertises = [{ name: 'Veden', source: 'manual' }];
+
       (component as any).calculateAvailablePoints();
-      
+
       expect(component.availablePoints).toBe(initialPoints - 1);
     });
   });
@@ -324,7 +322,7 @@ describe('ExpertiseSelector', () => {
     it('should validate as invalid when too many expertises selected', () => {
       component.availablePoints = -1;
       (component as any).updateValidation();
-      
+
       expect(setStepValidCalls).toContainEqual([5, false]);
       expect(component.validationMessage).toContain('too many');
     });
@@ -332,7 +330,7 @@ describe('ExpertiseSelector', () => {
     it('should validate as valid when points are available', () => {
       component.availablePoints = 2;
       (component as any).updateValidation();
-      
+
       expect(setStepValidCalls).toContainEqual([5, true]);
       expect(component.validationMessage).toContain('remaining');
     });
@@ -340,28 +338,28 @@ describe('ExpertiseSelector', () => {
     it('should validate as valid when all points allocated', () => {
       component.availablePoints = 0;
       (component as any).updateValidation();
-      
+
       expect(setStepValidCalls).toContainEqual([5, true]);
       expect(component.validationMessage).toContain('allocated');
     });
 
     it('should emit pending change when points available', () => {
       let emittedValue: boolean | undefined;
-      component.pendingChange.subscribe(val => emittedValue = val);
+      component.pendingChange.subscribe((val) => (emittedValue = val));
       component.availablePoints = 1;
-      
+
       (component as any).checkPendingStatus();
-      
+
       expect(emittedValue).toBe(true);
     });
 
     it('should not emit pending change when all points used', () => {
       let emittedValue: boolean | undefined;
-      component.pendingChange.subscribe(val => emittedValue = val);
+      component.pendingChange.subscribe((val) => (emittedValue = val));
       component.availablePoints = 0;
-      
+
       (component as any).checkPendingStatus();
-      
+
       expect(emittedValue).toBe(false);
     });
   });
@@ -374,9 +372,9 @@ describe('ExpertiseSelector', () => {
     it('should return correct source badge for expertise', () => {
       component.selectedExpertises = [
         { name: 'Veden', source: 'manual' },
-        { name: 'Alethi', source: 'culture', sourceId: 'culture:Alethi' }
+        { name: 'Alethi', source: 'culture', sourceId: 'culture:Alethi' },
       ];
-      
+
       // Note: This test depends on ExpertiseSourceHelper implementation
       expect(component.getSourceBadge('Veden')).toBeTruthy();
       expect(component.getSourceBadge('Alethi')).toBeTruthy();
@@ -389,9 +387,9 @@ describe('ExpertiseSelector', () => {
     it('should determine if expertise can be removed', () => {
       component.selectedExpertises = [
         { name: 'Veden', source: 'manual' },
-        { name: 'LockedExpertise', source: 'gm' }
+        { name: 'LockedExpertise', source: 'gm' },
       ];
-      
+
       // Manual expertises can typically be removed
       expect(component.canRemoveExpertise('Veden')).toBe(true);
       // GM-granted might not be removable (depends on ExpertiseSourceHelper)
@@ -402,11 +400,11 @@ describe('ExpertiseSelector', () => {
   describe('Lifecycle', () => {
     it('should subscribe to pointsChanged$ on init', () => {
       let emitted = false;
-      component.pendingChange.subscribe(() => emitted = true);
+      component.pendingChange.subscribe(() => (emitted = true));
       fixture.detectChanges();
-      
+
       pointsChangedSubject.next();
-      
+
       // Should trigger pending status check
       expect(emitted).toBe(true);
     });
@@ -419,7 +417,7 @@ describe('ExpertiseSelector', () => {
 
     it('should complete subjects on destroy', () => {
       fixture.detectChanges();
-      
+
       // Verify ngOnDestroy doesn't throw
       expect(() => component.ngOnDestroy()).not.toThrow();
     });
@@ -428,8 +426,8 @@ describe('ExpertiseSelector', () => {
   describe('All Categories Display', () => {
     it('should have expertises in all categories', () => {
       const categories = ['cultural', 'weapon', 'armor', 'utility', 'specialist'];
-      
-      categories.forEach(category => {
+
+      categories.forEach((category) => {
         const expertises = component.getExpertisesByCategory(category);
         expect(expertises.length).toBeGreaterThan(0);
       });
@@ -439,7 +437,7 @@ describe('ExpertiseSelector', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement;
       const categorySections = compiled.querySelectorAll('.category-section');
-      
+
       expect(categorySections.length).toBe(5); // cultural, weapon, armor, utility, specialist
     });
   });

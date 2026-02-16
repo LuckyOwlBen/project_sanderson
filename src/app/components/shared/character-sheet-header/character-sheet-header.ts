@@ -8,18 +8,13 @@ import { Character } from '../../../character/character';
 @Component({
   selector: 'app-character-sheet-header',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDividerModule
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDividerModule],
   templateUrl: './character-sheet-header.html',
   styleUrl: './character-sheet-header.scss',
 })
 export class CharacterSheetHeader {
   @Input() character: Character | null = null;
-  
+
   @Output() save = new EventEmitter<void>();
   @Output() export = new EventEmitter<void>();
   @Output() navigateBack = new EventEmitter<void>();

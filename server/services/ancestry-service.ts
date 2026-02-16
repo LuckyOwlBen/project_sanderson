@@ -12,7 +12,7 @@ export function createEmptyAncestryDTO(): AncestryDTO {
   return {
     ancestry: null,
     cultures: [],
-    paths: []
+    paths: [],
   };
 }
 
@@ -37,6 +37,6 @@ export async function setAncestryByCharacterId(
   return {
     ancestry,
     cultures,
-    paths
+    paths,
   };
 }

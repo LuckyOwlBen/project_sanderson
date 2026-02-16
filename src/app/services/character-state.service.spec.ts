@@ -1,15 +1,15 @@
 import 'zone.js';
 import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
 
 // Initialize TestBed before anything else
 const testBed = getTestBed();
 try {
-  testBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  );
+  testBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 } catch (e) {
   // Already initialized, that's fine
 }
@@ -33,7 +33,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
   describe('addExpertise', () => {
     it('should add expertise with manual source by default', () => {
       service.addExpertise('Light Weaponry');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
       expect(character.selectedExpertises[0].name).toBe('Light Weaponry');
@@ -42,7 +42,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
 
     it('should add expertise with specified source', () => {
       service.addExpertise('Alethi', 'culture', 'culture:Alethi');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
       expect(character.selectedExpertises[0].source).toBe('culture');
@@ -52,7 +52,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should not add duplicate expertise', () => {
       service.addExpertise('Light Weaponry', 'manual');
       service.addExpertise('Light Weaponry', 'manual');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
     });
@@ -60,7 +60,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should upgrade manual source to more specific source', () => {
       service.addExpertise('Combat Training', 'manual');
       service.addExpertise('Combat Training', 'talent', 'talent:combat_training');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
       expect(character.selectedExpertises[0].source).toBe('talent');
@@ -70,7 +70,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should not downgrade non-manual source to manual', () => {
       service.addExpertise('Alethi', 'culture', 'culture:Alethi');
       service.addExpertise('Alethi', 'manual');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
       expect(character.selectedExpertises[0].source).toBe('culture');
@@ -81,7 +81,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should remove manual expertise', () => {
       service.addExpertise('Light Weaponry', 'manual');
       service.removeExpertise('Light Weaponry');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(0);
     });
@@ -89,7 +89,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should remove GM-granted expertise', () => {
       service.addExpertise('Custom Expertise', 'gm', 'gm:custom1');
       service.removeExpertise('Custom Expertise');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(0);
     });
@@ -97,7 +97,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should NOT remove culture expertise', () => {
       service.addExpertise('Alethi', 'culture', 'culture:Alethi');
       service.removeExpertise('Alethi');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
     });
@@ -105,7 +105,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should NOT remove talent expertise', () => {
       service.addExpertise('Combat Training', 'talent', 'talent:combat_training');
       service.removeExpertise('Combat Training');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
     });
@@ -117,9 +117,9 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
       service.addExpertise('Expertise 2', 'talent', 'talent:soldier');
       service.addExpertise('Expertise 3', 'talent', 'talent:archer');
       service.addExpertise('Expertise 4', 'manual');
-      
+
       service.removeExpertisesBySource('talent:soldier');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(2);
       expect(character.selectedExpertises.some((e: any) => e.name === 'Expertise 3')).toBe(true);
@@ -128,9 +128,9 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
 
     it('should handle removing non-existent source gracefully', () => {
       service.addExpertise('Light Weaponry', 'manual');
-      
+
       service.removeExpertisesBySource('talent:nonexistent');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
     });
@@ -139,10 +139,10 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
       // Simulate talent granting expertises
       service.addExpertise('Sleight of Hand', 'talent', 'talent:plausible_excuse');
       service.addExpertise('Light Weaponry', 'manual');
-      
+
       // Simulate talent removal
       service.removeExpertisesBySource('talent:plausible_excuse');
-      
+
       const character = service.getCharacter();
       expect(character.selectedExpertises.length).toBe(1);
       expect(character.selectedExpertises[0].name).toBe('Light Weaponry');
@@ -154,7 +154,7 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
       service.addExpertise('Alethi', 'culture');
       service.addExpertise('Light Weaponry', 'manual');
       service.addExpertise('Combat Training', 'talent', 'talent:soldier');
-      
+
       const names = service.getSelectedExpertises();
       expect(names).toEqual(['Alethi', 'Light Weaponry', 'Combat Training']);
     });
@@ -164,18 +164,18 @@ describe('CharacterStateService - Expertise Source Tracking', () => {
     it('should return full ExpertiseSource objects', () => {
       service.addExpertise('Alethi', 'culture', 'culture:Alethi');
       service.addExpertise('Light Weaponry', 'manual');
-      
+
       const expertises = service.getSelectedExpertisesWithSource();
       expect(expertises.length).toBe(2);
       expect(expertises[0]).toEqual({
         name: 'Alethi',
         source: 'culture',
-        sourceId: 'culture:Alethi'
+        sourceId: 'culture:Alethi',
       });
       expect(expertises[1]).toEqual({
         name: 'Light Weaponry',
         source: 'manual',
-        sourceId: undefined
+        sourceId: undefined,
       });
     });
   });
@@ -185,7 +185,7 @@ describe('ExpertiseSourceHelper', () => {
   describe('create', () => {
     it('should create expertise source object', () => {
       const expertise = ExpertiseSourceHelper.create('Alethi', 'culture', 'culture:Alethi');
-      
+
       expect(expertise.name).toBe('Alethi');
       expect(expertise.source).toBe('culture');
       expect(expertise.sourceId).toBe('culture:Alethi');
@@ -244,11 +244,19 @@ describe('ExpertiseSourceHelper', () => {
     it('should convert old string array to ExpertiseSource array', () => {
       const oldFormat = ['Alethi', 'Light Weaponry', 'Heavy Weaponry'];
       const migrated = ExpertiseSourceHelper.migrateFromStringArray(oldFormat);
-      
+
       expect(migrated.length).toBe(3);
       expect(migrated[0]).toEqual({ name: 'Alethi', source: 'manual', sourceId: undefined });
-      expect(migrated[1]).toEqual({ name: 'Light Weaponry', source: 'manual', sourceId: undefined });
-      expect(migrated[2]).toEqual({ name: 'Heavy Weaponry', source: 'manual', sourceId: undefined });
+      expect(migrated[1]).toEqual({
+        name: 'Light Weaponry',
+        source: 'manual',
+        sourceId: undefined,
+      });
+      expect(migrated[2]).toEqual({
+        name: 'Heavy Weaponry',
+        source: 'manual',
+        sourceId: undefined,
+      });
     });
 
     it('should handle empty array', () => {
@@ -262,9 +270,9 @@ describe('ExpertiseSourceHelper', () => {
       const expertises = [
         ExpertiseSourceHelper.create('Alethi', 'culture'),
         ExpertiseSourceHelper.create('Light Weaponry', 'manual'),
-        ExpertiseSourceHelper.create('Combat Training', 'talent')
+        ExpertiseSourceHelper.create('Combat Training', 'talent'),
       ];
-      
+
       const names = ExpertiseSourceHelper.toStringArray(expertises);
       expect(names).toEqual(['Alethi', 'Light Weaponry', 'Combat Training']);
     });

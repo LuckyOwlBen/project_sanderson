@@ -32,7 +32,7 @@ export class ExpertisesModule {
    * Add an expertise
    */
   addExpertise(expertise: ExpertiseSource): void {
-    if (!this._selectedExpertises.find(e => e.name === expertise.name)) {
+    if (!this._selectedExpertises.find((e) => e.name === expertise.name)) {
       this._selectedExpertises.push(expertise);
       this.invalidateCache();
     }
@@ -42,9 +42,7 @@ export class ExpertisesModule {
    * Remove an expertise
    */
   removeExpertise(expertiseName: string): void {
-    this._selectedExpertises = this._selectedExpertises.filter(
-      e => e.name !== expertiseName
-    );
+    this._selectedExpertises = this._selectedExpertises.filter((e) => e.name !== expertiseName);
     this.invalidateCache();
   }
 
@@ -55,11 +53,11 @@ export class ExpertisesModule {
   hasExpertise(expertiseName: string): boolean {
     const currentCount = this._selectedExpertises.length;
     const cacheSize = this.expertiseCache?.size ?? -1;
-    
+
     if (!this.expertiseCache || cacheSize !== currentCount) {
       this.rebuildCache();
     }
-    
+
     return this.expertiseCache!.has(expertiseName);
   }
 
@@ -74,14 +72,14 @@ export class ExpertisesModule {
    * Get all expertise names (for skill checks)
    */
   getExpertiseSkills(): string[] {
-    return this._selectedExpertises.map(e => e.name);
+    return this._selectedExpertises.map((e) => e.name);
   }
 
   /**
    * Rebuild expertise cache
    */
   private rebuildCache(): void {
-    this.expertiseCache = new Set(this._selectedExpertises.map(e => e.name));
+    this.expertiseCache = new Set(this._selectedExpertises.map((e) => e.name));
   }
 
   /**

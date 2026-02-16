@@ -1,6 +1,6 @@
 /**
  * Character Creation Routes
- * 
+ *
  * Handles creation-specific endpoints:
  * - POST /api/characters/:id/ancestry
  * - POST /api/characters/:id/name
@@ -12,11 +12,7 @@ const path = require('path');
 const fsPromises = require('fs').promises;
 const { attributesService } = require('../services/attributes-service');
 const { levelUpManager } = require('../services/levelup-manager');
-const {
-  getAttributesRecord,
-  updateAttributesRecord,
-  saveCharacter
-} = require('../database');
+const { getAttributesRecord, updateAttributesRecord, saveCharacter } = require('../database');
 
 function createCreationRoutes(app, CHARACTERS_DIR) {
   console.log('[Routes] Registering creation routes...');
@@ -40,7 +36,7 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (!ancestry || typeof ancestry !== 'string') {
         return res.status(400).json({
           success: false,
-          error: 'ancestry is required and must be a string'
+          error: 'ancestry is required and must be a string',
         });
       }
 
@@ -49,22 +45,19 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (!validAncestries.includes(ancestry.toLowerCase())) {
         return res.status(400).json({
           success: false,
-          error: `Invalid ancestry: ${ancestry}. Must be one of: ${validAncestries.join(', ')}`
+          error: `Invalid ancestry: ${ancestry}. Must be one of: ${validAncestries.join(', ')}`,
         });
       }
 
       const filepath = getCharacterFilepath(id);
       const data = await fsPromises.readFile(filepath, 'utf8');
       const character = JSON.parse(data);
-      
+
       character.ancestry = ancestry.toLowerCase();
       character.lastModified = new Date().toISOString();
 
-      await fsPromises.writeFile(
-        filepath,
-        JSON.stringify(character, null, 2)
-      );
-      
+      await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2));
+
       // Also save to database
       try {
         const db = require('../database.js');
@@ -80,7 +73,7 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         success: true,
         id,
         ancestry: character.ancestry,
-        message: `Ancestry set to ${ancestry}`
+        message: `Ancestry set to ${ancestry}`,
       });
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -103,7 +96,7 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (!name || typeof name !== 'string') {
         return res.status(400).json({
           success: false,
-          error: 'name is required and must be a string'
+          error: 'name is required and must be a string',
         });
       }
 
@@ -111,32 +104,29 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (trimmedName.length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'name cannot be empty'
+          error: 'name cannot be empty',
         });
       }
 
       if (trimmedName.length < 2 || trimmedName.length > 50) {
         return res.status(400).json({
           success: false,
-          error: 'name must be between 2 and 50 characters'
+          error: 'name must be between 2 and 50 characters',
         });
       }
 
       const filepath = getCharacterFilepath(id);
       const data = await fsPromises.readFile(filepath, 'utf8');
       const character = JSON.parse(data);
-      
+
       character.name = trimmedName;
       if (level !== undefined && level !== null) {
         character.level = level;
       }
       character.lastModified = new Date().toISOString();
 
-      await fsPromises.writeFile(
-        filepath,
-        JSON.stringify(character, null, 2)
-      );
-      
+      await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2));
+
       // Also save to database
       try {
         const db = require('../database.js');
@@ -158,7 +148,7 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         success: true,
         id,
         name: character.name,
-        message: `Character name set to ${trimmedName}`
+        message: `Character name set to ${trimmedName}`,
       });
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -181,22 +171,19 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (!Array.isArray(cultures)) {
         return res.status(400).json({
           success: false,
-          error: 'cultures must be an array'
+          error: 'cultures must be an array',
         });
       }
 
       const filepath = getCharacterFilepath(id);
       const data = await fsPromises.readFile(filepath, 'utf8');
       const character = JSON.parse(data);
-      
+
       character.cultures = cultures;
       character.lastModified = new Date().toISOString();
 
-      await fsPromises.writeFile(
-        filepath,
-        JSON.stringify(character, null, 2)
-      );
-      
+      await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2));
+
       // Also save to database
       try {
         const db = require('../database.js');
@@ -206,13 +193,15 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         console.warn(`[Cultures] Warning: Failed to save to database: ${dbError.message}`);
       }
 
-      console.log(`[Cultures] Updated ${character.name} (${id}) with ${cultures.length} culture(s)`);
+      console.log(
+        `[Cultures] Updated ${character.name} (${id}) with ${cultures.length} culture(s)`
+      );
 
       res.json({
         success: true,
         id,
         cultures: character.cultures,
-        message: `Updated ${cultures.length} culture(s)`
+        message: `Updated ${cultures.length} culture(s)`,
       });
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -235,22 +224,19 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
       if (!Array.isArray(selectedExpertises)) {
         return res.status(400).json({
           success: false,
-          error: 'selectedExpertises must be an array'
+          error: 'selectedExpertises must be an array',
         });
       }
 
       const filepath = getCharacterFilepath(id);
       const data = await fsPromises.readFile(filepath, 'utf8');
       const character = JSON.parse(data);
-      
+
       character.selectedExpertises = selectedExpertises;
       character.lastModified = new Date().toISOString();
 
-      await fsPromises.writeFile(
-        filepath,
-        JSON.stringify(character, null, 2)
-      );
-      
+      await fsPromises.writeFile(filepath, JSON.stringify(character, null, 2));
+
       // Also save to database
       try {
         const db = require('../database.js');
@@ -260,13 +246,15 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         console.warn(`[Expertises] Warning: Failed to save to database: ${dbError.message}`);
       }
 
-      console.log(`[Expertises] Updated ${character.name} (${id}) with ${selectedExpertises.length} expertise(ies)`);
+      console.log(
+        `[Expertises] Updated ${character.name} (${id}) with ${selectedExpertises.length} expertise(ies)`
+      );
 
       res.json({
         success: true,
         id,
         selectedExpertises: character.selectedExpertises,
-        message: `Updated ${selectedExpertises.length} expertise(ies)`
+        message: `Updated ${selectedExpertises.length} expertise(ies)`,
       });
     } catch (error) {
       if (error.code === 'ENOENT') {

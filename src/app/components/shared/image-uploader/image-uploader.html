@@ -1,18 +1,19 @@
 <div class="image-uploader">
   <div class="uploader-label">{{ label }}</div>
-  
+
   <div class="preview-container" *ngIf="showPreview">
     <div class="image-preview">
-      <img 
-        *ngIf="currentImageUrl" 
-        [src]="getFullImageUrl(currentImageUrl)" 
+      <img
+        *ngIf="currentImageUrl"
+        [src]="getFullImageUrl(currentImageUrl)"
         [alt]="label"
-        class="uploaded-image">
+        class="uploaded-image"
+      />
       <div *ngIf="!currentImageUrl" class="placeholder">
         <mat-icon>image</mat-icon>
         <span>No image uploaded</span>
       </div>
-      
+
       <div *ngIf="uploading" class="uploading-overlay">
         <mat-spinner diameter="40"></mat-spinner>
         <span>Uploading...</span>
@@ -21,27 +22,25 @@
   </div>
 
   <div class="upload-actions">
-    <input 
-      #fileInput 
-      type="file" 
+    <input
+      #fileInput
+      type="file"
       accept="image/jpeg,image/jpg,image/png,image/webp"
       (change)="onFileSelected($event)"
-      style="display: none">
-    
-    <button 
-      mat-raised-button 
+      style="display: none"
+    />
+
+    <button
+      mat-raised-button
       color="primary"
       (click)="triggerFileInput(fileInput)"
-      [disabled]="uploading">
+      [disabled]="uploading"
+    >
       <mat-icon>upload</mat-icon>
       {{ currentImageUrl ? 'Change Image' : 'Upload Image' }}
     </button>
-    
-    <button 
-      mat-button 
-      color="warn"
-      *ngIf="currentImageUrl && !uploading"
-      (click)="removeImage()">
+
+    <button mat-button color="warn" *ngIf="currentImageUrl && !uploading" (click)="removeImage()">
       <mat-icon>delete</mat-icon>
       Remove
     </button>

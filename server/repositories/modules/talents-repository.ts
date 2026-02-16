@@ -19,7 +19,7 @@ export class TalentsModuleRepository extends BaseModuleRepository {
   ): Promise<SaveResult> {
     return await this.updateCharacterModule(characterId, {
       unlockedTalents,
-      baselineUnlockedTalents
+      baselineUnlockedTalents,
     });
   }
 
@@ -36,7 +36,7 @@ export class TalentsModuleRepository extends BaseModuleRepository {
     if (!char) return null;
     return {
       unlockedTalents: char.unlockedTalents || [],
-      baselineUnlockedTalents: char.baselineUnlockedTalents
+      baselineUnlockedTalents: char.baselineUnlockedTalents,
     };
   }
 }

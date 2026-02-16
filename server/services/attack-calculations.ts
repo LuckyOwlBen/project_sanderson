@@ -1,6 +1,6 @@
 /**
  * Attack Calculations Service
- * 
+ *
  * Handles all attack and damage calculations including:
  * - Single attack rolls
  * - Damage calculations
@@ -8,7 +8,7 @@
  * - Advantage/disadvantage mechanics
  * - Defense vs attack comparisons
  * - Hit determination and margin of success
- * 
+ *
  * This is the single source of truth for combat calculations.
  * All attack decisions must be validated here.
  */
@@ -19,7 +19,7 @@
 export enum AdvantageMode {
   NORMAL = 'normal',
   ADVANTAGE = 'advantage',
-  DISADVANTAGE = 'disadvantage'
+  DISADVANTAGE = 'disadvantage',
 }
 
 /**
@@ -35,25 +35,25 @@ export interface DiceRoll {
  * Attack roll result (skill check)
  */
 export interface AttackRoll {
-  rollDescription: string;        // 'd20', 'd20+3', etc
-  diceRoll: DiceRoll;            // Raw dice rolls
-  skillModifier: number;          // Skill total (rank + attribute/2)
-  bonusModifiers: number;         // From items, effects, etc
+  rollDescription: string; // 'd20', 'd20+3', etc
+  diceRoll: DiceRoll; // Raw dice rolls
+  skillModifier: number; // Skill total (rank + attribute/2)
+  bonusModifiers: number; // From items, effects, etc
   advantageMode: AdvantageMode;
-  rollsGenerated: number[];       // All rolls (for advantage, will be 2)
-  finalRoll: number;             // Selected roll (base roll for normal, best for advantage, worst for disadvantage)
-  total: number;                 // finalRoll + modifiers
-  isCritical: boolean;           // Natural 20 on d20
-  isFumble: boolean;             // Natural 1 on d20
+  rollsGenerated: number[]; // All rolls (for advantage, will be 2)
+  finalRoll: number; // Selected roll (base roll for normal, best for advantage, worst for disadvantage)
+  total: number; // finalRoll + modifiers
+  isCritical: boolean; // Natural 20 on d20
+  isFumble: boolean; // Natural 1 on d20
 }
 
 /**
  * Damage roll result
  */
 export interface DamageRoll {
-  rollDescription: string;        // 'd6+2', etc
+  rollDescription: string; // 'd6+2', etc
   diceRoll: DiceRoll;
-  bonuses: number;               // Additional flat damage
+  bonuses: number; // Additional flat damage
   total: number;
 }
 
@@ -63,10 +63,10 @@ export interface DamageRoll {
 export interface Attack {
   attackRoll: AttackRoll;
   damageRoll: DamageRoll;
-  vsDefense: number;             // Opponent's defense
-  hitMargin: number;             // How much attack exceeded defense
-  isHit: boolean;                // true if total >= defense
-  damageDealt: number;           // Damage if hit, 0 if miss
+  vsDefense: number; // Opponent's defense
+  hitMargin: number; // How much attack exceeded defense
+  isHit: boolean; // true if total >= defense
+  damageDealt: number; // Damage if hit, 0 if miss
 }
 
 /**
@@ -92,7 +92,7 @@ export class AttackCalculationsService {
 
   /**
    * Roll arbitrary dice
-   * 
+   *
    * @param sides - Number of sides on die (d6, d8, d10, d12, d20)
    * @param count - Number of dice to roll (default 1)
    * @returns DiceRoll with all rolls and total
@@ -115,13 +115,13 @@ export class AttackCalculationsService {
     return {
       sides,
       rolls,
-      total
+      total,
     };
   }
 
   /**
    * Parse a dice notation string (e.g., 'd20', '2d6+3', 'd8')
-   * 
+   *
    * @param notation - Dice notation string
    * @returns {count, sides, bonus}
    */
@@ -142,11 +142,11 @@ export class AttackCalculationsService {
 
   /**
    * Calculate attack roll
-   * 
+   *
    * Attack Roll = d20 + Skill Total + Bonuses (with advantage/disadvantage)
    * Advantage: roll 2d20, take higher
    * Disadvantage: roll 2d20, take lower
-   * 
+   *
    * @param skillTotal - Skill total (rank + attribute/2)
    * @param bonusModifiers - Additional bonuses from items/effects
    * @param advantageMode - Normal/advantage/disadvantage
@@ -161,7 +161,8 @@ export class AttackCalculationsService {
     let finalRoll: number;
 
     // Normalize the advantage mode
-    const normalizedMode = typeof advantageMode === 'string' ? advantageMode : String(advantageMode);
+    const normalizedMode =
+      typeof advantageMode === 'string' ? advantageMode : String(advantageMode);
 
     if (normalizedMode === AdvantageMode.NORMAL || normalizedMode === 'normal') {
       // Single d20 roll
@@ -181,17 +182,19 @@ export class AttackCalculationsService {
       finalRoll = Math.min(roll1, roll2);
     }
 
-    const isCritical = rollsGenerated.some(r => r === 20);
-    const isFumble = rollsGenerated.some(r => r === 1);
+    const isCritical = rollsGenerated.some((r) => r === 20);
+    const isFumble = rollsGenerated.some((r) => r === 1);
 
     const total = finalRoll + skillTotal + bonusModifiers;
 
     return {
-      rollDescription: `d20${skillTotal > 0 ? '+' + skillTotal : ''}${bonusModifiers > 0 ? '+' + bonusModifiers : ''}`,
+      rollDescription: `d20${skillTotal > 0 ? '+' + skillTotal : ''}${
+        bonusModifiers > 0 ? '+' + bonusModifiers : ''
+      }`,
       diceRoll: {
         sides: 20,
         rolls: [finalRoll],
-        total: finalRoll
+        total: finalRoll,
       },
       skillModifier: skillTotal,
       bonusModifiers,
@@ -200,15 +203,15 @@ export class AttackCalculationsService {
       finalRoll,
       total,
       isCritical,
-      isFumble
+      isFumble,
     };
   }
 
   /**
    * Calculate damage roll
-   * 
+   *
    * Damage Roll = XdY + Bonuses
-   * 
+   *
    * @param diceNotation - Notation like 'd6', '2d6+3', 'd8+2'
    * @param bonuses - Additional flat damage
    * @returns DamageRoll with breakdown
@@ -223,15 +226,15 @@ export class AttackCalculationsService {
       rollDescription: diceNotation + (bonuses > 0 ? `+${bonuses}` : ''),
       diceRoll,
       bonuses: totalBonus,
-      total: Math.max(0, total) // Damage cannot be negative
+      total: Math.max(0, total), // Damage cannot be negative
     };
   }
 
   /**
    * Check if attack hits target
-   * 
+   *
    * Hit if: Attack Total >= Defense
-   * 
+   *
    * @param attackTotal - Total attack roll
    * @param targetDefense - Target's defense value
    * @returns {isHit, hitMargin}
@@ -240,17 +243,17 @@ export class AttackCalculationsService {
     const hitMargin = attackTotal - targetDefense;
     return {
       isHit: attackTotal >= targetDefense,
-      hitMargin
+      hitMargin,
     };
   }
 
   /**
    * Determine damage dealt based on hit/miss
-   * 
+   *
    * - Hit: Full damage
    * - Miss: No damage
    * - Critical: Double damage
-   * 
+   *
    * @param damage - Base damage from damage roll
    * @param isHit - Whether attack hit
    * @param isCritical - Whether attack was critical
@@ -268,7 +271,7 @@ export class AttackCalculationsService {
 
   /**
    * Execute complete single attack
-   * 
+   *
    * @param skillTotal - Skill total (rank + attribute/2)
    * @param attackBonus - Attack roll bonuses
    * @param damageNotation - Damage dice notation
@@ -297,14 +300,14 @@ export class AttackCalculationsService {
       vsDefense: targetDefense,
       hitMargin,
       isHit,
-      damageDealt
+      damageDealt,
     };
   }
 
   /**
    * Execute multiple attacks at once (attack combination)
    * Used when character can make multiple attacks
-   * 
+   *
    * @param attackCount - Number of attacks to make
    * @param skillTotal - Skill total
    * @param attackBonus - Attack roll bonuses
@@ -352,7 +355,7 @@ export class AttackCalculationsService {
       attacks,
       totalDamage,
       hitCount,
-      missCount: attackCount - hitCount
+      missCount: attackCount - hitCount,
     };
   }
 
@@ -389,7 +392,7 @@ export class AttackCalculationsService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 

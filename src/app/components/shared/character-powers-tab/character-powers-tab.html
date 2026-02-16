@@ -3,7 +3,10 @@
   <app-character-attacks [character]="character"></app-character-attacks>
 
   <!-- Stance Selector Section -->
-  <app-stance-selector [character]="character" (stanceChanged)="onStanceChanged($event)"></app-stance-selector>
+  <app-stance-selector
+    [character]="character"
+    (stanceChanged)="onStanceChanged($event)"
+  ></app-stance-selector>
 
   <!-- Universal Abilities Card (for Radiant and other special abilities) -->
   <div class="abilities-card" *ngIf="getUniversalAbilities().length > 0">
@@ -42,7 +45,10 @@
                   <li *ngFor="let effect of ability.effects">{{ effect }}</li>
                 </ul>
               </div>
-              <div class="ability-limitations" *ngIf="ability.limitations && ability.limitations.length > 0">
+              <div
+                class="ability-limitations"
+                *ngIf="ability.limitations && ability.limitations.length > 0"
+              >
                 <h4><span class="limit-icon">⚠️</span> Limitations</h4>
                 <ul>
                   <li *ngFor="let limitation of ability.limitations">{{ limitation }}</li>
@@ -110,13 +116,11 @@
             </div>
           </details>
         </div>
-        <p class="empty-text" *ngIf="getPowers().length === 0">
-          No powers unlocked yet
-        </p>
+        <p class="empty-text" *ngIf="getPowers().length === 0">No powers unlocked yet</p>
       </div>
     </div>
   </div>
-  
+
   <!-- Expertises Card -->
   <div class="stats-card">
     <div class="card-header">

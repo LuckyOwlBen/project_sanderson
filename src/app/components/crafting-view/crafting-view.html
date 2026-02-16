@@ -1,17 +1,28 @@
 <div class="crafting-view-container">
   <!-- Craft Result Notification -->
   <div class="craft-result-notification" *ngIf="lastCraftResult">
-    <div class="notification-card" [class.success]="lastCraftResult.success" [class.failure]="!lastCraftResult.success">
+    <div
+      class="notification-card"
+      [class.success]="lastCraftResult.success"
+      [class.failure]="!lastCraftResult.success"
+    >
       <div class="notification-header">
-        <span class="notification-icon" [class.success-icon]="lastCraftResult.success" [class.error-icon]="!lastCraftResult.success">
+        <span
+          class="notification-icon"
+          [class.success-icon]="lastCraftResult.success"
+          [class.error-icon]="!lastCraftResult.success"
+        >
           {{ lastCraftResult.success ? '✓' : '✕' }}
         </span>
-        <h3 class="notification-title">{{ lastCraftResult.success ? 'Crafting Successful!' : 'Crafting Failed' }}</h3>
+        <h3 class="notification-title">
+          {{ lastCraftResult.success ? 'Crafting Successful!' : 'Crafting Failed' }}
+        </h3>
       </div>
       <div class="notification-content">
         <p>{{ lastCraftResult.message }}</p>
         <div *ngIf="lastCraftResult.success && lastCraftResult.itemId" class="result-details">
-          <strong>Created:</strong> {{ lastCraftResult.quantity }}x {{ formatItemName(lastCraftResult.itemId) }}
+          <strong>Created:</strong> {{ lastCraftResult.quantity }}x
+          {{ formatItemName(lastCraftResult.itemId) }}
         </div>
       </div>
       <div class="notification-actions">
@@ -26,27 +37,51 @@
   <!-- Category Tabs -->
   <div class="category-tabs-card">
     <div class="category-chips">
-      <button class="chip" [class.selected]="selectedCategory === 'all'" (click)="selectCategory('all')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'all'"
+        (click)="selectCategory('all')"
+      >
         <span class="chip-icon">⊞</span>
         All ({{ availableRecipes.length }})
       </button>
-      <button class="chip" [class.selected]="selectedCategory === 'weapon'" (click)="selectCategory('weapon')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'weapon'"
+        (click)="selectCategory('weapon')"
+      >
         <span class="chip-icon">⚔</span>
         Weapons ({{ getCategoryCount('weapon') }})
       </button>
-      <button class="chip" [class.selected]="selectedCategory === 'armor'" (click)="selectCategory('armor')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'armor'"
+        (click)="selectCategory('armor')"
+      >
         <span class="chip-icon">🛡</span>
         Armor ({{ getCategoryCount('armor') }})
       </button>
-      <button class="chip" [class.selected]="selectedCategory === 'fabrial'" (click)="selectCategory('fabrial')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'fabrial'"
+        (click)="selectCategory('fabrial')"
+      >
         <span class="chip-icon">✦</span>
         Fabrials ({{ getCategoryCount('fabrial') }})
       </button>
-      <button class="chip" [class.selected]="selectedCategory === 'consumable'" (click)="selectCategory('consumable')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'consumable'"
+        (click)="selectCategory('consumable')"
+      >
         <span class="chip-icon">⚗</span>
         Consumables ({{ getCategoryCount('consumable') }})
       </button>
-      <button class="chip" [class.selected]="selectedCategory === 'equipment'" (click)="selectCategory('equipment')">
+      <button
+        class="chip"
+        [class.selected]="selectedCategory === 'equipment'"
+        (click)="selectCategory('equipment')"
+      >
         <span class="chip-icon">🔧</span>
         Equipment ({{ getCategoryCount('equipment') }})
       </button>
@@ -91,10 +126,12 @@
               Required Materials
             </h4>
             <div class="materials-list">
-              <div *ngFor="let material of recipe.materials" 
-                   class="material-item"
-                   [class.has-material]="hasMaterial(material)"
-                   [class.lacks-material]="!hasMaterial(material)">
+              <div
+                *ngFor="let material of recipe.materials"
+                class="material-item"
+                [class.has-material]="hasMaterial(material)"
+                [class.lacks-material]="!hasMaterial(material)"
+              >
                 <span class="material-icon">
                   {{ hasMaterial(material) ? '✓' : '✕' }}
                 </span>
@@ -123,9 +160,11 @@
 
           <!-- Craft Button -->
           <div class="craft-action">
-            <button class="btn btn-primary craft-button"
-                    [disabled]="!canCraftRecipe(recipe.id)"
-                    (click)="craftItem(recipe)">
+            <button
+              class="btn btn-primary craft-button"
+              [disabled]="!canCraftRecipe(recipe.id)"
+              (click)="craftItem(recipe)"
+            >
               <span class="btn-icon">🔨</span>
               {{ canCraftRecipe(recipe.id) ? 'Craft Item' : getCraftabilityMessage(recipe.id) }}
             </button>
@@ -139,8 +178,8 @@
       <span class="empty-icon">ℹ</span>
       <h3>No Recipes Available</h3>
       <p *ngIf="availableRecipes.length === 0">
-        You need crafting expertises to unlock recipes.
-        Gain expertises through your culture, talents, or from the GM.
+        You need crafting expertises to unlock recipes. Gain expertises through your culture,
+        talents, or from the GM.
       </p>
       <p *ngIf="availableRecipes.length > 0">
         No recipes in this category. Try selecting a different category.

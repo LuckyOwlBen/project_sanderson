@@ -19,8 +19,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Thrown[30/120]'],
-      expertTraits: ['Indirect']
-    }
+      expertTraits: ['Indirect'],
+    },
   },
   {
     id: 'knife',
@@ -40,8 +40,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Discreet'],
-      expertTraits: ['Offhand', 'Thrown[20/60]']
-    }
+      expertTraits: ['Offhand', 'Thrown[20/60]'],
+    },
   },
   {
     id: 'mace',
@@ -61,8 +61,8 @@ const LIGHT_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: [],
-      expertTraits: ['Momentum']
-    }
+      expertTraits: ['Momentum'],
+    },
   },
   {
     id: 'rapier',
@@ -82,8 +82,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'shortspear',
@@ -103,8 +103,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Unique: loses Two-Handed trait']
-    }
+      expertTraits: ['Unique: loses Two-Handed trait'],
+    },
   },
   {
     id: 'sidesword',
@@ -124,8 +124,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'staff',
@@ -145,8 +145,8 @@ const LIGHT_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Discreet', 'Two-Handed'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'shortbow',
@@ -166,8 +166,8 @@ const LIGHT_WEAPONS = [
       damageType: 'keen',
       range: 'Ranged[80/320]',
       traits: ['Two-Handed'],
-      expertTraits: ['Quickdraw']
-    }
+      expertTraits: ['Quickdraw'],
+    },
   },
   {
     id: 'sling',
@@ -187,9 +187,9 @@ const LIGHT_WEAPONS = [
       damageType: 'impact',
       range: 'Ranged[30/120]',
       traits: ['Discreet'],
-      expertTraits: ['Indirect']
-    }
-  }
+      expertTraits: ['Indirect'],
+    },
+  },
 ];
 
 const HEAVY_WEAPONS = [
@@ -211,8 +211,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Thrown[20/60]'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'greatsword',
@@ -232,8 +232,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Deadly']
-    }
+      expertTraits: ['Deadly'],
+    },
   },
   {
     id: 'hammer',
@@ -253,8 +253,8 @@ const HEAVY_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Momentum']
-    }
+      expertTraits: ['Momentum'],
+    },
   },
   {
     id: 'longspear',
@@ -274,8 +274,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Melee[+5]',
       traits: ['Two-Handed'],
-      expertTraits: ['Defensive']
-    }
+      expertTraits: ['Defensive'],
+    },
   },
   {
     id: 'longsword',
@@ -295,8 +295,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Quickdraw', 'Two-Handed'],
-      expertTraits: ['Unique: loses Two-handed Trait']
-    }
+      expertTraits: ['Unique: loses Two-handed Trait'],
+    },
   },
   {
     id: 'poleaxe',
@@ -316,8 +316,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Melee',
       traits: ['Two-Handed'],
-      expertTraits: ['Unique: Melee[+5]']
-    }
+      expertTraits: ['Unique: Melee[+5]'],
+    },
   },
   {
     id: 'shield',
@@ -337,8 +337,8 @@ const HEAVY_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Defensive'],
-      expertTraits: ['Offhand']
-    }
+      expertTraits: ['Offhand'],
+    },
   },
   {
     id: 'crossbow',
@@ -358,8 +358,8 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Ranged[100/400]',
       traits: ['Loaded[1]', 'Two-Handed'],
-      expertTraits: ['Deadly']
-    }
+      expertTraits: ['Deadly'],
+    },
   },
   {
     id: 'longbow',
@@ -379,9 +379,9 @@ const HEAVY_WEAPONS = [
       damageType: 'keen',
       range: 'Ranged[150/600]',
       traits: ['Two-Handed'],
-      expertTraits: ['Indirect']
-    }
-  }
+      expertTraits: ['Indirect'],
+    },
+  },
 ];
 
 const SPECIAL_WEAPONS = [
@@ -403,13 +403,13 @@ const SPECIAL_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Defensive', 'Two-Handed', 'Unique'],
-      expertTraits: ['Momentum']
+      expertTraits: ['Momentum'],
     },
     fabrialProperties: {
       charges: 1,
       currentCharges: 1,
-      effect: 'Can expend a charge to increase deflect by 10 against one attack'
-    }
+      effect: 'Can expend a charge to increase deflect by 10 against one attack',
+    },
   },
   {
     id: 'shardblade',
@@ -419,7 +419,8 @@ const SPECIAL_WEAPONS = [
     weight: 4,
     price: 0,
     rarity: 'reward-only',
-    description: 'A priceless blade that cuts through soul rather than flesh. Can be summoned from thin air.',
+    description:
+      'A priceless blade that cuts through soul rather than flesh. Can be summoned from thin air.',
     equipable: true,
     stackable: false,
     slot: 'mainHand',
@@ -429,8 +430,8 @@ const SPECIAL_WEAPONS = [
       damageType: 'spirit',
       range: 'Melee',
       traits: ['Dangerous', 'Deadly', 'Unique'],
-      expertTraits: ['Unique: loses Dangerous Trait']
-    }
+      expertTraits: ['Unique: loses Dangerous Trait'],
+    },
   },
   {
     id: 'shardblade-radiant',
@@ -440,7 +441,8 @@ const SPECIAL_WEAPONS = [
     weight: 0,
     price: 0,
     rarity: 'talent-only',
-    description: 'A living Shardblade formed from a bonded spren. Can be instantly summoned and reshaped.',
+    description:
+      'A living Shardblade formed from a bonded spren. Can be instantly summoned and reshaped.',
     equipable: true,
     stackable: false,
     slot: 'mainHand',
@@ -450,8 +452,8 @@ const SPECIAL_WEAPONS = [
       damageType: 'spirit',
       range: 'Melee',
       traits: ['Deadly', 'Unique'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'warhammer',
@@ -471,8 +473,8 @@ const SPECIAL_WEAPONS = [
       damageType: 'impact',
       range: 'Melee',
       traits: ['Cumbersome[5]', 'Two-Handed'],
-      expertTraits: ['Unique']
-    }
+      expertTraits: ['Unique'],
+    },
   },
   {
     id: 'grandbow',
@@ -492,9 +494,9 @@ const SPECIAL_WEAPONS = [
       damageType: 'keen',
       range: 'Ranged[200/800]',
       traits: ['Cumbersome[5]', 'Two-Handed'],
-      expertTraits: ['Pierce']
-    }
-  }
+      expertTraits: ['Pierce'],
+    },
+  },
 ];
 
 // ===== ARMOR =====
@@ -515,8 +517,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 0,
       traits: ['Presentable'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'leather-armor',
@@ -533,8 +535,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 1,
       traits: [],
-      expertTraits: ['Presentable']
-    }
+      expertTraits: ['Presentable'],
+    },
   },
   {
     id: 'chain-armor',
@@ -551,8 +553,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 2,
       traits: ['Cumbersome[3]'],
-      expertTraits: ['Unique: loses Cumbersome Trait']
-    }
+      expertTraits: ['Unique: loses Cumbersome Trait'],
+    },
   },
   {
     id: 'breastplate',
@@ -569,8 +571,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 2,
       traits: ['Cumbersome[3]'],
-      expertTraits: ['Presentable']
-    }
+      expertTraits: ['Presentable'],
+    },
   },
   {
     id: 'half-plate',
@@ -587,8 +589,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 3,
       traits: ['Cumbersome[4]'],
-      expertTraits: ['Unique: Cumbersome[3] instead of Cumbersome[4]']
-    }
+      expertTraits: ['Unique: Cumbersome[3] instead of Cumbersome[4]'],
+    },
   },
   {
     id: 'full-plate',
@@ -605,8 +607,8 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 4,
       traits: ['Cumbersome[5]'],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'shardplate',
@@ -623,13 +625,13 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 5,
       traits: ['Dangerous', 'Unique'],
-      expertTraits: ['Unique: loses Dangerous Trait']
+      expertTraits: ['Unique: loses Dangerous Trait'],
     },
     fabrialProperties: {
       charges: 4,
       currentCharges: 4,
-      effect: 'Can expend a charge to increase deflect by 10 against one attack'
-    }
+      effect: 'Can expend a charge to increase deflect by 10 against one attack',
+    },
   },
   {
     id: 'shardplate-radiant',
@@ -646,14 +648,14 @@ const ARMOR_ITEMS = [
     armorProperties: {
       deflectValue: 5,
       traits: ['Unique'],
-      expertTraits: []
+      expertTraits: [],
     },
     fabrialProperties: {
       charges: 4,
       currentCharges: 4,
-      effect: 'Can expend a charge to increase deflect by 10. Regains all charges after long rest.'
-    }
-  }
+      effect: 'Can expend a charge to increase deflect by 10. Regains all charges after long rest.',
+    },
+  },
 ];
 
 // ===== EQUIPMENT =====
@@ -669,7 +671,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A sturdy pack for carrying supplies.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'rope',
@@ -681,7 +683,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Seasilk rope, strong and reliable.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'blanket',
@@ -693,7 +695,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A wool blanket for warmth.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'waterskin',
@@ -705,7 +707,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A leather bag for carrying water.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'flint-steel',
@@ -717,7 +719,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'For starting fires.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'whetstone',
@@ -729,7 +731,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'For sharpening blades.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'food-ration',
@@ -741,7 +743,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Preserved food for travel.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'food-street',
@@ -753,7 +755,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Fresh street food from vendors.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'ink-pen',
@@ -765,7 +767,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A writing implement.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'ink-bottle',
@@ -777,7 +779,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'One ounce of ink.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'paper',
@@ -789,7 +791,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A single sheet of paper.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'vial-empty',
@@ -801,7 +803,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A small glass vial.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'wax-block',
@@ -813,7 +815,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'For sealing letters.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'reference-book',
@@ -825,7 +827,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A book on a specific topic.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'poison-weak',
@@ -837,7 +839,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Causes 1d6 vital damage on DC 12 Athletics test.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'common-clothing',
@@ -849,7 +851,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Plain, everyday clothes.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'fine-clothing',
@@ -861,7 +863,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'High-quality clothing for formal occasions.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'surgical-supplies',
@@ -874,7 +876,7 @@ const EQUIPMENT_ITEMS = [
     description: 'Bandages, salves, and splints. Can be used 10 times.',
     equipable: false,
     stackable: false,
-    properties: { uses: 10 }
+    properties: { uses: 10 },
   },
   {
     id: 'antiseptic-weak',
@@ -887,7 +889,7 @@ const EQUIPMENT_ITEMS = [
     description: 'Restores 1d6 health after a short rest.',
     equipable: false,
     stackable: true,
-    properties: { doses: 5 }
+    properties: { doses: 5 },
   },
   {
     id: 'antiseptic-potent',
@@ -900,7 +902,7 @@ const EQUIPMENT_ITEMS = [
     description: 'Restores 2d6 health after a short rest.',
     equipable: false,
     stackable: true,
-    properties: { doses: 5 }
+    properties: { doses: 5 },
   },
   {
     id: 'candle',
@@ -912,7 +914,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Burns for 6 hours, sheds light in 15-foot radius.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'oil-lantern',
@@ -924,7 +926,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Sheds light in 30-foot radius for 6 hours per pint of oil.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'oil-flask',
@@ -936,7 +938,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'One pint of oil for lanterns or improvised weapons.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'crowbar',
@@ -948,7 +950,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Grants advantage on Athletics tests for leverage.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'lockpick',
@@ -960,7 +962,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Grants advantage on Thievery tests to pick locks.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'manacles',
@@ -972,7 +974,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Metal restraints with a key.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'musical-instrument',
@@ -984,7 +986,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A typical musical instrument.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'scale',
@@ -996,7 +998,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'For weighing objects up to 2 pounds.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'tuning-fork',
@@ -1008,7 +1010,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Can transfer Stormlight between gems.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'unencased-gem',
@@ -1020,7 +1022,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Can recharge fabrials or provide Stormlight to Radiants.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'alcohol-bottle',
@@ -1032,7 +1034,7 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'A bottle of Vorin wine.',
     equipable: false,
-    stackable: true
+    stackable: true,
   },
   {
     id: 'grappling-hook',
@@ -1044,8 +1046,8 @@ const EQUIPMENT_ITEMS = [
     rarity: 'common',
     description: 'Grants advantage on climbing tests when anchored.',
     equipable: false,
-    stackable: false
-  }
+    stackable: false,
+  },
 ];
 
 // ===== FABRIAL ITEMS =====
@@ -1065,8 +1067,8 @@ const FABRIAL_ITEMS = [
     fabrialProperties: {
       charges: 3,
       currentCharges: 3,
-      effect: 'Allows written communication over long distances. Expends 1 charge per 5 days.'
-    }
+      effect: 'Allows written communication over long distances. Expends 1 charge per 5 days.',
+    },
   },
   {
     id: 'heatrial',
@@ -1082,8 +1084,9 @@ const FABRIAL_ITEMS = [
     fabrialProperties: {
       charges: 5,
       currentCharges: 5,
-      effect: 'Generates heat. Expends 1 charge per day for ambient warmth, or per hour for cooking.'
-    }
+      effect:
+        'Generates heat. Expends 1 charge per day for ambient warmth, or per hour for cooking.',
+    },
   },
   {
     id: 'soulcaster',
@@ -1100,9 +1103,9 @@ const FABRIAL_ITEMS = [
     fabrialProperties: {
       charges: 5,
       currentCharges: 5,
-      effect: 'Allows use of Transformation surge to convert materials to one Essence type.'
-    }
-  }
+      effect: 'Allows use of Transformation surge to convert materials to one Essence type.',
+    },
+  },
 ];
 
 // ===== MOUNTS & VEHICLES =====
@@ -1121,8 +1124,8 @@ const MOUNT_ITEMS = [
     stackable: false,
     properties: {
       travelSpeed: '2mph',
-      carryCapacity: 1500
-    }
+      carryCapacity: 1500,
+    },
   },
   {
     id: 'horse',
@@ -1137,8 +1140,8 @@ const MOUNT_ITEMS = [
     stackable: false,
     properties: {
       travelSpeed: '4mph',
-      carryCapacity: 500
-    }
+      carryCapacity: 500,
+    },
   },
   {
     id: 'ryshadium',
@@ -1148,14 +1151,15 @@ const MOUNT_ITEMS = [
     weight: 0,
     price: 0,
     rarity: 'reward-only',
-    description: 'A rare, sapient breed of horse that chooses its rider. Travel speed: 6mph, Carry capacity: 1,000lb.',
+    description:
+      'A rare, sapient breed of horse that chooses its rider. Travel speed: 6mph, Carry capacity: 1,000lb.',
     equipable: false,
     stackable: false,
     properties: {
       travelSpeed: '6mph',
-      carryCapacity: 1000
-    }
-  }
+      carryCapacity: 1000,
+    },
+  },
 ];
 
 const VEHICLE_ITEMS = [
@@ -1169,7 +1173,7 @@ const VEHICLE_ITEMS = [
     rarity: 'common',
     description: 'A cart pulled by a chull. Travel speed: 2mph.',
     equipable: false,
-    stackable: false
+    stackable: false,
   },
   {
     id: 'rowboat',
@@ -1181,8 +1185,8 @@ const VEHICLE_ITEMS = [
     rarity: 'common',
     description: 'A small boat for water travel. Travel speed: 3mph downstream, 1mph upstream.',
     equipable: false,
-    stackable: false
-  }
+    stackable: false,
+  },
 ];
 
 // ===== STARTING KITS =====
@@ -1192,12 +1196,8 @@ const STARTING_KITS = [
     id: 'academic-kit',
     name: 'Academic Kit',
     description: 'Equipment for scholars and researchers.',
-    weapons: [
-      { itemId: 'knife', quantity: 1 }
-    ],
-    armor: [
-      { itemId: 'uniform', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'knife', quantity: 1 }],
+    armor: [{ itemId: 'uniform', quantity: 1 }],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
       { itemId: 'common-clothing', quantity: 1 },
@@ -1207,20 +1207,16 @@ const STARTING_KITS = [
       { itemId: 'vial-empty', quantity: 3 },
       { itemId: 'wax-block', quantity: 1 },
       { itemId: 'reference-book', quantity: 1 },
-      { itemId: 'poison-weak', quantity: 1 }
+      { itemId: 'poison-weak', quantity: 1 },
     ],
-    currency: 18
+    currency: 18,
   },
   {
     id: 'artisan-kit',
     name: 'Artisan Kit',
     description: 'Tools for crafters and artisans.',
-    weapons: [
-      { itemId: 'hammer', quantity: 1 }
-    ],
-    armor: [
-      { itemId: 'leather-armor', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'hammer', quantity: 1 }],
+    armor: [{ itemId: 'leather-armor', quantity: 1 }],
     equipment: [
       { itemId: 'common-clothing', quantity: 1 },
       { itemId: 'surgical-supplies', quantity: 1 },
@@ -1233,9 +1229,9 @@ const STARTING_KITS = [
       { itemId: 'vial-empty', quantity: 3 },
       { itemId: 'tuning-fork', quantity: 1 },
       { itemId: 'musical-instrument', quantity: 1 },
-      { itemId: 'scale', quantity: 1 }
+      { itemId: 'scale', quantity: 1 },
     ],
-    currency: 16
+    currency: 16,
   },
   {
     id: 'military-kit',
@@ -1243,11 +1239,11 @@ const STARTING_KITS = [
     description: 'Standard equipment for soldiers.',
     weapons: [
       { itemId: 'longsword', quantity: 1 },
-      { itemId: 'shield', quantity: 1 }
+      { itemId: 'shield', quantity: 1 },
     ],
     armor: [
       { itemId: 'uniform', quantity: 1 },
-      { itemId: 'chain-armor', quantity: 1 }
+      { itemId: 'chain-armor', quantity: 1 },
     ],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
@@ -1256,23 +1252,21 @@ const STARTING_KITS = [
       { itemId: 'flint-steel', quantity: 1 },
       { itemId: 'whetstone', quantity: 1 },
       { itemId: 'blanket', quantity: 1 },
-      { itemId: 'food-ration', quantity: 10 }
+      { itemId: 'food-ration', quantity: 10 },
     ],
-    currency: 7
+    currency: 7,
   },
   {
     id: 'courtier-kit',
     name: 'Courtier Kit',
     description: 'Fine attire and accoutrements for nobles.',
-    weapons: [
-      { itemId: 'sidesword', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'sidesword', quantity: 1 }],
     armor: [],
     equipment: [
       { itemId: 'alcohol-bottle', quantity: 1 },
-      { itemId: 'fine-clothing', quantity: 1 }
+      { itemId: 'fine-clothing', quantity: 1 },
     ],
-    currency: 40
+    currency: 40,
   },
   {
     id: 'prisoner-kit',
@@ -1280,21 +1274,15 @@ const STARTING_KITS = [
     description: 'The bare minimum for those who have lost everything.',
     weapons: [],
     armor: [],
-    equipment: [
-      { itemId: 'manacles', quantity: 1 }
-    ],
-    currency: 0
+    equipment: [{ itemId: 'manacles', quantity: 1 }],
+    currency: 0,
   },
   {
     id: 'underworld-kit',
     name: 'Underworld Kit',
     description: 'Tools for thieves and rogues.',
-    weapons: [
-      { itemId: 'knife', quantity: 2 }
-    ],
-    armor: [
-      { itemId: 'leather-armor', quantity: 1 }
-    ],
+    weapons: [{ itemId: 'knife', quantity: 2 }],
+    armor: [{ itemId: 'leather-armor', quantity: 1 }],
     equipment: [
       { itemId: 'backpack', quantity: 1 },
       { itemId: 'common-clothing', quantity: 1 },
@@ -1305,10 +1293,10 @@ const STARTING_KITS = [
       { itemId: 'flint-steel', quantity: 1 },
       { itemId: 'oil-lantern', quantity: 1 },
       { itemId: 'oil-flask', quantity: 1 },
-      { itemId: 'food-street', quantity: 5 }
+      { itemId: 'food-street', quantity: 5 },
     ],
-    currency: 10
-  }
+    currency: 10,
+  },
 ];
 
 // ===== CRAFTING MATERIALS =====
@@ -1324,7 +1312,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'leather-strip',
@@ -1336,7 +1324,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'leather',
@@ -1348,7 +1336,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'thread',
@@ -1360,7 +1348,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'gemstone-ruby',
@@ -1372,7 +1360,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'metal-housing',
@@ -1384,7 +1372,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'copper-wire',
@@ -1396,7 +1384,7 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
+    quantity: 1,
   },
   {
     id: 'iron-sword',
@@ -1416,8 +1404,8 @@ const CRAFTING_MATERIALS = [
       damageType: 'keen',
       range: 'melee',
       traits: [],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'steel-sword',
@@ -1437,8 +1425,8 @@ const CRAFTING_MATERIALS = [
       damageType: 'keen',
       range: 'melee',
       traits: [],
-      expertTraits: []
-    }
+      expertTraits: [],
+    },
   },
   {
     id: 'heating-fabrial',
@@ -1454,8 +1442,8 @@ const CRAFTING_MATERIALS = [
     fabrialProperties: {
       charges: 10,
       currentCharges: 10,
-      effect: 'Generates heat within a 10-foot radius'
-    }
+      effect: 'Generates heat within a 10-foot radius',
+    },
   },
   {
     id: 'health-potion',
@@ -1467,8 +1455,8 @@ const CRAFTING_MATERIALS = [
     rarity: 'common',
     equipable: false,
     stackable: true,
-    quantity: 1
-  }
+    quantity: 1,
+  },
 ];
 
 // ===== PETS =====
@@ -1482,7 +1470,8 @@ const PET_ITEMS = [
     weight: 8,
     price: 0,
     rarity: 'reward-only',
-    description: 'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
+    description:
+      'A fierce avian companion, a cross between a chicken and a hawk. Loyal and protective.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -1491,8 +1480,8 @@ const PET_ITEMS = [
       behavior: 'Protective and loyal',
       intelligence: 'animal',
       flyingSpeed: 40,
-      specialAbilities: ['Swift Strike', 'Aerial Reconnaissance']
-    }
+      specialAbilities: ['Swift Strike', 'Aerial Reconnaissance'],
+    },
   },
   {
     id: 'armored-hound',
@@ -1511,8 +1500,8 @@ const PET_ITEMS = [
       behavior: 'Loyal and battle-hardened',
       intelligence: 'animal',
       movementSpeed: 50,
-      specialAbilities: ['Protective Stance', 'Pack Tactics']
-    }
+      specialAbilities: ['Protective Stance', 'Pack Tactics'],
+    },
   },
   {
     id: 'spren-familiar',
@@ -1530,8 +1519,8 @@ const PET_ITEMS = [
       species: 'Spren',
       behavior: 'Magical and curious',
       intelligence: 'sapient',
-      specialAbilities: ['Spell Resonance', 'Ethereal Form']
-    }
+      specialAbilities: ['Spell Resonance', 'Ethereal Form'],
+    },
   },
   {
     id: 'storm-drake',
@@ -1541,7 +1530,8 @@ const PET_ITEMS = [
     weight: 45,
     price: 0,
     rarity: 'reward-only',
-    description: 'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
+    description:
+      'A small dragon-like creature attuned to the storms. A rare and powerful companion.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -1550,8 +1540,8 @@ const PET_ITEMS = [
       behavior: 'Fierce and storm-aligned',
       intelligence: 'sapient',
       flyingSpeed: 60,
-      specialAbilities: ['Storm Breath', 'Lightning Aura']
-    }
+      specialAbilities: ['Storm Breath', 'Lightning Aura'],
+    },
   },
   {
     id: 'demo-companion',
@@ -1561,7 +1551,8 @@ const PET_ITEMS = [
     weight: 12,
     price: 0,
     rarity: 'reward-only',
-    description: 'A friendly demonstration companion. Perfect for testing and learning how pets work.',
+    description:
+      'A friendly demonstration companion. Perfect for testing and learning how pets work.',
     equipable: true,
     stackable: false,
     slot: 'accessory',
@@ -1570,9 +1561,9 @@ const PET_ITEMS = [
       behavior: 'Friendly and eager to help',
       intelligence: 'animal',
       movementSpeed: 30,
-      specialAbilities: ['Learn Quickly', 'Demo Mode']
-    }
-  }
+      specialAbilities: ['Learn Quickly', 'Demo Mode'],
+    },
+  },
 ];
 
 // ===== COMBINED EXPORTS & HELPERS =====
@@ -1587,27 +1578,27 @@ const ALL_ITEMS = [
   ...MOUNT_ITEMS,
   ...VEHICLE_ITEMS,
   ...CRAFTING_MATERIALS,
-  ...PET_ITEMS
+  ...PET_ITEMS,
 ];
 
 function getItemById(itemId) {
-  return ALL_ITEMS.find(item => item.id === itemId);
+  return ALL_ITEMS.find((item) => item.id === itemId);
 }
 
 function getItemsByType(type) {
-  return ALL_ITEMS.filter(item => item.type === type);
+  return ALL_ITEMS.filter((item) => item.type === type);
 }
 
 function getItemsByRarity(rarity) {
-  return ALL_ITEMS.filter(item => item.rarity === rarity);
+  return ALL_ITEMS.filter((item) => item.rarity === rarity);
 }
 
 function getEquipableItems() {
-  return ALL_ITEMS.filter(item => item.equipable);
+  return ALL_ITEMS.filter((item) => item.equipable);
 }
 
 function getKitById(kitId) {
-  return STARTING_KITS.find(kit => kit.id === kitId);
+  return STARTING_KITS.find((kit) => kit.id === kitId);
 }
 
 module.exports = {
@@ -1627,5 +1618,5 @@ module.exports = {
   getItemsByType,
   getItemsByRarity,
   getEquipableItems,
-  getKitById
+  getKitById,
 };
