@@ -68,7 +68,9 @@ export class TalentView implements OnInit, OnDestroy {
   // Template compatibility properties (derived from talentUIState)
   get isLoadingTalentData(): boolean { return this.isLoading; }
   get availableTalentPoints(): number { return this.talentUIState?.pointsAvailable || 0; }
-  get availableTrees(): any[] { return this.buildAvailableTreesFromKeywords(); }
+  get availableTrees(): any[] { return (this.talentUIState?.availableTrees && this.talentUIState.availableTrees.length > 0)
+    ? this.talentUIState.availableTrees
+    : this.buildAvailableTreesFromKeywords(); }
   get showCorePathSelector(): boolean { return (this.talentUIState?.bonusPathIds?.length || 0) > 0; }
   get availableCorePaths(): any[] { return this.buildBonusPathOptions(); }
   selectedTree: any = null;
@@ -669,7 +671,7 @@ export class TalentView implements OnInit, OnDestroy {
       return;
     }
 
-    const trees = this.buildAvailableTreesFromKeywords();
+    const trees = this.availableTrees;
     console.log('[TalentView] autoSelectInitialTree - found', trees.length, 'trees');
     
     if (trees.length === 0) {

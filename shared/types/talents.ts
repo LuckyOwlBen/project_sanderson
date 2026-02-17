@@ -289,4 +289,37 @@ export interface TalentUIResponse {
       mainPathId?: string;                   // Main path ID for getTalentPath() calls
     }
   }
+  // Optional detailed available trees populated by server for UI
+  availableTrees?: AvailableTreeDTO[];
+}
+
+/**
+ * Backend-provided node state for UI
+ */
+export interface AvailableNodeDTO {
+  id: string;
+  name?: string;
+  description?: string;
+  tier: number;
+  pathId?: string;
+  mainPathId?: string;
+
+  // Backend-provided state flags
+  isUnlocked: boolean;
+  isPending: boolean;
+  isAvailable: boolean;
+
+  // Raw prerequisites for UI display
+  prerequisites?: TalentPrerequisite[];
+}
+
+/**
+ * Backend-provided tree object containing nodes and minimal metadata
+ */
+export interface AvailableTreeDTO {
+  id: string;
+  pathName: string;
+  mainPathId?: string | null;
+  isBonus?: boolean;
+  nodes: AvailableNodeDTO[];
 }

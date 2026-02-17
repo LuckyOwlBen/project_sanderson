@@ -20,7 +20,7 @@ export interface TalentsState {
   totalTalents: string[];
   pendingTalents: string[];
   pendingTrees: string[];  // Selected bonus path trees (removable until finalized)
-  availableTrees: string[];
+  availableTrees: any[]; // now may contain detailed tree objects from server
   selectedTreeId: string | null;
   requiresSingerSelection: boolean;
   ancestry: string | null;

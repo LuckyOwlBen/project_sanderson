@@ -5,6 +5,8 @@ import {
   loadCharacter
 } from '../database';
 import { getTalentPath, getTalentTree } from 'shared/data/talents/talentTrees';
+import { AvailableTreeDTO, AvailableNodeDTO } from 'shared/types/talents';
+import canUnlockTalentForCharacter from 'shared/data/talents/prereqChecker';
 import { getPathsByCharacterId } from './paths-service';
 import { RADIANT_TIER0_TALENTS } from './paths-service';
 
@@ -25,7 +27,7 @@ export interface TalentsStateDTO {
   totalTalents: string[];
   pendingTalents: string[];
   pendingTrees: string[];  // Selected bonus tree paths (removable until finalized)
-  availableTrees: string[];
+  availableTrees: AvailableTreeDTO[];
   selectedTreeId: string | null;
   requiresSingerSelection: boolean;
   ancestry: string | null;
@@ -128,7 +130,7 @@ export async function getTalentsByCharacterId(characterId: string): Promise<Tale
   const pendingTreesArray = state.pendingTrees ?? [];
 
   const { availableTrees, selectedTreeId, requiresSingerSelection } = 
-    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray);
+    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray, new Set(pendingTalents));
   
   console.log('[TalentsService] Determined trees:', { availableTrees, selectedTreeId, requiresSingerSelection });
 
@@ -220,8 +222,9 @@ function determineAvailableTrees(
   character: any,
   paths: { type: string | null; sub: string | null },
   unlockedTalents: Set<string>,
-  pendingTrees: string[] = []
-): { availableTrees: string[]; selectedTreeId: string | null; requiresSingerSelection: boolean } {
+  pendingTrees: string[] = [],
+  pendingTalentIds: Set<string> = new Set()
+): { availableTrees: AvailableTreeDTO[]; selectedTreeId: string | null; requiresSingerSelection: boolean } {
   const treeIds: string[] = [];
   const addedTreeNames = new Set<string>();
 
@@ -234,7 +237,6 @@ function determineAvailableTrees(
 
   // Check if any singer tier 1+ talents are unlocked
   const hasSingerTalent = (unlockedTalents: Set<string>): boolean => {
-    // This is a simplified check - in practice you'd check if unlocked talents belong to singer trees
     return Array.from(unlockedTalents).some(id => id.includes('singer') || id.includes('form'));
   };
 
@@ -370,22 +372,59 @@ function determineAvailableTrees(
     }
   }
 
-  // NOTE: Surge trees will be added by the frontend based on radiantPath.idealSpoken and radiantPath.surgePair
-  // This allows the frontend access to its talent tree registry
+  // Build detailed tree objects with node state
+  const bonusSet = new Set(pendingTrees.map(p => p.toLowerCase()));
+  const availableTrees: AvailableTreeDTO[] = [];
+
+  treeIds.forEach(treeId => {
+    const tree = getTalentTree(treeId);
+    if (!tree) return;
+    const isBonus = bonusSet.has(treeId);
+    const lookupPathId = isBonus ? treeId : (mainPathName || treeId);
+
+    const nodes: AvailableNodeDTO[] = (tree.nodes || []).map((node: any) => {
+      const isUnlocked = unlockedTalents.has(node.id);
+      const isPending = pendingTalentIds.has(node.id);
+      const prereqResult = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, { level, ancestry, paths, radiant: character.radiantPath });
+
+      const availableNode: AvailableNodeDTO = {
+        id: node.id,
+        name: node.name,
+        description: node.description,
+        tier: node.tier,
+        pathId: tree.pathName?.toLowerCase() || treeId,
+        mainPathId: lookupPathId,
+        isUnlocked,
+        isPending,
+        isAvailable: prereqResult.canUnlock,
+        prerequisites: node.prerequisites || []
+      };
+
+      return availableNode;
+    });
+
+    availableTrees.push({
+      id: treeId,
+      pathName: tree.pathName || treeId,
+      mainPathId: lookupPathId,
+      isBonus,
+      nodes
+    });
+  });
 
   // Determine selected tree (singer tree for singers, otherwise first available)
   let selectedTreeId: string | null = null;
-  if (treeIds.length > 0) {
-    if (ancestry === 'singer' && treeIds.includes('singer')) {
+  if (availableTrees.length > 0) {
+    if (ancestry === 'singer' && availableTrees.some(t => t.id === 'singer')) {
       selectedTreeId = 'singer';
     } else {
-      selectedTreeId = treeIds[0];
+      selectedTreeId = availableTrees[0].id;
     }
   }
 
-  console.log('[TalentsService] determineAvailableTrees END -', { availableTrees: treeIds, selectedTreeId, requiresSingerSelection });
+  console.log('[TalentsService] determineAvailableTrees END -', { availableTrees: availableTrees.map(t=>t.id), selectedTreeId, requiresSingerSelection });
 
-  return { availableTrees: treeIds, selectedTreeId, requiresSingerSelection };
+  return { availableTrees, selectedTreeId, requiresSingerSelection };
 }
 /**
  * Find the parent core path for a specialization tree ID.
@@ -581,17 +620,17 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
   });
   
   const { availableTrees, selectedTreeId, requiresSingerSelection } = 
-    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray);
+    determineAvailableTrees(character, paths, unlockedTalents, pendingTreesArray, new Set(pendingTalents));
   
   // Get bonus path options
   const availableBonusClasses = getAvailableBonusClasses(mainPathName, null);
   const selectedBonusPathIds = pendingTreesArray;
 
-  // Build talent keywords map
-  const talentKeywords = buildTalentKeywordsMap(availableTrees, mainPathName, pendingTreesArray);
+  // Build talent keywords map (pass tree ids)
+  const talentKeywords = buildTalentKeywordsMap(availableTrees.map(t => t.id), mainPathName, pendingTreesArray);
   
-  // Get available talent IDs
-  const availableTalentIds = getAvailableTalentIds(availableTrees, unlockedTalents, requiresSingerSelection);
+  // Get available talent IDs (from tree ids)
+  const availableTalentIds = getAvailableTalentIds(availableTrees.map(t => t.id), unlockedTalents, requiresSingerSelection);
   
   return {
     characterId,
@@ -599,6 +638,7 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
     unlockedTalentIds: Array.from(unlockedTalents),
     pendingTalentIds: pendingTalents,
     availableTalentIds,
+    availableTrees,
     selectedTreeId,
     requiresSingerSelection,
     ancestry: character.ancestry || null,
