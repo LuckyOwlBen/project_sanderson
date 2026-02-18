@@ -231,12 +231,12 @@ export class TalentView implements OnInit, OnDestroy {
       return;
     }
 
-    // Check prerequisites locally for UX before sending to backend
-    const checker = new TalentPrerequisiteChecker(this.character, new Set(this.talentUIState?.unlockedTalentIds || []));
-    if (!checker.canUnlockTalent(realTalentNode)) {
-      console.log('[TalentView] unlockTalent - prerequisite check failed');
-      return;
-    }
+    // // Check prerequisites locally for UX before sending to backend
+    // const checker = new TalentPrerequisiteChecker(this.character, new Set(this.talentUIState?.unlockedTalentIds || []));
+    // if (!checker.canUnlockTalent(realTalentNode)) {
+    //   console.log('[TalentView] unlockTalent - prerequisite check failed');
+    //   return;
+    // }
 
     console.log('[TalentView] unlockTalent - prerequisites OK, proceeding with unlock');
     // Parse expertise grants from talent

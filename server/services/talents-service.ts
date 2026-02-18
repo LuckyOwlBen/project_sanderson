@@ -200,6 +200,50 @@ export async function setTalentsByCharacterId(
   const pointsSpent = totalTalents.length + pendingTalents.length;
   const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
 
+  // Ensure pendingTalents stays consistent with pendingTrees selections:
+  // - When a bonus/core path is added to pendingTrees, ensure its tier-0 talent
+  //   is present in pendingTalents (if not already locked in totalTalents).
+  // - When a path is removed from pendingTrees, remove its tier-0 talent
+  //   from pendingTalents so points are correctly freed.
+  try {
+    const existingPendingTrees = existing?.pendingTrees ?? [];
+    const removedTrees = existingPendingTrees.filter(t => !pendingTrees.includes(t));
+    const addedTrees = pendingTrees.filter(t => !existingPendingTrees.includes(t));
+
+    if (removedTrees.length || addedTrees.length) {
+      console.log('[TalentsService] pendingTrees changed - added:', addedTrees, 'removed:', removedTrees);
+    }
+
+    // Handle additions: add tier-0 talent for newly added bonus paths
+    addedTrees.forEach(treeIdRaw => {
+      const treeId = (treeIdRaw || '').toLowerCase();
+      const talentPath = getTalentPath(treeId);
+      const tier0Id = talentPath?.talentNodes?.find((n: any) => n.tier === 0)?.id;
+      if (tier0Id) {
+        if (!pendingTalents.includes(tier0Id) && !totalTalents.includes(tier0Id)) {
+          pendingTalents = [...pendingTalents, tier0Id];
+          console.log('[TalentsService] Added tier0 pending talent for tree', treeId, ':', tier0Id);
+        }
+      }
+    });
+
+    // Handle removals: remove tier-0 talent for removed bonus paths
+    removedTrees.forEach(treeIdRaw => {
+      const treeId = (treeIdRaw || '').toLowerCase();
+      const talentPath = getTalentPath(treeId);
+      const tier0Id = talentPath?.talentNodes?.find((n: any) => n.tier === 0)?.id;
+      if (tier0Id) {
+        if (pendingTalents.includes(tier0Id)) {
+          pendingTalents = pendingTalents.filter(id => id !== tier0Id);
+          console.log('[TalentsService] Removed tier0 pending talent for tree', treeId, ':', tier0Id);
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('[TalentsService] Error syncing pendingTalents with pendingTrees', err);
+  }
+
+  // Rebuild record after syncing pendingTalents/pendingTrees so DB write is accurate
   const record = {
     characterId,
     totalPoints,

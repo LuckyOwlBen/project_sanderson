@@ -631,6 +631,12 @@ export async function getTalentsStateRecord(characterId: string): Promise<Talent
 
 export async function createTalentsStateRecord(record: TalentsStateRecord): Promise<TalentsStateRecord> {
   if (!db) throw new Error('Database not initialized');
+  console.log('[Database] createTalentsStateRecord - saving', {
+    characterId: record.characterId,
+    totalTalents: record.totalTalents,
+    pendingTalents: record.pendingTalents,
+    pendingTrees: record.pendingTrees
+  });
   await db.run(`
     INSERT INTO CharacterTalents (
       id, characterId, totalPoints, pointsSpent, pointsRemaining, finalized, totalTalents, pendingTalents, pendingTrees
@@ -664,6 +670,13 @@ export async function updateTalentsStateRecord(
     ...updates,
     characterId
   };
+
+  console.log('[Database] updateTalentsStateRecord - saving', {
+    characterId: merged.characterId,
+    totalTalents: merged.totalTalents,
+    pendingTalents: merged.pendingTalents,
+    pendingTrees: merged.pendingTrees
+  });
 
   await db.run(`
     UPDATE CharacterTalents SET

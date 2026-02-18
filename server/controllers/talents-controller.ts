@@ -141,7 +141,10 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
   }}export async function setTalents(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
-    const { talents } = req.body ?? {};
+    // Accept two payload shapes: { talents: { ... } } or direct body { ... }
+    const talents = (req.body && (req.body.talents ?? req.body)) || {};
+
+    console.log('[TalentsController] saveTalents payload for', id, ':', talents);
 
     if (!talents || typeof talents !== 'object' || Array.isArray(talents)) {
       res.status(400).json({
