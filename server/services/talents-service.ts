@@ -255,6 +255,33 @@ export async function setTalentsByCharacterId(
     pendingTrees
   };
 
+  // Server-side validation: ensure pending talents are actually unlockable
+  try {
+    const character = await loadCharacter(characterId);
+    const paths = await getPathsByCharacterId(characterId);
+
+    if (!character) {
+      throw new Error('validation:character_not_found');
+    }
+
+    if (pointsRemaining < 0) {
+      throw new Error('validation:insufficient_points');
+    }
+
+    const pendingSet = new Set(pendingTalents);
+    const unlockedSet = new Set(totalTalents);
+
+    for (const tid of pendingSet) {
+      const result = canUnlockTalentForCharacter(character, tid, unlockedSet, pendingSet, { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath });
+      if (!result || !result.canUnlock) {
+        throw new Error(`validation:invalid_pending_talent:${tid}`);
+      }
+    }
+  } catch (err) {
+    console.warn('[TalentsService] Validation failed for pendingTalents:', err);
+    throw err;
+  }
+
   const updated = existing
     ? await updateTalentsStateRecord(characterId, record)
     : await createTalentsStateRecord(record);
@@ -578,24 +605,30 @@ function buildTalentKeywordsMap(availableTreeIds: string[], mainPathName?: strin
 function getAvailableTalentIds(
   availableTreeIds: string[],
   unlockedTalents: Set<string>,
-  _requiresSingerSelection: boolean
+  pendingTalentIds: Set<string>,
+  character: any,
+  context?: { level?: number; ancestry?: string; paths?: { type?: string | null; sub?: string | null }; radiant?: any }
 ): string[] {
   const talentIds = new Set<string>();
-  
+
   availableTreeIds.forEach(treeId => {
     const tree = getTalentTree(treeId);
     if (tree && tree.nodes) {
       tree.nodes.forEach((node: any) => {
-        // Include all tier 1 talents (always available to start with)
-        // Include any unlocked talents
-        // Tier 0 talents are handled separately in bonusPathIds
-        if (node.tier >= 1) {
-          talentIds.add(node.id);
+        // Use the authoritative prereq checker to decide availability
+        try {
+          const result = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, context);
+          if (result && result.canUnlock) {
+            talentIds.add(node.id);
+          }
+        } catch (err) {
+          // In case of unexpected errors, skip the node and continue
+          console.warn('[TalentsService] Error checking prereqs for', node.id, err);
         }
       });
     }
   });
-  
+
   return Array.from(talentIds);
 }
 
@@ -673,8 +706,15 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
   // Build talent keywords map (pass tree ids)
   const talentKeywords = buildTalentKeywordsMap(availableTrees.map(t => t.id), mainPathName, pendingTreesArray);
   
-  // Get available talent IDs (from tree ids)
-  const availableTalentIds = getAvailableTalentIds(availableTrees.map(t => t.id), unlockedTalents, requiresSingerSelection);
+  // Get available talent IDs (from tree ids) using authoritative prereq checks
+  const pendingSet = new Set(pendingTalents);
+  const availableTalentIds = getAvailableTalentIds(
+    availableTrees.map(t => t.id),
+    unlockedTalents,
+    pendingSet,
+    character,
+    { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath }
+  );
   
   return {
     characterId,

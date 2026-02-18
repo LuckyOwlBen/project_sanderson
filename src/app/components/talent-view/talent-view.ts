@@ -509,17 +509,18 @@ export class TalentView implements OnInit, OnDestroy {
     if (this.availableTalentPoints <= 0) return false;
 
     // Server-provided list is the primary source of truth
-    if (this.talentUIState.availableTalentIds.includes(talent.id)) return true;
-
-    // If server provided detailed trees, prefer their node flags
-    if (this.talentUIState.availableTrees) {
-      for (const tree of this.talentUIState.availableTrees) {
-        const node = tree.nodes.find((n: any) => n.id === talent.id);
-        if (node) {
-          return !!node.isAvailable && !node.isUnlocked && !node.isPending;
+      // If server provided detailed trees, prefer their node flags (more authoritative)
+      if (this.talentUIState.availableTrees) {
+        for (const tree of this.talentUIState.availableTrees) {
+          const node = tree.nodes.find((n: any) => n.id === talent.id);
+          if (node) {
+            return !!node.isAvailable && !node.isUnlocked && !node.isPending;
+          }
         }
       }
-    }
+
+      // Fallback to the flat availableTalentIds list if trees are not present
+      if (this.talentUIState.availableTalentIds.includes(talent.id)) return true;
 
     return false;
   }

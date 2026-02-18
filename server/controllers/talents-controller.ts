@@ -188,12 +188,21 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
       data: updated
     });
   } catch (error) {
-    console.error('Error saving talents:', error);
+    const message = typeof error === 'object' && error !== null && 'message' in error
+      ? (error as { message: string }).message
+      : String(error);
+    console.error('Error saving talents:', message);
+
+    // If this is a validation error from the service, return 400
+    if (typeof message === 'string' && message.startsWith('validation:')) {
+      const friendly = message.replace('validation:', '');
+      res.status(400).json({ success: false, error: friendly });
+      return;
+    }
+
     res.status(500).json({
       success: false,
-      error: typeof error === 'object' && error !== null && 'message' in error
-        ? (error as { message: string }).message
-        : String(error)
+      error: message
     });
   }
 }
