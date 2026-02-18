@@ -271,11 +271,43 @@ export async function setTalentsByCharacterId(
     const pendingSet = new Set(pendingTalents);
     const unlockedSet = new Set(totalTalents);
 
-    for (const tid of pendingSet) {
-      const result = canUnlockTalentForCharacter(character, tid, unlockedSet, pendingSet, { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath });
-      if (!result || !result.canUnlock) {
-        throw new Error(`validation:invalid_pending_talent:${tid}`);
+    // Allow pending tier-1 talents even if prereqs are not yet satisfied so the
+    // user can pre-select them while reallocating other resources. For tiers >1
+    // require that prereqs are satisfied.
+    const findNodeTier = (talentId: string): number | null => {
+      const corePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+      for (const p of corePaths) {
+        const talentPath = getTalentPath(p);
+        if (!talentPath) continue;
+        if (talentPath.talentNodes) {
+          const n = talentPath.talentNodes.find((x: any) => x.id === talentId);
+          if (n) return n.tier ?? null;
+        }
+        if (talentPath.paths) {
+          for (const t of talentPath.paths) {
+            const n = (t.nodes || []).find((x: any) => x.id === talentId);
+            if (n) return n.tier ?? null;
+          }
+        }
       }
+      // check special trees like singer
+      const special = ['singer'];
+      for (const s of special) {
+        const tree = getTalentTree(s);
+        if (!tree) continue;
+        const n = (tree.nodes || []).find((x: any) => x.id === talentId);
+        if (n) return n.tier ?? null;
+      }
+      return null;
+    };
+
+    for (const tid of pendingSet) {
+      const tier = findNodeTier(tid);
+      const result = canUnlockTalentForCharacter(character, tid, unlockedSet, pendingSet, { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath });
+      if (result && result.canUnlock) continue;
+      // allow tier 1 even if prereqs missing
+      if (tier === 1) continue;
+      throw new Error(`validation:invalid_pending_talent:${tid}`);
     }
   } catch (err) {
     console.warn('[TalentsService] Validation failed for pendingTalents:', err);
@@ -615,8 +647,15 @@ function getAvailableTalentIds(
     const tree = getTalentTree(treeId);
     if (tree && tree.nodes) {
       tree.nodes.forEach((node: any) => {
-        // Use the authoritative prereq checker to decide availability
+        // Allow all tier-1 talents to appear in the available list so users
+        // can pre-select them while adjusting other resources (skill points)
+        // later. For higher tiers, require prereq checks.
         try {
+          if (node.tier === 1) {
+            talentIds.add(node.id);
+            return;
+          }
+
           const result = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, context);
           if (result && result.canUnlock) {
             talentIds.add(node.id);
