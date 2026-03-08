@@ -358,6 +358,7 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
     const attrs = await db.get('SELECT * FROM Attributes WHERE characterId = ?', characterId);
     const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
     const talents = await db.all('SELECT talentId FROM UnlockedTalent WHERE characterId = ?', characterId);
+    const talentsState = await db.get('SELECT totalTalents, pendingTalents FROM CharacterTalents WHERE characterId = ?', characterId);
     const expertises = await db.all('SELECT name, source, sourceId FROM SelectedExpertise WHERE characterId = ?', characterId);
     const items = await db.all('SELECT itemId, quantity, equipped FROM InventoryItem WHERE characterId = ?', characterId);
     const resources = await db.get('SELECT * FROM CharacterResources WHERE characterId = ?', characterId);
@@ -386,7 +387,17 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
         acc[s.skillName] = s.value;
         return acc;
       }, {}),
-      unlockedTalents: talents.map((t: any) => t.talentId),
+      unlockedTalents: (() => {
+        // Use CharacterTalents as authoritative source (merged total + pending)
+        if (talentsState) {
+          const total = talentsState.totalTalents ? JSON.parse(talentsState.totalTalents) : [];
+          const pending = talentsState.pendingTalents ? JSON.parse(talentsState.pendingTalents) : [];
+          const merged = [...new Set([...total, ...pending])];
+          if (merged.length > 0) return merged;
+        }
+        // Fallback to UnlockedTalent table for legacy data
+        return talents.map((t: any) => t.talentId);
+      })(),
       selectedExpertises: expertises,
       inventory: {
         items: items.map((item: any) => ({
@@ -702,6 +713,32 @@ export async function updateTalentsStateRecord(
   return merged;
 }
 
+/**
+ * Sync the UnlockedTalent table with the given talent IDs.
+ * Replaces all existing UnlockedTalent rows for the character with the provided list.
+ * Called during finalization to keep the display table in sync with CharacterTalents.
+ */
+export async function syncUnlockedTalents(characterId: string, talentIds: string[]): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  const now = new Date().toISOString();
+
+  // Remove talents no longer in the list
+  await db.run('DELETE FROM UnlockedTalent WHERE characterId = ?', characterId);
+
+  // Insert all current talents
+  for (const talentId of talentIds) {
+    await db.run(
+      `INSERT INTO UnlockedTalent (id, characterId, talentId, unlockedAt, level)
+       VALUES (?, ?, ?, ?, ?)`,
+      `talent-${characterId}-${talentId}`,
+      characterId,
+      talentId,
+      now,
+      1
+    );
+  }
+}
+
 export async function getSkillRanks(characterId: string): Promise<Record<string, number>> {
   if (!db) throw new Error('Database not initialized');
   const skills = await db.all('SELECT skillName, value FROM Skill WHERE characterId = ?', characterId);
@@ -964,6 +1001,18 @@ export async function saveCharacter(
             talentId,
             now,
             character.level ?? 1
+          );
+        }
+        // Also sync to CharacterTalents (authoritative source)
+        const existingState = await db.get(
+          'SELECT totalTalents, pendingTalents, pendingTrees, finalized FROM CharacterTalents WHERE characterId = ?',
+          character.id
+        );
+        if (existingState) {
+          await db.run(
+            `UPDATE CharacterTalents SET totalTalents = ? WHERE characterId = ?`,
+            JSON.stringify(character.unlockedTalents),
+            character.id
           );
         }
       } else {

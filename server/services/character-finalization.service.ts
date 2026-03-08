@@ -8,16 +8,11 @@
 
 import { attributesFinalizationService } from './attributes-finalization';
 import { finalizeSkillsForCharacter } from './skills-service';
-import TalentService from './talent-service';
+import { finalizeTalentsByCharacterId } from './talents-service';
 import { finalizeExpertisesForCharacter } from './expertise-service';
 import { characterRepository } from '../repositories/character-repository';
 
 export class CharacterFinalizationService {
-  private talentService: TalentService;
-
-  constructor() {
-    this.talentService = new TalentService();
-  }
 
   /**
    * Finalize character creation
@@ -47,7 +42,7 @@ export class CharacterFinalizationService {
       await finalizeSkillsForCharacter(characterId);
       console.log(`[CharacterFinalization] ✓ Skills finalized`);
 
-      await this.talentService.finalizeTalentsForCharacter(characterId);
+      await finalizeTalentsByCharacterId(characterId);
       console.log(`[CharacterFinalization] ✓ Talents finalized`);
 
       await finalizeExpertisesForCharacter(characterId);

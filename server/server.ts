@@ -7,8 +7,11 @@ import path from 'path';
 import multer from 'multer';
 // import sharp from 'sharp'; // TODO: Fix C++ build issue on Node 24.11.1
 
-import talentRules from './talent-rules';
-import talentService from './talent-service';
+import {
+  getTalentSelectionState as getTalentSelectionStateForCharacter,
+  validateTalentSelection,
+  saveTalentSelections
+} from './services/talents-service';
 import attributeAllocator from './services/attribute-allocator';
 import InventoryManager from './inventory-manager';
 import { ALL_ITEMS, getItemById, getKitById } from 'shared/data/items/item-definitions';
@@ -48,13 +51,11 @@ import {
   loadCharacter,
   listCharacters,
   deleteCharacter,
-  unlockTalent,
   getSpentPoints,
   getAttributesRecord,
   updateAttributesRecord,
   setAttributesFinalized,
-  clearDatabase,
-  getTalentsStateRecord
+  clearDatabase
 } from './database';
 
 import { createCharacter } from './services/character-service';
@@ -936,18 +937,6 @@ app.get('/api/characters/load/:id', async (req, res) => {
       });
     }
 
-    // If unlocked talents are missing, backfill from talents state record
-    if (!character.unlockedTalents || character.unlockedTalents.length === 0) {
-      const talentsState = await getTalentsStateRecord(id);
-      if (talentsState) {
-        const mergedTalents = new Set<string>([
-          ...(talentsState.totalTalents || []),
-          ...(talentsState.pendingTalents || [])
-        ]);
-        character.unlockedTalents = Array.from(mergedTalents);
-      }
-    }
-
     // Normalize inventory to client DTO shape
     let inventory = character.inventory as any;
     if (Array.isArray(inventory)) {
@@ -1252,8 +1241,8 @@ app.get('/api/characters/:id/talents/forLevel', async (req, res) => {
       });
     }
 
-    // Get talent selection state from service (pass character object)
-    const state = talentService.getTalentSelectionState(character, level, isCreationMode);
+    // Get talent selection state from consolidated service
+    const state = await getTalentSelectionStateForCharacter(id, level, isCreationMode);
 
     res.json({
       talentPoints: state.talentPoints,
@@ -1283,8 +1272,8 @@ app.get('/api/characters/:id/level/talents', async (req, res) => {
     const character = await loadCharacterData(id);
     const level = character.level || 1;
 
-    // Get talent state from service (READ-ONLY, no side effects)
-    const state = talentService.getTalentSelectionState(character, level, false);
+    // Get talent state from consolidated service (READ-ONLY, no side effects)
+    const state = await getTalentSelectionStateForCharacter(id, level, false);
 
     res.json({
       id: character.id,
@@ -1468,8 +1457,8 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
     const level = character.level || 1;
     const mainPath = character.mainPath || character.paths?.[0] || null;
 
-    // Validate selection (pass character object)
-    const validation = talentService.validateTalentSelection(character, unlockedTalents, level, mainPath);
+    // Validate selection
+    const validation = validateTalentSelection(character, unlockedTalents, level, mainPath);
     if (!validation.isValid) {
       return res.status(400).json({
         success: false,
@@ -1479,7 +1468,7 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
     }
 
     // Prepare for save
-    const saveResult = talentService.saveTalentSelections(character, unlockedTalents, level, mainPath);
+    const saveResult = saveTalentSelections(character, unlockedTalents, level, mainPath);
     if (!saveResult.success) {
       return res.status(400).json({
         success: false,
@@ -1487,13 +1476,12 @@ app.patch('/api/characters/:id/level/talents', async (req, res) => {
       });
     }
 
-    // Actually save to file/database (this is where server.js would call DB layer)
+    // Save talents to CharacterTalents and character file
     character.unlockedTalents = unlockedTalents;
-    // Save to database
     await saveCharacterData(character);
 
-    // Return updated state (pass character object)
-    const updatedState = talentService.getTalentSelectionState(character, level, false);
+    // Return updated state
+    const updatedState = await getTalentSelectionStateForCharacter(id, level, false);
     res.json({
       success: true,
       id,

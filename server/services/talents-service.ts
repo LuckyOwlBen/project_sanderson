@@ -7,8 +7,7 @@ import {
 import { getTalentPath, getTalentTree } from 'shared/data/talents/talentTrees';
 import { AvailableTreeDTO, AvailableNodeDTO } from 'shared/types/talents';
 import canUnlockTalentForCharacter from 'shared/data/talents/prereqChecker';
-import { getPathsByCharacterId } from './paths-service';
-import { RADIANT_TIER0_TALENTS } from './paths-service';
+import { getPathsByCharacterId, RADIANT_TIER0_TALENTS } from './paths-service';
 
 export interface RadiantPathData {
   boundOrder: string | null;
@@ -847,19 +846,181 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
 
 /**
  * Finalize talents for a character (called by finalization step).
- * Merges pendingTalents into totalTalents and clears pending state.
+ * Validates all points are spent, merges pendingTalents into totalTalents,
+ * clears pending state, and syncs to the UnlockedTalent table.
  * pendingTrees are preserved as they represent permanent bonus class selections.
  */
 export async function finalizeTalentsByCharacterId(characterId: string): Promise<TalentsStateDTO> {
   const state = await getTalentsStateRecord(characterId);
   if (!state) {
-    return createEmptyTalentsDTO(characterId);
+    throw new Error(`Talents state record not found for character ${characterId}`);
+  }
+
+  // Validate all points are spent
+  if (state.pointsRemaining > 0) {
+    throw new Error(
+      `Cannot finalize talents: ${state.pointsRemaining} points remaining. All points must be spent.`
+    );
   }
 
   // Merge pending into total and finalize
-  return await setTalentsByCharacterId(characterId, {
+  const result = await setTalentsByCharacterId(characterId, {
     totalTalents: Array.from(new Set([...state.totalTalents, ...state.pendingTalents])),
     pendingTalents: [],
     finalized: true
   });
+
+  return result;
+}
+
+// ============================================================================
+// TALENT POINTS & TIER 0 — Migrated from legacy talent-service.js / talent-service.ts
+// ============================================================================
+
+const TALENT_POINTS_PER_LEVEL = [
+  2, // Level 1 (tier 0 + 1 tier 1)
+  1, 1, 1, 1, // Levels 2-5
+  2, // Level 6 (bonus)
+  1, 1, 1, 1, // Levels 7-10
+  2, // Level 11 (bonus)
+  1, 1, 1, 1, // Levels 12-15
+  2, // Level 16 (bonus)
+  1, 1, 1, 1, 1 // Levels 17-21
+];
+
+const PATH_TIER0_TALENTS: Record<string, string> = {
+  'warrior': 'vigilant_stance',
+  'scholar': 'education',
+  'hunter': 'seek_quarry',
+  'leader': 'decisive_command',
+  'envoy': 'rousing_presence',
+  'agent': 'opportunist'
+};
+
+/** Get the tier 0 (free) talent for a given path */
+export function getTier0TalentForPath(pathId: string | null): string | null {
+  if (!pathId) return null;
+  return PATH_TIER0_TALENTS[pathId] || null;
+}
+
+/** Calculate total talent points available from level 1 to a given level */
+export function calculateTotalTalentPoints(level: number): number {
+  if (level < 1 || level > 21) return 0;
+  let total = 0;
+  for (let i = 0; i < level; i++) {
+    total += TALENT_POINTS_PER_LEVEL[i];
+  }
+  return total;
+}
+
+/** Get talent points available at a specific level */
+export function getTalentPointsForLevel(level: number): number {
+  if (level < 1 || level > 21) return 0;
+  return TALENT_POINTS_PER_LEVEL[level - 1];
+}
+
+/**
+ * Ensure tier 0 talent is included in the CharacterTalents totalTalents.
+ * Called when a path is selected so the free talent appears immediately.
+ */
+export async function ensureTier0Unlocked(
+  characterId: string,
+  mainPath: string | null
+): Promise<string | null> {
+  const tier0TalentId = getTier0TalentForPath(mainPath);
+  if (!tier0TalentId) return null;
+
+  const state = await getTalentsStateRecord(characterId);
+  if (!state) return tier0TalentId; // Record doesn't exist yet; tier 0 will be enriched on read
+
+  const totalTalents = state.totalTalents ?? [];
+  if (!totalTalents.includes(tier0TalentId)) {
+    await updateTalentsStateRecord(characterId, {
+      totalTalents: [...totalTalents, tier0TalentId]
+    });
+    console.log(`[TalentsService] Tier 0 talent ensured for ${characterId}: ${tier0TalentId}`);
+  }
+
+  return tier0TalentId;
+}
+
+/**
+ * Get talent selection state for legacy level-up endpoints.
+ * Wraps the new CharacterTalents-based system to provide the same shape
+ * expected by the server.ts level-up handlers.
+ */
+export async function getTalentSelectionState(
+  characterId: string,
+  level: number,
+  isCreationMode: boolean
+) {
+  const character = await loadCharacter(characterId);
+  if (!character) throw new Error(`Character not found: ${characterId}`);
+
+  const mainPath = character.paths?.[0] || null;
+  const state = await getTalentsStateRecord(characterId);
+  const totalTalents = state?.totalTalents ?? [];
+  const pendingTalents = state?.pendingTalents ?? [];
+
+  // Merge for display
+  const unlockedTalents = [...new Set([...totalTalents, ...pendingTalents])];
+
+  // Enrich with free tier 0
+  const tier0 = getTier0TalentForPath(mainPath);
+  if (tier0 && !unlockedTalents.includes(tier0)) {
+    unlockedTalents.push(tier0);
+  }
+
+  const previouslySelected = unlockedTalents.filter(id => id !== tier0);
+  const totalPoints = isCreationMode
+    ? calculateTotalTalentPoints(level)
+    : getTalentPointsForLevel(level);
+  const spentCount = previouslySelected.length;
+  const availablePoints = totalPoints - spentCount;
+
+  return {
+    talentPoints: availablePoints,
+    previouslySelectedTalents: isCreationMode ? [] : previouslySelected,
+    unlockedTalents,
+    spentPoints: { talents: {} },
+    lockedTalents: isCreationMode ? [] : previouslySelected,
+    requiresSingerSelection: character.ancestry === 'singer' && level === 1,
+    tier0TalentId: tier0
+  };
+}
+
+/**
+ * Validate talent selection for level-up endpoint
+ */
+export function validateTalentSelection(
+  character: any,
+  talentIds: string[],
+  level: number,
+  mainPath: string | null
+): { isValid: boolean; error?: string } {
+  const tier0 = getTier0TalentForPath(mainPath);
+  const nonTier0 = talentIds.filter(id => id !== tier0);
+  const totalPoints = calculateTotalTalentPoints(level);
+
+  if (nonTier0.length > totalPoints) {
+    return { isValid: false, error: `Talent point limit exceeded by ${nonTier0.length - totalPoints} point(s)` };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate and prepare talent selections for saving (level-up flow)
+ */
+export function saveTalentSelections(
+  character: any,
+  talentIds: string[],
+  level: number,
+  mainPath: string | null
+): { success: boolean; error?: string } {
+  const validation = validateTalentSelection(character, talentIds, level, mainPath);
+  if (!validation.isValid) {
+    return { success: false, error: validation.error };
+  }
+  return { success: true };
 }
