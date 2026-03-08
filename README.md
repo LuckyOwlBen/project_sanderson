@@ -1,3 +1,5 @@
+This repo is unfortunately AI slop. I tried so hard to remediate it but the data is still flaky because I built it front end backward out of lazyness. I'm starting over back end forward so this never happens again. 
+
 # Sanderson RPG - Character Management System
 
 Web-based character creator and session manager for tabletop RPG sessions. Built with Angular 18 and Node.js.

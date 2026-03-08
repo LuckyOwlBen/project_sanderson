@@ -329,15 +329,13 @@ export class TalentView implements OnInit, OnDestroy {
       return [];
     }
     
-    const filtered = this.selectedTree.nodes
-      .filter((talent: any) => talent && talent.id && this.talentUIState!.availableTalentIds.includes(talent.id))
-      .map((talent: any) => ({
-        ...talent,
-        id: talent.id,
-        pathId: this.selectedTree.mainPathId || this.selectedTree.pathName  // Use mainPathId from tree (which is 'agent' for specializations)
-      }));
-    
-    return filtered;
+    // Return all nodes from selected tree with their server-provided state
+    // The template will use isAvailable/isUnlocked/isPending for display
+    return this.selectedTree.nodes.map((talent: any) => ({
+      ...talent,
+      id: talent.id,
+      pathId: this.selectedTree.mainPathId || this.selectedTree.pathName
+    }));
   }
 
   formatPrerequisite(prereq: string | any): string {
@@ -497,36 +495,36 @@ export class TalentView implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if a talent can be unlocked (checks prerequisites)
+   * Check if a talent can be unlocked
+   * Trusts server-provided node state from availableTrees
    */
   canUnlockTalent(talent: any): boolean {
     if (!talent || !this.talentUIState) return false;
 
-    // Can't unlock if already unlocked or pending
-    if (this.isTalentUnlocked(talent.id) || this.talentUIState.pendingTalentIds.includes(talent.id)) return false;
-
     // Need points available
     if (this.availableTalentPoints <= 0) return false;
 
-    // Server-provided list is the primary source of truth
-      // If server provided detailed trees, prefer their node flags (more authoritative)
-      if (this.talentUIState.availableTrees) {
-        for (const tree of this.talentUIState.availableTrees) {
-          const node = tree.nodes.find((n: any) => n.id === talent.id);
-          if (node) {
-            return !!node.isAvailable && !node.isUnlocked && !node.isPending;
-          }
+    // Find node in server-provided trees (authoritative source)
+    if (this.talentUIState.availableTrees) {
+      for (const tree of this.talentUIState.availableTrees) {
+        const node = tree.nodes.find((n: any) => n.id === talent.id);
+        if (node) {
+          // Server provides isAvailable, isUnlocked, isPending flags
+          return !!node.isAvailable && !node.isUnlocked && !node.isPending;
         }
       }
+    }
 
-      // Fallback to the flat availableTalentIds list if trees are not present
-      if (this.talentUIState.availableTalentIds.includes(talent.id)) return true;
-
-    return false;
+    // Fallback: check if in availableTalentIds and not already selected
+    const isAvailable = this.talentUIState.availableTalentIds.includes(talent.id);
+    const isUnlocked = this.talentUIState.unlockedTalentIds.includes(talent.id);
+    const isPending = this.talentUIState.pendingTalentIds.includes(talent.id);
+    return isAvailable && !isUnlocked && !isPending;
   }
 
   /**
    * Select a bonus path (core path)
+   * Backend handles adding the tier 0 talent automatically via pendingTrees sync
    */
   selectBonusPath(pathId: string): void {
     if (!this.talentUIState || !this.characterId) return;
@@ -535,22 +533,13 @@ export class TalentView implements OnInit, OnDestroy {
     if (!this.talentUIState.selectedBonusPathIds.includes(pathId)) {
       const newSelected = [...this.talentUIState.selectedBonusPathIds, pathId];
       
-      // Persist the bonus path selection first
+      // Single server call - backend handles tier 0 talent auto-add
       this.talentsApi.saveTalents(this.characterId, {
         pendingTrees: newSelected
       }).subscribe({
         next: () => {
-          // After save succeeds, reload to get updated available trees
+          // Reload to get updated state (tier 0 added by backend)
           this.loadTalentUIState();
-          
-          // Now try to unlock the key talent for this path
-          const talentPath = talentTreeManager.getTalentPath(pathId);
-          if (talentPath?.talentNodes) {
-            const keyTalent = talentPath.talentNodes.find((t: TalentNode) => t.tier === 0);
-            if (keyTalent && !this.isTalentUnlocked(keyTalent.id)) {
-              this.unlockTalent({ ...keyTalent, pathId: pathId });
-            }
-          }
         },
         error: (err) => {
           console.error('[TalentView] Failed to save bonus path selection:', err);
@@ -561,23 +550,15 @@ export class TalentView implements OnInit, OnDestroy {
 
   /**
    * Remove a bonus path (core path) selection
+   * Backend handles removing the tier 0 talent automatically via pendingTrees sync
    */
   removeBonusPath(pathId: string): void {
     if (!this.talentUIState || !this.characterId) return;
 
     // Remove from selected
     const newSelected = this.talentUIState.selectedBonusPathIds.filter(p => p !== pathId);
-
-    // First remove the key talent for this path if it's pending
-    const talentPath = talentTreeManager.getTalentPath(pathId);
-    const keyTalentId = talentPath?.talentNodes?.find((t: TalentNode) => t.tier === 0)?.id;
     
-    if (keyTalentId && this.talentUIState.pendingTalentIds.includes(keyTalentId)) {
-      // Remove the talent first (which will trigger persistence)
-      this.removeTalent(keyTalentId);
-    }
-    
-    // Then persist the bonus path removal
+    // Single server call - backend handles tier 0 talent removal
     this.talentsApi.saveTalents(this.characterId, {
       pendingTrees: newSelected
     }).subscribe({

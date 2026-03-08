@@ -90,8 +90,12 @@ export function canUnlockTalentForCharacter(
       }
       case 'skill':
       case 'attribute': {
-        // Best-effort: if character has skill/attribute values, check; otherwise assume missing
-        const val = character?.skills?.[pr.target] ?? character?.attributes?.[pr.target];
+        // Normalize skill/attribute name to uppercase for comparison (DB stores as UPPERCASE)
+        const targetNormalized = pr.target?.toUpperCase();
+        const val = character?.skills?.[targetNormalized] 
+          ?? character?.skills?.[pr.target]  // fallback to original case
+          ?? character?.attributes?.[pr.target?.toLowerCase()]
+          ?? character?.attributes?.[pr.target];
         if (typeof pr.value === 'number') {
           if (!(typeof val === 'number' && val >= pr.value)) missing.push(pr);
         } else {

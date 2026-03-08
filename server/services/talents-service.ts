@@ -76,6 +76,49 @@ function normalizePaths(paths: { type: string | null; sub: string | null }): { m
 
   return { mainPathName, specializationName };
 }
+
+/**
+ * Get all tier 0 talent IDs that should be FREE (not cost points).
+ * This includes:
+ * - Main path tier 0 talent (always free)
+ * - Singer ancestry talents (singer_ancestry, singer_change_form)
+ * - Radiant tier 0 talent (if bonded)
+ * NOTE: Bonus path tier 0 talents cost 1 point - they are NOT free!
+ */
+function getFreeTier0TalentIds(
+  character: any,
+  paths: { type: string | null; sub: string | null },
+  pendingTrees: string[] = []
+): Set<string> {
+  const freeTalents = new Set<string>();
+  
+  // Main path tier 0 (always free)
+  const { mainPathName } = normalizePaths(paths);
+  if (mainPathName) {
+    const mainPath = getTalentPath(mainPathName);
+    const tier0Id = mainPath?.talentNodes?.find((n: any) => n.tier === 0)?.id;
+    if (tier0Id) freeTalents.add(tier0Id);
+  }
+  
+  // Singer ancestry talents (both are free)
+  if (character?.ancestry?.toLowerCase() === 'singer') {
+    freeTalents.add('singer_ancestry');
+    freeTalents.add('singer_change_form');
+  }
+  
+  // Radiant tier 0 talent (free when bonded)
+  const radiantTier0 = character?.radiantTier0TalentId 
+    || (character?.radiantPath?.boundOrder 
+        ? RADIANT_TIER0_TALENTS[character.radiantPath.boundOrder.toLowerCase()] 
+        : null);
+  if (radiantTier0) freeTalents.add(radiantTier0);
+  
+  // NOTE: Bonus path tier 0 talents are NOT free - they cost 1 point
+  // So we don't add them to the free set
+  
+  return freeTalents;
+}
+
 export async function getTalentsByCharacterId(characterId: string): Promise<TalentsStateDTO> {
   const state = await getTalentsStateRecord(characterId);
   if (!state) {
@@ -195,16 +238,8 @@ export async function setTalentsByCharacterId(
     ? talents.totalPoints
     : existing?.totalPoints ?? 0;
 
-  // Total points spent = locked talents + pending talents
-  // NOTE: Bonus path tier 0 talents should be in pendingTalents, not counted separately
-  const pointsSpent = totalTalents.length + pendingTalents.length;
-  const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
-
-  // Ensure pendingTalents stays consistent with pendingTrees selections:
-  // - When a bonus/core path is added to pendingTrees, ensure its tier-0 talent
-  //   is present in pendingTalents (if not already locked in totalTalents).
-  // - When a path is removed from pendingTrees, remove its tier-0 talent
-  //   from pendingTalents so points are correctly freed.
+  // FIRST: Sync pendingTalents with pendingTrees selections BEFORE calculating points.
+  // This ensures tier 0 talents are properly added/removed before we count spent points.
   try {
     const existingPendingTrees = existing?.pendingTrees ?? [];
     const removedTrees = existingPendingTrees.filter(t => !pendingTrees.includes(t));
@@ -227,21 +262,53 @@ export async function setTalentsByCharacterId(
       }
     });
 
-    // Handle removals: remove tier-0 talent for removed bonus paths
+    // Handle removals: remove tier-0 talent AND all specialization talents for removed bonus paths
     removedTrees.forEach(treeIdRaw => {
       const treeId = (treeIdRaw || '').toLowerCase();
       const talentPath = getTalentPath(treeId);
+      
+      // Remove tier-0 talent
       const tier0Id = talentPath?.talentNodes?.find((n: any) => n.tier === 0)?.id;
-      if (tier0Id) {
-        if (pendingTalents.includes(tier0Id)) {
-          pendingTalents = pendingTalents.filter(id => id !== tier0Id);
-          console.log('[TalentsService] Removed tier0 pending talent for tree', treeId, ':', tier0Id);
-        }
+      if (tier0Id && pendingTalents.includes(tier0Id)) {
+        pendingTalents = pendingTalents.filter(id => id !== tier0Id);
+        console.log('[TalentsService] Removed tier0 pending talent for tree', treeId, ':', tier0Id);
+      }
+      
+      // Also remove any talents from this path's specialization trees
+      if (talentPath?.paths) {
+        talentPath.paths.forEach((specTree: any) => {
+          const specTalentIds = (specTree.nodes || []).map((n: any) => n.id);
+          const removedFromSpec = pendingTalents.filter(id => specTalentIds.includes(id));
+          if (removedFromSpec.length > 0) {
+            console.log('[TalentsService] Removing specialization talents for', treeId, ':', removedFromSpec);
+            pendingTalents = pendingTalents.filter(id => !specTalentIds.includes(id));
+          }
+        });
       }
     });
   } catch (err) {
     console.warn('[TalentsService] Error syncing pendingTalents with pendingTrees', err);
   }
+
+  // NOW calculate points spent, EXCLUDING free tier 0 talents
+  // Load character to determine which talents are free
+  const character = await loadCharacter(characterId);
+  const paths = await getPathsByCharacterId(characterId);
+  const freeTier0Ids = getFreeTier0TalentIds(character, paths, pendingTrees);
+  
+  // Count only talents that aren't free tier 0 talents
+  const allTalentIds = [...totalTalents, ...pendingTalents];
+  const pointsSpent = allTalentIds.filter(id => !freeTier0Ids.has(id)).length;
+  const pointsRemaining = Math.max(0, totalPoints - pointsSpent);
+  
+  console.log('[TalentsService] Point calculation:', {
+    totalPoints,
+    allTalentsCount: allTalentIds.length,
+    freeTier0Count: freeTier0Ids.size,
+    freeTier0Ids: Array.from(freeTier0Ids),
+    pointsSpent,
+    pointsRemaining
+  });
 
   // Rebuild record after syncing pendingTalents/pendingTrees so DB write is accurate
   const record = {
@@ -256,10 +323,8 @@ export async function setTalentsByCharacterId(
   };
 
   // Server-side validation: ensure pending talents are actually unlockable
+  // Note: character and paths already loaded above for tier 0 calculation
   try {
-    const character = await loadCharacter(characterId);
-    const paths = await getPathsByCharacterId(characterId);
-
     if (!character) {
       throw new Error('validation:character_not_found');
     }
