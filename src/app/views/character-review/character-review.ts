@@ -98,15 +98,18 @@ export class CharacterReview implements OnInit, OnDestroy {
           if (!complete) {
             console.warn('[CharacterReview] API returned no complete character for ID:', characterId);
             this.characterLoadError = 'Failed to load character. Character may have been deleted.';
+            this.cdr.detectChanges();
             return;
           }
           this.completeCharacter = complete;
           console.log('[CharacterReview] Complete character loaded from API:', complete.name);
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.isLoadingCharacter = false;
           console.error('[CharacterReview] Failed to load complete character from API:', err);
           this.characterLoadError = 'Failed to load character. Please check your connection.';
+          this.cdr.detectChanges();
         }
       });
   }
