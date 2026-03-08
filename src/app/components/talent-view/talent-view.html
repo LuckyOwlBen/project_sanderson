@@ -13,7 +13,12 @@
     </div>
   </div>
 
-  <div class="validation-message" *ngIf="validationMessage">
+  <div class="validation-message over-budget" *ngIf="pointsOverBudget > 0">
+    <mat-icon>warning</mat-icon>
+    <span>{{ validationMessage }}</span>
+  </div>
+
+  <div class="validation-message" *ngIf="validationMessage && pointsOverBudget === 0">
     <mat-icon>info</mat-icon>
     <span>{{ validationMessage }}</span>
   </div>

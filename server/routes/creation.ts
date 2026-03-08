@@ -146,9 +146,9 @@ function createCreationRoutes(app, CHARACTERS_DIR) {
         console.warn(`[Name] Warning: Failed to save to database: ${dbError.message}`);
       }
 
-      // Apply level bonuses if level > 1
-      if (level && level > 1) {
-        console.log(`[Name] Calling getCreationLevelBonuses for character ${id} at level ${level}`);
+      // Recalculate point budgets for the selected creation level (idempotent)
+      if (level) {
+        console.log(`[Name] Recalculating point budgets for character ${id} at level ${level}`);
         await levelUpManager.getCreationLevelBonuses(id, level);
       }
 

@@ -37,9 +37,9 @@ export async function setNameByCharacterId(
     throw new Error(result.error || 'Failed to save name');
   }
 
-  console.log(`[Name] Name saved successfully, calling getCreationLevelBonuses for level ${level}`);
+  console.log(`[Name] Name saved successfully, recalculating point budgets for level ${level}`);
 
-  // Assign level bonuses if level > 1 during character creation
+  // Recalculate point budgets for the selected creation level (idempotent)
   await levelUpManager.getCreationLevelBonuses(characterId, level);
 
   return {

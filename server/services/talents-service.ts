@@ -749,6 +749,7 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
     return {
       characterId,
       pointsAvailable: 0,
+      pointsOverBudget: 0,
       unlockedTalentIds: [],
       availableTalentIds: [],
       selectedTreeId: null,
@@ -819,10 +820,18 @@ export async function getTalentUIResponseForCharacterId(characterId: string) {
     character,
     { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath }
   );
+
+  // Calculate over-budget amount so frontend can warn the user to remove talents
+  const freeTier0Ids = getFreeTier0TalentIds(character, paths, pendingTreesArray);
+  const allTalentIds = [...totalTalents, ...pendingTalents];
+  const actualPointsSpent = allTalentIds.filter(id => !freeTier0Ids.has(id)).length;
+  const totalPointsBudget = state.totalPoints || 0;
+  const pointsOverBudget = Math.max(0, actualPointsSpent - totalPointsBudget);
   
   return {
     characterId,
     pointsAvailable: state.pointsRemaining || 0,
+    pointsOverBudget,
     unlockedTalentIds: Array.from(unlockedTalents),
     pendingTalentIds: pendingTalents,
     availableTalentIds,

@@ -20,6 +20,11 @@ import {
   getExpertiseStateRecord,
   updateExpertiseStateRecord
 } from '../database';
+import {
+  getTotalAttributePointsUpToLevel,
+  getTotalSkillPointsUpToLevel,
+  getTotalTalentPointsUpToLevel
+} from './calculation-constants';
 
 export class LevelUpManager {
   // ATTRIBUTE POINTS: 12 at level 1, then +1 at levels 3,6,9,12,15,18 (up to level 21)
@@ -153,77 +158,78 @@ export class LevelUpManager {
   }
 
   /**
-   * Assign creation-time level bonuses when a character is created at a level > 1
-   * Calculates cumulative points for levels 2 through selectedLevel and assigns to database
-   * 
-   * @param characterId - The character to assign bonuses to
-   * @param selectedLevel - The selected creation level (must be > 1 for bonuses to apply)
+   * Set creation-time point budgets based on the selected level.
+   * Uses absolute recalculation so it is idempotent — safe to call
+   * repeatedly as the user changes the level dropdown mid-flow.
+   *
+   * For each module (attributes, skills, talents):
+   *   totalPoints     = cumulative points for levels 1..selectedLevel
+   *   pointsRemaining = max(0, totalPoints - pointsSpent)
+   *
+   * If pointsSpent exceeds the new budget (level decreased after spending),
+   * pointsRemaining is clamped to 0 and finalized is set to false so the
+   * allocation UI forces the user to re-adjust.
+   *
+   * @param characterId  - The character to recalculate for
+   * @param selectedLevel - The level chosen on the name step (1-21)
    */
   async getCreationLevelBonuses(characterId: string, selectedLevel: number): Promise<void> {
-    // Only apply bonuses if creating at level > 1
-    if (selectedLevel <= 1) {
-      console.log(`[LevelUp] Character ${characterId} at level ${selectedLevel} - skipping bonuses (level 1)`);
-      return;
-    }
-
-    console.log(`[LevelUp] Applying creation bonuses for character ${characterId} at level ${selectedLevel}`);
+    console.log(`[LevelUp] Recalculating creation budgets for character ${characterId} at level ${selectedLevel}`);
 
     try {
-      // Calculate cumulative bonuses from level 2 to selected level
-      const attributePoints = this.getAttributePointsRange(2, selectedLevel);
-      const skillPoints = this.getSkillPointsRange(2, selectedLevel);
-      const talentPoints = this.getTalentPointsRange(2, selectedLevel);
+      // Absolute totals for the selected level (includes level-1 base)
+      const totalAttrPoints = getTotalAttributePointsUpToLevel(selectedLevel);
+      const totalSkillPoints = getTotalSkillPointsUpToLevel(selectedLevel);
+      const totalTalentPoints = getTotalTalentPointsUpToLevel(selectedLevel);
 
-      console.log(`[LevelUp] Calculated bonuses - Attributes: ${attributePoints}, Skills: ${skillPoints}, Talents: ${talentPoints}`);
+      console.log(`[LevelUp] Target totals - Attributes: ${totalAttrPoints}, Skills: ${totalSkillPoints}, Talents: ${totalTalentPoints}`);
 
-      // Update Attributes state: add bonus points to pointsRemaining
-      if (attributePoints > 0) {
-        const attrRecord = await getAttributesRecord(characterId);
-        console.log(`[LevelUp] Attributes record before update:`, attrRecord);
-        if (attrRecord) {
-          const newPointsRemaining = (attrRecord.pointsRemaining || 0) + attributePoints;
-          console.log(`[LevelUp] Updating attributes: ${attrRecord.pointsRemaining} + ${attributePoints} = ${newPointsRemaining}`);
-          await updateAttributesRecord(characterId, {
-            pointsRemaining: newPointsRemaining
-          });
-          console.log(`[LevelUp] Attributes updated successfully`);
-        }
+      // --- Attributes ---
+      const attrRecord = await getAttributesRecord(characterId);
+      if (attrRecord) {
+        const spent = attrRecord.pointsSpent || 0;
+        const remaining = Math.max(0, totalAttrPoints - spent);
+        const overBudget = spent > totalAttrPoints;
+        console.log(`[LevelUp] Attributes: total ${totalAttrPoints}, spent ${spent}, remaining ${remaining}${overBudget ? ' (OVER BUDGET)' : ''}`);
+        await updateAttributesRecord(characterId, {
+          totalPoints: totalAttrPoints,
+          pointsRemaining: remaining,
+          ...(overBudget ? { finalized: false } : {})
+        });
       }
 
-      // Update SkillsState: add bonus points to pointsRemaining
-      if (skillPoints > 0) {
-        const skillsRecord = await getSkillsStateRecord(characterId);
-        console.log(`[LevelUp] Skills record before update:`, skillsRecord);
-        if (skillsRecord) {
-          const newPointsRemaining = (skillsRecord.pointsRemaining || 0) + skillPoints;
-          console.log(`[LevelUp] Updating skills: ${skillsRecord.pointsRemaining} + ${skillPoints} = ${newPointsRemaining}`);
-          await updateSkillsStateRecord(characterId, {
-            pointsRemaining: newPointsRemaining
-          });
-          console.log(`[LevelUp] Skills updated successfully`);
-        }
+      // --- Skills ---
+      const skillsRecord = await getSkillsStateRecord(characterId);
+      if (skillsRecord) {
+        const spent = skillsRecord.pointsSpent || 0;
+        const remaining = Math.max(0, totalSkillPoints - spent);
+        const overBudget = spent > totalSkillPoints;
+        console.log(`[LevelUp] Skills: total ${totalSkillPoints}, spent ${spent}, remaining ${remaining}${overBudget ? ' (OVER BUDGET)' : ''}`);
+        await updateSkillsStateRecord(characterId, {
+          totalPoints: totalSkillPoints,
+          pointsRemaining: remaining,
+          ...(overBudget ? { finalized: false } : {})
+        });
       }
 
-      // Update CharacterTalents: add bonus points to both totalPoints and pointsRemaining
-      if (talentPoints > 0) {
-        const talentsRecord = await getTalentsStateRecord(characterId);
-        console.log(`[LevelUp] Talents record before update:`, talentsRecord);
-        if (talentsRecord) {
-          const newTotalPoints = (talentsRecord.totalPoints || 0) + talentPoints;
-          const newPointsRemaining = (talentsRecord.pointsRemaining || 0) + talentPoints;
-          console.log(`[LevelUp] Updating talents: totalPoints ${talentsRecord.totalPoints} + ${talentPoints} = ${newTotalPoints}, pointsRemaining ${talentsRecord.pointsRemaining} + ${talentPoints} = ${newPointsRemaining}`);
-          await updateTalentsStateRecord(characterId, {
-            totalPoints: newTotalPoints,
-            pointsRemaining: newPointsRemaining
-          });
-          console.log(`[LevelUp] Talents updated successfully`);
-        }
+      // --- Talents ---
+      const talentsRecord = await getTalentsStateRecord(characterId);
+      if (talentsRecord) {
+        const spent = talentsRecord.pointsSpent || 0;
+        const remaining = Math.max(0, totalTalentPoints - spent);
+        const overBudget = spent > totalTalentPoints;
+        console.log(`[LevelUp] Talents: total ${totalTalentPoints}, spent ${spent}, remaining ${remaining}${overBudget ? ' (OVER BUDGET)' : ''}`);
+        await updateTalentsStateRecord(characterId, {
+          totalPoints: totalTalentPoints,
+          pointsRemaining: remaining,
+          ...(overBudget ? { finalized: false } : {})
+        });
       }
 
-      console.log(`[LevelUp] Completed bonuses application for character ${characterId}`);
+      console.log(`[LevelUp] Completed budget recalculation for character ${characterId}`);
     } catch (error) {
-      console.error(`[LevelUp] Failed to assign creation level bonuses for character ${characterId}:`, error);
-      // Don't throw - allow character creation to proceed even if bonus assignment fails
+      console.error(`[LevelUp] Failed to recalculate creation level budgets for character ${characterId}:`, error);
+      // Don't throw - allow character creation to proceed even if recalculation fails
     }
   }
 

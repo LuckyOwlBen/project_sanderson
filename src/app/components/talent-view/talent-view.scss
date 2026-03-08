@@ -79,6 +79,16 @@
   mat-icon {
     color: #ffc107;
   }
+
+  &.over-budget {
+    background-color: #f8d7da;
+    border-color: #f44336;
+    color: #721c24;
+
+    mat-icon {
+      color: #f44336;
+    }
+  }
 }
 
 .core-path-selector {

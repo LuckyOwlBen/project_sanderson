@@ -270,6 +270,7 @@ export interface TalentsState {
 export interface TalentUIResponse {
   characterId: string;
   pointsAvailable: number;                    // How many talent points left to spend
+  pointsOverBudget: number;                   // How many excess talents must be removed (0 if within budget)
   unlockedTalentIds: string[];               // IDs of talents already unlocked (total + pending)
   pendingTalentIds: string[];                // IDs of talents pending selection (this session only)
   availableTalentIds: string[];              // IDs of talents that can be selected

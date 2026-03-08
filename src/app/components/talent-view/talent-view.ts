@@ -53,6 +53,7 @@ export class TalentView implements OnInit, OnDestroy {
   // Template compatibility properties (derived from talentUIState)
   get isLoadingTalentData(): boolean { return this.isLoading; }
   get availableTalentPoints(): number { return this.talentUIState?.pointsAvailable || 0; }
+  get pointsOverBudget(): number { return this.talentUIState?.pointsOverBudget || 0; }
   get availableTrees(): any[] { return (this.talentUIState?.availableTrees && this.talentUIState.availableTrees.length > 0)
     ? this.talentUIState.availableTrees
     : this.buildAvailableTreesFromKeywords(); }
@@ -397,6 +398,14 @@ export class TalentView implements OnInit, OnDestroy {
       const pointsSpent = this.talentUIState.pointsAvailable === 0;
       this.validationMessage = pointsSpent ? '' : `Select ${this.talentUIState.pointsAvailable} more talent(s)`;
       this.validationService.setStepValid(this.STEP_INDEX, pointsSpent);
+      this.checkPendingStatus();
+      return;
+    }
+
+    // Check for over-budget condition (level was decreased after talents were selected)
+    if (this.talentUIState.pointsOverBudget > 0) {
+      this.validationMessage = `Over budget by ${this.talentUIState.pointsOverBudget} — please remove ${this.talentUIState.pointsOverBudget} talent(s)`;
+      this.validationService.setStepValid(this.STEP_INDEX, false);
       this.checkPendingStatus();
       return;
     }
