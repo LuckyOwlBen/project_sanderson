@@ -110,9 +110,8 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       { name: 'Presence', key: 'presence', currentValue: state.presence }
     ];
 
-    // Initialize with pointsRemaining as total available (includes level bonuses)
-    this.initialize(attributes, state.pointsRemaining, false);
-    this.initialize(attributes, state.pointsRemaining, false);
+    // Initialize with totalPoints as total available (includes level bonuses)
+    this.initialize(attributes, state.totalPoints, false);
     
     // Initialize resource manager with base attributes
     const attrs = new Attributes();

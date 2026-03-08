@@ -94,7 +94,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
       .subscribe({
         next: (state: SkillsState) => {
           this.isFetchingSlice = false;
-          this.serverSkillPoints = state.pointsRemaining;
+          this.serverSkillPoints = state.totalPoints;
           if (this.character && state.skills) {
             this.mapSkillsFromSlice(state.skills);
           }
