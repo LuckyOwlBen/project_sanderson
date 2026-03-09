@@ -76,9 +76,39 @@ export const CULTURAL_EXPERTISES: ExpertiseDefinition[] = [
 
 export const ITEM_EXPERTISES: ExpertiseDefinition[] = [
     {
-        name: 'Light Weaponry',
+        name: 'Animal Care',
+        category: 'utility',
+        description: 'Knowledge in caring for and managing animals, including feeding, grooming, and basic medical care.'
+    },
+    {
+        name: 'Breastplate',
+        category: 'armor',
+        description: 'Specialized proficiency with breastplates and similar torso armor. Granted by talents like Iron Will.'
+    },
+    {
+        name: 'Culinary Arts', 
+        category: 'utility',
+        description: 'Knowledge in preparing, cooking, and presenting food. Includes understanding of ingredients, techniques, and kitchen safety.'
+    },
+    {
+        name: 'Engineering',
+        category: 'utility',
+        description: 'Knowledge in designing, building, and maintaining mechanical systems and devices.'
+    },
+    {
+        name: 'High Socicety',
+        category: 'utility',
+        description: 'Knowledge in navigating social hierarchies, etiquette, and influential networks.'
+    },
+    {
+        name: 'History',
+        category: 'utility',
+        description: 'Knowledge in historical events, cultures, and significant figures.'
+    },
+    {
+        name: 'Improvised Weapons',
         category: 'weapon',
-        description: 'Proficiency with light melee weapons such as daggers, short swords, and shortbows.'
+        description: 'Specialized proficiency with improvised weapons. Granted by talents like Improvised Combat.'
     },
     {
         name: 'Knives',
@@ -86,24 +116,54 @@ export const ITEM_EXPERTISES: ExpertiseDefinition[] = [
         description: 'Specialized proficiency with knives and similar bladed tools. Granted by talents like Killing Edge.'
     },
     {
-        name: 'Slings',
-        category: 'weapon',
-        description: 'Specialized proficiency with slings and similar thrown weapons. Granted by talents like Killing Edge.'
-    },
-    {
-        name: 'Heavy Weaponry',
-        category: 'weapon',
-        description: 'Proficiency with heavy melee weapons such as greatswords, hammers, and longbows.'
-    },
-    {
-        name: 'Special Weapons',
-        category: 'weapon',
-        description: 'Proficiency with specialized weapons such as improvised weapons, shardblades, and grandbows.'
-    },
-    {
-        name: 'Armor Proficiency',
+        name: 'Leather Armor',
         category: 'armor',
-        description: 'Proficiency in wearing and maintaining various types of armor, including light, medium, and heavy armor.'
+        description: 'Specialized proficiency with leather armor. Granted by talents like Leather Mastery.'
+    },
+    {
+        name: 'Military Strategy',
+        category: 'utility',
+        description: 'Knowledge in planning and executing military operations, including tactics, logistics, and leadership.'
+    },
+    {
+        name: 'Religion',
+        category: 'utility',
+        description: 'Knowledge in various religious beliefs, practices, and institutions.'
+    },
+    {
+        name: 'Riding Horses',
+        category: 'utility',
+        description: 'Knowledge in riding and managing horses, including basic care and training.'
+    },
+    {
+        name: 'Shortbow',
+        category: 'weapon',
+        description: 'Specialized proficiency with shortbows and similar ranged weapons. Granted by talents like Archery Mastery.'
+    },
+    {
+        name: 'Shortspear',
+        category: 'weapon',
+        description: 'Specialized proficiency with shortspears and similar polearms. Granted by talents like Polearm Mastery.'
+    },
+    {
+        name: 'Sidesword',
+        category: 'weapon',
+        description: 'Specialized proficiency with sideswords and similar one-handed swords. Granted by talents like Sword Mastery.'
+    },
+    {
+        name: 'Unarmed Attacks',
+        category: 'weapon',
+        description: 'Specialized proficiency with unarmed combat techniques. Granted by talents like Martial Arts Mastery.'
+    },
+    {
+        name: 'Underworld',
+        category: 'utility',
+        description: 'Knowledge in navigating and understanding the criminal underworld, including its networks, operations, and key figures.'
+    },
+    {
+        name: 'Visual Arts',
+        category: 'utility',
+        description: 'Knowledge in visual arts, including painting, drawing, sculpture, and other forms of artistic expression.'
     },
     {
         name: 'Fabrial Operation',
