@@ -19,7 +19,7 @@ import { TalentNode, TalentUIResponse } from '../../../../shared/types/talents';
 import talentTreeManager from '../../../../shared/data/talents/talentManager';
 import { StepValidationService } from '../../services/step-validation.service';
 import { TalentsApiService } from '../../services/talents-api.service';
-import { TalentEffectParser } from '../../character/talents/talentEffectParser';
+import { TalentEffectParser } from 'shared/data/talents/talentEffectParser';
 import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
 
 @Component({

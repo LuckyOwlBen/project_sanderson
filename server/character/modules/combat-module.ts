@@ -5,7 +5,7 @@
 
 import { Attack, Stance } from '../attacks/attackInterfaces';
 import { AttackCalculator } from '../attacks/attackCalculator';
-import { TalentNode } from '../talents/talentInterface';
+import { TalentNode } from 'shared/types/talents';
 import { BonusManager } from '../bonuses/bonusManager';
 
 export class CombatModule {

@@ -1,7 +1,7 @@
 import { AdvantageModule } from '../advantage/AdvantageModule';
 import { Character } from '../character';
-import { TalentNode } from '../talents/talentInterface';
-import { TalentPrerequisiteChecker } from '../talents/talentPrerequesite';
+import { TalentNode } from 'shared/types/talents';
+import { TalentPrerequisiteChecker } from 'shared/data/talents/talentPrerequesite';
 import { BonusModule } from './bonusModule';
 
 export class BonusManager {

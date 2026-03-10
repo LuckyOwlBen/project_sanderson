@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Character } from '../character/character';
 import { Ancestry } from '../character/ancestry/ancestry';
 import { ExpertiseSourceHelper } from '../character/expertises/expertiseSource';
-import { applyTalentEffects } from '../character/talents/talentEffects';
+import { applyTalentEffects } from 'shared/data/talents/talentEffects';
 
 export interface SavedCharacter {
   id: string;

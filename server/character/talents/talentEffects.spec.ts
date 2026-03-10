@@ -1,5 +1,5 @@
 import { Character } from '../character';
-import { applyTalentEffects, getTalentEffectPreview } from './talentEffects';
+import { applyTalentEffects, getTalentEffectPreview } from 'shared/data/talents/talentEffects';
 import { SINGER_FORMS } from '../abilities/universalAbilities';
 
 describe('Talent Effects', () => {

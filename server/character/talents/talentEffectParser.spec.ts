@@ -1,5 +1,5 @@
-import { TalentEffectParser } from './talentEffectParser';
-import { TalentNode, ActionCostCode } from './talentInterface';
+import { TalentEffectParser } from 'shared/data/talents/talentEffectParser';
+import { TalentNode, ActionCostCode } from 'shared/types/talents';
 
 describe('TalentEffectParser', () => {
   describe('parseExpertiseGrants', () => {

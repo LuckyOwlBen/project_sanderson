@@ -1,11 +1,27 @@
-import { Character } from '../character';
-import { TalentNode, TalentPrerequisite } from './talentInterface';
+import { TalentNode, TalentPrerequisite } from '../../types/talents';
+
+/**
+ * Minimal interface describing what TalentPrerequisiteChecker needs from a character.
+ * Both server and UI Character classes satisfy this contract.
+ */
+export interface TalentPrerequisiteCharacter {
+  skills: {
+    checkStringForMatchingSkill(target: string): string | null;
+    getSkillRank(skillName: string): number;
+  };
+  attributes: any;
+  level: number;
+  radiantPath: {
+    hasSpokenIdeal(): boolean;
+  };
+  [key: string]: any;
+}
 
 export class TalentPrerequisiteChecker {
-  private character: Character;
+  private character: TalentPrerequisiteCharacter;
   private unlockedTalents: Set<string>;
 
-  constructor(character: Character, unlockedTalents: Set<string>) {
+  constructor(character: TalentPrerequisiteCharacter, unlockedTalents: Set<string>) {
     this.character = character;
     this.unlockedTalents = unlockedTalents;
   }

@@ -1,5 +1,5 @@
 import { Character } from './character';
-import { applyTalentEffects } from './talents/talentEffects';
+import { applyTalentEffects } from 'shared/data/talents/talentEffects';
 
 describe('Character Active Form', () => {
   let character: Character;

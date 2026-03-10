@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormSelectorComponent } from './form-selector';
 import { Character } from '../../../character/character';
 import { Ancestry } from '../../../character/ancestry/ancestry';
-import { applyTalentEffects } from '../../../character/talents/talentEffects';
+import { applyTalentEffects } from 'shared/data/talents/talentEffects';
 import { CharacterStateService } from '../../../character/characterStateService';
 import { of } from 'rxjs';
 

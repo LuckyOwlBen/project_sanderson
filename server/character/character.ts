@@ -14,7 +14,7 @@ import { UniversalAbility, getSingerFormAbilities, SINGER_FORMS } from './abilit
 import { BonusType, BonusEffect } from './bonuses/bonusModule';
 import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
-import { TalentNode } from './talents/talentInterface';
+import { TalentNode } from 'shared/types/talents';
 import { PetCompanion } from './companions/petCompanion';
 
 // Import new character modules

@@ -8,8 +8,8 @@
 import { Attack, AttackSource, DefenseType, Stance, AttackModifier } from './attackInterfaces';
 import { Character } from '../character';
 import { InventoryItem } from '../inventory/inventoryItem';
-import { TalentNode, ActionCostCode, TalentPath } from '../talents/talentInterface';
-import { ALL_TALENT_PATHS, getTalentTree } from '../talents/talentTrees/talentTrees';
+import { TalentNode, ActionCostCode, TalentPath } from 'shared/types/talents';
+import { ALL_TALENT_PATHS, getTalentTree } from 'shared/data/talents/talentTrees';
 import { SkillType } from '../skills/skillTypes';
 import { BonusType } from '../bonuses/bonusModule';
 

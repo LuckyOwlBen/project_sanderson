@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CharacterStateService } from '../../../character/characterStateService';
 import { Character } from '../../../character/character';
 import { UniversalAbility } from '../../../character/abilities/universalAbilities';
-import { applyTalentEffects } from '../../../character/talents/talentEffects';
+import { applyTalentEffects } from 'shared/data/talents/talentEffects';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 

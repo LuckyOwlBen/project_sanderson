@@ -5,7 +5,13 @@
  * such as granting Singer forms or other universal abilities.
  */
 
-import { Character } from '../character';
+/**
+ * Minimal interface for any object that can receive Singer form unlocks.
+ * Both server and UI Character classes satisfy this contract.
+ */
+export interface SingerFormUnlocker {
+  unlockSingerForm(formId: string): void;
+}
 
 /**
  * Mapping of talent IDs to the Singer forms they grant
@@ -24,10 +30,10 @@ const TALENT_TO_SINGER_FORMS: Record<string, string[]> = {
  * This is called when a talent is unlocked and handles special cases
  * like granting Singer forms
  * 
- * @param character - The character unlocking the talent
+ * @param character - Any object that supports unlockSingerForm
  * @param talentId - The ID of the talent being unlocked
  */
-export function applyTalentEffects(character: Character, talentId: string): void {
+export function applyTalentEffects(character: SingerFormUnlocker, talentId: string): void {
     // Check if this talent grants Singer forms
     const formsGranted = TALENT_TO_SINGER_FORMS[talentId];
     if (formsGranted) {

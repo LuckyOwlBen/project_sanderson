@@ -7,7 +7,7 @@
  * structured fields instead of relying on text parsing.
  */
 
-import { TalentNode, ExpertiseGrant as StructuredExpertiseGrant } from './talentInterface';
+import { TalentNode, ExpertiseGrant as StructuredExpertiseGrant } from '../../types/talents';
 
 // Legacy interface for backward compatibility
 export interface ExpertiseGrant {
