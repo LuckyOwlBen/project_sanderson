@@ -15,6 +15,7 @@ import { LevelUpApiService } from '../../services/levelup-api.service';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { PathsApiService } from '../../services/paths-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 
 export interface PathOption {
   id: string;
@@ -48,6 +49,7 @@ export class PathSelector implements OnInit, OnDestroy {
   isLevelUpMode: boolean = false;
   isLoading: boolean = false;
   isWaitingForIdentity: boolean = false;
+  isFinalized: boolean = false;
 
   availablePaths: PathOption[] = [
     {
@@ -96,6 +98,7 @@ export class PathSelector implements OnInit, OnDestroy {
     private storageService: CharacterStorageService,
     private pathsApiService: PathsApiService,
     private identityService: CharacterIdentityService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -114,7 +117,7 @@ export class PathSelector implements OnInit, OnDestroy {
         this.isLevelUpMode = params['levelUp'] === 'true';
       });
 
-    // Once we have a character ID, load paths from API
+    // Once we have a character ID, load paths and finalized status from API
     this.identityService.currentCharacterId$
       .pipe(
         takeUntil(this.destroy$),
@@ -123,6 +126,7 @@ export class PathSelector implements OnInit, OnDestroy {
       .subscribe((characterId) => {
         if (characterId) {
           this.loadPathsFromApi(characterId);
+          this.loadFinalizedStatus(characterId);
         }
       });
   }
@@ -149,6 +153,7 @@ export class PathSelector implements OnInit, OnDestroy {
           }
           this.updateValidation();
           this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
           console.log('[PathSelector] Updated paths:', this.selectedMainPath, this.selectedSpecialization);
         },
         error: (err) => {
@@ -157,7 +162,19 @@ export class PathSelector implements OnInit, OnDestroy {
           this.selectedSpecialization = null;
           this.updateValidation();
           this.isWaitingForIdentity = false;
+          this.cdr.detectChanges();
         }
+      });
+  }
+
+  private loadFinalizedStatus(characterId: string): void {
+    this.navFinalizedService.loadNavFinalized(characterId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((status) => {
+        if (status.paths) {
+          this.isFinalized = true;
+        }
+        this.cdr.detectChanges();
       });
   }
 
@@ -195,6 +212,7 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   backToMainPath(): void {
+    if (this.isFinalized) return;
     this.selectedMainPath = null;
     this.selectedSpecialization = null;
     this.availableSpecializations = [];
@@ -213,6 +231,14 @@ export class PathSelector implements OnInit, OnDestroy {
   getPathName(pathId: string): string {
     const path = this.availablePaths.find(p => p.id === pathId);
     return path?.name || pathId;
+  }
+
+  getSpecializationDisplayName(): string {
+    if (!this.selectedSpecialization) return '';
+    const match = this.availableSpecializations.find(
+      spec => spec.pathName.toLowerCase() === this.selectedSpecialization
+    );
+    return match?.pathName || this.selectedSpecialization;
   }
 
   // Persist hook for CharacterCreatorView

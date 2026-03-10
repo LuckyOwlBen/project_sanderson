@@ -45,7 +45,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             description: "To resist your influence, a character must spend additional focus equal to your tier.",
             actionCost: Infinity, // Passive
             prerequisites: [
-                { type: 'talent', target: 'Get \'Em Talking' },
+                { type: 'talent', target: 'getEmTalking' },
             ],
             tier: 2,
             bonuses: [],
@@ -71,7 +71,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             actionCost: Infinity, // Passive
             prerequisites: [
                 { type: 'talent', target: 'baleful', operator: 'OR' },
-                {type: 'talent', target: 'sleuthsInstincts', operator: 'OR' },
+                { type: 'talent', target: 'sleuthsInstincts', operator: 'OR' },
             ],
             tier: 3,
             bonuses: [],

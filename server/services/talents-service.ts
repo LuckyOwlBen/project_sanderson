@@ -402,12 +402,11 @@ function determineAvailableTrees(
   console.log('[TalentsService] determineAvailableTrees START -', { mainPathName, specializationName, ancestry, level });
   console.log('[TalentsService] unlockedTalents:', Array.from(unlockedTalents));
 
-  // Check if any singer tier 1+ talents are unlocked
-  const hasSingerTalent = (unlockedTalents: Set<string>): boolean => {
-    return Array.from(unlockedTalents).some(id => id.includes('singer') || id.includes('form'));
-  };
-
-  const requiresSingerSelection = ancestry === 'singer' && !hasSingerTalent(unlockedTalents);
+  // At ancestry talent milestone levels (1, 6, 11, 16), singers must spend at
+  // least one pending talent on the singer tree before they can finalize.
+  const isAncestryTalentLevel = ANCESTRY_TALENT_LEVELS.includes(level);
+  const pendingHasSingerTalent = Array.from(pendingTalentIds).some(id => isSingerTalent(id));
+  const requiresSingerSelection = ancestry === 'singer' && isAncestryTalentLevel && !pendingHasSingerTalent;
 
   // Helper to check if a path's tier-0 talent is unlocked
   const hasPathKeyTalent = (pathId: string): boolean => {
@@ -863,6 +862,20 @@ export async function finalizeTalentsByCharacterId(characterId: string): Promise
     );
   }
 
+  // Singers must have at least one pending singer talent at ancestry milestone levels
+  const character = await loadCharacter(characterId);
+  if (character?.ancestry === 'singer') {
+    const level = character.level || 1;
+    if (ANCESTRY_TALENT_LEVELS.includes(level)) {
+      const hasPendingSingerTalent = state.pendingTalents.some(id => isSingerTalent(id));
+      if (!hasPendingSingerTalent) {
+        throw new Error(
+          'Cannot finalize talents: Singers must select at least one Singer talent at ancestry milestone levels.'
+        );
+      }
+    }
+  }
+
   // Merge pending into total and finalize
   const result = await setTalentsByCharacterId(characterId, {
     totalTalents: Array.from(new Set([...state.totalTalents, ...state.pendingTalents])),
@@ -887,6 +900,17 @@ const TALENT_POINTS_PER_LEVEL = [
   2, // Level 16 (bonus)
   1, 1, 1, 1, 1 // Levels 17-21
 ];
+
+/** Levels where 2 talent points are awarded — the extra point is an ancestry talent.
+ *  Singers MUST spend at least one of their pending talents on the singer tree at these levels. */
+export const ANCESTRY_TALENT_LEVELS = [1, 6, 11, 16];
+
+/** Check whether a talent ID belongs to the Singer Forms talent tree (any tier). */
+export function isSingerTalent(talentId: string): boolean {
+  const singerTree = getTalentTree('singer');
+  if (!singerTree) return false;
+  return (singerTree.nodes || []).some((n: any) => n.id === talentId);
+}
 
 const PATH_TIER0_TALENTS: Record<string, string> = {
   'warrior': 'vigilant_stance',
@@ -984,7 +1008,7 @@ export async function getTalentSelectionState(
     unlockedTalents,
     spentPoints: { talents: {} },
     lockedTalents: isCreationMode ? [] : previouslySelected,
-    requiresSingerSelection: character.ancestry === 'singer' && level === 1,
+    requiresSingerSelection: character.ancestry === 'singer' && ANCESTRY_TALENT_LEVELS.includes(level),
     tier0TalentId: tier0
   };
 }

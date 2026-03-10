@@ -72,11 +72,11 @@
 
     <mat-card class="selection-summary-card">
       <mat-card-content>
-        <h3>{{ selectedSpecialization }}</h3>
+        <h3>{{ getSpecializationDisplayName() }}</h3>
         <p class="path-info">{{ getPathName(selectedMainPath!) }} Path</p>
         <p class="info-text">You can now proceed to select talents from this path.</p>
       </mat-card-content>
-      <mat-card-actions>
+      <mat-card-actions *ngIf="!isFinalized">
         <button mat-button (click)="backToMainPath()">
           <mat-icon>edit</mat-icon> Change Selection
         </button>

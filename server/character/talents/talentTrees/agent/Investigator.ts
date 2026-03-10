@@ -45,7 +45,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             description: "To resist your influence, a character must spend additional focus equal to your tier.",
             actionCost: Infinity, // Passive
             prerequisites: [
-                { type: 'talent', target: 'Get \'Em Talking' },
+                { type: 'talent', target: 'getEmTalking' },
             ],
             tier: 2,
             bonuses: [],
@@ -78,7 +78,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             otherEffects: ["Gain +1 max health per level(Including previous levels)."],
         },
         {
-            id: "sleuth'sInstincts",
+            id: "sleuthsInstincts",
             name: "Sleuth's Instincts",
             description: "Gain an advantage on cognitive tests against characters whose motiviation you know. You know when those characters lie to you.",
             actionCost: Infinity, // Passive

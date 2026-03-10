@@ -1003,18 +1003,11 @@ export async function saveCharacter(
             character.level ?? 1
           );
         }
-        // Also sync to CharacterTalents (authoritative source)
-        const existingState = await db.get(
-          'SELECT totalTalents, pendingTalents, pendingTrees, finalized FROM CharacterTalents WHERE characterId = ?',
-          character.id
-        );
-        if (existingState) {
-          await db.run(
-            `UPDATE CharacterTalents SET totalTalents = ? WHERE characterId = ?`,
-            JSON.stringify(character.unlockedTalents),
-            character.id
-          );
-        }
+        // NOTE: Do NOT sync to CharacterTalents here. The CharacterTalents table
+        // (totalTalents/pendingTalents) is managed exclusively by the talent service
+        // endpoints (setTalentsByCharacterId, ensureTier0Unlocked, finalizeTalents).
+        // Writing the merged unlockedTalents array as totalTalents would destroy
+        // the pending/total distinction and cause talents to become "locked".
       } else {
         // Clear talents if empty list provided
         await db.run('DELETE FROM UnlockedTalent WHERE characterId = ?', character.id);

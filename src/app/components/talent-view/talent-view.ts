@@ -413,11 +413,11 @@ export class TalentView implements OnInit, OnDestroy {
     // Character creation mode: specific rules
     let isValid = true;
     if (this.talentUIState.requiresSingerSelection) {
-      const hasSingerTalent = this.talentUIState.unlockedTalentIds.some(id => 
+      const hasPendingSingerTalent = this.talentUIState.pendingTalentIds.some(id => 
         this.talentUIState!.talentKeywords[id]?.pathId?.includes('singer')
       );
-      isValid = hasSingerTalent;
-      this.validationMessage = isValid ? '' : 'Please select a Singer path talent first';
+      isValid = hasPendingSingerTalent;
+      this.validationMessage = isValid ? '' : 'You must select at least one Singer talent at this level';
     } else {
       this.validationMessage = '';
     }
