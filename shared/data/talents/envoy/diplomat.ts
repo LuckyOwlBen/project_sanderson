@@ -44,7 +44,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             actionCost: ActionCostCode.Special,
             prerequisites: [
                 { type: 'skill', target: 'discipline', value: 2 },
-                { type: 'talent', target: 'steadfast_challenge' }
+                { type: 'talent', target: 'withering_retort' }
             ],
             specialActivation: "Costs 1 focus to pacify Disoriented target. Resisting costs additional focus equal to Discipline ranks.",
             tier: 2,
@@ -96,7 +96,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
         {
             id: "high_society_contacts",
             name: "High Society Contacts",
-            description: "Gain High Society expertise. Spend 2 focus to add additional effects to a test to interact in high society.",
+            description: "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
             actionCost: 1,
             prerequisites: [
                 { type: 'talent', target: 'well_dressed'}
@@ -107,7 +107,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
                 { type: 'fixed', expertises: ['High Society'] }
             ],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'to add additional effects in high society interactions', frequency: 'unlimited' }
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'to add an opportunity to a test to interact in high society', frequency: 'unlimited' }
             ]
         },
         {
@@ -118,7 +118,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
             specialActivation: "Spend focus up to Persuasion ranks to add additional targets to Rousing Presence or Steadfast Challenge.",
             prerequisites: [
                 { type: 'skill', target: 'persuasion', value: 3 },
-                { type: 'talent', target: 'practiced_oratory' }
+                { type: 'talent', target: 'high_society_contacts' }
             ],
             tier: 2,
             bonuses: [],

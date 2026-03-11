@@ -18,7 +18,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
         {
             id:"getEmTalking",
             name: "Get 'Em Talking",
-            description: "Spend 1 focus to test Deduction vs. Spiritual to learn the target's motivation. During this scene, you cna raise the stakes on tests to leverage this motivation.",
+            description: "Spend 1 focus to test Deduction vs. Spiritual to learn the target's motivation. During this scene, you can raise the stakes on tests to leverage this motivation.",
             actionCost: 2, // 2 actions
             prerequisites: [
                 { type: 'skill', target: 'Insight', value: 2}
@@ -30,7 +30,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
         {
             id: "quickAnalysis",
             name: "Quick Analysis",
-            description: "Spend 2 focus to gain 2 action points for cognitive tests with use as skill, Gain Advantage, or an agent talent.",
+            description: "Spend 2 focus to gain 2 action points for cognitive tests with use a skill, Gain Advantage, or an agent talent.",
             actionCost: 0, // Free
             prerequisites: [
                 { type: 'talent', target: 'watchfulEye' },
@@ -70,8 +70,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             description: "Gain +1 max health per level(Including previous levels).",
             actionCost: Infinity, // Passive
             prerequisites: [
-                { type: 'talent', target: 'baleful', operator: 'OR' },
-                { type: 'talent', target: 'sleuthsInstincts', operator: 'OR' },
+                { type: 'talent', target: 'baleful' }
             ],
             tier: 3,
             bonuses: [],
@@ -83,8 +82,10 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             description: "Gain an advantage on cognitive tests against characters whose motiviation you know. You know when those characters lie to you.",
             actionCost: Infinity, // Passive
             prerequisites: [
-                { type: 'talent', target: 'gatherEvidence' },
                 { type: 'skill', target: 'Deduction', value: 3 },
+                { type: 'talent', target: 'hardy'},
+
+                
             ],
             tier: 4,
             bonuses: [],
@@ -96,7 +97,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
             description: " Spend 3 focus to test Deduction vs. Cognitive, gaining an advantage if you know the target's motivation. On failure, the target gains an advantage against you. On success, they back down.",
             actionCost: 3, // 3 actions
             prerequisites: [
-                { type: 'talent', target: 'sleuthsInstincts' },
+                { type: 'talent', target: 'hardy' },
                 { type: 'skill', target: 'Deduction', value: 3 },
             ],
             tier: 4,

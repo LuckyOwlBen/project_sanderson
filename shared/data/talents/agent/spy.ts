@@ -103,6 +103,7 @@ export const SPY_TALENT_TREE: TalentTree = {
             actionCost: -2, //special
             specialActivation: "Disguise yourself using Deception without needing physical supplies.",
             prerequisites: [
+                {type: 'skill', target: 'Deception', value: 3},
                 {type: 'talent', target:'subtleTakedown'},
             ],
             tier: 4,

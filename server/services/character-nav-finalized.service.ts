@@ -11,6 +11,7 @@ import {
   getSkillsStateRecord,
   getTalentsStateRecord,
   getExpertiseStateRecord,
+  getPathsFinalized,
   loadCharacter
 } from '../database';
 
@@ -54,7 +55,7 @@ export class CharacterNavFinalizedService {
       const hasAncestry = !!character.ancestry;
       const hasCulture = (character.cultures?.length ?? 0) > 0;
       const hasName = !!(character.name && character.name.length > 0) && character.name !== 'Unnamed';
-      const hasPath = (character.paths?.length ?? 0) > 0;
+      const pathsFinalized = await getPathsFinalized(characterId);
 
       return {
         ancestry: hasAncestry,
@@ -63,7 +64,7 @@ export class CharacterNavFinalizedService {
         attributes: attrs?.finalized ?? false,
         expertises: expertise?.finalized ?? false,
         skills: skills?.finalized ?? false,
-        paths: hasPath,
+        paths: pathsFinalized,
         talents: talents?.finalized ?? false,
         equipment: true // Equipment is always available/finalizable
       };

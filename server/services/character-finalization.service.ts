@@ -11,6 +11,7 @@ import { finalizeSkillsForCharacter } from './skills-service';
 import { finalizeTalentsByCharacterId } from './talents-service';
 import { finalizeExpertisesForCharacter } from './expertise-service';
 import { characterRepository } from '../repositories/character-repository';
+import { setPathsFinalized } from '../database';
 
 export class CharacterFinalizationService {
 
@@ -47,6 +48,9 @@ export class CharacterFinalizationService {
 
       await finalizeExpertisesForCharacter(characterId);
       console.log(`[CharacterFinalization] ✓ Expertises finalized`);
+
+      await setPathsFinalized(characterId, true);
+      console.log(`[CharacterFinalization] ✓ Paths finalized`);
 
       // Clear the pending level flag and points on finalization
       const character = await characterRepository.load(characterId);

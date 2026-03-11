@@ -64,6 +64,8 @@ model PathSelection {
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   pathName    String
   tier0TalentId String?  // The tier 0 talent unlocked for this path (e.g., "vigilant_stance")
+  // Gates editing during creation/level-up
+  finalized   Boolean  @default(false)
 
   @@unique([characterId, pathName])
 }

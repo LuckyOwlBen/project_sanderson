@@ -869,6 +869,21 @@ export async function updateExpertiseStateRecord(
   return merged;
 }
 
+// ============================================================================
+// PATH SELECTION FINALIZED HELPERS
+// ============================================================================
+
+export async function getPathsFinalized(characterId: string): Promise<boolean> {
+  if (!db) throw new Error('Database not initialized');
+  const row = await db.get('SELECT finalized FROM PathSelection WHERE characterId = ? LIMIT 1', characterId);
+  return row ? (row.finalized === 1 || row.finalized === true) : false;
+}
+
+export async function setPathsFinalized(characterId: string, finalized: boolean): Promise<void> {
+  if (!db) throw new Error('Database not initialized');
+  await db.run('UPDATE PathSelection SET finalized = ? WHERE characterId = ?', finalized ? 1 : 0, characterId);
+}
+
 
 /**
  * Save a character to the database atomically

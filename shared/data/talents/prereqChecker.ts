@@ -70,51 +70,61 @@ export function canUnlockTalentForCharacter(
 
   const prereqs: TalentPrerequisite[] = Array.isArray(foundNode.prerequisites) ? foundNode.prerequisites : [];
 
-  prereqs.forEach(pr => {
+  // Split into AND (default) and OR groups based on operator field
+  const andPrereqs = prereqs.filter(pr => pr.operator !== 'OR');
+  const orPrereqs = prereqs.filter(pr => pr.operator === 'OR');
+
+  const isPrereqMet = (pr: TalentPrerequisite): boolean => {
     switch (pr.type) {
-      case 'talent': {
-        if (!combined.has(pr.target)) missing.push(pr);
-        break;
-      }
+      case 'talent':
+        return combined.has(pr.target);
       case 'level': {
         const required = pr.value || 1;
         const lvl = (context && context.level) || (character && character.level) || 1;
-        if (lvl < required) missing.push(pr);
-        break;
+        return lvl >= required;
       }
       case 'ideal': {
         const idealNeeded = pr.target;
         const currentIdeal = context?.radiant?.currentIdeal || character?.radiantPath?.currentIdeal || 1;
-        // If value is provided, compare numeric; otherwise just ensure currentIdeal >= 1
         if (typeof pr.value === 'number') {
-          if (currentIdeal < pr.value) missing.push(pr);
-        } else {
-          // Best-effort: if target is a string like 'first' treat as 1
-          const map: any = { first: 1, second: 2, third: 3 };
-          const needed = map[idealNeeded] || 1;
-          if (currentIdeal < needed) missing.push(pr);
+          return currentIdeal >= pr.value;
         }
-        break;
+        const map: any = { first: 1, second: 2, third: 3 };
+        const needed = map[idealNeeded] || 1;
+        return currentIdeal >= needed;
       }
       case 'skill':
       case 'attribute': {
-        // Normalize skill/attribute name to uppercase for comparison (DB stores as UPPERCASE)
         const targetNormalized = pr.target?.toUpperCase();
-        const val = character?.skills?.[targetNormalized] 
-          ?? character?.skills?.[pr.target]  // fallback to original case
+        const val = character?.skills?.[targetNormalized]
+          ?? character?.skills?.[pr.target]
           ?? character?.attributes?.[pr.target?.toLowerCase()]
           ?? character?.attributes?.[pr.target];
         if (typeof pr.value === 'number') {
-          if (!(typeof val === 'number' && val >= pr.value)) missing.push(pr);
-        } else {
-          if (val == null) missing.push(pr);
+          return typeof val === 'number' && val >= pr.value;
         }
-        break;
+        return val != null;
       }
       default:
-        break;
+        return false;
     }
+  };
+
+  // All AND prerequisites must be met
+  andPrereqs.forEach(pr => {
+    if (!isPrereqMet(pr)) missing.push(pr);
   });
+
+  // At least one OR prerequisite must be met (if any exist)
+  if (orPrereqs.length > 0) {
+    const orMet = orPrereqs.some(pr => isPrereqMet(pr));
+    console.log(`[PrereqChecker] OR group for ${talentId}:`, orPrereqs.map(p => p.target), '- met:', orMet);
+    if (!orMet) {
+      missing.push(...orPrereqs);
+    }
+  }
+
+  console.log(`[PrereqChecker] ${talentId} - andPrereqs: ${andPrereqs.length}, orPrereqs: ${orPrereqs.length}, missing: ${missing.map(p => p.target)}, canUnlock: ${missing.length === 0}`);
 
   return { canUnlock: missing.length === 0, missingPrerequisites: missing };
 }
