@@ -10,38 +10,46 @@ export function canUnlockTalentForCharacter(
   talentId: string,
   unlockedTalentIds: Set<string>,
   pendingTalentIds: Set<string>,
-  context?: { level?: number; ancestry?: string; paths?: { type?: string | null; sub?: string | null }; radiant?: any }
+  context?: { level?: number; ancestry?: string; paths?: { type?: string | null; sub?: string | null }; radiant?: any },
+  treeId?: string
 ): { canUnlock: boolean; missingPrerequisites: TalentPrerequisite[]; reason?: string } {
   const combined = new Set<string>([...Array.from(unlockedTalentIds), ...Array.from(pendingTalentIds)]);
 
   // Try to locate the talent node in registered trees
   let foundNode: any | null = null;
-  // Search all known trees quickly via getTalentTree if caller passed a tree id; otherwise search all paths
-  // We'll iterate over core paths
-  const corePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
 
   // Helper to search a tree for the node
-  const searchTreeForId = (treeId: string) => {
-    const tree = getTalentTree(treeId);
+  const searchTreeForId = (id: string) => {
+    const tree = getTalentTree(id);
     if (!tree || !tree.nodes) return null;
     return tree.nodes.find((n: any) => n.id === talentId) || null;
   };
 
-  // Try common lookups: direct tree id equal to talentId prefix? fallback to scanning core paths
-  for (const path of corePaths) {
-    const talentPath = getTalentPath(path);
-    if (!talentPath) continue;
-    if (talentPath.paths) {
-      for (const t of talentPath.paths) {
-        const node = (t.nodes || []).find((n: any) => n.id === talentId);
+  // When a treeId hint is provided, look up the node directly from that tree
+  // first. This avoids incorrect resolution when duplicate talent IDs exist
+  // across different specialization trees.
+  if (treeId) {
+    foundNode = searchTreeForId(treeId);
+  }
+
+  // Fallback: scan core paths (for callers that don't pass a hint)
+  if (!foundNode) {
+    const corePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
+    for (const path of corePaths) {
+      const talentPath = getTalentPath(path);
+      if (!talentPath) continue;
+      if (talentPath.paths) {
+        for (const t of talentPath.paths) {
+          const node = (t.nodes || []).find((n: any) => n.id === talentId);
+          if (node) { foundNode = node; break; }
+        }
+      }
+      if (foundNode) break;
+      // also check talentPath.talentNodes
+      if (talentPath.talentNodes) {
+        const node = talentPath.talentNodes.find((n: any) => n.id === talentId);
         if (node) { foundNode = node; break; }
       }
-    }
-    if (foundNode) break;
-    // also check talentPath.talentNodes
-    if (talentPath.talentNodes) {
-      const node = talentPath.talentNodes.find((n: any) => n.id === talentId);
-      if (node) { foundNode = node; break; }
     }
   }
 

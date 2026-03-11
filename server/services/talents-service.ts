@@ -338,36 +338,48 @@ export async function setTalentsByCharacterId(
     // Allow pending tier-1 talents even if prereqs are not yet satisfied so the
     // user can pre-select them while reallocating other resources. For tiers >1
     // require that prereqs are satisfied.
-    const findNodeTier = (talentId: string): number | null => {
-      const corePaths = ['warrior', 'scholar', 'hunter', 'leader', 'envoy', 'agent'];
-      for (const p of corePaths) {
-        const talentPath = getTalentPath(p);
-        if (!talentPath) continue;
-        if (talentPath.talentNodes) {
-          const n = talentPath.talentNodes.find((x: any) => x.id === talentId);
-          if (n) return n.tier ?? null;
-        }
-        if (talentPath.paths) {
-          for (const t of talentPath.paths) {
-            const n = (t.nodes || []).find((x: any) => x.id === talentId);
-            if (n) return n.tier ?? null;
-          }
-        }
+    //
+    // Build the character's actual available tree list so we resolve duplicate
+    // talent IDs (e.g. "baleful") to the correct specialization tree.
+    const characterTreeIds: string[] = [];
+    const { mainPathName: valMainPath } = normalizePaths(paths);
+    if (valMainPath) {
+      const mp = getTalentPath(valMainPath);
+      mp?.paths?.forEach(t => characterTreeIds.push(t.pathName?.toLowerCase()));
+    }
+    pendingTrees.forEach(bonusId => {
+      const bp = getTalentPath(bonusId.toLowerCase());
+      bp?.paths?.forEach(t => {
+        const tid = t.pathName?.toLowerCase();
+        if (tid && !characterTreeIds.includes(tid)) characterTreeIds.push(tid);
+      });
+    });
+    if (character?.ancestry === 'singer') characterTreeIds.push('singer');
+    if (character?.radiantPath?.boundOrder) {
+      const rp = getTalentPath(character.radiantPath.boundOrder);
+      if (rp?.paths?.[0]) characterTreeIds.push(rp.paths[0].pathName.toLowerCase());
+    }
+
+    const findNodeInfo = (talentId: string): { tier: number | null; treeId: string | undefined } => {
+      // Search character's actual trees first (avoids wrong duplicate resolution)
+      for (const tid of characterTreeIds) {
+        const tree = getTalentTree(tid);
+        if (!tree?.nodes) continue;
+        const n = tree.nodes.find((x: any) => x.id === talentId);
+        if (n) return { tier: n.tier ?? null, treeId: tid };
       }
-      // check special trees like singer
-      const special = ['singer'];
-      for (const s of special) {
-        const tree = getTalentTree(s);
-        if (!tree) continue;
-        const n = (tree.nodes || []).find((x: any) => x.id === talentId);
-        if (n) return n.tier ?? null;
+      // Also check path-level talentNodes (tier 0 key talents)
+      if (valMainPath) {
+        const mp = getTalentPath(valMainPath);
+        const n = mp?.talentNodes?.find((x: any) => x.id === talentId);
+        if (n) return { tier: n.tier ?? null, treeId: undefined };
       }
-      return null;
+      return { tier: null, treeId: undefined };
     };
 
     for (const tid of pendingSet) {
-      const tier = findNodeTier(tid);
-      const result = canUnlockTalentForCharacter(character, tid, unlockedSet, pendingSet, { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath });
+      const { tier, treeId: resolvedTreeId } = findNodeInfo(tid);
+      const result = canUnlockTalentForCharacter(character, tid, unlockedSet, pendingSet, { level: character.level || 1, ancestry: character.ancestry, paths, radiant: character.radiantPath }, resolvedTreeId);
       if (result && result.canUnlock) continue;
       // allow tier 1 even if prereqs missing
       if (tier === 1) continue;
@@ -551,7 +563,7 @@ function determineAvailableTrees(
     const nodes: AvailableNodeDTO[] = (tree.nodes || []).map((node: any) => {
       const isUnlocked = unlockedTalents.has(node.id);
       const isPending = pendingTalentIds.has(node.id);
-      const prereqResult = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, { level, ancestry, paths, radiant: character.radiantPath });
+      const prereqResult = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, { level, ancestry, paths, radiant: character.radiantPath }, treeId);
 
       const availableNode: AvailableNodeDTO = {
         id: node.id,
@@ -719,7 +731,7 @@ function getAvailableTalentIds(
             return;
           }
 
-          const result = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, context);
+          const result = canUnlockTalentForCharacter(character, node.id, unlockedTalents, pendingTalentIds, context, treeId);
           if (result && result.canUnlock) {
             talentIds.add(node.id);
           }
