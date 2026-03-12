@@ -113,7 +113,8 @@ export const PathSelectionScalarFieldEnum = {
   id: 'id',
   characterId: 'characterId',
   pathName: 'pathName',
-  tier0TalentId: 'tier0TalentId'
+  tier0TalentId: 'tier0TalentId',
+  finalized: 'finalized'
 } as const
 
 export type PathSelectionScalarFieldEnum = (typeof PathSelectionScalarFieldEnum)[keyof typeof PathSelectionScalarFieldEnum]
@@ -250,7 +251,8 @@ export const CharacterTalentsScalarFieldEnum = {
   pointsRemaining: 'pointsRemaining',
   finalized: 'finalized',
   totalTalents: 'totalTalents',
-  pendingTalents: 'pendingTalents'
+  pendingTalents: 'pendingTalents',
+  pendingTrees: 'pendingTrees'
 } as const
 
 export type CharacterTalentsScalarFieldEnum = (typeof CharacterTalentsScalarFieldEnum)[keyof typeof CharacterTalentsScalarFieldEnum]

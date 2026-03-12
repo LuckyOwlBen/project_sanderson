@@ -47,6 +47,7 @@ export type CharacterTalentsMinAggregateOutputType = {
   finalized: boolean | null
   totalTalents: string | null
   pendingTalents: string | null
+  pendingTrees: string | null
 }
 
 export type CharacterTalentsMaxAggregateOutputType = {
@@ -58,6 +59,7 @@ export type CharacterTalentsMaxAggregateOutputType = {
   finalized: boolean | null
   totalTalents: string | null
   pendingTalents: string | null
+  pendingTrees: string | null
 }
 
 export type CharacterTalentsCountAggregateOutputType = {
@@ -69,6 +71,7 @@ export type CharacterTalentsCountAggregateOutputType = {
   finalized: number
   totalTalents: number
   pendingTalents: number
+  pendingTrees: number
   _all: number
 }
 
@@ -94,6 +97,7 @@ export type CharacterTalentsMinAggregateInputType = {
   finalized?: true
   totalTalents?: true
   pendingTalents?: true
+  pendingTrees?: true
 }
 
 export type CharacterTalentsMaxAggregateInputType = {
@@ -105,6 +109,7 @@ export type CharacterTalentsMaxAggregateInputType = {
   finalized?: true
   totalTalents?: true
   pendingTalents?: true
+  pendingTrees?: true
 }
 
 export type CharacterTalentsCountAggregateInputType = {
@@ -116,6 +121,7 @@ export type CharacterTalentsCountAggregateInputType = {
   finalized?: true
   totalTalents?: true
   pendingTalents?: true
+  pendingTrees?: true
   _all?: true
 }
 
@@ -214,6 +220,7 @@ export type CharacterTalentsGroupByOutputType = {
   finalized: boolean
   totalTalents: string
   pendingTalents: string
+  pendingTrees: string
   _count: CharacterTalentsCountAggregateOutputType | null
   _avg: CharacterTalentsAvgAggregateOutputType | null
   _sum: CharacterTalentsSumAggregateOutputType | null
@@ -248,6 +255,7 @@ export type CharacterTalentsWhereInput = {
   finalized?: Prisma.BoolFilter<"CharacterTalents"> | boolean
   totalTalents?: Prisma.StringFilter<"CharacterTalents"> | string
   pendingTalents?: Prisma.StringFilter<"CharacterTalents"> | string
+  pendingTrees?: Prisma.StringFilter<"CharacterTalents"> | string
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }
 
@@ -260,6 +268,7 @@ export type CharacterTalentsOrderByWithRelationInput = {
   finalized?: Prisma.SortOrder
   totalTalents?: Prisma.SortOrder
   pendingTalents?: Prisma.SortOrder
+  pendingTrees?: Prisma.SortOrder
   character?: Prisma.CharacterOrderByWithRelationInput
 }
 
@@ -275,6 +284,7 @@ export type CharacterTalentsWhereUniqueInput = Prisma.AtLeast<{
   finalized?: Prisma.BoolFilter<"CharacterTalents"> | boolean
   totalTalents?: Prisma.StringFilter<"CharacterTalents"> | string
   pendingTalents?: Prisma.StringFilter<"CharacterTalents"> | string
+  pendingTrees?: Prisma.StringFilter<"CharacterTalents"> | string
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }, "id" | "characterId">
 
@@ -287,6 +297,7 @@ export type CharacterTalentsOrderByWithAggregationInput = {
   finalized?: Prisma.SortOrder
   totalTalents?: Prisma.SortOrder
   pendingTalents?: Prisma.SortOrder
+  pendingTrees?: Prisma.SortOrder
   _count?: Prisma.CharacterTalentsCountOrderByAggregateInput
   _avg?: Prisma.CharacterTalentsAvgOrderByAggregateInput
   _max?: Prisma.CharacterTalentsMaxOrderByAggregateInput
@@ -306,6 +317,7 @@ export type CharacterTalentsScalarWhereWithAggregatesInput = {
   finalized?: Prisma.BoolWithAggregatesFilter<"CharacterTalents"> | boolean
   totalTalents?: Prisma.StringWithAggregatesFilter<"CharacterTalents"> | string
   pendingTalents?: Prisma.StringWithAggregatesFilter<"CharacterTalents"> | string
+  pendingTrees?: Prisma.StringWithAggregatesFilter<"CharacterTalents"> | string
 }
 
 export type CharacterTalentsCreateInput = {
@@ -316,6 +328,7 @@ export type CharacterTalentsCreateInput = {
   finalized?: boolean
   totalTalents?: string
   pendingTalents?: string
+  pendingTrees?: string
   character: Prisma.CharacterCreateNestedOneWithoutTalentsStateInput
 }
 
@@ -328,6 +341,7 @@ export type CharacterTalentsUncheckedCreateInput = {
   finalized?: boolean
   totalTalents?: string
   pendingTalents?: string
+  pendingTrees?: string
 }
 
 export type CharacterTalentsUpdateInput = {
@@ -338,6 +352,7 @@ export type CharacterTalentsUpdateInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
   character?: Prisma.CharacterUpdateOneRequiredWithoutTalentsStateNestedInput
 }
 
@@ -350,6 +365,7 @@ export type CharacterTalentsUncheckedUpdateInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CharacterTalentsCreateManyInput = {
@@ -361,6 +377,7 @@ export type CharacterTalentsCreateManyInput = {
   finalized?: boolean
   totalTalents?: string
   pendingTalents?: string
+  pendingTrees?: string
 }
 
 export type CharacterTalentsUpdateManyMutationInput = {
@@ -371,6 +388,7 @@ export type CharacterTalentsUpdateManyMutationInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CharacterTalentsUncheckedUpdateManyInput = {
@@ -382,6 +400,7 @@ export type CharacterTalentsUncheckedUpdateManyInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CharacterTalentsNullableScalarRelationFilter = {
@@ -398,6 +417,7 @@ export type CharacterTalentsCountOrderByAggregateInput = {
   finalized?: Prisma.SortOrder
   totalTalents?: Prisma.SortOrder
   pendingTalents?: Prisma.SortOrder
+  pendingTrees?: Prisma.SortOrder
 }
 
 export type CharacterTalentsAvgOrderByAggregateInput = {
@@ -415,6 +435,7 @@ export type CharacterTalentsMaxOrderByAggregateInput = {
   finalized?: Prisma.SortOrder
   totalTalents?: Prisma.SortOrder
   pendingTalents?: Prisma.SortOrder
+  pendingTrees?: Prisma.SortOrder
 }
 
 export type CharacterTalentsMinOrderByAggregateInput = {
@@ -426,6 +447,7 @@ export type CharacterTalentsMinOrderByAggregateInput = {
   finalized?: Prisma.SortOrder
   totalTalents?: Prisma.SortOrder
   pendingTalents?: Prisma.SortOrder
+  pendingTrees?: Prisma.SortOrder
 }
 
 export type CharacterTalentsSumOrderByAggregateInput = {
@@ -474,6 +496,7 @@ export type CharacterTalentsCreateWithoutCharacterInput = {
   finalized?: boolean
   totalTalents?: string
   pendingTalents?: string
+  pendingTrees?: string
 }
 
 export type CharacterTalentsUncheckedCreateWithoutCharacterInput = {
@@ -484,6 +507,7 @@ export type CharacterTalentsUncheckedCreateWithoutCharacterInput = {
   finalized?: boolean
   totalTalents?: string
   pendingTalents?: string
+  pendingTrees?: string
 }
 
 export type CharacterTalentsCreateOrConnectWithoutCharacterInput = {
@@ -510,6 +534,7 @@ export type CharacterTalentsUpdateWithoutCharacterInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CharacterTalentsUncheckedUpdateWithoutCharacterInput = {
@@ -520,6 +545,7 @@ export type CharacterTalentsUncheckedUpdateWithoutCharacterInput = {
   finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   totalTalents?: Prisma.StringFieldUpdateOperationsInput | string
   pendingTalents?: Prisma.StringFieldUpdateOperationsInput | string
+  pendingTrees?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -533,6 +559,7 @@ export type CharacterTalentsSelect<ExtArgs extends runtime.Types.Extensions.Inte
   finalized?: boolean
   totalTalents?: boolean
   pendingTalents?: boolean
+  pendingTrees?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["characterTalents"]>
 
@@ -545,6 +572,7 @@ export type CharacterTalentsSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   finalized?: boolean
   totalTalents?: boolean
   pendingTalents?: boolean
+  pendingTrees?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["characterTalents"]>
 
@@ -557,6 +585,7 @@ export type CharacterTalentsSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   finalized?: boolean
   totalTalents?: boolean
   pendingTalents?: boolean
+  pendingTrees?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["characterTalents"]>
 
@@ -569,9 +598,10 @@ export type CharacterTalentsSelectScalar = {
   finalized?: boolean
   totalTalents?: boolean
   pendingTalents?: boolean
+  pendingTrees?: boolean
 }
 
-export type CharacterTalentsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "totalPoints" | "pointsSpent" | "pointsRemaining" | "finalized" | "totalTalents" | "pendingTalents", ExtArgs["result"]["characterTalents"]>
+export type CharacterTalentsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "totalPoints" | "pointsSpent" | "pointsRemaining" | "finalized" | "totalTalents" | "pendingTalents" | "pendingTrees", ExtArgs["result"]["characterTalents"]>
 export type CharacterTalentsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }
@@ -596,6 +626,7 @@ export type $CharacterTalentsPayload<ExtArgs extends runtime.Types.Extensions.In
     finalized: boolean
     totalTalents: string
     pendingTalents: string
+    pendingTrees: string
   }, ExtArgs["result"]["characterTalents"]>
   composites: {}
 }
@@ -1028,6 +1059,7 @@ export interface CharacterTalentsFieldRefs {
   readonly finalized: Prisma.FieldRef<"CharacterTalents", 'Boolean'>
   readonly totalTalents: Prisma.FieldRef<"CharacterTalents", 'String'>
   readonly pendingTalents: Prisma.FieldRef<"CharacterTalents", 'String'>
+  readonly pendingTrees: Prisma.FieldRef<"CharacterTalents", 'String'>
 }
     
 

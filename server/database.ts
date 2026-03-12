@@ -279,6 +279,7 @@ export async function initializeSchema(): Promise<void> {
         id TEXT PRIMARY KEY,
         characterId TEXT NOT NULL,
         pathName TEXT NOT NULL,
+        finalized INTEGER DEFAULT 0,
         UNIQUE(characterId, pathName),
         FOREIGN KEY(characterId) REFERENCES Character(id) ON DELETE CASCADE
       );
@@ -327,6 +328,15 @@ async function runMigrations(): Promise<void> {
       }
     } else {
       console.log('[Database] Migration skipped: currencyInChips column already exists');
+    }
+
+    // Migration: Add finalized column to PathSelection table if it doesn't exist
+    const pathSelectionColumns = await db.all("PRAGMA table_info(PathSelection)");
+    const hasPathFinalized = pathSelectionColumns.some((col: any) => col.name === 'finalized');
+    if (!hasPathFinalized) {
+      console.log('[Database] Running migration: Adding finalized column to PathSelection table');
+      await db.run('ALTER TABLE PathSelection ADD COLUMN finalized INTEGER DEFAULT 0');
+      console.log('[Database] Migration completed: PathSelection.finalized column added');
     }
   } catch (error) {
     console.error('[Database] Migration failed:', (error as Error).message);

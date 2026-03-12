@@ -29,6 +29,7 @@ export type PathSelectionMinAggregateOutputType = {
   characterId: string | null
   pathName: string | null
   tier0TalentId: string | null
+  finalized: boolean | null
 }
 
 export type PathSelectionMaxAggregateOutputType = {
@@ -36,6 +37,7 @@ export type PathSelectionMaxAggregateOutputType = {
   characterId: string | null
   pathName: string | null
   tier0TalentId: string | null
+  finalized: boolean | null
 }
 
 export type PathSelectionCountAggregateOutputType = {
@@ -43,6 +45,7 @@ export type PathSelectionCountAggregateOutputType = {
   characterId: number
   pathName: number
   tier0TalentId: number
+  finalized: number
   _all: number
 }
 
@@ -52,6 +55,7 @@ export type PathSelectionMinAggregateInputType = {
   characterId?: true
   pathName?: true
   tier0TalentId?: true
+  finalized?: true
 }
 
 export type PathSelectionMaxAggregateInputType = {
@@ -59,6 +63,7 @@ export type PathSelectionMaxAggregateInputType = {
   characterId?: true
   pathName?: true
   tier0TalentId?: true
+  finalized?: true
 }
 
 export type PathSelectionCountAggregateInputType = {
@@ -66,6 +71,7 @@ export type PathSelectionCountAggregateInputType = {
   characterId?: true
   pathName?: true
   tier0TalentId?: true
+  finalized?: true
   _all?: true
 }
 
@@ -146,6 +152,7 @@ export type PathSelectionGroupByOutputType = {
   characterId: string
   pathName: string
   tier0TalentId: string | null
+  finalized: boolean
   _count: PathSelectionCountAggregateOutputType | null
   _min: PathSelectionMinAggregateOutputType | null
   _max: PathSelectionMaxAggregateOutputType | null
@@ -174,6 +181,7 @@ export type PathSelectionWhereInput = {
   characterId?: Prisma.StringFilter<"PathSelection"> | string
   pathName?: Prisma.StringFilter<"PathSelection"> | string
   tier0TalentId?: Prisma.StringNullableFilter<"PathSelection"> | string | null
+  finalized?: Prisma.BoolFilter<"PathSelection"> | boolean
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }
 
@@ -182,6 +190,7 @@ export type PathSelectionOrderByWithRelationInput = {
   characterId?: Prisma.SortOrder
   pathName?: Prisma.SortOrder
   tier0TalentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalized?: Prisma.SortOrder
   character?: Prisma.CharacterOrderByWithRelationInput
 }
 
@@ -194,6 +203,7 @@ export type PathSelectionWhereUniqueInput = Prisma.AtLeast<{
   characterId?: Prisma.StringFilter<"PathSelection"> | string
   pathName?: Prisma.StringFilter<"PathSelection"> | string
   tier0TalentId?: Prisma.StringNullableFilter<"PathSelection"> | string | null
+  finalized?: Prisma.BoolFilter<"PathSelection"> | boolean
   character?: Prisma.XOR<Prisma.CharacterScalarRelationFilter, Prisma.CharacterWhereInput>
 }, "id" | "characterId_pathName">
 
@@ -202,6 +212,7 @@ export type PathSelectionOrderByWithAggregationInput = {
   characterId?: Prisma.SortOrder
   pathName?: Prisma.SortOrder
   tier0TalentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalized?: Prisma.SortOrder
   _count?: Prisma.PathSelectionCountOrderByAggregateInput
   _max?: Prisma.PathSelectionMaxOrderByAggregateInput
   _min?: Prisma.PathSelectionMinOrderByAggregateInput
@@ -215,12 +226,14 @@ export type PathSelectionScalarWhereWithAggregatesInput = {
   characterId?: Prisma.StringWithAggregatesFilter<"PathSelection"> | string
   pathName?: Prisma.StringWithAggregatesFilter<"PathSelection"> | string
   tier0TalentId?: Prisma.StringNullableWithAggregatesFilter<"PathSelection"> | string | null
+  finalized?: Prisma.BoolWithAggregatesFilter<"PathSelection"> | boolean
 }
 
 export type PathSelectionCreateInput = {
   id?: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
   character: Prisma.CharacterCreateNestedOneWithoutPathsInput
 }
 
@@ -229,12 +242,14 @@ export type PathSelectionUncheckedCreateInput = {
   characterId: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
 }
 
 export type PathSelectionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
   character?: Prisma.CharacterUpdateOneRequiredWithoutPathsNestedInput
 }
 
@@ -243,6 +258,7 @@ export type PathSelectionUncheckedUpdateInput = {
   characterId?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PathSelectionCreateManyInput = {
@@ -250,12 +266,14 @@ export type PathSelectionCreateManyInput = {
   characterId: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
 }
 
 export type PathSelectionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PathSelectionUncheckedUpdateManyInput = {
@@ -263,6 +281,7 @@ export type PathSelectionUncheckedUpdateManyInput = {
   characterId?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PathSelectionListRelationFilter = {
@@ -285,6 +304,7 @@ export type PathSelectionCountOrderByAggregateInput = {
   characterId?: Prisma.SortOrder
   pathName?: Prisma.SortOrder
   tier0TalentId?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type PathSelectionMaxOrderByAggregateInput = {
@@ -292,6 +312,7 @@ export type PathSelectionMaxOrderByAggregateInput = {
   characterId?: Prisma.SortOrder
   pathName?: Prisma.SortOrder
   tier0TalentId?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type PathSelectionMinOrderByAggregateInput = {
@@ -299,6 +320,7 @@ export type PathSelectionMinOrderByAggregateInput = {
   characterId?: Prisma.SortOrder
   pathName?: Prisma.SortOrder
   tier0TalentId?: Prisma.SortOrder
+  finalized?: Prisma.SortOrder
 }
 
 export type PathSelectionCreateNestedManyWithoutCharacterInput = {
@@ -347,12 +369,14 @@ export type PathSelectionCreateWithoutCharacterInput = {
   id?: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
 }
 
 export type PathSelectionUncheckedCreateWithoutCharacterInput = {
   id?: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
 }
 
 export type PathSelectionCreateOrConnectWithoutCharacterInput = {
@@ -388,30 +412,35 @@ export type PathSelectionScalarWhereInput = {
   characterId?: Prisma.StringFilter<"PathSelection"> | string
   pathName?: Prisma.StringFilter<"PathSelection"> | string
   tier0TalentId?: Prisma.StringNullableFilter<"PathSelection"> | string | null
+  finalized?: Prisma.BoolFilter<"PathSelection"> | boolean
 }
 
 export type PathSelectionCreateManyCharacterInput = {
   id?: string
   pathName: string
   tier0TalentId?: string | null
+  finalized?: boolean
 }
 
 export type PathSelectionUpdateWithoutCharacterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PathSelectionUncheckedUpdateWithoutCharacterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PathSelectionUncheckedUpdateManyWithoutCharacterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pathName?: Prisma.StringFieldUpdateOperationsInput | string
   tier0TalentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalized?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -421,6 +450,7 @@ export type PathSelectionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   characterId?: boolean
   pathName?: boolean
   tier0TalentId?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathSelection"]>
 
@@ -429,6 +459,7 @@ export type PathSelectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   characterId?: boolean
   pathName?: boolean
   tier0TalentId?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathSelection"]>
 
@@ -437,6 +468,7 @@ export type PathSelectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   characterId?: boolean
   pathName?: boolean
   tier0TalentId?: boolean
+  finalized?: boolean
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathSelection"]>
 
@@ -445,9 +477,10 @@ export type PathSelectionSelectScalar = {
   characterId?: boolean
   pathName?: boolean
   tier0TalentId?: boolean
+  finalized?: boolean
 }
 
-export type PathSelectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "pathName" | "tier0TalentId", ExtArgs["result"]["pathSelection"]>
+export type PathSelectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "characterId" | "pathName" | "tier0TalentId" | "finalized", ExtArgs["result"]["pathSelection"]>
 export type PathSelectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
 }
@@ -468,6 +501,7 @@ export type $PathSelectionPayload<ExtArgs extends runtime.Types.Extensions.Inter
     characterId: string
     pathName: string
     tier0TalentId: string | null
+    finalized: boolean
   }, ExtArgs["result"]["pathSelection"]>
   composites: {}
 }
@@ -896,6 +930,7 @@ export interface PathSelectionFieldRefs {
   readonly characterId: Prisma.FieldRef<"PathSelection", 'String'>
   readonly pathName: Prisma.FieldRef<"PathSelection", 'String'>
   readonly tier0TalentId: Prisma.FieldRef<"PathSelection", 'String'>
+  readonly finalized: Prisma.FieldRef<"PathSelection", 'Boolean'>
 }
     
 
