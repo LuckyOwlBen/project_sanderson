@@ -74,8 +74,8 @@ describe('TalentEffectParser', () => {
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
       expect(grants[0].choiceCount).toBe(1);
-      expect(grants[0].expertises).toContain('Light Weaponry');
-      expect(grants[0].expertises).toContain('Heavy Weaponry');
+      expect(grants[0].expertises).toContain('Knives');
+      expect(grants[0].expertises).toContain('Shortbow');
     });
 
     it('should parse "gain an armor expertise" as choice', () => {
@@ -84,7 +84,8 @@ describe('TalentEffectParser', () => {
       
       expect(grants.length).toBe(1);
       expect(grants[0].type).toBe('choice');
-      expect(grants[0].expertises).toContain('Armor Proficiency');
+      expect(grants[0].expertises).toContain('Breastplate');
+      expect(grants[0].expertises).toContain('Leather Armor');
     });
 
     it('should parse slash-separated choices (Artifabrian talent)', () => {
@@ -146,8 +147,8 @@ describe('TalentEffectParser', () => {
       expect(grants.length).toBe(3);
       
       // Check that we have weapon and armor choices
-      const hasWeaponChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Light Weaponry'));
-      const hasArmorChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Armor Proficiency'));
+      const hasWeaponChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Knives'));
+      const hasArmorChoice = grants.some(g => g.type === 'choice' && g.expertises.includes('Leather Armor'));
       const hasMilitaryLife = grants.some(g => g.type === 'single' && g.expertises[0].includes('Military Life'));
       
       expect(hasWeaponChoice).toBe(true);

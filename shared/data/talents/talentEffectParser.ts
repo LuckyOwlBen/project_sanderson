@@ -8,6 +8,7 @@
  */
 
 import { TalentNode, ExpertiseGrant as StructuredExpertiseGrant } from '../../types/talents';
+import { ITEM_EXPERTISES, CRAFTING_EXPERTISES, CULTURAL_EXPERTISES } from '../expertises/allExpertises';
 
 // Legacy interface for backward compatibility
 export interface ExpertiseGrant {
@@ -217,17 +218,17 @@ export class TalentEffectParser {
   private static getExpertisesByCategory(category: string): string[] {
     switch (category.toLowerCase()) {
       case 'weapon':
-        return ['Light Weaponry', 'Heavy Weaponry', 'Special Weapons'];
+        return ITEM_EXPERTISES.filter(e => e.category === 'weapon').map(e => e.name);
       case 'armor':
-        return ['Armor Proficiency'];
+        return ITEM_EXPERTISES.filter(e => e.category === 'armor').map(e => e.name);
       case 'utility':
+        return ITEM_EXPERTISES.filter(e => e.category === 'utility').map(e => e.name);
       case 'crafting':
-        return ['Armor Crafting', 'Weapon Crafting', 'Equipment Crafting', 'Fabrial Crafting'];
+        return CRAFTING_EXPERTISES.map(e => e.name);
       case 'cultural':
-        return ['Alethi', 'Azish', 'Herdazian', 'Iriali', 'Kharbranthian', 'Listener', 
-                'Natan', 'Reshi', 'Shin', 'Thaylen', 'Unkalaki', 'Veden', 'Wayfarer'];
+        return CULTURAL_EXPERTISES.map(e => e.name);
       case 'specialist':
-        return ['Grandbows', 'Shardblades', 'Warhammers', 'Shardplate'];
+        return CRAFTING_EXPERTISES.map(e => e.name);
       default:
         return [];
     }

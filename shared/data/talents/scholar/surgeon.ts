@@ -41,7 +41,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
         {
             id: "anatomical_insight",
             name: "Anatomical Insight",
-            description: "When you hit a target of your size or smaller with an unarmed attack, you can spend 1 focus to apply the Exhausted condition to your target. The penalty applied by this condition equals half your ranks in Medicine, rounded up.",
+            description: "When you hit a target of your size or smaller with an unarmed attack, you can spend 1 focus or one opportunity to apply the Exhausted condition to your target. The penalty applied by this condition equals half your ranks in Medicine, rounded up.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When hitting with unarmed attack against same-size or smaller target",
             prerequisites: [
