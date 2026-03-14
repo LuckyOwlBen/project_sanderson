@@ -12,8 +12,8 @@ export const SCHOLAR_TALENT_TREE: TalentPath = {
     ],
     talentNodes: [
         {
-            id: 'education',
-            name: 'Education',
+            id: 'erudition',
+            name: 'Erudition',
             description: 'Temporarily gain a cultural or utility expertise and a rank in two non-surge cognitive skills. Reassign these after a long rest with library access.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'After a long rest with library access, reassign expertise and skill ranks',

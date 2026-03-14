@@ -8,30 +8,42 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             id: "galvanize",
             name: "Galvanize",
             description: "Once per scene, choose an ally you can influence. They can roll their recovery die (no action required) and recover focus equal to the result.",
-            actionCost: 2, // 2 actions
+            actionCost: 2,
             prerequisites: [
-                { type: 'talent', target: 'rousing_presence' }
+                { type: 'talent', target: 'rousingPresence' },
             ],
             tier: 1,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'recover', amount: 'recovery_die', trigger: 'when target uses this talent', frequency: 'once-per-scene' }
-            ]
+                {
+                    resource: 'focus',
+                    effect: 'recover',
+                    amount: 'recovery_die',
+                    trigger: 'ally targeted by Galvanize',
+                    frequency: 'once-per-scene',
+                },
+            ],
         },
         {
-            id: "applied_motivation",
+            id: "appliedMotivation",
             name: "Applied Motivation",
             description: "When you cause a character to recover focus, they recover additional focus equal to half your ranks in Lore (rounded up).",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'discipline', value: 2 },
-                { type: 'talent', target: 'galvanize' }
+                { type: 'skill', target: 'Discipline', value: 2 },
+                { type: 'talent', target: 'galvanize' },
             ],
             tier: 2,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'recover', amount: 'half_lore_ranks_rounded_up', trigger: 'when you cause focus recovery', frequency: 'unlimited' }
-            ]
+                {
+                    resource: 'focus',
+                    effect: 'recover',
+                    amount: 'ceil(lore.ranks / 2)',
+                    trigger: 'you cause any focus recovery',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
             id: "composed",
@@ -39,87 +51,128 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'galvanize' }
+                { type: 'talent', target: 'galvanize' },
             ],
             tier: 2,
-            bonuses: [],
-            resourceTriggers: [
-                { resource: 'focus', effect: 'recover', amount: 'tier', trigger: 'on talent acquisition', frequency: 'once-per-scene', condition: 'max and current focus increase' },
-                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'when tier increases', frequency: 'unlimited', condition: 'max and current focus increase' }
-            ]
+            bonuses: [
+                {
+                    type: BonusType.RESOURCE,
+                    target: 'focus',
+                    formula: 'tier',
+                    scaling: true,
+                },
+            ],
         },
         {
-            id: "customary_garb",
+            id: "customaryGarb",
             name: "Customary Garb",
             description: "While you're visibly wearing Presentable armor or clothing appropriate for your station, your Physical and Spiritual defenses increase by 2.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'rousing_presence' }
+                { type: 'talent', target: 'rousingPresence' },
             ],
             tier: 1,
             bonuses: [
-                { type: BonusType.DEFENSE, target: 'physical', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' },
-                { type: BonusType.DEFENSE, target: 'spiritual', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' }
-            ]
+                { type: BonusType.DEFENSE, target: 'Physical', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' },
+                { type: BonusType.DEFENSE, target: 'Spiritual', value: 2, condition: 'while wearing Presentable armor or appropriate clothing' },
+            ],
         },
         {
-            id: "devoted_presence",
+            id: "devotedPresence",
             name: "Devoted Presence",
             description: "When you use your Rousing Presence on one or more allies, you can spend 1 focus per target to remove any number of the following conditions from them: Prone, Slowed, Stunned, and Surprised.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Spend 1 focus per target to remove Prone, Slowed, Stunned, or Surprised conditions when using Rousing Presence.",
+            specialActivation: "When using Rousing Presence, spend 1 focus per target to remove Prone, Slowed, Stunned, or Surprised.",
             prerequisites: [
-                { type: 'skill', target: 'lore', value: 1 },
-                { type: 'talent', target: 'customary_garb' }
+                { type: 'skill', target: 'Lore', value: 1 },
+                { type: 'talent', target: 'customaryGarb' },
             ],
             tier: 2,
             bonuses: [],
-        },
-        {
-            id: "inspired_zeal",
-            name: "Inspired Zeal",
-            description: "After an ally you can sense uses their Determined condition to add an Opportunity to a test, you can choose a number of other allies you can influence up to your ranks in Discipline. Each target recovers 1 focus (no action required).",
-            actionCost: ActionCostCode.Special,
-            specialActivation: "After ally uses Determined condition for Opportunity, choose up to Discipline rank allies to recover 1 focus each",
-            prerequisites: [
-                { type: 'skill', target: 'discipline', value: 3 },
-                { type: 'talent', target: 'applied_motivation', operator: 'OR' },
-                { type: 'talent', target: 'stalwart_presence', operator: 'OR' }
-            ],
-            tier: 4,
-            bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'after allied Determined condition is used', frequency: 'unlimited', condition: 'up to Discipline rank allies' }
-            ]
-        },
-        {
-            id: "sage_counsel",
-            name: "Sage Counsel",
-            description: "After you use the Aid reaction on an ally, spend 1 focus to grant that ally the benefits of your Rousing Presence (no action required).",
-            actionCost: ActionCostCode.Special,
-            specialActivation: "After using Aid reaction, spend 1 focus to grant ally Rousing Presence benefits",
-            prerequisites: [
-                { type: 'skill', target: 'lore', value: 3 },
-                { type: 'talent', target: 'stalwart_presence' }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'remove conditions from each target via Devoted Presence',
+                    frequency: 'unlimited',
+                    condition: 'cost is per target',
+                },
             ],
-            tier: 4,
-            bonuses: [],
+            conditionEffects: [
+                { type: 'ignore', condition: 'Prone', trigger: 'when using Devoted Presence', target: 'target' },
+                { type: 'ignore', condition: 'Slowed', trigger: 'when using Devoted Presence', target: 'target' },
+                { type: 'ignore', condition: 'Stunned', trigger: 'when using Devoted Presence', target: 'target' },
+                { type: 'ignore', condition: 'Surprised', trigger: 'when using Devoted Presence', target: 'target' },
+            ],
         },
         {
-            id: "stalwart_presence",
+            id: "stalwartPresence",
             name: "Stalwart Presence",
             description: "When you use your Rousing Presence, you can spend 1 focus to increase one of the target's defenses (your choice) by 2 until the end of the next round.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "When using Rousing Presence, spend 1 focus to increase target's defense by 2 until end of next round",
+            specialActivation: "When using Rousing Presence, spend 1 focus to increase a target's defense by 2 until end of next round.",
             prerequisites: [
-                { type: 'skill', target: 'discipline', value: 2 },
-                { type: 'talent', target: 'devoted_presence' }
+                { type: 'skill', target: 'Discipline', value: 2 },
+                { type: 'talent', target: 'devotedPresence' },
             ],
             tier: 3,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using Rousing Presence', frequency: 'unlimited', condition: 'to increase a target defense by 2 until end of next round' }
-            ]
-        }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'use Rousing Presence — boost target defense by 2 until end of next round',
+                    frequency: 'unlimited',
+                },
+            ],
+        },
+        {
+            id: "inspiredZeal",
+            name: "Inspired Zeal",
+            description: "After an ally you can sense uses their Determined condition to add an Opportunity to a test, you can choose a number of other allies you can influence up to your ranks in Discipline. Each target recovers 1 focus (no action required).",
+            actionCost: ActionCostCode.Special,
+            specialActivation: "After an ally uses Determined for an Opportunity, choose up to Discipline-ranks allies — each recovers 1 focus.",
+            prerequisites: [
+                { type: 'skill', target: 'Discipline', value: 3 },
+                { type: 'talent', target: 'appliedMotivation', operator: 'OR' },
+                { type: 'talent', target: 'stalwartPresence', operator: 'OR' },
+            ],
+            tier: 4,
+            bonuses: [],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'recover',
+                    amount: 1,
+                    trigger: 'ally uses Determined condition to add an Opportunity',
+                    frequency: 'unlimited',
+                    condition: 'affects up to Discipline-ranks allies',
+                },
+            ],
+        },
+        {
+            id: "sageCounsel",
+            name: "Sage Counsel",
+            description: "After you use the Aid reaction on an ally, spend 1 focus to grant that ally the benefits of your Rousing Presence (no action required).",
+            actionCost: ActionCostCode.Special,
+            specialActivation: "After using Aid reaction, spend 1 focus to grant ally Rousing Presence benefits.",
+            prerequisites: [
+                { type: 'skill', target: 'Lore', value: 3 },
+                { type: 'talent', target: 'stalwartPresence' },
+            ],
+            tier: 4,
+            bonuses: [],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'after using Aid reaction on an ally',
+                    frequency: 'unlimited',
+                },
+            ],
+        },
     ],
 }

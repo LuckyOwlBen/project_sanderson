@@ -7,6 +7,7 @@ import {
   getAvailableBonusClasses,
   finalizeTalentsByCharacterId
 } from '../services/talents-service';
+import { addTalentGrantedExpertises } from '../services/expertise-service';
 import { SocketBroadcaster } from '../socket-broadcaster';
 
 export async function getTalents(req: Request, res: Response): Promise<void> {
@@ -179,7 +180,12 @@ export async function finalizeTalents(req: Request, res: Response, broadcaster: 
     }
 
     const updated = await setTalentsByCharacterId(id, talents);
-    
+
+    // If talent unlocks included expertise choices (fixed or user-selected), persist them
+    if (Array.isArray(talents.expertiseChoices) && talents.expertiseChoices.length > 0) {
+      await addTalentGrantedExpertises(id, talents.expertiseChoices);
+    }
+
     // Broadcast character update via WebSocket
     broadcaster.scheduleCharacterUpdate(id);
 

@@ -12,7 +12,7 @@ export const LEADER_TALENT_TREE: TalentPath = {
     ],
     talentNodes: [
         {
-            id: "decisive_command",
+            id: "decisiveCommand",
             name: "Decisive Command",
             description: "spend 1 focus to give an ally within 20 feet a d4 command die. They can add it to one die roll on their next test.",
             actionCost: 1,

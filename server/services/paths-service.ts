@@ -9,11 +9,11 @@ const pathsRepository = new PathsModuleRepository();
 
 // Mapping of path types to their tier 0 talents
 const PATH_TIER0_TALENTS: Record<string, string> = {
-  'warrior': 'vigilant_stance',
-  'scholar': 'education',
-  'hunter': 'seek_quarry',
-  'leader': 'decisive_command',
-  'envoy': 'rousing_presence',
+  'warrior': 'vigilantStance',
+  'scholar': 'erudition',
+  'hunter': 'seekQuarry',
+  'leader': 'decisiveCommand',
+  'envoy': 'rousingPresence  ',
   'agent': 'opportunist'
 };
 

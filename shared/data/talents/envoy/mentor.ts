@@ -5,89 +5,161 @@ export const MENTOR_TALENT_TREE: TalentTree = {
     pathName: 'Mentor',
     nodes: [
         {
-            id: "practical_demonstration",
+            id: "practicalDemonstration",
             name: "Practical Demonstration",
             description: "After you succeed on a test to attack or Gain Advantage, you can use your Rousing Presence as a free action.",
             actionCost: ActionCostCode.Free,
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 1 },
-                { type: 'talent', target: 'rousing_presence' }
+                { type: 'skill', target: 'Leadership', value: 1 },
+                { type: 'talent', target: 'rousingPresence' },
             ],
             tier: 1,
             bonuses: [],
             actionGrants: [
-                { type: 'free-action', count: 1, restrictedTo: 'Rousing Presence', frequency: 'unlimited' }
-            ]
+                {
+                    type: 'free-action',
+                    count: 1,
+                    restrictedTo: 'Rousing Presence',
+                    timing: 'always',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
-            id: "sound_advice",
+            id: "soundAdvice",
             name: "Sound Advice",
             description: "After an ally you can influence fails a skill test, you can spend 1 focus to use your Rousing Presence on them as a free action.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
-                { type: 'talent', target: 'rousing_presence' }
+                { type: 'talent', target: 'rousingPresence' },
             ],
             tier: 1,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'after allied skill test failure', frequency: 'unlimited' }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'ally fails a skill test — use Rousing Presence on them',
+                    frequency: 'unlimited',
+                },
             ],
             actionGrants: [
-                { type: 'free-action', count: 1, restrictedTo: 'Rousing Presence', frequency: 'unlimited' }
-            ]
+                {
+                    type: 'free-action',
+                    count: 1,
+                    restrictedTo: 'Rousing Presence on the failed ally',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
-            id: "lessons_in_patience",
+            id: "lessonsInPatience",
             name: "Lessons in Patience",
-            description: "After you use your Rousing Presence, the target recovers 1 focus. Additionally, when you acquire this talent, gain a utility expertise in Motivational Speech.",
+            description: "After you use your Rousing Presence, the target recovers 1 focus. Additionally, when you acquire this talent, gain a Motivational Speech utility expertise.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'discipline', value: 2 },
-                { type: 'talent', target: 'sound_advice' }
+                { type: 'skill', target: 'Discipline', value: 2 },
+                { type: 'talent', target: 'soundAdvice' },
             ],
             tier: 2,
             bonuses: [],
             expertiseGrants: [
-                { type: 'fixed', expertises: ['Motivational Speech'] }
+                { type: 'fixed', expertises: ['Motivational Speech'] },
             ],
-            otherEffects: ["After using Rousing Presence, target recovers 1 focus", "Gain Motivational Speech utility expertise"]
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'recover',
+                    amount: 1,
+                    trigger: 'you use Rousing Presence',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
             id: "mighty",
             name: "Mighty",
-            description: "When you hit with a weapon or unarmed attack, for each action you used on that attack's action, increase the damage you deal by 1 + your tier.",
+            description: "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'practical_demonstration' }
+                { type: 'talent', target: 'practicalDemonstration' },
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["When hitting with weapon/unarmed attack, each action spent increases damage by 1 + tier"]
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'special',
+                specialMechanics: [
+                    'On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack.',
+                ],
+            },
         },
         {
-            id: "instill_confidence",
+            id: "instillConfidence",
             name: "Instill Confidence",
             description: "When you use your Rousing Presence, instead of the target becoming Determined, you can make them Focused until the end of the scene.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Requires having a companion. When you use your Rousing Presence, instead of the target becoming Determined, you can make them Focused until the end of the scene.",
+            specialActivation: "When using Rousing Presence, make the target Focused until end of scene instead of Determined.",
             prerequisites: [
-                { type: 'talent', target: 'lessons_in_patience' }
+                { type: 'talent', target: 'lessonsInPatience' },
             ],
             tier: 3,
             bonuses: [],
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'Focused',
+                    trigger: 'use Rousing Presence with Instill Confidence',
+                    target: 'target',
+                    duration: 'end of scene',
+                    details: 'Replaces the Determined condition.',
+                },
+            ],
         },
         {
-            id: "guiding_oration",
+            id: "guidingOration",
             name: "Guiding Oration",
             description: "After you succeed on a test to Gain Advantage, you can choose an ally you can influence within 10 feet of your target. Until the end of their next turn, that ally gains an advantage on their next test against your target.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 2 },
-                { type: 'talent', target: 'mighty' }
+                { type: 'skill', target: 'Leadership', value: 2 },
+                { type: 'talent', target: 'mighty' },
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["After successful Gain Advantage test, ally within 10 feet gains advantage on next test against target"]
+            grantsAdvantage: ['next test against Gain Advantage target for a chosen ally within 10 feet'],
+        },
+        {
+            id: "rallyingShout",
+            name: "Rallying Shout",
+            description: "When you use your Rousing Presence, you can target an Unconscious ally you can sense. When you do, the target is no longer Unconscious, and if they have 0 health, they roll their recovery die and recover health equal to the result + your ranks in Leadership.",
+            actionCost: ActionCostCode.Passive,
+            prerequisites: [
+                { type: 'skill', target: 'Leadership', value: 3 },
+                { type: 'talent', target: 'guidingOration' },
+            ],
+            tier: 3,
+            bonuses: [],
+            conditionEffects: [
+                {
+                    type: 'ignore',
+                    condition: 'Unconscious',
+                    trigger: 'targeted by Rousing Presence with Rallying Shout',
+                    target: 'target',
+                },
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'health',
+                    effect: 'recover',
+                    amount: 'recovery_die + leadership.ranks',
+                    trigger: 'target of Rallying Shout has 0 health',
+                    frequency: 'unlimited',
+                    condition: 'only when target has 0 health',
+                },
+            ],
         },
         {
             id: "foresight",
@@ -95,28 +167,15 @@ export const MENTOR_TALENT_TREE: TalentTree = {
             description: "At the beginning of combat and at the start of each of your turns, gain an additional reaction.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'discipline', value: 3 },
-                { type: 'talent', target: 'instill_confidence' }
+                { type: 'skill', target: 'Discipline', value: 3 },
+                { type: 'talent', target: 'instillConfidence' },
             ],
             tier: 4,
             bonuses: [],
             actionGrants: [
                 { type: 'reaction', count: 1, timing: 'start-of-combat', frequency: 'unlimited' },
-                { type: 'reaction', count: 1, timing: 'start-of-turn', frequency: 'unlimited' }
-            ]
-        },
-        {
-            id: "rallying_shout",
-            name: "Rallying Shout",
-            description: "When you use your Rousing Presence, you can target an Unconscious ally you can sense. When you do, the target is no longer Unconscious, and if they have 0 health, they roll their recovery die and recover health equal to the result + your ranks in Leadership.",
-            actionCost: ActionCostCode.Passive,
-            prerequisites: [
-                { type: 'skill', target: 'leadership', value: 3 },
-                { type: 'talent', target: 'guiding_oration' }
+                { type: 'reaction', count: 1, timing: 'start-of-turn', frequency: 'unlimited' },
             ],
-            tier: 3,
-            bonuses: [],
-            otherEffects: ["Can target Unconscious ally with Rousing Presence", "If at 0 health, ally rolls recovery die and recovers health equal to result + Leadership ranks"]
-        }
+        },
     ],
 }

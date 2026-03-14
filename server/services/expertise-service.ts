@@ -181,6 +181,34 @@ export async function setExpertiseByCharacterId(
 }
 
 /**
+ * Add talent-granted expertises to a character's existing selection.
+ * Bypasses point validation since talent grants are free (not drawing from Intellect).
+ * Skips any expertise that the character already has (by name).
+ */
+export async function addTalentGrantedExpertises(
+  characterId: string,
+  expertiseChoices: Array<{ talentId: string; choices: string[] }>
+): Promise<void> {
+  const existing = await getSelectedExpertises(characterId);
+  const existingNames = new Set(existing.map(e => e.name));
+
+  const toAdd: ExpertiseRecord[] = [];
+  for (const { talentId, choices } of expertiseChoices) {
+    for (const name of choices) {
+      if (!existingNames.has(name)) {
+        toAdd.push({ name, source: 'talent', sourceId: `talent:${talentId}` });
+        existingNames.add(name);
+      }
+    }
+  }
+
+  if (toAdd.length > 0) {
+    await replaceSelectedExpertises(characterId, [...existing, ...toAdd]);
+    console.log(`[ExpertiseService] Added talent-granted expertises for character ${characterId}:`, toAdd.map(e => e.name));
+  }
+}
+
+/**
  * Finalize expertises for a character
  * Validates all points are spent, moves spent points to total, and locks from editing
  * 

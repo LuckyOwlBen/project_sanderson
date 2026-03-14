@@ -12,7 +12,7 @@ export const WARRIOR_TALENT_TREE: TalentPath = {
     ],
     talentNodes: [
         {
-            id: 'vigilant_stance',
+            id: 'vigilantStance',
             name: 'Vigilant Stance',
             description: 'Enter Vigilant Stance: Reduce the focus cost of Dodge and Reactive Strike by 1, and you can enter other stances as a reaction.',
             actionCost: 1,

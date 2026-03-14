@@ -5,36 +5,44 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
     pathName: 'Strategist',
     nodes: [
         {
-            id: "mind_and_body",
+            id: "mindAndBody",
             name: "Mind and Body",
             description: "When you acquire this talent, your Erudition talent grants you an additional skill, and you can use Erudition to choose physical skills that aren't surges. Additionally, gain one weapon expertise of your choice.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'education' }
+                { type: 'talent', target: 'erudition' },
             ],
             tier: 1,
             bonuses: [],
             expertiseGrants: [
-                { type: 'choice', options: ['weapon'] }
+                { type: 'category', choiceCount: 1, category: 'weapon' },
             ],
-            otherEffects: ["Erudition grants +1 skill", "Erudition can select physical skills (non-surge)"]
+            otherEffects: [
+                "Erudition grants +1 additional skill.",
+                "Erudition can select physical skills (non-surge).",
+            ],
         },
         {
             id: "strategize",
             name: "Strategize",
             description: "After you succeed on a test to Gain Advantage using a skill gained from your Erudition, you can choose an ally you can influence. That ally gains the benefits of your Gain Advantage action instead of you. When you use this talent, you can also spend 2 focus to prevent the target of your Gain Advantage from using reactions against the ally you chose until the end of your next turn.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "After succeeding on Gain Advantage with Erudition skill",
+            specialActivation: "After succeeding on a Gain Advantage test using an Erudition skill, the benefit goes to a chosen ally instead of you.",
             prerequisites: [
-                { type: 'skill', target: 'deduction', value: 1 },
-                { type: 'talent', target: 'education' }
+                { type: 'skill', target: 'Deduction', value: 1 },
+                { type: 'talent', target: 'erudition' },
             ],
             tier: 1,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this talent', frequency: 'unlimited', condition: 'prevent target reactions against chosen ally' }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'using Strategize — prevent the Gain Advantage target from using reactions against the chosen ally until end of your next turn',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: ["After Gain Advantage with Erudition skill, ally gains benefit instead of you"]
         },
         {
             id: "composed",
@@ -42,58 +50,55 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, your maximum and current focus increase by a number equal to your tier. When your tier increases by 1, your maximum and current focus do as well.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'strategize' }
+                { type: 'talent', target: 'strategize' },
             ],
             tier: 2,
-            bonuses: [],
-            resourceTriggers: [
-                { resource: 'focus', effect: 'recover', amount: 'tier', trigger: 'on talent acquisition', frequency: 'once-per-scene', condition: 'max and current focus increase' },
-                { resource: 'focus', effect: 'recover', amount: 1, trigger: 'when tier increases', frequency: 'unlimited', condition: 'max and current focus increase' }
-            ]
+            bonuses: [
+                { type: BonusType.RESOURCE, target: 'focus', formula: 'tier', scaling: true },
+            ],
         },
         {
-            id: "know_your_moment",
+            id: "knowYourMoment",
             name: "Know Your Moment",
             description: "After the beginning of each round, each of your defenses increases by 2 until the start of your turn.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'deduction', value: 2 },
-                { type: 'talent', target: 'mind_and_body' }
+                { type: 'skill', target: 'Deduction', value: 2 },
+                { type: 'talent', target: 'mindAndBody' },
             ],
             tier: 2,
             bonuses: [
-                { type: BonusType.DEFENSE, target: 'physical', value: 2, condition: 'after round beginning until start of your turn' },
-                { type: BonusType.DEFENSE, target: 'cognitive', value: 2, condition: 'after round beginning until start of your turn' },
-                { type: BonusType.DEFENSE, target: 'spiritual', value: 2, condition: 'after round beginning until start of your turn' }
+                { type: BonusType.DEFENSE, target: 'Physical', value: 2, condition: 'after round beginning until start of your turn' },
+                { type: BonusType.DEFENSE, target: 'Cognitive', value: 2, condition: 'after round beginning until start of your turn' },
+                { type: BonusType.DEFENSE, target: 'Spiritual', value: 2, condition: 'after round beginning until start of your turn' },
             ],
-            otherEffects: []
         },
         {
-            id: "deep_contemplation",
+            id: "deepContemplation",
             name: "Deep Contemplation",
             description: "Reassign up to 2 of the skills and expertises gained from your Erudition.",
             actionCost: 2,
             prerequisites: [
-                { type: 'skill', target: 'lore', value: 2 },
-                { type: 'talent', target: 'composed' }
+                { type: 'skill', target: 'Lore', value: 2 },
+                { type: 'talent', target: 'composed' },
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Reassign up to 2 skills/expertises from Erudition"]
+            otherEffects: ["Reassign up to 2 skills or expertises gained from Erudition."],
         },
         {
-            id: "keen_insight",
+            id: "keenInsight",
             name: "Keen Insight",
             description: "After you succeed on a test to Gain Advantage, you exploit one of your target's crucial traits, strengths, or flaws. Unless the target resists your influence, they gain a disadvantage on their next test during this encounter.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'deep_contemplation' }
+                { type: 'talent', target: 'deepContemplation' },
             ],
             tier: 3,
             bonuses: [],
-            conditionEffects: [
-                { type: 'apply', condition: 'disadvantage', trigger: 'after successful Gain Advantage', target: 'target', duration: 'until end of encounter', details: 'on next test unless resisted' }
-            ]
+            grantsDisadvantage: [
+                "After a successful Gain Advantage test, target has disadvantage on their next test this encounter (unless they resist your influence).",
+            ],
         },
         {
             id: "contingency",
@@ -101,37 +106,50 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
             description: "After an ally you can influence within 20 feet of you rolls a Complication, you can use this reaction and spend 2 focus to remove a Complication from their test.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
-                { type: 'skill', target: 'lore', value: 3 },
-                { type: 'talent', target: 'composed' }
+                { type: 'skill', target: 'Lore', value: 3 },
+                { type: 'talent', target: 'composed' },
             ],
             tier: 4,
             bonuses: [],
-            actionGrants: [
-                { type: 'reaction', count: 1, restrictedTo: 'after ally rolls Complication' }
-            ],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this reaction', frequency: 'unlimited' }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'triggering Contingency — remove a Complication from an influenced ally\'s test (ally must be within 20 feet)',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: ["Remove Complication from ally's test"]
         },
         {
-            id: "turning_point",
+            id: "turningPoint",
             name: "Turning Point",
             description: "Once per scene, you can spend 2 focus to find a weakness in an opposing group's strategy. Make a Deduction test against the Cognitive defense of the top-ranking enemy leader in this scene; to target this leader, you must be able to sense them. If you took a slow turn, you gain an advantage on this test. On a success, you and your allies you can influence gain an additional action on your next turns.",
             actionCost: 2,
             prerequisites: [
-                { type: 'skill', target: 'deduction', value: 3 },
-                { type: 'talent', target: 'contingency' }
+                { type: 'skill', target: 'Deduction', value: 3 },
+                { type: 'talent', target: 'contingency' },
             ],
             tier: 4,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when using this talent', frequency: 'once-per-scene' }
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'activate Turning Point',
+                    frequency: 'once-per-scene',
+                },
             ],
-            actionGrants: [
-                { type: 'action', count: 1, restrictedTo: 'you and influenced allies', frequency: 'once-per-scene' }
-            ],
-            otherEffects: ["Test Deduction vs enemy leader's Cognitive defense", "Advantage if took slow turn"]
-        }
+            attackDefinition: {
+                targetDefense: 'Cognitive',
+                range: 'special',
+                specialMechanics: [
+                    "Test Deduction vs. Cognitive defense of the top-ranking enemy leader you can sense.",
+                    "If you took a slow turn, gain advantage on this test.",
+                    "On success: you and all influenced allies gain 1 additional action on your next turns.",
+                ],
+            },
+        },
     ],
 }

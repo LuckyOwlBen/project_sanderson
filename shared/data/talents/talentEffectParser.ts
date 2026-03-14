@@ -52,10 +52,13 @@ export class TalentEffectParser {
           expertises: grant.expertises || [],
         };
       } else if (grant.type === 'choice') {
-        // Choice grants
+        // Choice grants — if no options list but a category is set, expand by category
+        const expertises = (grant.options && grant.options.length > 0)
+          ? grant.options
+          : this.getExpertisesByCategory(grant.category || '');
         return {
           type: 'choice',
-          expertises: grant.options || [],
+          expertises,
           choiceCount: grant.choiceCount || 1
         };
       } else if (grant.type === 'category') {

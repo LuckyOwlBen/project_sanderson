@@ -12,7 +12,7 @@ export const ENVOY_HEROIC_PATH: TalentPath = {
     ],
     talentNodes: [
         {
-            id: 'rousing_presence',
+            id: 'rousingPresence',
             name: 'Rousing Presence',
             description: 'An ally becomes Determined until end of scene',
             actionCost: 1, // 1 action

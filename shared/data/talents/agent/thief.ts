@@ -1,4 +1,5 @@
-import { TalentTree } from "../../../types/talents";
+import { TalentTree, ActionCostCode } from "../../../types/talents";
+import { BonusType } from "../../../types/bonuses";
 
 export const THIEF_TALENT_TREE: TalentTree = {
   pathName: 'Thief',
@@ -7,31 +8,62 @@ export const THIEF_TALENT_TREE: TalentTree = {
         id: 'riskyBehavior',
         name: 'Risky Behavior',
         description: 'Spend 1 focus to raise the stakes on your test.',
-        actionCost: -1, // Special
+        actionCost: ActionCostCode.Special,
         specialActivation: 'Spend 1 focus to raise the stakes on your test.',
         prerequisites: [
-            { type: 'skill', target: 'Insight', value: 2}
+            { type: 'skill', target: 'Insight', value: 2 },
         ],
         tier: 1,
         bonuses: [],
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 1,
+                trigger: 'raise the stakes on a test',
+                frequency: 'unlimited',
+            },
+        ],
     },
     {
         id: 'cheapShot',
         name: 'Cheap Shot',
         description: 'Spend 1 focus to make an unarmed attack with Thievery vs Cognitive, raising the stakes. On a hit, the target is stunned.',
-        actionCost: 1, //1 action
+        actionCost: 1,
         prerequisites: [],
         tier: 1,
         bonuses: [],
-        otherEffects: [
-            'Spend 1 focus to make an unarmed attack with Thievery vs Cognitive, raising the stakes. On a hit, the target is stunned.'
-        ]
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 1,
+                trigger: 'activate Cheap Shot',
+                frequency: 'unlimited',
+            },
+        ],
+        attackDefinition: {
+            weaponType: 'unarmed',
+            targetDefense: 'Cognitive',
+            range: 'melee',
+            specialMechanics: [
+                'Raises the stakes on the attack.',
+            ],
+        },
+        conditionEffects: [
+            {
+                type: 'apply',
+                condition: 'Stunned',
+                trigger: 'hit with Cheap Shot',
+                target: 'target',
+            },
+        ],
     },
     {
         id: 'doubleDown',
         name: 'Double Down',
         description: 'You can reroll again with Opportunist, but on a complication, you lose 2 focus.',
-        actionCost: -2, // Special
+        actionCost: ActionCostCode.Special,
         specialActivation: 'You can reroll again with Opportunist, but on a complication, you lose 2 focus.',
         prerequisites: [
             { type: 'talent', target: 'opportunist' },
@@ -39,74 +71,152 @@ export const THIEF_TALENT_TREE: TalentTree = {
         ],
         tier: 2,
         bonuses: [],
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 2,
+                trigger: 'complication on Double Down reroll',
+                frequency: 'unlimited',
+                condition: 'only on complication',
+            },
+        ],
     },
     {
         id: 'surefooted',
         name: 'Surefooted',
-        description: 'Your movement increases by 10. Reduce Damage from falling and dnagerous terrain by twice your tier.',
-        actionCost: Infinity, // Passive
+        description: 'Your movement increases by 10. Reduce damage from falling and dangerous terrain by twice your tier.',
+        actionCost: ActionCostCode.Passive,
         prerequisites: [
             { type: 'talent', target: 'cheapShot' },
         ],
         tier: 2,
         bonuses: [],
+        movementEffects: [
+            {
+                type: 'increase-rate',
+                amount: 10,
+                timing: 'always',
+                movementType: 'walk',
+            },
+        ],
+        otherEffects: [
+            'Reduce damage from falling and dangerous terrain by twice your tier.',
+        ],
     },
     {
         id: 'underworldContacts',
         name: 'Underworld Contacts',
         description: 'Gain Criminal Groups expertise. Spend 2 focus to add an opportunity to a social test against criminals.',
-        actionCost: -2, // Special
+        actionCost: ActionCostCode.Special,
         specialActivation: 'Spend 2 focus to add an opportunity to a social test against criminals.',
         prerequisites: [
-            { type: 'talent', target: 'doubleDown'},
+            { type: 'talent', target: 'doubleDown' },
         ],
         tier: 3,
-        bonuses: [],        
+        bonuses: [],
+        expertiseGrants: [
+            {
+                type: 'fixed',
+                expertises: ['Criminal Groups'],
+            },
+        ],
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 2,
+                trigger: 'add an opportunity to a social test against criminals',
+                frequency: 'unlimited',
+            },
+        ],
     },
     {
         id: 'shadowStep',
         name: 'Shadow Step',
-        description: 'After you Disengage, spend 2 focus to test Thievery vs each enemy\'s Cognitive to hide from them. You gain an advantage if in cover or obscured.',
-        actionCost: 0, // Free
+        description: "After you Disengage, spend 2 focus to test Thievery vs each enemy's Cognitive to hide from them. You gain an advantage if in cover or obscured.",
+        actionCost: ActionCostCode.Free,
         prerequisites: [
             { type: 'talent', target: 'surefooted' },
-            {type: 'skill', target: 'Thievery', value: 3},
+            { type: 'skill', target: 'Thievery', value: 3 },
         ],
         tier: 3,
         bonuses: [],
-        otherEffects: [
-            'After you Disengage, spend 2 focus to test Thievery vs each enemy\'s Cognitive to hide from them. You gain an advantage if in cover or obscured.'
-        ]
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 2,
+                trigger: 'activate Shadow Step after Disengaging',
+                frequency: 'unlimited',
+            },
+        ],
+        attackDefinition: {
+            targetDefense: 'Cognitive',
+            range: 'special',
+            specialMechanics: [
+                'Only usable after you Disengage.',
+                'Test Thievery vs each enemy\'s Cognitive to hide from them.',
+            ],
+        },
+        grantsAdvantage: ['Shadow Step Thievery test while in cover or obscured'],
     },
     {
         id: 'fastTalker',
         name: 'Fast Talker',
         description: 'Spend 2 focus to gain two actions for spiritual tests with use a skill, gain advantage, or an agent talent.',
-        actionCost: 0, // Free
+        actionCost: ActionCostCode.Free,
         prerequisites: [
-            { type: 'talent', target: 'doubleDown'},
-            { type: 'skill', target: 'Insight', value: 3},
+            { type: 'talent', target: 'doubleDown' },
+            { type: 'skill', target: 'Insight', value: 3 },
         ],
         tier: 4,
         bonuses: [],
-        otherEffects: [
-            'Spend 2 focus to gain two actions for spiritual tests with use a skill, gain advantage, or an agent talent.'
-        ]
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 2,
+                trigger: 'activate Fast Talker',
+                frequency: 'once-per-round',
+            },
+        ],
+        actionGrants: [
+            {
+                type: 'action',
+                count: 2,
+                restrictedTo: 'spiritual tests, use a skill, gain advantage, or an agent talent',
+                frequency: 'once-per-round',
+            },
+        ],
     },
     {
-        id: 'trickster\'shand',
-        name: 'Trickster\'s Hand',
+        id: 'trickstersHand',
+        name: "Trickster's Hand",
         description: 'Spend 2 focus to gain two actions for physical tests with Use a Skill, gain advantage, or an agent talent.',
-        actionCost: 0, // Free
+        actionCost: ActionCostCode.Free,
         prerequisites: [
             { type: 'talent', target: 'surefooted' },
         ],
         tier: 4,
         bonuses: [],
-        otherEffects: [
-            'Spend 2 focus to gain two actions for physical tests with Use a Skill, gain advantage, or an agent talent.'
-        ]
-    }
-
+        resourceTriggers: [
+            {
+                resource: 'focus',
+                effect: 'spend',
+                amount: 2,
+                trigger: "activate Trickster's Hand",
+                frequency: 'once-per-round',
+            },
+        ],
+        actionGrants: [
+            {
+                type: 'action',
+                count: 2,
+                restrictedTo: 'physical tests, use a skill, gain advantage, or an agent talent',
+                frequency: 'once-per-round',
+            },
+        ],
+    },
   ],
 }

@@ -1,5 +1,5 @@
 import { BonusType } from "../../../types/bonuses";
-import { TalentTree } from "../../../types/talents";
+import { TalentTree, ActionCostCode } from "../../../types/talents";
 
 export const SPY_TALENT_TREE: TalentTree = {
     pathName: "Spy",
@@ -8,7 +8,7 @@ export const SPY_TALENT_TREE: TalentTree = {
             id: "sureOutcome",
             name: "Sure Outcome",
             description: "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",
-            actionCost: -2, // Special
+            actionCost: ActionCostCode.Special,
             specialActivation: "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",
             prerequisites: [
                 { type: 'talent', target: 'opportunist' },
@@ -16,26 +16,48 @@ export const SPY_TALENT_TREE: TalentTree = {
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity."],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'use Sure Outcome on an Opportunist result',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
-            id: "plasibleExcuse",
+            id: "plausibleExcuse",
             name: "Plausible Excuse",
             description: "Gain Sleight of Hand expertise. When discovered skulking, spend 2 focus to feign innocence.",
-            actionCost: -1, // Reaction
+            actionCost: ActionCostCode.Reaction,
             prerequisites: [
                 { type: 'talent', target: 'opportunist' },
                 { type: 'skill', target: 'Deception', value: 1 },
             ],
             tier: 1,
             bonuses: [],
-            otherEffects: ["Gain Sleight of Hand expertise. When discovered skulking, spend 2 focus to feign innocence."],
+            expertiseGrants: [
+                {
+                    type: 'fixed',
+                    expertises: ['Sleight of Hand'],
+                },
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'discovered skulking — feign innocence',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
             id: "collected",
             name: "Collected",
             description: "Increase your Cognitive and Spiritual defenses by 2.",
-            actionCost: Infinity, // Passive
+            actionCost: ActionCostCode.Passive,
             prerequisites: [
                 { type: 'talent', target: 'sureOutcome' },
             ],
@@ -49,65 +71,117 @@ export const SPY_TALENT_TREE: TalentTree = {
             id: "coverStory",
             name: "Cover Story",
             description: "Gain a false identity and a relevant cultural expertise.",
-            actionCost: Infinity, // Passive
+            actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'plasibleExcuse'},
-
+                { type: 'talent', target: 'plausibleExcuse' },
             ],
             tier: 2,
             bonuses: [],
-            otherEffects: ["Gain a false identity and a relevant cultural expertise."],
+            expertiseGrants: [
+                {
+                    type: 'category',
+                    choiceCount: 1,
+                    category: 'cultural',
+                },
+            ],
+            otherEffects: ["Gain a false identity in addition to the cultural expertise."],
         },
         {
             id: "subtleTakedown",
             name: "Subtle Takedown",
             description: "Make an unarmed attack with Insight vs. an unsuspecting target's Cognitive, raising the stakes. On a hit, they can't communicate.",
-            actionCost: 2, // 2 actions
+            actionCost: 2,
             prerequisites: [
                 { type: 'talent', target: 'coverStory' },
                 { type: 'skill', target: 'Insight', value: 3 },
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["Make an unarmed attack with Insight vs. an unsuspecting target's Cognitive, raising the stakes. On a hit, they can't communicate."],
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Cognitive',
+                range: 'melee',
+                specialMechanics: [
+                    "Only usable against an unsuspecting target.",
+                    "Raises the stakes on the attack.",
+                    "On a hit, the target cannot communicate.",
+                ],
+            },
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'Cannot Communicate',
+                    trigger: 'hit with Subtle Takedown',
+                    target: 'target',
+                },
+            ],
         },
         {
             id: "mighty",
             name: "Mighty",
             description: "When you hit with a weapon or unarmed attack, for each action point spent deal extra damage equal to 1 + your tier.",
-            actionCost: Infinity, // Passive
+            actionCost: ActionCostCode.Passive,
             prerequisites: [
                 { type: 'talent', target: 'coverStory' },
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ["When you hit with a weapon or unarmed attack, for each action point spent deal extra damage equal to 1 + your tier."],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'special',
+                specialMechanics: [
+                    "On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack.",
+                ],
+            },
         },
         {
             id: "highSocietyContacts",
             name: "High Society Contacts",
-            description: "Gain High Society expertise. Spend 2 focus to add a opportunity to a test to interact in high society.",
-            actionCost: -2, // Special
-            specialActivation: "Spend 2 focus to add a opportunity to a test to interact in high society.",
+            description: "Gain High Society expertise. Spend 2 focus to add an opportunity to a test to interact in high society.",
+            actionCost: ActionCostCode.Special,
+            specialActivation: "Spend 2 focus to add an opportunity to a test to interact in high society.",
             prerequisites: [
-                {type: 'talent', target: 'coverStory'}
-
+                { type: 'talent', target: 'coverStory' },
             ],
             tier: 4,
             bonuses: [],
+            expertiseGrants: [
+                {
+                    type: 'fixed',
+                    expertises: ['High Society'],
+                },
+            ],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 2,
+                    trigger: 'add an opportunity to a high society interaction test',
+                    frequency: 'unlimited',
+                },
+            ],
         },
         {
             id: "mercurialFacade",
             name: "Mercurial Facade",
             description: "Disguise yourself using Deception without needing physical supplies. The first character to see through your disguise is surprised.",
-            actionCost: -2, //special
+            actionCost: ActionCostCode.Special,
             specialActivation: "Disguise yourself using Deception without needing physical supplies.",
             prerequisites: [
-                {type: 'skill', target: 'Deception', value: 3},
-                {type: 'talent', target:'subtleTakedown'},
+                { type: 'skill', target: 'Deception', value: 3 },
+                { type: 'talent', target: 'subtleTakedown' },
             ],
             tier: 4,
             bonuses: [],
-        }
+            conditionEffects: [
+                {
+                    type: 'apply',
+                    condition: 'Surprised',
+                    trigger: 'first character to see through your disguise',
+                    target: 'target',
+                },
+            ],
+        },
     ],
 }

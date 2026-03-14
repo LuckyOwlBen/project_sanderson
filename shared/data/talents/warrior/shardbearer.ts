@@ -5,23 +5,23 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
     pathName: 'Shardbearer',
     nodes: [
         {
-            id: "shard_training",
+            id: "shardTraining",
             name: "Shard Training",
             description: "Once per round, when you use the Strike action to attack with a Shardblade, you can choose a number of additional enemies up to your ranks in the skill you used for that Strike. Each target must be within your Shardblade's reach. Without spending focus, you graze each additional target whose Physical defense is equal to or lower than your Strike's test result. Additionally, when you acquire this talent, gain a specialist expertise in Shardplate, and gain a specialist expertise in either Grandbows, Shardblades, or Warhammers. Finally, while you wear Shardplate, it has 2 additional charges for you.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Once per round when using Strike with Shardblade, can target additional enemies",
+            specialActivation: "Once per round when using Strike with a Shardblade, graze additional targets (up to skill ranks) whose Physical defense ≤ your test result.",
             prerequisites: [
-                { type: 'talent', target: 'vigilant_stance' }
+                { type: 'talent', target: 'vigilantStance' },
             ],
             tier: 1,
-            bonuses: [
-                { type: BonusType.DERIVED, target: 'shardplate_charges', value: 2, condition: 'while wearing Shardplate' }
-            ],
+            bonuses: [],
             expertiseGrants: [
                 { type: 'fixed', expertises: ['Shardplate'] },
-                { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] }
+                { type: 'choice', choiceCount: 1, options: ['Grandbows', 'Shardblades', 'Warhammers'] },
             ],
-            otherEffects: ["Once per round: Strike with Shardblade can graze additional targets (up to skill ranks) if Physical defense ≤ test result", "Requires access to Shardblade and Shardplate for training"]
+            otherEffects: [
+                "While wearing Shardplate, it has 2 additional charges for you.",
+            ],
         },
         {
             id: "stonestance",
@@ -29,13 +29,15 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, you learn a new stance, which you can enter as an action: Stonestance. While in this stance, increase your deflect value by 1. Additionally, before an enemy within your melee weapon's reach spends one or more actions to attack one of your allies not in Stonestance, that enemy must spend one additional action.",
             actionCost: 1,
             prerequisites: [
-                { type: 'talent', target: 'vigilant_stance' }
+                { type: 'talent', target: 'vigilantStance' },
             ],
             tier: 1,
             bonuses: [
-                { type: BonusType.DEFLECT, target: 'all', value: 1, condition: "while in stonestance" }
+                { type: BonusType.DEFLECT, target: 'all', value: 1, condition: 'while in Stonestance' },
             ],
-            otherEffects: ["Learn Stonestance (enter as 1 action)", "Enemies in reach must spend +1 action to attack non-Stonestance allies"]
+            otherEffects: [
+                "While in Stonestance: enemies within your melee weapon's reach must spend 1 additional action to attack allies who are not in Stonestance.",
+            ],
         },
         {
             id: "windstance",
@@ -43,16 +45,15 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, you learn a new stance, which you can enter as an action: Windstance. While in this stance, you gain an advantage on Agility tests. Additionally, while there are two or more enemies within your reach, you can use a reaction to gain an action, which you can spend only to Disengage or use an action that includes an attack test targeting one or more of those enemies.",
             actionCost: 1,
             prerequisites: [
-                { type: 'skill', target: 'perception', value: 1 },
-                { type: 'talent', target: 'shard_training' }
+                { type: 'skill', target: 'Perception', value: 1 },
+                { type: 'talent', target: 'shardTraining' },
             ],
             tier: 2,
             bonuses: [],
-            grantsAdvantage: ["agility_in_windstance"],
-            actionGrants: [
-                { type: 'reaction', count: 1, restrictedTo: 'Disengage or attack when 2+ enemies in reach', timing: 'always', frequency: 'unlimited' }
+            grantsAdvantage: ["On Agility tests while in Windstance."],
+            otherEffects: [
+                "While in Windstance: if 2 or more enemies are within your reach, use a reaction to gain 1 action (spend only to Disengage or make an attack targeting one or more of those enemies).",
             ],
-            otherEffects: ["Learn Windstance (enter as 1 action)"]
         },
         {
             id: "mighty",
@@ -60,12 +61,18 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             description: "When you hit with a weapon or unarmed attack, for each action you used on that attack's action, increase the damage you deal by 1 + your tier.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'stonestance' }
+                { type: 'talent', target: 'stonestance' },
             ],
             tier: 2,
-            bonuses: [
-                { type: BonusType.DERIVED, target: 'damage_per_action', formula: '1 + tier', condition: 'per action spent on attack' }
-            ]
+            bonuses: [],
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'melee',
+                specialMechanics: [
+                    "On hit: increase damage dealt by (1 + tier) for each action spent on that attack.",
+                ],
+            },
         },
         {
             id: "bloodstance",
@@ -73,84 +80,89 @@ export const SHARDBEARER_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, you learn a new stance, which you can enter as an action: Bloodstance. While in this stance, your Opportunity range for attack tests and physical tests expands by 2, but your Physical, Cognitive, and Spiritual defenses decrease by 2.",
             actionCost: 1,
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 2 },
+                { type: 'skill', target: 'Athletics', value: 2 },
                 { type: 'talent', target: 'mighty', operator: 'OR' },
-                { type: 'talent', target: 'shard_training', operator: 'OR' }
+                { type: 'talent', target: 'shardTraining', operator: 'OR' },
             ],
             tier: 3,
             bonuses: [
-                { type: BonusType.DEFENSE, target: 'physical', value: -2, condition: "while in bloodstance" },
-                { type: BonusType.DEFENSE, target: 'cognitive', value: -2, condition: "while in bloodstance" },
-                { type: BonusType.DEFENSE, target: 'spiritual', value: -2, condition: "while in bloodstance" }
+                { type: BonusType.DEFENSE, target: 'Physical', value: -2, condition: 'while in Bloodstance' },
+                { type: BonusType.DEFENSE, target: 'Cognitive', value: -2, condition: 'while in Bloodstance' },
+                { type: BonusType.DEFENSE, target: 'Spiritual', value: -2, condition: 'while in Bloodstance' },
             ],
-            otherEffects: ["Learn Bloodstance (enter as 1 action)", "In stance: Opportunity range +2 for attack/physical tests"]
+            otherEffects: ["While in Bloodstance: Opportunity range expands by 2 for attack tests and physical tests."],
         },
         {
-            id: "shattering_blow",
+            id: "shatteringBlow",
             name: "Shattering Blow",
             description: "When you hit a target with a melee attack, if you did so either with a two-handed weapon or with a hand free, you can spend 2 focus to hit with remarkable force. Before resolving that attack's damage, if your target is wearing armor with charges (such as Shardplate), the armor loses 1 charge. After that attack, each target who lost health to your attack is pushed horizontally 5 feet away from you. If your Strength is greater than 5, they're pushed an additional 5 feet for each additional point of Strength. If your target hits a Medium or larger object during this forced movement, the target takes damage as if they'd fallen the distance they were pushed (1d6 impact damage per 10 feet).",
             actionCost: ActionCostCode.Special,
-            specialActivation: "When hitting with two-handed weapon or hand free",
+            specialActivation: "On melee hit with a two-handed weapon or with a hand free, spend 2 focus to trigger Shattering Blow.",
             prerequisites: [
-                { type: 'skill', target: 'perception', value: 2 },
-                { type: 'talent', target: 'windstance' }
+                { type: 'skill', target: 'Perception', value: 2 },
+                { type: 'talent', target: 'windstance' },
             ],
             tier: 3,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'when hitting with melee attack (two-handed or hand free)' }
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'on melee hit with two-handed weapon or free hand', frequency: 'unlimited' },
             ],
-            otherEffects: ["Before damage: armor loses 1 charge", "After damage: push target 5 feet (+5 per Strength above 5)", "If pushed into object: 1d6 impact per 10 feet pushed"]
+            otherEffects: [
+                "Before damage: target's charged armor (e.g. Shardplate) loses 1 charge.",
+                "After damage: each target that lost health is pushed 5 feet away (+5 feet per Strength above 5).",
+                "If pushed into a Medium or larger object: target takes 1d6 impact damage per 10 feet pushed.",
+            ],
         },
         {
-            id: "meteoric_leap",
+            id: "meteoricLeap",
             name: "Meteoric Leap",
             description: "Spend 2 focus to leap up to a quarter of your movement rate, then make an unarmed attack against the Physical defense of each character of your choice within your reach. While wearing Shardplate, you gain an advantage on this test. Roll double the usual damage dice for this attack. On a hit, each target whose Strength score is lower than yours is also knocked Prone.",
             actionCost: 2,
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 3 },
-                { type: 'talent', target: 'bloodstance' }
-            ],
-            tier: 4,
-            bonuses: [],
-            attackDefinition: {
-                weaponType: 'unarmed',
-                targetDefense: 'Physical',
-                range: 'melee',
-                resourceCost: { type: 'focus', amount: 2 },
-                conditionalAdvantages: [
-                    { condition: 'wearing Shardplate', value: 1 }
-                ],
-                specialMechanics: [
-                    "Leap up to quarter movement rate before attacking",
-                    "Attacks all chosen targets within reach",
-                    "Roll double damage dice",
-                    "On hit: targets with lower Strength knocked Prone"
-                ]
-            },
-            movementEffects: [
-                { type: 'special-movement', movementType: 'leap', amount: '0.25 * movementRate', timing: 'before-attack', actionCost: 'part-of-action' }
-            ],
-            conditionEffects: [
-                { type: 'apply', condition: 'Prone', trigger: 'on hit', target: 'target', details: 'if target Strength < yours' }
-            ]
-        },
-        {
-            id: "precise_parry",
-            name: "Precise Parry",
-            description: "Before being hit by a melee attack, you can use this reaction and spend 1 focus to attempt to parry the blow. Depending on whether you're unarmed or wielding a weapon, make one of the following tests: Unarmed - Make an Athletics test, gaining a disadvantage unless you're being attacked with a Shardblade. You can spend opportunity to disarm your opponent. Wielding a Weapon - Make a Light Weaponry test or Heavy Weaponry test (using the skill corresponding to your weapon). If you're wielding a Shardblade and if your opponent's weapon is non-Invested, you can spend an action to destroy their weapon. The DC of this test equals the result of the attack test that hit you. On a success, the hit against you becomes a graze.",
-            actionCost: ActionCostCode.Reaction,
-            prerequisites: [
-                { type: 'skill', target: 'perception', value: 3 },
-                { type: 'talent', target: 'shattering_blow' }
+                { type: 'skill', target: 'Athletics', value: 3 },
+                { type: 'talent', target: 'bloodstance' },
             ],
             tier: 4,
             bonuses: [],
             resourceTriggers: [
-                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'when using Precise Parry reaction' }
+                { resource: 'focus', effect: 'spend', amount: 2, trigger: 'activate Meteoric Leap', frequency: 'unlimited' },
             ],
-            grantsDisadvantage: ["athletics_parry_unarmed_vs_non_shardblade"],
-            otherEffects: ["Reaction before being hit", "Unarmed: Athletics test, spend opportunity to disarm", "Weapon: Light/Heavy Weaponry test, spend action to destroy non-Invested weapon with Shardblade", "DC = attack result, success turns hit to graze"]
-        }
+            grantsAdvantage: ["On the Meteoric Leap attack test while wearing Shardplate."],
+            attackDefinition: {
+                weaponType: 'unarmed',
+                targetDefense: 'Physical',
+                range: 'melee',
+                specialMechanics: [
+                    "Leap up to one quarter of your movement rate before attacking.",
+                    "Attacks all chosen characters within reach.",
+                    "Roll double the usual damage dice.",
+                    "On hit: targets with Strength lower than yours are knocked Prone.",
+                ],
+            },
+            conditionEffects: [
+                { type: 'apply', condition: 'Prone', trigger: 'on hit with Meteoric Leap', target: 'target', details: 'only if target\'s Strength is lower than yours' },
+            ],
+        },
+        {
+            id: "preciseParry",
+            name: "Precise Parry",
+            description: "Before being hit by a melee attack, you can use this reaction and spend 1 focus to attempt to parry the blow. Depending on whether you're unarmed or wielding a weapon, make one of the following tests: Unarmed - Make an Athletics test, gaining a disadvantage unless you're being attacked with a Shardblade. You can spend opportunity to disarm your opponent. Wielding a Weapon - Make a Light Weaponry test or Heavy Weaponry test (using the skill corresponding to your weapon). If you're wielding a Shardblade and if your opponent's weapon is non-Invested, you can spend an action to destroy their weapon. The DC of this test equals the result of the attack test that hit you. On a success, the hit against you becomes a graze.",
+            actionCost: ActionCostCode.Reaction,
+            prerequisites: [
+                { type: 'skill', target: 'Perception', value: 3 },
+                { type: 'talent', target: 'shatteringBlow' },
+            ],
+            tier: 4,
+            bonuses: [],
+            resourceTriggers: [
+                { resource: 'focus', effect: 'spend', amount: 1, trigger: 'triggering Precise Parry reaction before being hit by a melee attack', frequency: 'unlimited' },
+            ],
+            grantsDisadvantage: ["On Precise Parry's Athletics test when unarmed and not being attacked with a Shardblade."],
+            otherEffects: [
+                "DC = the attack test result that triggered this reaction; success turns the hit into a graze.",
+                "Unarmed: make an Athletics test; spend opportunity to disarm the attacker.",
+                "Wielding a weapon: make a Light or Heavy Weaponry test; if wielding a Shardblade, spend an action to destroy the attacker's non-Invested weapon.",
+            ],
+        },
     ],
 }

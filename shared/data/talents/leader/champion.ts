@@ -5,13 +5,13 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
     pathName: 'Champion',
     nodes: [
         {
-            id: "combat_coordination",
+            id: "combatCoordination",
             name: "Combat Coordination",
             description: "After you use the Strike action, use Decisive Command as a free action. If your Strike didn't hit, you also don't have to spend the usual focus for Decisive Command.",
             actionCost: ActionCostCode.Free,
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 2 },
-                { type: 'talent', target: 'decisive_command' }
+                { type: 'skill', target: 'Leadership', value: 2 },
+                { type: 'talent', target: 'decisiveCommand' },
             ],
             tier: 1,
             bonuses: [],
@@ -19,63 +19,68 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 {
                     type: 'free-action',
                     count: 1,
-                    restrictedTo: 'Decisive Command',
-                    frequency: 'unlimited'
-                }
+                    restrictedTo: 'Decisive Command after a Strike',
+                    frequency: 'unlimited',
+                },
             ],
             resourceTriggers: [
                 {
                     resource: 'focus',
                     effect: 'reduce-cost',
                     amount: 1,
-                    trigger: 'When using Decisive Command after a missed Strike',
-                    condition: 'Strike action did not hit'
-                }
+                    trigger: 'use Decisive Command after a missed Strike',
+                    frequency: 'unlimited',
+                    condition: 'only when the Strike did not hit',
+                },
             ],
-            otherEffects: []
         },
         {
-            id: "valiant_intervention",
+            id: "valiantIntervention",
             name: "Valiant Intervention",
             description: "Spend 1 focus to move up to 10 feet, then make an Athletics test against the Spiritual defense of an enemy you can influence. On a success, they gain a disadvantage on tests against your allies until the end of the target's next turn. A target can resist this influence, but after they do, you gain an advantage on your next test against them until the end of your next turn.",
             actionCost: 1,
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 1 },
-                { type: 'talent', target: 'decisive_command' }
+                { type: 'skill', target: 'Athletics', value: 1 },
+                { type: 'talent', target: 'decisiveCommand' },
             ],
             tier: 1,
             bonuses: [],
+            resourceTriggers: [
+                {
+                    resource: 'focus',
+                    effect: 'spend',
+                    amount: 1,
+                    trigger: 'activate Valiant Intervention',
+                    frequency: 'unlimited',
+                },
+            ],
             movementEffects: [
                 {
                     type: 'special-movement',
                     amount: 10,
                     timing: 'before-attack',
-                    movementType: 'walk'
-                }
+                    movementType: 'walk',
+                },
             ],
             attackDefinition: {
-                weaponType: 'unarmed',
                 targetDefense: 'Spiritual',
                 range: 'special',
-                resourceCost: { type: 'focus', amount: 1 },
                 specialMechanics: [
-                    "Move up to 10 feet before attacking",
-                    "Uses Athletics test (not attack test)",
-                    "Must be able to influence target",
-                    "Success: target has disadvantage on tests vs allies until end of their next turn",
-                    "If target resists: gain advantage on next test vs them"
-                ]
+                    "Uses Athletics test (not a weapon attack); must be able to influence the target.",
+                    "On success: target has disadvantage on tests against your allies until end of their next turn.",
+                    "If target resists: you gain advantage on your next test against them until end of your next turn.",
+                ],
             },
             conditionEffects: [
                 {
                     type: 'apply',
-                    condition: 'disadvantage on tests against allies',
-                    trigger: 'on successful Athletics test',
+                    condition: 'Disadvantage on tests against allies',
+                    trigger: 'succeed with Valiant Intervention',
                     target: 'target',
-                    duration: 'until end of target next turn'
-                }
+                    duration: 'until end of target\'s next turn',
+                },
             ],
-            otherEffects: ["If target resists influence: gain advantage on next test vs them until end of your next turn"]
+            grantsAdvantage: ["next test against a target who resisted Valiant Intervention"],
         },
         {
             id: "hardy",
@@ -83,26 +88,21 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
             description: "When you acquire this talent, your maximum and current health increase by 1 per level. This applies to all previous and future levels.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'valiant_intervention' }
+                { type: 'talent', target: 'valiantIntervention' },
             ],
             tier: 2,
             bonuses: [
-                {
-                    type: BonusType.RESOURCE,
-                    target: 'health',
-                    value: 1
-                }
+                { type: BonusType.RESOURCE, target: 'health', formula: 'level', scaling: true },
             ],
-            otherEffects: []
         },
         {
-            id: "imposing_posture",
+            id: "imposingPosture",
             name: "Imposing Posture",
             description: "After an enemy resists your influence while within your weapon's reach, they become Disoriented until the end of their next turn.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 2 },
-                { type: 'talent', target: 'combat_coordination' }
+                { type: 'skill', target: 'Athletics', value: 2 },
+                { type: 'talent', target: 'combatCoordination' },
             ],
             tier: 2,
             bonuses: [],
@@ -110,22 +110,21 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 {
                     type: 'apply',
                     condition: 'Disoriented',
-                    trigger: 'when enemy resists your influence',
+                    trigger: 'enemy resists your influence while within weapon reach',
                     target: 'target',
-                    duration: 'until end of their next turn'
-                }
+                    duration: 'until end of their next turn',
+                },
             ],
-            otherEffects: []
         },
         {
-            id: "resolute_stand",
+            id: "resoluteStand",
             name: "Resolute Stand",
             description: "When you use your Valiant Intervention, you can spend focus up to your ranks in Leadership to target that many additional characters. Additionally, after you affect a target with Valiant Intervention, they can't make Reactive Strikes against your allies until the end of that target's next turn.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Enhances Valiant Intervention with multi-target and Reactive Strike prevention",
+            specialActivation: "When using Valiant Intervention, spend up to Leadership-ranks focus to target additional characters.",
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 1 },
-                { type: 'talent', target: 'hardy' }
+                { type: 'skill', target: 'Athletics', value: 1 },
+                { type: 'talent', target: 'hardy' },
             ],
             tier: 3,
             bonuses: [],
@@ -133,71 +132,72 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 {
                     resource: 'focus',
                     effect: 'spend',
-                    amount: 'up to Leadership ranks',
-                    trigger: 'when using Valiant Intervention',
-                    condition: 'to add additional targets'
-                }
+                    amount: 'leadership.ranks',
+                    trigger: 'use Valiant Intervention to add additional targets',
+                    frequency: 'unlimited',
+                    condition: 'amount spent determines number of extra targets; capped at Leadership ranks',
+                },
             ],
             conditionEffects: [
                 {
                     type: 'prevent',
                     condition: 'Reactive Strikes against allies',
-                    trigger: 'after using Valiant Intervention on target',
+                    trigger: 'after affecting target with Valiant Intervention',
                     target: 'target',
-                    duration: 'until end of their next turn'
-                }
+                    duration: 'until end of their next turn',
+                },
             ],
-            otherEffects: []
         },
         {
             id: "mighty",
             name: "Mighty",
-            description: "When you hit with a weapon or unarmed attack, for each action you used on that attack's action, increase the damage you deal by 1 + your tier.",
+            description: "When you hit with a weapon or unarmed attack, for each action you used on that attack, increase the damage you deal by 1 + your tier.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'imposing_posture' }
+                { type: 'talent', target: 'imposingPosture' },
             ],
             tier: 3,
             bonuses: [],
-            otherEffects: ['Damage increased by 1 + tier per action spent on attack']
+            attackDefinition: {
+                weaponType: 'any',
+                targetDefense: 'Physical',
+                range: 'special',
+                specialMechanics: [
+                    "On hit, deal extra damage equal to (1 + tier) for each action point spent on the attack.",
+                ],
+            },
         },
         {
-            id: "demonstrative_command",
+            id: "demonstrativeCommand",
             name: "Demonstrative Command",
             description: "Before you make an Athletics, Agility, or Leadership test, you can spend 1 focus to roll your command die and add the result to your d20 roll. Additionally, when you acquire this talent, increase the size of your command die by one size (such as from a d4 to a d6).",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Before Athletics, Agility, or Leadership test",
+            specialActivation: "Before an Athletics, Agility, or Leadership test, spend 1 focus to add your command die result to the roll.",
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 2 },
-                { type: 'talent', target: 'resolute_stand' }
+                { type: 'skill', target: 'Leadership', value: 2 },
+                { type: 'talent', target: 'resoluteStand' },
             ],
             tier: 4,
-            bonuses: [
-                {
-                    type: BonusType.DEFENSE,
-                    target: 'command-die',
-                    value: 1
-                }
-            ],
+            bonuses: [],
             resourceTriggers: [
                 {
                     resource: 'focus',
                     effect: 'spend',
                     amount: 1,
-                    trigger: 'before Athletics, Agility, or Leadership test',
-                    condition: 'to add command die result to roll'
-                }
+                    trigger: 'before an Athletics, Agility, or Leadership test — add command die result to roll',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: []
+            otherEffects: ["When you acquire this talent, increase your command die size by one step (e.g. d4 → d6)."],
         },
         {
-            id: "resilient_hero",
+            id: "resilientHero",
             name: "Resilient Hero",
             description: "Once per scene, before you are reduced to 0 health, you can use this reaction to instead change your health to equal your Athletics modifier.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
-                { type: 'skill', target: 'athletics', value: 3 },
-                { type: 'talent', target: 'resolute_stand' }
+                { type: 'skill', target: 'Athletics', value: 3 },
+                { type: 'talent', target: 'resoluteStand' },
             ],
             tier: 4,
             bonuses: [],
@@ -205,11 +205,10 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
                 {
                     type: 'reaction',
                     count: 1,
+                    restrictedTo: 'set health to Athletics modifier instead of reaching 0',
                     frequency: 'once-per-scene',
-                    restrictedTo: 'set health to Athletics modifier'
-                }
+                },
             ],
-            otherEffects: []
-        }
+        },
     ],
 }

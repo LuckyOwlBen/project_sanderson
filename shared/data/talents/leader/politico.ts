@@ -1,18 +1,17 @@
 import { TalentTree, ActionCostCode } from "../../../types/talents";
-import { BonusType } from "../../../types/bonuses";
 
 export const POLITICO_TALENT_TREE: TalentTree = {
     pathName: 'Politico',
     nodes: [
         {
-            id: "cutthroat_tactics",
+            id: "cutthroatTactics",
             name: "Cutthroat Tactics",
             description: "Before an ally rolls your command die on a test, they can choose to instead raise the stakes on that test. If they do so and roll a Complication, you recover 1 focus.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Ally chooses to raise stakes before rolling command die",
+            specialActivation: "Ally chooses to raise stakes before rolling command die — if they roll a Complication, you recover 1 focus.",
             prerequisites: [
-                { type: 'skill', target: 'deception', value: 1 },
-                { type: 'talent', target: 'decisive_command' }
+                { type: 'skill', target: 'Deception', value: 1 },
+                { type: 'talent', target: 'decisiveCommand' },
             ],
             tier: 1,
             bonuses: [],
@@ -21,96 +20,71 @@ export const POLITICO_TALENT_TREE: TalentTree = {
                     resource: 'focus',
                     effect: 'recover',
                     amount: 1,
-                    trigger: 'when ally rolls Complication on raised stakes test',
-                    condition: 'if ally chose to raise stakes on command die test'
-                }
+                    trigger: 'ally rolls Complication on raised-stakes command die test',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: []
         },
         {
-            id: "tactical_ploy",
+            id: "tacticalPloy",
             name: "Tactical Ploy",
             description: "Make a Deception test against the Cognitive defense of an enemy you can influence. On a success, your target loses one reaction and gains a disadvantage on their next cognitive or spiritual test. A target can resist this influence, but after they do, you gain an advantage on your next test targeting them before the end of your next turn.",
             actionCost: 1,
             prerequisites: [
-                { type: 'talent', target: 'decisive_command' }
+                { type: 'talent', target: 'decisiveCommand' },
             ],
             tier: 1,
             bonuses: [],
             attackDefinition: {
-                weaponType: 'unarmed',
                 targetDefense: 'Cognitive',
                 range: 'special',
                 specialMechanics: [
-                    "Uses Deception test",
-                    "Success: target loses 1 reaction and has disadvantage on next Cognitive/Spiritual test",
-                    "If target resists: gain advantage on next test vs them until end of your next turn"
-                ]
+                    "Test Deception vs. Cognitive defense.",
+                    "On success: target loses 1 reaction and has disadvantage on their next Cognitive or Spiritual test.",
+                    "If target resists: you gain advantage on your next test targeting them before end of your next turn.",
+                ],
             },
-            otherEffects: []
         },
         {
             id: "rumormonger",
             name: "Rumormonger",
             description: "When you make a test to spread misinformation or gather rumors, you can spend 2 focus to add an Opportunity to the result. Additionally, when you acquire this talent, gain a utility expertise in Scandal.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "When making test to spread misinformation or gather rumors",
+            specialActivation: "When making a test to spread misinformation or gather rumors, spend 2 focus to add an Opportunity to the result.",
             prerequisites: [
-                { type: 'talent', target: 'cutthroat_tactics' }
+                { type: 'talent', target: 'cutthroatTactics' },
             ],
             tier: 2,
             bonuses: [],
+            expertiseGrants: [
+                { type: 'fixed', expertises: ['Scandal'] },
+            ],
             resourceTriggers: [
                 {
                     resource: 'focus',
                     effect: 'spend',
                     amount: 2,
-                    trigger: 'when making test to spread misinformation or gather rumors',
-                    condition: 'to add Opportunity to result'
-                }
+                    trigger: 'making a test to spread misinformation or gather rumors — add Opportunity to result',
+                    frequency: 'unlimited',
+                },
             ],
-            expertiseGrants: [
-                {
-                    type: 'fixed',
-                    expertises: ['Scandal']
-                }
-            ],
-            otherEffects: ["Requires having a patron"]
+            otherEffects: ["Requires having a patron."],
         },
         {
-            id: "well_dressed",
+            id: "wellDressed",
             name: "Well Dressed",
             description: "While visibly wearing Presentable armor or fashionable clothing, you gain an advantage on the first Deception, Leadership, or Persuasion test you make during each scene. Additionally, when you acquire this talent, gain a cultural expertise in Fashion.",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Advantage on first social test per scene while well-dressed",
+            specialActivation: "While visibly wearing Presentable armor or fashionable clothing, gain advantage on the first Deception, Leadership, or Persuasion test you make each scene.",
             prerequisites: [
-                { type: 'talent', target: 'rumormonger' }
+                { type: 'talent', target: 'rumormonger' },
             ],
             tier: 2,
-            bonuses: [
-                {
-                    type: BonusType.SKILL,
-                    target: 'Deception',
-                    value: 1
-                },
-                {
-                    type: BonusType.SKILL,
-                    target: 'Leadership',
-                    value: 1
-                },
-                {
-                    type: BonusType.SKILL,
-                    target: 'Persuasion',
-                    value: 1
-                }
-            ],
+            bonuses: [],
             expertiseGrants: [
-                {
-                    type: 'fixed',
-                    expertises: ['Fashion']
-                }
+                { type: 'fixed', expertises: ['Fashion'] },
             ],
-            otherEffects: []
+            otherEffects: [],
         },
         {
             id: "baleful",
@@ -118,29 +92,20 @@ export const POLITICO_TALENT_TREE: TalentTree = {
             description: "To resist your influence, a character must spend additional focus equal to your tier.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
-                { type: 'talent', target: 'rumormonger' }
+                { type: 'talent', target: 'rumormonger' },
             ],
             tier: 3,
             bonuses: [],
-            resourceTriggers: [
-                {
-                    resource: 'focus',
-                    effect: 'spend',
-                    amount: 'tier',
-                    trigger: 'when character resists your influence',
-                    frequency: 'unlimited'
-                }
-            ],
-            otherEffects: []
+            otherEffects: ["Any character resisting your influence must spend additional focus equal to your tier."],
         },
         {
-            id: "set_at_odds",
+            id: "setAtOdds",
             name: "Set at Odds",
             description: "Choose two or more characters you can influence and spend that many focus to seed division among them. Describe a potential source of conflict, then make a Leadership test (DC equals highest Spiritual defense among those targets). On a success, you influence each target to become hostile toward the other targets, which sparks an argument, combat, or other conflict until they find a way to resolve it. A target can resist this influence, but after they do, they lose additional focus equal to your ranks in Leadership. If only some of the targets resist influence, the others remain hostile, but their conflict might become easier to resolve.",
             actionCost: 2,
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 3 },
-                { type: 'talent', target: 'baleful' }
+                { type: 'skill', target: 'Leadership', value: 3 },
+                { type: 'talent', target: 'baleful' },
             ],
             tier: 3,
             bonuses: [],
@@ -149,66 +114,52 @@ export const POLITICO_TALENT_TREE: TalentTree = {
                     resource: 'focus',
                     effect: 'spend',
                     amount: 'number of chosen targets',
-                    trigger: 'when using Set at Odds',
-                    condition: 'to seed division'
+                    trigger: 'activate Set at Odds',
+                    frequency: 'unlimited',
                 },
-                {
-                    resource: 'focus',
-                    effect: 'spend',
-                    amount: 'Leadership ranks',
-                    trigger: 'when target resists influence',
-                    condition: 'additional cost for resisting'
-                }
             ],
-            conditionEffects: [
-                {
-                    type: 'apply',
-                    condition: 'Hostile',
-                    trigger: 'on successful Leadership test against highest Spiritual defense',
-                    target: 'all-enemies',
-                    duration: 'until they find way to resolve conflict'
-                }
-            ],
-            otherEffects: []
+            attackDefinition: {
+                targetDefense: 'Spiritual',
+                range: 'special',
+                specialMechanics: [
+                    "Test Leadership vs. highest Spiritual defense among chosen targets (2 or more).",
+                    "On success: each target becomes hostile toward the other targets until they resolve the conflict.",
+                    "If a target resists: they lose additional focus equal to your Leadership ranks.",
+                    "If only some targets resist: remaining targets stay hostile, conflict may become easier to resolve.",
+                ],
+            },
         },
         {
-            id: "shrewd_command",
+            id: "shrewdCommand",
             name: "Shrewd Command",
             description: "Before you make a Deception, Insight, or Leadership test, you can spend 1 focus to roll your command die and add the result to your d20 roll. Additionally, when you acquire this talent, increase the size of your command die by one size (such as from a d4 to a d6).",
             actionCost: ActionCostCode.Special,
-            specialActivation: "Before Deception, Insight, or Leadership test",
+            specialActivation: "Before a Deception, Insight, or Leadership test, spend 1 focus to add your command die result to the roll.",
             prerequisites: [
-                { type: 'skill', target: 'leadership', value: 2 },
-                { type: 'talent', target: 'rumormonger' }
+                { type: 'skill', target: 'Leadership', value: 2 },
+                { type: 'talent', target: 'rumormonger' },
             ],
             tier: 4,
-            bonuses: [
-                {
-                    type: BonusType.DEFENSE,
-                    target: 'command-die',
-                    value: 1,
-                    condition: 'increase by one die size (d4→d6, d6→d8, etc.)'
-                }
-            ],
+            bonuses: [],
             resourceTriggers: [
                 {
                     resource: 'focus',
                     effect: 'spend',
                     amount: 1,
-                    trigger: 'before Deception, Insight, or Leadership test',
-                    condition: 'to add command die result to roll'
-                }
+                    trigger: 'before a Deception, Insight, or Leadership test — add command die result to roll',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: []
+            otherEffects: ["When you acquire this talent, increase your command die size by one step (e.g. d4 → d6)."],
         },
         {
-            id: "grand_deception",
+            id: "grandDeception",
             name: "Grand Deception",
             description: "Spend 3 focus to make a DC 15 Deception test. On a success, choose a detail you established since the start of the last scene and reveal that it was actually a ruse. This ruse must be plausible. The GM is the final arbiter of what sort of ruse you can reveal.",
             actionCost: 3,
             prerequisites: [
-                { type: 'skill', target: 'deception', value: 3 },
-                { type: 'talent', target: 'shrewd_command' }
+                { type: 'skill', target: 'Deception', value: 3 },
+                { type: 'talent', target: 'shrewdCommand' },
             ],
             tier: 4,
             bonuses: [],
@@ -217,11 +168,19 @@ export const POLITICO_TALENT_TREE: TalentTree = {
                     resource: 'focus',
                     effect: 'spend',
                     amount: 3,
-                    trigger: 'when using Grand Deception',
-                    condition: 'to make DC 15 Deception test'
-                }
+                    trigger: 'activate Grand Deception',
+                    frequency: 'unlimited',
+                },
             ],
-            otherEffects: ["Must be plausible", "GM determines final validity of ruse"]
-        }
+            attackDefinition: {
+                targetDefense: 'Cognitive',
+                range: 'special',
+                specialMechanics: [
+                    "DC 15 Deception test.",
+                    "On success: choose a detail established since the start of last scene and reveal it as a plausible ruse.",
+                    "GM is the final arbiter of valid ruses.",
+                ],
+            },
+        },
     ],
 }

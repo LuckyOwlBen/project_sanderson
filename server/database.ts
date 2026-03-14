@@ -42,11 +42,11 @@ export { dbInitialized, dbError };
 // ============================================================================
 // Single source of truth for path -> tier 0 talent mapping
 export const PATH_TIER0_TALENTS: Record<string, string> = {
-  'warrior': 'vigilant_stance',
-  'scholar': 'education',
-  'hunter': 'seek_quarry',
-  'leader': 'decisive_command',
-  'envoy': 'rousing_presence',
+  'warrior': 'vigilantStance',
+  'scholar': 'erudition',
+  'hunter': 'seekQuarry',
+  'leader': 'decisiveCommand',
+  'envoy': 'rousingPresence',
   'agent': 'opportunist'
 };
 
@@ -73,7 +73,13 @@ export interface CharacterData {
   skills?: Record<string, number>;
   unlockedTalents?: string[];
   selectedExpertises?: any[];
-  inventory?: any[];
+  inventory?: any[] | {
+    items: any[];
+    equippedItems?: any[];
+    equipped?: any;
+    currencyInChips?: number;
+  };
+  mainPathTier0TalentId?: string | null;
   resources?: {
     health: { current: number; max: number };
     focus: { current: number; max: number };
@@ -382,6 +388,7 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       name: char.name,
       level: char.level,
       pendingLevelPoints: char.pendingLevelPoints,
+      pendingLevel: char.pendingLevel === 1 || char.pendingLevel === true,
       ancestry: char.ancestry,
       sessionNotes: char.sessionNotes,
       lastModified: char.lastModified,
