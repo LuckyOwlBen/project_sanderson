@@ -177,7 +177,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
         {
             id: "practicedOratory",
             name: "Practiced Oratory",
-            modifiesTalent: 'steadfastChallenge',
+            modifiesTalent: ['steadfastChallenge', 'rousingPresence'],
             description: "When you use Rousing Presence or Steadfast Challenge, spend focus up to your ranks in Persuasion to add that many targets.",
             actionCost: ActionCostCode.Special,
             specialActivation: "Spend focus up to your Persuasion ranks to add additional targets to Rousing Presence or Steadfast Challenge.",

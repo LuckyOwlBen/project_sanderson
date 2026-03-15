@@ -160,6 +160,7 @@ export const ARCHER_TALENT_TREE: TalentTree = {
         {
             id: "unrelentingSalvo",
             name: "Unrelenting Salvo",
+            modifiesTalent: 'seekQuarry',
             description: "You can use the same ranged weapon to Strike against your quarry more than once a turn, instead of being limited to one Strike per hand.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

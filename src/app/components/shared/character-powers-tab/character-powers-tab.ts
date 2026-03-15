@@ -65,31 +65,41 @@ export class CharacterPowersTab {
       powersById.set(p.id, p);
     }
 
-    // Resolve the root base for each modifier (flatten chains)
-    const resolveRoot = (talent: TalentNode): string | undefined => {
-      let current = talent;
+    // Normalize modifiesTalent to always return an array
+    const getModifiesIds = (talent: TalentNode): string[] => {
+      if (!talent.modifiesTalent) return [];
+      return Array.isArray(talent.modifiesTalent) ? talent.modifiesTalent : [talent.modifiesTalent];
+    };
+
+    // Resolve the root base for a single modifier chain
+    const resolveRoot = (talent: TalentNode, baseId: string): string | undefined => {
+      let currentId = baseId;
       const visited = new Set<string>();
-      while (current.modifiesTalent && !visited.has(current.id)) {
-        visited.add(current.id);
-        const parent = powersById.get(current.modifiesTalent);
-        if (!parent) return current.modifiesTalent; // parent not unlocked
-        if (!parent.modifiesTalent) return parent.id; // found the root
-        current = parent;
+      while (currentId && !visited.has(currentId)) {
+        visited.add(currentId);
+        const parent = powersById.get(currentId);
+        if (!parent) return currentId; // parent not unlocked
+        const parentBases = getModifiesIds(parent);
+        if (parentBases.length === 0) return parent.id; // found the root
+        currentId = parentBases[0]; // follow first chain for nested modifiers
       }
-      return current.modifiesTalent;
+      return currentId;
     };
 
     const modifierIds = new Set<string>();
     const groupMap = new Map<string, TalentNode[]>();
 
     for (const power of powers) {
-      if (!power.modifiesTalent) continue;
-      const rootId = resolveRoot(power);
-      if (!rootId || !powersById.has(rootId)) continue; // base not unlocked — show standalone
-      modifierIds.add(power.id);
-      const list = groupMap.get(rootId) || [];
-      list.push(power);
-      groupMap.set(rootId, list);
+      const bases = getModifiesIds(power);
+      if (bases.length === 0) continue;
+      for (const baseId of bases) {
+        const rootId = resolveRoot(power, baseId);
+        if (!rootId || !powersById.has(rootId)) continue; // base not unlocked — show standalone
+        modifierIds.add(power.id);
+        const list = groupMap.get(rootId) || [];
+        if (!list.includes(power)) list.push(power);
+        groupMap.set(rootId, list);
+      }
     }
 
     const grouped: GroupedPower[] = [];

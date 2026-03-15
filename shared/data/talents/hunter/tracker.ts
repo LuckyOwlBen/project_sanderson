@@ -110,6 +110,7 @@ export const TRACKER_TALENT_TREE: TalentTree = {
         {
             id: "huntersEdge",
             name: "Hunter's Edge",
+            modifiesTalent: ['deadlyTrap', 'animalBond'],
             description: "Your animal companion gains an advantage on tests against your quarry. Deadly Trap damage increases to 2d8 and conditions last 3 rounds.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

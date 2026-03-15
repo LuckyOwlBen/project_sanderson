@@ -217,8 +217,8 @@ export interface TalentNode {
   /** Movement modifications and special movement */
   movementEffects?: MovementEffect[];
 
-  /** ID of the base talent this talent modifies/enhances (for character sheet grouping) */
-  modifiesTalent?: string;
+  /** ID(s) of the base talent(s) this talent modifies/enhances (for character sheet grouping) */
+  modifiesTalent?: string | string[];
 }
 
 /** For quick copy paste of new talent nodes
