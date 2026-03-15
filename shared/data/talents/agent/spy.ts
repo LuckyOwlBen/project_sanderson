@@ -7,6 +7,7 @@ export const SPY_TALENT_TREE: TalentTree = {
         {
             id: "sureOutcome",
             name: "Sure Outcome",
+            modifiesTalent: 'opportunist',
             description: "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When you use Opportunist, spend 2 focus to change an opportunity to 4 consequences, or change any consequence to an opportunity.",

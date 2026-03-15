@@ -11,6 +11,11 @@ import { UniversalAbility, formatActionCost } from '../../../character/abilities
 import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
 import { StanceSelectorComponent } from '../stance-selector/stance-selector';
 
+export interface GroupedPower {
+  base: TalentNode;
+  modifiers: TalentNode[];
+}
+
 @Component({
   selector: 'app-character-powers-tab',
   standalone: true,
@@ -51,6 +56,50 @@ export class CharacterPowersTab {
     const { resourceType, amount } = ability.resourceCost;
     const displayType = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
     return `${amount} ${displayType}`;
+  }
+
+  getGroupedPowers(): GroupedPower[] {
+    const powers = this.getPowers();
+    const powersById = new Map<string, TalentNode>();
+    for (const p of powers) {
+      powersById.set(p.id, p);
+    }
+
+    // Resolve the root base for each modifier (flatten chains)
+    const resolveRoot = (talent: TalentNode): string | undefined => {
+      let current = talent;
+      const visited = new Set<string>();
+      while (current.modifiesTalent && !visited.has(current.id)) {
+        visited.add(current.id);
+        const parent = powersById.get(current.modifiesTalent);
+        if (!parent) return current.modifiesTalent; // parent not unlocked
+        if (!parent.modifiesTalent) return parent.id; // found the root
+        current = parent;
+      }
+      return current.modifiesTalent;
+    };
+
+    const modifierIds = new Set<string>();
+    const groupMap = new Map<string, TalentNode[]>();
+
+    for (const power of powers) {
+      if (!power.modifiesTalent) continue;
+      const rootId = resolveRoot(power);
+      if (!rootId || !powersById.has(rootId)) continue; // base not unlocked — show standalone
+      modifierIds.add(power.id);
+      const list = groupMap.get(rootId) || [];
+      list.push(power);
+      groupMap.set(rootId, list);
+    }
+
+    const grouped: GroupedPower[] = [];
+    for (const power of powers) {
+      if (modifierIds.has(power.id)) continue; // skip — will appear nested under base
+      const modifiers = groupMap.get(power.id) || [];
+      modifiers.sort((a, b) => a.tier - b.tier);
+      grouped.push({ base: power, modifiers });
+    }
+    return grouped;
   }
 
   getPowers(): TalentNode[] {

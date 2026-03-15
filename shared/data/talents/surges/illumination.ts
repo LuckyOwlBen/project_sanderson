@@ -44,6 +44,7 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
         {
             id: 'illumination_lingering_lightweaving',
             name: 'Lingering Lightweaving',
+            modifiesTalent: 'illumination_base',
             description: 'You infuse spheres with your Illumination, creating illusions that linger long after you\'ve moved away. When you Lightweave an illusion, instead of creating it in thin air, you can instead infuse its Investiture in a sphere or unencased gem within 5 feet of that illusion. For the duration, the illusion moves with the gem; for example, an ally could carry this gem to extend the duration of an illusory disguise you created for them. Instead of the infusion expending 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Illumination; for example, if you have 3 ranks in Illumination, your infusions in spheres expend Investiture once every 3 rounds.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'When you Lightweave an illusion',
@@ -116,6 +117,7 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
         {
             id: 'illumination_multiplicative_lightweaving',
             name: 'Multiplicative Lightweaving',
+            modifiesTalent: 'illumination_base',
             description: 'You effortlessly Lightweave multiple illusions at once. When you Lightweave an illusion, you can create a number of additional illusions up to your ranks in Illumination. These infusions last for the duration of the original infusion and require no additional Investiture to create or maintain.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -155,6 +157,7 @@ export const ILLUMINATION_SURGE_TREE: TalentTree = {
         {
             id: 'illumination_endless_illusions',
             name: 'Endless Illusions',
+            modifiesTalent: 'illumination_base',
             description: 'You\'ve become so efficient at powering your illusions that you can maintain them indefinitely. While you have 1 Investiture or more, each of your Illumination infusions within your spren bond range expends no infused Investiture at the start of your turn.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

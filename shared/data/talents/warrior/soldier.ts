@@ -77,6 +77,7 @@ export const SOLDIER_TALENT_TREE: TalentTree = {
         {
             id: "formationDrills",
             name: "Formation Drills",
+            modifiesTalent: 'defensivePosition',
             description: "While an ally within 10 feet of you benefits from the Brace action, they also benefit from your Defensive Position as if they had that talent themself.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

@@ -7,6 +7,7 @@ export const INVESTIGATOR_TALENT_TREE: TalentTree = {
         {
             id: "watchfulEye",
             name: "Watchful Eye",
+            modifiesTalent: 'opportunist',
             description: "Use Opportunist on the plot die of a willing ally within 20 feet.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [

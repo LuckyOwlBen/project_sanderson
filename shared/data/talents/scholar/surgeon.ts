@@ -7,6 +7,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
         {
             id: "emotionalIntelligence",
             name: "Emotional Intelligence",
+            modifiesTalent: 'erudition',
             description: "When you acquire this talent, your Erudition talent grants you an additional skill, and you can use Erudition to choose spiritual skills that aren't surges. Additionally, you gain a utility expertise in Diagnosis.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -79,6 +80,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
         {
             id: "swiftHealer",
             name: "Swift Healer",
+            modifiesTalent: 'fieldMedicine',
             description: "You can use your Field Medicine as a free action. Additionally, when you acquire this talent, you become more skilled in healing. When you use an ability that restores health to another character, they recover additional health equal to your ranks in Medicine.",
             actionCost: ActionCostCode.Free,
             prerequisites: [
@@ -129,6 +131,7 @@ export const SURGEON_TALENT_TREE: TalentTree = {
         {
             id: "resuscitation",
             name: "Resuscitation",
+            modifiesTalent: 'fieldMedicine',
             description: "You can use your Field Medicine talent to attempt to resuscitate a fallen character. When you do, spend 3 focus (instead of 1) to target a character within your reach who is Unconscious or who died within a number of rounds equal to your ranks in Medicine. That talent's test DC increases by 5 for each injury the target has beyond the first. On a failure, the target doesn't regain health. On a success, the target recovers health as usual for that talent, and if they were dead, they return to life. If they were Unconscious, they can choose to remove that condition if they wish.",
             actionCost: ActionCostCode.Special,
             specialActivation: "Use Field Medicine on an Unconscious target or one who died within Medicine-ranks rounds, spending 3 focus instead of 1.",

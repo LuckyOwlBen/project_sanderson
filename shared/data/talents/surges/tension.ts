@@ -25,6 +25,7 @@ export const TENSION_SURGE_TREE: TalentTree = {
         {
             id: 'tension_tension_parry',
             name: 'Tension Parry',
+            modifiesTalent: 'tension_base',
             description: 'You stiffen clothing to block incoming attacks. Before you or an ally within your reach is hit or grazed by an attack against Physical defense, you can use this reaction to infuse Tension into the target\'s clothing or a soft material you wrap around the target, spending Investiture as usual. They gain the Hardened Defense effect, increasing their Physical defense by 2 for the duration, including against the triggering attack. If the attack hit, this increase can change it to a miss. If the attack grazed, the target ignores its effects.',
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
@@ -55,6 +56,7 @@ export const TENSION_SURGE_TREE: TalentTree = {
         {
             id: 'tension_rigged_weaponry',
             name: 'Rigged Weaponry',
+            modifiesTalent: 'tension_base',
             description: 'Dynamic use of Tension on cloth or rope allows you to augment your martial prowess. While wielding a melee weapon and holding cloth or other flexible object that\'s at least 10 feet long, you can spend 1 Investiture as Free to increase the weapon\'s reach by 10 feet until the end of your next turn. Additionally, after you hit a character with a melee attack, you can spend C or 2 focus to use Tension on an object the target is holding or wearing, infusing Investiture as usual but without spending an action. You automatically succeed on the test to infuse it.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'While wielding melee weapon with 10+ foot cloth/rope, or after hitting with melee attack',
@@ -77,6 +79,7 @@ export const TENSION_SURGE_TREE: TalentTree = {
         {
             id: 'tension_extended_tension',
             name: 'Extended Tension',
+            modifiesTalent: 'tension_base',
             description: 'Your infusions of Tension expend the Stormlight far less quickly. When you infuse Tension into an object, instead of the infusion expending 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Tension. For example, if you have 3 ranks in Tension, those infusions expend Investiture once every 3 rounds. Additionally, while you have 1 Investiture or more, you can maintain Tension infusions on objects you\'re holding or wearing without either you or the infusion expending Investiture.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -143,6 +146,7 @@ export const TENSION_SURGE_TREE: TalentTree = {
         {
             id: 'tension_clothsmith',
             name: 'Clothsmith',
+            modifiesTalent: 'tension_tension_parry',
             description: 'The impromptu weapons and armor you create with Tension are so powerful that they rival Shardblades and Plate. When you infuse Tension to grant a character the Hardened Defense effect, their Physical defense increases by 4 (instead of 2). Additionally, when you temporarily create a weapon with Tension (see "Creating Objects and Weapons"), it gains an extra d4 damage die (for example, an axe created this way deals 1d6 + 1d4 keen damage). The size of this die increases with your ranks in Tension; at 2 ranks, the extra die becomes a d6 (instead of a d4), and so on.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

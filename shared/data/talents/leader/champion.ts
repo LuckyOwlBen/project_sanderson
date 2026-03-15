@@ -7,6 +7,7 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
         {
             id: "combatCoordination",
             name: "Combat Coordination",
+            modifiesTalent: 'decisiveCommand',
             description: "After you use the Strike action, use Decisive Command as a free action. If your Strike didn't hit, you also don't have to spend the usual focus for Decisive Command.",
             actionCost: ActionCostCode.Free,
             prerequisites: [
@@ -119,6 +120,7 @@ export const CHAMPION_TALENT_TREE: TalentTree = {
         {
             id: "resoluteStand",
             name: "Resolute Stand",
+            modifiesTalent: 'valiantIntervention',
             description: "When you use your Valiant Intervention, you can spend focus up to your ranks in Leadership to target that many additional characters. Additionally, after you affect a target with Valiant Intervention, they can't make Reactive Strikes against your allies until the end of that target's next turn.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When using Valiant Intervention, spend up to Leadership-ranks focus to target additional characters.",

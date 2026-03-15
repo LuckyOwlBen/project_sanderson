@@ -43,6 +43,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
         {
             id: "witheringRetort",
             name: "Withering Retort",
+            modifiesTalent: 'steadfastChallenge',
             description: "Use your Steadfast Challenge before an attack and increase your deflect against the attack by your ranks in Discipline.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
@@ -70,6 +71,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
         {
             id: "calmAppeal",
             name: "Calm Appeal",
+            modifiesTalent: 'steadfastChallenge',
             description: "When your Steadfast Challenge makes a target Disoriented, spend 1 focus to pacify them. Resisting your Steadfast Challenge costs additional focus equal to your ranks in Discipline.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When your Steadfast Challenge makes a target Disoriented, spend 1 focus to pacify them.",
@@ -175,6 +177,7 @@ export const DIPLOMAT_TALENT_TREE: TalentTree = {
         {
             id: "practicedOratory",
             name: "Practiced Oratory",
+            modifiesTalent: 'steadfastChallenge',
             description: "When you use Rousing Presence or Steadfast Challenge, spend focus up to your ranks in Persuasion to add that many targets.",
             actionCost: ActionCostCode.Special,
             specialActivation: "Spend focus up to your Persuasion ranks to add additional targets to Rousing Presence or Steadfast Challenge.",

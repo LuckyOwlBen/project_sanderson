@@ -6,6 +6,7 @@ export const POLITICO_TALENT_TREE: TalentTree = {
         {
             id: "cutthroatTactics",
             name: "Cutthroat Tactics",
+            modifiesTalent: 'decisiveCommand',
             description: "Before an ally rolls your command die on a test, they can choose to instead raise the stakes on that test. If they do so and roll a Complication, you recover 1 focus.",
             actionCost: ActionCostCode.Special,
             specialActivation: "Ally chooses to raise stakes before rolling command die — if they roll a Complication, you recover 1 focus.",

@@ -108,6 +108,7 @@ export const PROGRESSION_SURGE_TREE: TalentTree = {
         {
             id: 'progression_extended_regrowth',
             name: 'Extended Regrowth',
+            modifiesTalent: 'progression_base',
             description: 'Your Regrowth infusions expend Stormlight far less quickly. When you infuse Regrowth into a character, instead of the infusion expending 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Progression. For example, if you have 3 ranks in Progression, those infusions expend Investiture once every 3 rounds.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

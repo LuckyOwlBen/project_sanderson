@@ -7,6 +7,7 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
         {
             id: "mindAndBody",
             name: "Mind and Body",
+            modifiesTalent: 'erudition',
             description: "When you acquire this talent, your Erudition talent grants you an additional skill, and you can use Erudition to choose physical skills that aren't surges. Additionally, gain one weapon expertise of your choice.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -76,6 +77,7 @@ export const STRATEGIST_TALENT_TREE: TalentTree = {
         {
             id: "deepContemplation",
             name: "Deep Contemplation",
+            modifiesTalent: 'erudition',
             description: "Reassign up to 2 of the skills and expertises gained from your Erudition.",
             actionCost: 2,
             prerequisites: [

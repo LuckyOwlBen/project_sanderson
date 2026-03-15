@@ -63,6 +63,7 @@ export const TRANSFORMATION_SURGE_TREE: TalentTree = {
         {
             id: 'transformation_soulcast_parry',
             name: 'Soulcast Parry',
+            modifiesTalent: 'transformation_soulcast_defense',
             description: 'You can use Soulcasting to defend against even more immediate threats. You can now use Soulcast Defense on melee weapon attacks as well as ranged ones.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

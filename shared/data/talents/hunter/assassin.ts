@@ -57,6 +57,7 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
         {
             id: "shadowing",
             name: "Shadowing",
+            modifiesTalent: 'seekQuarry',
             description: "You gain an advantage on tests to avoid being sensed by your quarry, and your quarry gains a disadvantage on tests to sense you. Additionally, when you succeed on a test against an enemy's Spiritual defense while you're in cover or an area where your target's senses are obscured, you can spend 3 focus to designate that target as your quarry for your Seek Quarry talent.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When succeeding on a test vs. an enemy's Spiritual defense while in cover or obscured, spend 3 focus to designate them as your quarry.",
@@ -81,6 +82,7 @@ export const ASSASSIN_TALENT_TREE: TalentTree = {
         {
             id: "coldEyes",
             name: "Cold Eyes",
+            modifiesTalent: 'seekQuarry',
             description: "After you kill or incapacitate an enemy who is your quarry, you recover 1 focus and can designate another enemy you can sense as your quarry for your Seek Quarry talent.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

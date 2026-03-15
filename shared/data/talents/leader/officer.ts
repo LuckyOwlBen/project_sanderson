@@ -98,6 +98,7 @@ export const OFFICER_TALENT_TREE: TalentTree = {
         {
             id: "relentlessMarch",
             name: "Relentless March",
+            modifiesTalent: 'decisiveCommand',
             description: "After you use your Decisive Command on an ally, until the end of their next turn, their movement rate increases by 10 feet and they ignore the effects of the Exhausted, Slowed, and Surprised conditions.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

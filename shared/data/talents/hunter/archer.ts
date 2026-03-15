@@ -46,6 +46,7 @@ export const ARCHER_TALENT_TREE: TalentTree = {
         {
             id: "taggingShot",
             name: "Tagging Shot",
+            modifiesTalent: 'seekQuarry',
             description: "Move up to 5 feet and make a ranged weapon attack against the Physical defense of a target. On a hit or a graze, you also make the target your quarry for your Seek Quarry talent.",
             actionCost: 3,
             prerequisites: [

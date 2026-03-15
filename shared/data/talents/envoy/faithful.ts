@@ -27,6 +27,7 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
         {
             id: "appliedMotivation",
             name: "Applied Motivation",
+            modifiesTalent: 'galvanize',
             description: "When you cause a character to recover focus, they recover additional focus equal to half your ranks in Lore (rounded up).",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -80,6 +81,7 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
         {
             id: "devotedPresence",
             name: "Devoted Presence",
+            modifiesTalent: 'rousingPresence',
             description: "When you use your Rousing Presence on one or more allies, you can spend 1 focus per target to remove any number of the following conditions from them: Prone, Slowed, Stunned, and Surprised.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When using Rousing Presence, spend 1 focus per target to remove Prone, Slowed, Stunned, or Surprised.",
@@ -109,6 +111,7 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
         {
             id: "stalwartPresence",
             name: "Stalwart Presence",
+            modifiesTalent: 'rousingPresence',
             description: "When you use your Rousing Presence, you can spend 1 focus to increase one of the target's defenses (your choice) by 2 until the end of the next round.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When using Rousing Presence, spend 1 focus to increase a target's defense by 2 until end of next round.",
@@ -155,6 +158,7 @@ export const FAITHFUL_TALENT_TREE: TalentTree = {
         {
             id: "sageCounsel",
             name: "Sage Counsel",
+            modifiesTalent: 'rousingPresence',
             description: "After you use the Aid reaction on an ally, spend 1 focus to grant that ally the benefits of your Rousing Presence (no action required).",
             actionCost: ActionCostCode.Special,
             specialActivation: "After using Aid reaction, spend 1 focus to grant ally Rousing Presence benefits.",

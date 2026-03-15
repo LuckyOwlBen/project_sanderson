@@ -7,6 +7,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
         {
             id: "practicalDemonstration",
             name: "Practical Demonstration",
+            modifiesTalent: 'rousingPresence',
             description: "After you succeed on a test to attack or Gain Advantage, you can use your Rousing Presence as a free action.",
             actionCost: ActionCostCode.Free,
             prerequisites: [
@@ -28,6 +29,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
         {
             id: "soundAdvice",
             name: "Sound Advice",
+            modifiesTalent: 'rousingPresence',
             description: "After an ally you can influence fails a skill test, you can spend 1 focus to use your Rousing Presence on them as a free action.",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [
@@ -56,6 +58,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
         {
             id: "lessonsInPatience",
             name: "Lessons in Patience",
+            modifiesTalent: 'rousingPresence',
             description: "After you use your Rousing Presence, the target recovers 1 focus. Additionally, when you acquire this talent, gain a Motivational Speech utility expertise.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -99,6 +102,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
         {
             id: "instillConfidence",
             name: "Instill Confidence",
+            modifiesTalent: 'rousingPresence',
             description: "When you use your Rousing Presence, instead of the target becoming Determined, you can make them Focused until the end of the scene.",
             actionCost: ActionCostCode.Special,
             specialActivation: "When using Rousing Presence, make the target Focused until end of scene instead of Determined.",
@@ -134,6 +138,7 @@ export const MENTOR_TALENT_TREE: TalentTree = {
         {
             id: "rallyingShout",
             name: "Rallying Shout",
+            modifiesTalent: 'rousingPresence',
             description: "When you use your Rousing Presence, you can target an Unconscious ally you can sense. When you do, the target is no longer Unconscious, and if they have 0 health, they roll their recovery die and recover health equal to the result + your ranks in Leadership.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [

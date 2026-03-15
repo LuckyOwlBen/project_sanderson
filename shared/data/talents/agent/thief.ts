@@ -62,6 +62,7 @@ export const THIEF_TALENT_TREE: TalentTree = {
     {
         id: 'doubleDown',
         name: 'Double Down',
+        modifiesTalent: 'opportunist',
         description: 'You can reroll again with Opportunist, but on a complication, you lose 2 focus.',
         actionCost: ActionCostCode.Special,
         specialActivation: 'You can reroll again with Opportunist, but on a complication, you lose 2 focus.',

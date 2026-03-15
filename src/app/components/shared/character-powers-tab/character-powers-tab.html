@@ -71,46 +71,66 @@
     </div>
     <div class="card-content">
       <div class="powers-list">
-        <div class="powers-accordion" *ngIf="getPowers().length > 0">
-          <details *ngFor="let power of getPowers()" class="power-panel">
+        <div class="powers-accordion" *ngIf="getGroupedPowers().length > 0">
+          <details *ngFor="let group of getGroupedPowers()" class="power-panel">
             <summary class="power-header">
               <div class="power-title">
                 <span class="power-icon">⚡</span>
-                <span class="power-name">{{ power.name }}</span>
+                <span class="power-name">{{ group.base.name }}</span>
+                <span class="modifier-count" *ngIf="group.modifiers.length > 0">+{{ group.modifiers.length }}</span>
               </div>
               <span class="power-cost">
-                {{ getActionCostDisplay(power.actionCost) }}
+                {{ getActionCostDisplay(group.base.actionCost) }}
               </span>
             </summary>
             <div class="power-details">
               <div class="power-description">
-                <p>{{ power.description }}</p>
-                <p *ngIf="power.specialActivation" class="special-activation">
-                  <strong>Special Activation:</strong> {{ power.specialActivation }}
+                <p>{{ group.base.description }}</p>
+                <p *ngIf="group.base.specialActivation" class="special-activation">
+                  <strong>Special Activation:</strong> {{ group.base.specialActivation }}
                 </p>
               </div>
-              <div class="power-bonuses" *ngIf="getBonusDisplay(power).length > 0">
+              <div class="power-bonuses" *ngIf="getBonusDisplay(group.base).length > 0">
                 <h4><span class="bonus-icon">📈</span> Bonuses</h4>
                 <ul>
-                  <li *ngFor="let bonus of getBonusDisplay(power)">{{ bonus }}</li>
+                  <li *ngFor="let bonus of getBonusDisplay(group.base)">{{ bonus }}</li>
                 </ul>
               </div>
-              <div class="power-effects" *ngIf="getOtherEffects(power).length > 0">
+              <div class="power-effects" *ngIf="getOtherEffects(group.base).length > 0">
                 <h4><span class="effect-icon">✨</span> Additional Effects</h4>
                 <ul>
-                  <li *ngFor="let effect of getOtherEffects(power)">{{ effect }}</li>
+                  <li *ngFor="let effect of getOtherEffects(group.base)">{{ effect }}</li>
                 </ul>
               </div>
               <div class="power-meta">
-                <span class="power-tier">Tier {{ power.tier }}</span>
-                <span class="power-path" *ngIf="power.pathRequirement">
-                  <span class="path-icon">🛤️</span> {{ power.pathRequirement }}
+                <span class="power-tier">Tier {{ group.base.tier }}</span>
+                <span class="power-path" *ngIf="group.base.pathRequirement">
+                  <span class="path-icon">🛤️</span> {{ group.base.pathRequirement }}
                 </span>
+              </div>
+
+              <!-- Modifier talents grouped under this base -->
+              <div class="modifier-section" *ngIf="group.modifiers.length > 0">
+                <h4 class="modifier-header"><span class="modifier-header-icon">🔧</span> Talent Modifications</h4>
+                <div class="modifier-item" *ngFor="let mod of group.modifiers">
+                  <div class="modifier-item-header">
+                    <span class="modifier-name">{{ mod.name }}</span>
+                    <span class="modifier-cost">{{ getActionCostDisplay(mod.actionCost) }}</span>
+                  </div>
+                  <p class="modifier-description">{{ mod.description }}</p>
+                  <ul class="modifier-effects" *ngIf="getOtherEffects(mod).length > 0">
+                    <li *ngFor="let effect of getOtherEffects(mod)">{{ effect }}</li>
+                  </ul>
+                  <ul class="modifier-bonuses" *ngIf="getBonusDisplay(mod).length > 0">
+                    <li *ngFor="let bonus of getBonusDisplay(mod)">{{ bonus }}</li>
+                  </ul>
+                  <span class="modifier-tier">Tier {{ mod.tier }}</span>
+                </div>
               </div>
             </div>
           </details>
         </div>
-        <p class="empty-text" *ngIf="getPowers().length === 0">
+        <p class="empty-text" *ngIf="getGroupedPowers().length === 0">
           No powers unlocked yet
         </p>
       </div>

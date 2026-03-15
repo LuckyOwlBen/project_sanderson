@@ -32,6 +32,7 @@ export const ADHESION_SURGE_TREE: TalentTree = {
         {
             id: 'adhesion_binding_strike',
             name: 'Binding Strike',
+            modifiesTalent: 'adhesion_base',
             description: 'You can seamlessly use Adhesion while performing your melee attacks. After you hit with a melee attack, you can spend 1 or 2 focus to use Adhesion, infusing Investiture as usual but without spending an action. At least one target must be an object the target is holding or wearing, and you automatically succeed on the test to infuse it. As usual, the other object or surface must be within 5 feet of the first object, but you don\'t need to touch it or have a hand free.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'After you hit with a melee attack',
@@ -76,6 +77,7 @@ export const ADHESION_SURGE_TREE: TalentTree = {
         {
             id: 'adhesion_binding_shot',
             name: 'Binding Shot',
+            modifiesTalent: 'adhesion_binding_strike',
             description: 'You "paint" your ammunition with Adhesion before throwing or firing it at a target, transferring the infusion to one of your target\'s possessions. You can use Binding Strike when you hit with a ranged attack at any distance, and you don\'t need to touch the infused targets or have a hand free.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'After you hit with a ranged attack',
@@ -148,6 +150,7 @@ export const ADHESION_SURGE_TREE: TalentTree = {
         {
             id: 'adhesion_extended_adhesion',
             name: 'Extended Adhesion',
+            modifiesTalent: 'adhesion_base',
             description: 'Your Full Lashings use less Stormlight, allowing them to last much longer. When you perform a Full Lashing, instead of the infusion using 1 Investiture per round, it expends 1 Investiture per number of rounds equal to your ranks in Adhesion. For example, if you have 3 ranks in Adhesion, those infusions expend Investiture once every 3 rounds.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -164,6 +167,7 @@ export const ADHESION_SURGE_TREE: TalentTree = {
         {
             id: 'adhesion_living_adhesion',
             name: 'Living Adhesion',
+            modifiesTalent: 'adhesion_base',
             description: 'You can apply Adhesion directly to other living beings, sticking their bodies to surfaces. You can use Adhesion on characters, making a test as if you were targeting an object in their possession. When you Lash a character to an object or surface that\'s larger than them, that character becomes Restrained, they gain a disadvantage on all physical tests, and all attack tests against them gain an advantage.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

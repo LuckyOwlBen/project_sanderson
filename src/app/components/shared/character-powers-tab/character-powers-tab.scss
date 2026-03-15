@@ -272,7 +272,103 @@
         }
       }
     }
+
+    .modifier-section {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(74, 179, 232, 0.2);
+
+      .modifier-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.75rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ff9800;
+
+        .modifier-header-icon {
+          font-size: 18px;
+        }
+      }
+
+      .modifier-item {
+        margin-left: 0.75rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 152, 0, 0.06);
+        border-left: 3px solid rgba(255, 152, 0, 0.5);
+        border-radius: 0 6px 6px 0;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .modifier-item-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.4rem;
+        }
+
+        .modifier-name {
+          font-weight: 600;
+          font-size: 0.95rem;
+          color: #ff9800;
+        }
+
+        .modifier-cost {
+          font-size: 0.8rem;
+          color: #b0b0b0;
+          font-weight: 500;
+        }
+
+        .modifier-description {
+          margin: 0 0 0.4rem 0;
+          color: #d0d0d0;
+          font-size: 0.85rem;
+          line-height: 1.5;
+        }
+
+        .modifier-effects,
+        .modifier-bonuses {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 0.4rem 0;
+
+          li {
+            padding: 0.25rem 0.5rem;
+            background: var(--gpSystemDarkGrey);
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+            color: #e8e8e8;
+            font-size: 0.8rem;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+
+        .modifier-tier {
+          font-size: 0.75rem;
+          color: #888;
+          font-weight: 500;
+        }
+      }
+    }
   }
+}
+
+// Modifier count badge on the power header
+.modifier-count {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  font-weight: 700;
+  background: rgba(255, 152, 0, 0.25);
+  color: #ff9800;
+  margin-left: 0.35rem;
 }
 
 // Abilities styling (similar to powers but with unique touches)

@@ -70,6 +70,7 @@ export const ABRASION_SURGE_TREE: TalentTree = {
         {
             id: 'abrasion_graceful_skating',
             name: 'Graceful Skating',
+            modifiesTalent: 'abrasion_base',
             description: 'You dynamically skate around the battlefield, easily slipping away from your foes. When you Skate, you aren\'t restricted to moving in a straight line.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -112,6 +113,7 @@ export const ABRASION_SURGE_TREE: TalentTree = {
         {
             id: 'abrasion_slippery_target',
             name: 'Slippery Target',
+            modifiesTalent: 'abrasion_base',
             description: 'You make yourself so slick that glancing and hasty blows slide right off you. While you are infused with Abrasion, attacks can\'t graze you and Reactive Strikes against you gain a disadvantage.',
             actionCost: ActionCostCode.Special,
             specialActivation: 'While infused with Abrasion',
@@ -147,6 +149,7 @@ export const ABRASION_SURGE_TREE: TalentTree = {
         {
             id: 'abrasion_smooth_operator',
             name: 'Smooth Operator',
+            modifiesTalent: 'abrasion_base',
             description: 'You\'ve become so efficient at infusing yourself with Abrasion that it becomes subconscious, allowing you to slip around with effortless grace. While you have 1 Investiture or more, you gain the benefits of being infused with Abrasion without spending Investiture, and it costs you 1 fewer focus to Skate.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

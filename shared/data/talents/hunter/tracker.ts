@@ -53,6 +53,7 @@ export const TRACKER_TALENT_TREE: TalentTree = {
         {
             id: "protectiveBond",
             name: "Protective Bond",
+            modifiesTalent: 'animalBond',
             description: "Assign your animal companion to protect an ally within 30 feet. Animal companion moves to ally's side. While within reach of that ally, you lose the Animal Bond defense bonus and the ally gains it instead. Ends when you use action within 30 feet of companion or at end of scene.",
             actionCost: 1,
             prerequisites: [
@@ -69,6 +70,7 @@ export const TRACKER_TALENT_TREE: TalentTree = {
         {
             id: "experiencedTrapper",
             name: "Experienced Trapper",
+            modifiesTalent: 'deadlyTrap',
             description: "Forage during short rest without using full attention (can roll recovery die). Auto-succeed on Survival tests to forage for food/water (sustains Survival ranks number of characters). After long rest in wilderness, can fashion survival tool using Survival instead of Crafting. Deadly Trap damage increases to 2d6 and conditions last 2 rounds.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -87,6 +89,7 @@ export const TRACKER_TALENT_TREE: TalentTree = {
         {
             id: "feralConnection",
             name: "Feral Connection",
+            modifiesTalent: 'animalBond',
             description: "Animal companion's max and current health increase by 5 × your tier (scales with tier increases). Companion's Physical, Cognitive, and Spiritual defenses increase by 2 each. Companion adds your Survival ranks as bonus to their tests. Gain Animal Care utility expertise.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -121,6 +124,7 @@ export const TRACKER_TALENT_TREE: TalentTree = {
         {
             id: "packHunting",
             name: "Pack Hunting",
+            modifiesTalent: 'seekQuarry',
             description: "When an ally in your line of effect attacks your quarry, you can use this reaction and spend 1 focus to add your ranks in Survival to either the result of their attack test or their damage roll (your choice).",
             actionCost: ActionCostCode.Reaction,
             prerequisites: [

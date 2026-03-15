@@ -25,6 +25,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_flying_ace',
             name: 'Flying Ace',
+            modifiesTalent: 'gravitation_base',
             description: 'You are a master of the skies, adeptly wielding your weapon while in flight. While maintaining a Basic Lashing on yourself, fly a distance up to your gravitation rate. Once during this movement, you can spend 1 focus to make a melee weapon attack as part of the same action. After resolving that attack, you can continue your movement. Additionally, when you acquire this talent, your gravitation rate increases to 40 feet.',
             actionCost: 1,
             prerequisites: [
@@ -62,6 +63,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_stable_flight',
             name: 'Stable Flight',
+            modifiesTalent: 'gravitation_flying_ace',
             description: 'You\'re an expert in launching attacks from afar in mid-flight. While maintaining a Basic Lashing on yourself, your ranged attacks don\'t gain a disadvantage due to flying or other causes of unstable footing.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -76,6 +78,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_multiple_lashings',
             name: 'Multiple Lashings',
+            modifiesTalent: 'gravitation_base',
             description: 'You can apply multiple Basic Lashings to an enemy. After you succeed on a Gravitation test to move an unwilling character, you can infuse them with an amount of Investiture up to your ranks in Gravitation (instead of only 1 Investiture). When you do, the effect continues until the infusion ends (instead of until the start of your next turn).',
             actionCost: ActionCostCode.Special,
             specialActivation: 'After you succeed on a Gravitation test to move an unwilling character',
@@ -115,6 +118,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_group_flight',
             name: 'Group Flight',
+            modifiesTalent: 'gravitation_base',
             description: 'You can infuse multiple allies with Gravitation at once. While not in combat, when you spend 1 Investiture or more to infuse yourself or a willing character with a Basic Lashing, you can also infuse a number of additional willing characters up to your ranks in Gravitation. Each target must be within your reach. These infusions last for the duration of the original infusion and require no additional Investiture to create or maintain.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -134,6 +138,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_aerial_squadron',
             name: 'Aerial Squadron',
+            modifiesTalent: 'gravitation_group_flight',
             description: 'You\'ve trained your allies in aerial combat scenarios, readying them to fly together at a moment\'s notice. You can use your Group Flight in combat.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -150,6 +155,7 @@ export const GRAVITATION_SURGE_TREE: TalentTree = {
         {
             id: 'gravitation_master_of_the_skies',
             name: 'Master of the Skies',
+            modifiesTalent: 'gravitation_base',
             description: 'You\'ve become so efficient at infusing yourself with Gravitation that it becomes subconscious, allowing you to endlessly soar. While you have 1 Investiture or more, you gain the benefits of being infused with Gravitation without spending Investiture.',
             actionCost: ActionCostCode.Passive,
             prerequisites: [

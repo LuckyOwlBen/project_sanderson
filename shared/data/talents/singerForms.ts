@@ -27,6 +27,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_finesse",
             name: "Forms of Finesse",
+            modifiesTalent: 'singer_change_form',
             description: "Gain artform and nimbleform. These forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [
@@ -44,6 +45,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_wisdom",
             name: "Forms of Wisdom",
+            modifiesTalent: 'singer_change_form',
             description: "Gain meditationform and scholarform. These forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [
@@ -61,6 +63,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_resolve",
             name:"Forms of Resolve",
+            modifiesTalent: 'singer_change_form',
             description: "Gain warform and workform. These forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [
@@ -97,6 +100,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_destruction",
             name: "Forms of Destruction",
+            modifiesTalent: 'singer_change_form',
             description: "Gain direform and stormform. These powerful Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [
@@ -115,6 +119,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_expansion",
             name: "Forms of Expansion",
+            modifiesTalent: 'singer_change_form',
             description: "Gain envoyform and relayform. These Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [
@@ -133,6 +138,7 @@ export const SINGER_FORMS_TALENT_TREE: TalentTree = {
         {
             id: "forms_of_mystery",
             name: "Forms of Mystery",
+            modifiesTalent: 'singer_change_form',
             description: "Gain decayform and nightform. These mysterious Voidspren-bonded forms become available to you during highstorms when you use Change Form.",
             actionCost: Infinity,
             prerequisites: [

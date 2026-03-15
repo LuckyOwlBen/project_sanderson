@@ -45,6 +45,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
         {
             id: "deepStudy",
             name: "Deep Study",
+            modifiesTalent: 'erudition',
             description: "When you acquire this talent, your Erudition talent grants you one additional cultural or utility expertise, and it grants you two additional cognitive skills that aren't surge skills. You can reassign these in the same way as the others you gained from that talent.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -61,6 +62,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
         {
             id: "inventiveDesign",
             name: "Inventive Design",
+            modifiesTalent: 'prizedAcquisition',
             description: "When you craft a fabrial using your gemstone from your Prized Acquisition, you can select an effect of 1 tier higher than the tier you're currently crafting.",
             actionCost: ActionCostCode.Passive,
             prerequisites: [
@@ -103,6 +105,7 @@ export const ARTIFABRIAN_TALENT_TREE: TalentTree = {
         {
             id: "experimentalTinkering",
             name: "Experimental Tinkering",
+            modifiesTalent: 'prizedAcquisition',
             description: "When you craft an item or invent a fabrial, your Opportunity range on those tests expands by 1, and your crafting time is halved. Additionally, you can forgo the usual benefits of a long rest to instead spend that time tinkering with a fabrial that uses your Prized Acquisition gem. After that long rest, you can attempt to reconfigure this fabrial to create a different fabrial of the same tier or lower; this follows the normal crafting process, except you don't need new materials and you ignore the usual time requirement for attracting a spren and crafting the fabrial. If you fail your Lore test to trap a spren, your previous fabrial remains intact, but you can't use this talent to reconfigure a fabrial again until your next long rest. After you finish crafting a new fabrial using this talent, the old fabrial is lost.",
             actionCost: ActionCostCode.Special,
             specialActivation: "Forgo long rest benefits to reconfigure the Prized Acquisition fabrial into a different fabrial of the same tier or lower (no materials, no time requirement).",
