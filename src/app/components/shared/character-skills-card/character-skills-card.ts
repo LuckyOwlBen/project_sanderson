@@ -38,8 +38,18 @@ export class CharacterSkillsCard {
 
     const skills: SkillDisplay[] = [];
 
-    // Add regular and surge skills
+    // Determine which surge skills are unlocked for this character
+    const unlockedSurgePair: SkillType[] =
+      this.character.radiantPath.hasSpokenIdeal()
+        ? (this.character.radiantPath.getOrderInfo()?.surgePair ?? [])
+        : [];
+
+    // Add regular and unlocked surge skills
     Object.values(SkillType).forEach(skillType => {
+      if (isSurgeSkill(skillType) && !unlockedSurgePair.includes(skillType)) {
+        return; // Skip surge skills the character hasn't unlocked
+      }
+
       const rank = this.character!.skills.getSkillRank(skillType);
       const associatedAttr = this.skillAssociationTable.checkSkillAssociation(skillType);
       const attrValue = this.character!.attributes.getAttribute(associatedAttr);
@@ -72,8 +82,10 @@ export class CharacterSkillsCard {
       });
     });
 
-    // Sort alphabetically
-    return skills.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort alphabetically, hiding any skills with a total of 0
+    return skills
+      .filter(s => s.total !== 0)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
