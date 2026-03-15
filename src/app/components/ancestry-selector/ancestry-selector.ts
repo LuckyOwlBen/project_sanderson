@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil, filter, take } from 'rxjs';
 import { Ancestry } from '../../character/ancestry/ancestry';
 import { StepValidationService } from '../../services/step-validation.service';
 import { AncestryApiService } from '../../services/ancestry-api.service';
@@ -144,34 +144,43 @@ export class AncestrySelector implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
+  public persistStep(): Promise<void> {
     console.log('[AncestrySelector] persistStep called');
-    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
-      if (!characterId) {
-        console.warn('[AncestrySelector] No character ID available for saving');
-        return;
-      }
-      
-      if (!this.selectedAncestry) {
-        console.warn('[AncestrySelector] No ancestry selected for saving');
-        return;
-      }
+    return new Promise<void>((resolve, reject) => {
+      this.identityService.currentCharacterId$.pipe(
+        takeUntil(this.destroy$),
+        filter(id => id !== null),
+        take(1)
+      ).subscribe(characterId => {
+        if (!characterId) {
+          console.warn('[AncestrySelector] No character ID available for saving');
+          resolve();
+          return;
+        }
 
-      console.log('[AncestrySelector] Saving ancestry:', this.selectedAncestry, 'for character:', characterId);
-      this.isLoading = true;
-      this.ancestryApiService.saveAncestry(characterId, this.selectedAncestry)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            console.log('[AncestrySelector] Ancestry saved to server:', response);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('[AncestrySelector] Failed to save ancestry:', error);
-            this.isLoading = false;
-            this.router.navigate(['/']);
-          }
-        });
+        if (!this.selectedAncestry) {
+          console.warn('[AncestrySelector] No ancestry selected for saving');
+          resolve();
+          return;
+        }
+
+        console.log('[AncestrySelector] Saving ancestry:', this.selectedAncestry, 'for character:', characterId);
+        this.isLoading = true;
+        this.ancestryApiService.saveAncestry(characterId, this.selectedAncestry)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              console.log('[AncestrySelector] Ancestry saved to server:', response);
+              this.isLoading = false;
+              resolve();
+            },
+            error: (error) => {
+              console.error('[AncestrySelector] Failed to save ancestry:', error);
+              this.isLoading = false;
+              reject(error);
+            }
+          });
+      });
     });
   }
 }

@@ -6,6 +6,7 @@ import { Character } from '../character/character';
 import { Ancestry } from '../character/ancestry/ancestry';
 import { ExpertiseSourceHelper } from '../character/expertises/expertiseSource';
 import { applyTalentEffects } from 'shared/data/talents/talentEffects';
+import { talentTreeManager } from 'shared/data/talents/talentManager';
 
 export interface SavedCharacter {
   id: string;
@@ -224,6 +225,21 @@ export class CharacterStorageService {
     if (data.unlockedTalents) {
       data.unlockedTalents.forEach((talentId: string) => {
         character.unlockedTalents.add(talentId);
+      });
+      // Apply talent bonuses (defense, skill, attribute, etc.) from talent node data
+      data.unlockedTalents.forEach((talentId: string) => {
+        const entry = talentTreeManager.getTalentNodeById(talentId);
+        if (entry) {
+          entry.node.bonuses?.forEach(bonus => {
+            character.bonuses.bonuses.addBonus(`talent:${talentId}`, bonus);
+          });
+          entry.node.grantsAdvantage?.forEach(situation => {
+            character.bonuses.advantages.addAdvantage(`talent:${talentId}:${situation}`);
+          });
+          entry.node.grantsDisadvantage?.forEach(situation => {
+            character.bonuses.advantages.addDisadvantage(`talent:${talentId}:${situation}`);
+          });
+        }
       });
     }
 

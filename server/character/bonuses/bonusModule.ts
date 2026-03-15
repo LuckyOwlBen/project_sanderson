@@ -82,9 +82,10 @@ export class BonusModule {
 
   getBonusesFor(type: BonusType, target: string, context?: { tier: number; skillRanks?: Map<string, number> }): number {
     let total = 0;
+    const normalizedTarget = target.toLowerCase();
     for (const effects of this.activeEffects.values()) {
       for (const e of effects) {
-        if (e.type === type && e.target === target) {
+        if (e.type === type && e.target.toLowerCase() === normalizedTarget) {
           total += this.evaluateBonus(e, context);
         }
       }
