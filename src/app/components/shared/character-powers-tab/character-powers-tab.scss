@@ -5,14 +5,499 @@
   padding-bottom: 6rem;
 }
 
-.powers-card,
-.stats-card,
-.abilities-card {
+// ─── Section accent color variables ───
+// Each action-economy section gets its own accent
+.accent-action    { --section-accent: #ff9800; --section-accent-bg: rgba(255, 152, 0, 0.12); --section-border: rgba(255, 152, 0, 0.3); }
+.accent-multi     { --section-accent: #e65100; --section-accent-bg: rgba(230, 81, 0, 0.12); --section-border: rgba(230, 81, 0, 0.3); }
+.accent-free      { --section-accent: #4CAF50; --section-accent-bg: rgba(76, 175, 80, 0.12); --section-border: rgba(76, 175, 80, 0.3); }
+.accent-reaction  { --section-accent: #00BCD4; --section-accent-bg: rgba(0, 188, 212, 0.12); --section-border: rgba(0, 188, 212, 0.3); }
+.accent-special   { --section-accent: #AB47BC; --section-accent-bg: rgba(171, 71, 188, 0.12); --section-border: rgba(171, 71, 188, 0.3); }
+.accent-passive   { --section-accent: #78909C; --section-accent-bg: rgba(120, 144, 156, 0.10); --section-border: rgba(120, 144, 156, 0.25); }
+
+// ─── Action Economy Section Card ───
+.action-section {
+  background: var(--gpSystemDarkerGrey);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--section-border);
+  overflow: hidden;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--section-border);
+    background: var(--section-accent-bg);
+
+    .section-icon {
+      font-size: 1.3rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--section-accent);
+      flex: 1;
+    }
+
+    .section-count {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 10px;
+      font-weight: 700;
+      background: var(--section-accent-bg);
+      color: var(--section-accent);
+      border: 1px solid var(--section-border);
+    }
+  }
+
+  .section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+}
+
+// ─── Power Panel (accordion item) ───
+.power-panel {
+  background-color: var(--gpSystemDarkGrey);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color 0.2s;
+
+  &[open] {
+    border-color: var(--section-border);
+  }
+
+  summary {
+    list-style: none;
+    cursor: pointer;
+    &::-webkit-details-marker { display: none; }
+  }
+
+  .power-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0.85rem;
+    color: #ffffff;
+    transition: background-color 0.2s;
+    gap: 0.75rem;
+
+    &:hover {
+      background-color: var(--section-accent-bg);
+    }
+
+    &::after {
+      content: '▼';
+      color: var(--section-accent);
+      font-size: 0.65rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+  }
+
+  &[open] .power-header::after {
+    transform: rotate(180deg);
+  }
+}
+
+.power-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+
+  .power-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .power-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.power-meta-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.power-cost {
+  color: var(--section-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+// ─── Inline attack quick stats (header) ───
+.attack-quick-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.attack-bonus {
+  font-weight: 700;
+  color: #4CAF50;
+  font-family: 'Courier New', monospace;
+}
+
+.stat-separator {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.attack-damage {
+  font-weight: 700;
+  color: #f44336;
+  font-family: 'Courier New', monospace;
+}
+
+.action-cost-badge {
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 152, 0, 0.2);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ff9800;
+  white-space: nowrap;
+}
+
+.defense-badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.defense-physical {
+  background: rgba(198, 40, 40, 0.2);
+  color: #ef9a9a;
+}
+
+.defense-cognitive {
+  background: rgba(21, 101, 192, 0.2);
+  color: #90caf9;
+}
+
+.defense-spiritual {
+  background: rgba(106, 27, 154, 0.2);
+  color: #ce93d8;
+}
+
+// ─── Damage type badges ───
+.damage-type-badge {
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.damage-keen {
+  background: rgba(255, 235, 59, 0.25);
+  color: #ffee58;
+}
+
+.damage-impact {
+  background: rgba(158, 158, 158, 0.3);
+  color: #bdbdbd;
+}
+
+.damage-energy {
+  background: rgba(33, 150, 243, 0.25);
+  color: #64b5f6;
+}
+
+.damage-vital {
+  background: rgba(244, 67, 54, 0.25);
+  color: #ef5350;
+}
+
+.damage-spirit {
+  background: rgba(156, 39, 176, 0.25);
+  color: #ba68c8;
+}
+
+// ─── Modifier count badge ───
+.modifier-count {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  font-weight: 700;
+  background: rgba(255, 152, 0, 0.25);
+  color: #ff9800;
+  flex-shrink: 0;
+}
+
+// ─── Power Details (expanded content) ───
+.power-details {
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  animation: expandDown 0.2s ease;
+
+  .power-description {
+    margin-bottom: 1rem;
+    color: #e0e0e0;
+    line-height: 1.6;
+
+    p { margin: 0 0 0.5rem 0; }
+
+    .special-activation {
+      padding: 0.65rem 0.85rem;
+      background: var(--section-accent-bg);
+      border-left: 3px solid var(--section-accent);
+      border-radius: 4px;
+      margin-top: 0.75rem;
+
+      strong { color: var(--section-accent); }
+    }
+  }
+
+  .power-bonuses,
+  .power-effects,
+  .power-limitations,
+  .resource-cost-display {
+    margin-bottom: 1rem;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--section-accent);
+    }
+
+    p {
+      color: #e0e0e0;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: 0.35rem 0.65rem;
+        background: var(--gpSystemDarkGrey);
+        border-radius: 4px;
+        margin-bottom: 0.35rem;
+        color: #e0e0e0;
+        font-size: 0.85rem;
+
+        &:last-child { margin-bottom: 0; }
+      }
+    }
+  }
+
+  .power-limitations {
+    h4 { color: #ff9800; }
+  }
+}
+
+// ─── Rich Attack Stats Grid ───
+.attack-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--gpSystemDarkGrey);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+// ─── Traits ───
+.attack-traits {
+  margin-bottom: 1rem;
+
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--section-accent);
+  }
+}
+
+.traits-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.trait-badge {
+  padding: 0.2rem 0.6rem;
+  background: rgba(63, 81, 181, 0.2);
+  color: #7986cb;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.modifier-condition {
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+}
+
+// ─── Power meta (tier, path, source) ───
+.power-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  color: #999;
+
+  .power-tier { font-weight: 500; }
+
+  .power-path {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    .path-icon { font-size: 14px; }
+  }
+
+  .ability-source {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    .source-icon { font-size: 14px; }
+  }
+
+  .ability-unconscious {
+    color: #ff9800;
+    font-weight: 500;
+  }
+}
+
+// ─── Modifier talents section ───
+.modifier-section {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--section-border, rgba(255, 255, 255, 0.08));
+
+  .modifier-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ff9800;
+    .modifier-header-icon { font-size: 16px; }
+  }
+
+  .modifier-item {
+    margin-left: 0.75rem;
+    padding: 0.65rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 152, 0, 0.06);
+    border-left: 3px solid rgba(255, 152, 0, 0.5);
+    border-radius: 0 6px 6px 0;
+
+    &:last-child { margin-bottom: 0; }
+
+    .modifier-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .modifier-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #ff9800;
+    }
+
+    .modifier-cost {
+      font-size: 0.75rem;
+      color: #999;
+      font-weight: 500;
+    }
+
+    .modifier-description {
+      margin: 0 0 0.35rem 0;
+      color: #d0d0d0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .modifier-effects,
+    .modifier-bonuses {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 0.35rem 0;
+
+      li {
+        padding: 0.2rem 0.45rem;
+        background: var(--gpSystemDarkGrey);
+        border-radius: 4px;
+        margin-bottom: 0.2rem;
+        color: #e0e0e0;
+        font-size: 0.75rem;
+        &:last-child { margin-bottom: 0; }
+      }
+    }
+
+    .modifier-tier {
+      font-size: 0.7rem;
+      color: #777;
+      font-weight: 500;
+    }
+  }
+}
+
+// ─── Expertises Card ───
+.stats-card {
   background: var(--gpSystemDarkerGrey);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  border: 1px solid rgba(74,179,232,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(74, 179, 232, 0.15);
 
   .card-header {
     display: flex;
@@ -44,22 +529,13 @@
   gap: 0.5rem;
   max-height: 400px;
   overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
 
-  &::-webkit-scrollbar-track {
-    background: var(--gpSystemDarkGrey);
-  }
-
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-track { background: var(--gpSystemDarkGrey); }
   &::-webkit-scrollbar-thumb {
     background: var(--gpColor-ChalkyBlue);
     border-radius: 4px;
-
-    &:hover {
-      background: #5ab3e8;
-    }
+    &:hover { background: #5ab3e8; }
   }
 
   .expertise-item {
@@ -90,466 +566,45 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
 
-      &.badge-culture {
-        background: #7e57c2;
-        color: white;
-      }
-
-      &.badge-talent {
-        background: #ff9800;
-        color: white;
-      }
-
-      &.badge-gm {
-        background: #f44336;
-        color: white;
-      }
-
-      &.badge-manual {
-        background: rgba(255, 255, 255, 0.15);
-        color: #e8e8e8;
-      }
+      &.badge-culture { background: #7e57c2; color: white; }
+      &.badge-talent  { background: #ff9800; color: white; }
+      &.badge-gm      { background: #f44336; color: white; }
+      &.badge-manual   { background: rgba(255, 255, 255, 0.15); color: #e8e8e8; }
     }
   }
 }
 
-.powers-list {
-  .powers-accordion {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .power-panel {
-    background-color: var(--gpSystemDarkGrey);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-    border: 1px solid rgba(74,179,232,0.2);
-
-    summary {
-      list-style: none;
-      cursor: pointer;
-      
-      &::-webkit-details-marker {
-        display: none;
-      }
-    }
-
-    .power-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--gpSystemDarkGrey);
-      color: #ffffff;
-      padding: 0.75rem 1rem;
-      transition: background-color 0.2s;
-      
-      &:hover {
-        background-color: rgba(74, 179, 232, 0.1);
-      }
-
-      &::after {
-        content: '▼';
-        color: var(--gpColor-ChalkyBlue);
-        font-size: 0.75rem;
-        transition: transform 0.2s;
-      }
-    }
-
-    &[open] .power-header::after {
-      transform: rotate(180deg);
-    }
-  }
-
-  .power-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1;
-
-    .power-icon {
-      font-size: 20px;
-      color: var(--gpColor-ChalkyBlue);
-    }
-
-    .power-name {
-      font-weight: 600;
-      font-size: 1rem;
-    }
-  }
-
-  .power-cost {
-    color: var(--gpColor-ChalkyBlue);
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .power-details {
-    padding: 1rem;
-    background-color: var(--gpSystemDarkerGrey);
-
-    .power-description {
-      margin-bottom: 1rem;
-      color: #e8e8e8;
-      line-height: 1.6;
-
-      p {
-        margin: 0 0 0.5rem 0;
-      }
-
-      .special-activation {
-        padding: 0.75rem;
-        background: rgba(74, 179, 232, 0.1);
-        border-left: 3px solid var(--gpColor-ChalkyBlue);
-        border-radius: 4px;
-        margin-top: 0.75rem;
-        
-        strong {
-          color: var(--gpColor-ChalkyBlue);
-        }
-      }
-    }
-
-    .power-bonuses,
-    .power-effects {
-      margin-bottom: 1rem;
-
-      h4 {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin: 0 0 0.5rem 0;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--gpColor-ChalkyBlue);
-
-        .bonus-icon,
-        .effect-icon {
-          font-size: 18px;
-        }
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          padding: 0.4rem 0.75rem;
-          background: var(--gpSystemDarkGrey);
-          border-radius: 4px;
-          margin-bottom: 0.4rem;
-          color: #e8e8e8;
-          font-size: 0.9rem;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
-
-    .power-meta {
-      display: flex;
-      gap: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--gpSystemDarkGrey);
-      font-size: 0.85rem;
-      color: #b0b0b0;
-
-      .power-tier {
-        font-weight: 500;
-      }
-
-      .power-path {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-
-        .path-icon {
-          font-size: 16px;
-        }
-      }
-    }
-
-    .modifier-section {
-      margin-top: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(74, 179, 232, 0.2);
-
-      .modifier-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin: 0 0 0.75rem 0;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #ff9800;
-
-        .modifier-header-icon {
-          font-size: 18px;
-        }
-      }
-
-      .modifier-item {
-        margin-left: 0.75rem;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-        background: rgba(255, 152, 0, 0.06);
-        border-left: 3px solid rgba(255, 152, 0, 0.5);
-        border-radius: 0 6px 6px 0;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        .modifier-item-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.4rem;
-        }
-
-        .modifier-name {
-          font-weight: 600;
-          font-size: 0.95rem;
-          color: #ff9800;
-        }
-
-        .modifier-cost {
-          font-size: 0.8rem;
-          color: #b0b0b0;
-          font-weight: 500;
-        }
-
-        .modifier-description {
-          margin: 0 0 0.4rem 0;
-          color: #d0d0d0;
-          font-size: 0.85rem;
-          line-height: 1.5;
-        }
-
-        .modifier-effects,
-        .modifier-bonuses {
-          list-style: none;
-          padding: 0;
-          margin: 0 0 0.4rem 0;
-
-          li {
-            padding: 0.25rem 0.5rem;
-            background: var(--gpSystemDarkGrey);
-            border-radius: 4px;
-            margin-bottom: 0.25rem;
-            color: #e8e8e8;
-            font-size: 0.8rem;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-          }
-        }
-
-        .modifier-tier {
-          font-size: 0.75rem;
-          color: #888;
-          font-weight: 500;
-        }
-      }
-    }
-  }
+// ─── Empty state ───
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
 }
 
-// Modifier count badge on the power header
-.modifier-count {
-  font-size: 0.7rem;
-  padding: 0.1rem 0.45rem;
-  border-radius: 10px;
-  font-weight: 700;
-  background: rgba(255, 152, 0, 0.25);
-  color: #ff9800;
-  margin-left: 0.35rem;
+.empty-text {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  padding: 2rem 1rem;
+  margin: 0;
 }
 
-// Abilities styling (similar to powers but with unique touches)
-.abilities-list {
-  .abilities-accordion {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+// ─── Animation ───
+@keyframes expandDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── Responsive ───
+@media (max-width: 768px) {
+  .attack-quick-stats {
+    display: none; // Hide inline stats on mobile; they show in expanded details
   }
 
-  .ability-panel {
-    background-color: var(--gpSystemDarkGrey);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-    border: 1px solid rgba(255, 215, 0, 0.2); // Gold border for special abilities
-
-    summary {
-      list-style: none;
-      cursor: pointer;
-      
-      &::-webkit-details-marker {
-        display: none;
-      }
-    }
-
-    .ability-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--gpSystemDarkGrey);
-      color: #ffffff;
-      padding: 0.75rem 1rem;
-      transition: background-color 0.2s;
-      
-      &:hover {
-        background-color: rgba(255, 215, 0, 0.1);
-      }
-
-      &::after {
-        content: '▼';
-        color: gold;
-        font-size: 0.75rem;
-        transition: transform 0.2s;
-      }
-    }
-
-    &[open] .ability-header::after {
-      transform: rotate(180deg);
-    }
+  .attack-stats-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .ability-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1;
-
-    .ability-icon {
-      font-size: 20px;
-      color: gold;
-    }
-
-    .ability-name {
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    .ability-category-badge {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 10px;
-      font-weight: 600;
-      background: rgba(255, 215, 0, 0.2);
-      color: gold;
-      margin-left: 0.5rem;
-    }
-  }
-
-  .ability-cost {
-    color: gold;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .ability-details {
-    padding: 1rem;
-    background-color: var(--gpSystemDarkerGrey);
-
-    .ability-description {
-      margin-bottom: 1rem;
-      color: #e8e8e8;
-      line-height: 1.6;
-
-      p {
-        margin: 0 0 0.5rem 0;
-      }
-
-      .special-activation {
-        padding: 0.75rem;
-        background: rgba(255, 215, 0, 0.1);
-        border-left: 3px solid gold;
-        border-radius: 4px;
-        margin-top: 0.75rem;
-        
-        strong {
-          color: gold;
-        }
-      }
-    }
-
-    .ability-resource-cost,
-    .ability-effects,
-    .ability-limitations {
-      margin-bottom: 1rem;
-
-      h4 {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin: 0 0 0.5rem 0;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: gold;
-
-        .resource-icon,
-        .effect-icon,
-        .limit-icon {
-          font-size: 18px;
-        }
-      }
-
-      p, ul {
-        color: #e8e8e8;
-      }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          padding: 0.4rem 0.75rem;
-          background: var(--gpSystemDarkGrey);
-          border-radius: 4px;
-          margin-bottom: 0.4rem;
-          color: #e8e8e8;
-          font-size: 0.9rem;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
-
-    .ability-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--gpSystemDarkGrey);
-      font-size: 0.85rem;
-      color: #b0b0b0;
-
-      .ability-source,
-      .ability-unconscious {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-
-        .source-icon,
-        .unconscious-icon {
-          font-size: 16px;
-        }
-      }
-
-      .ability-unconscious {
-        color: #ff9800;
-        font-weight: 500;
-      }
-    }
+  .power-header {
+    flex-wrap: wrap;
   }
 }

@@ -7,13 +7,29 @@ import { Character } from '../../../character/character';
 import { TalentNode, TalentTree, ActionCostCode } from '../../../../../shared/types/talents';
 import { ALL_TALENT_PATHS, getTalentTree, getTalentPath } from '../../../../../shared/data/talents/talentTrees';
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../../character/expertises/expertiseSource';
-import { UniversalAbility, formatActionCost } from '../../../character/abilities/universalAbilities';
-import { CharacterAttacksComponent } from '../character-attacks/character-attacks';
+import { UniversalAbility, formatActionCost, SINGER_FORMS } from '../../../character/abilities/universalAbilities';
+import { Attack } from '../../../../../shared/types/attacks';
 import { StanceSelectorComponent } from '../stance-selector/stance-selector';
 
 export interface GroupedPower {
   base: TalentNode;
   modifiers: TalentNode[];
+  /** Calculated attack stats if this talent has an attackDefinition */
+  attack?: Attack;
+}
+
+/** A single section in the action-economy layout */
+export interface ActionEconomySection {
+  key: string;
+  title: string;
+  icon: string;
+  accentClass: string;
+  groups: GroupedPower[];
+}
+
+/** Wraps a UniversalAbility for display in action-economy sections */
+export interface UniversalAbilityItem {
+  ability: UniversalAbility;
 }
 
 @Component({
@@ -24,7 +40,6 @@ export interface GroupedPower {
     MatCardModule,
     MatIconModule,
     MatExpansionModule,
-    CharacterAttacksComponent,
     StanceSelectorComponent
   ],
   templateUrl: './character-powers-tab.html',
@@ -41,8 +56,14 @@ export class CharacterPowersTab {
     return ExpertiseSourceHelper.getSourceBadge(expertise.source);
   }
 
-  getUniversalAbilities(): UniversalAbility[] {
-    return this.character?.getUniversalAbilities() || [];
+  /**
+   * Get only non-Singer universal abilities (Radiant powers, items, etc.)
+   * These get merged into action-economy sections.
+   */
+  getRadiantAbilities(): UniversalAbility[] {
+    const all = this.character?.getUniversalAbilities() || [];
+    const singerFormIds = new Set(SINGER_FORMS.map(f => f.id));
+    return all.filter(a => !singerFormIds.has(a.id) && a.source !== 'Singer Ancestry');
   }
 
   formatAbilityActionCost(cost: number | string): string {
@@ -56,6 +77,150 @@ export class CharacterPowersTab {
     const { resourceType, amount } = ability.resourceCost;
     const displayType = resourceType.charAt(0).toUpperCase() + resourceType.slice(1);
     return `${amount} ${displayType}`;
+  }
+
+  /**
+   * Core method: Buckets all talents + radiant abilities into action-economy sections.
+   * Returns only non-empty sections.
+   */
+  getActionEconomySections(): ActionEconomySection[] {
+    const grouped = this.getGroupedPowers();
+    const attacks = this.character?.getAvailableAttacks() || [];
+    const attackByTalentId = new Map(attacks.filter(a => a.talentId).map(a => [a.talentId!, a]));
+
+    // Attach calculated attack stats to grouped powers that have attackDefinitions
+    for (const group of grouped) {
+      const attack = attackByTalentId.get(group.base.id);
+      if (attack) {
+        group.attack = attack;
+      }
+    }
+
+    // Also include weapon-only and combined attacks as pseudo-groups
+    const talentAttackIds = new Set(grouped.filter(g => g.attack).map(g => g.attack!.id));
+    const weaponAttacks = attacks.filter(a => !talentAttackIds.has(a.id));
+
+    // Bucket grouped talents by action cost
+    const oneAction: GroupedPower[] = [];
+    const multiAction: GroupedPower[] = [];
+    const freeAction: GroupedPower[] = [];
+    const reaction: GroupedPower[] = [];
+    const special: GroupedPower[] = [];
+    const passive: GroupedPower[] = [];
+
+    for (const group of grouped) {
+      const cost = group.base.actionCost;
+      if (cost === ActionCostCode.Passive || cost === Infinity) {
+        passive.push(group);
+      } else if (cost === ActionCostCode.Reaction || cost === -1) {
+        reaction.push(group);
+      } else if (cost === ActionCostCode.Special || cost === -2) {
+        special.push(group);
+      } else if (cost === ActionCostCode.Free || cost === 0) {
+        freeAction.push(group);
+      } else if (cost === 1) {
+        oneAction.push(group);
+      } else {
+        multiAction.push(group);
+      }
+    }
+
+    // Merge radiant universal abilities into the appropriate buckets
+    for (const ability of this.getRadiantAbilities()) {
+      const pseudoGroup = this.universalAbilityToGroupedPower(ability);
+      if (!pseudoGroup) continue;
+      const cost = ability.actionCost;
+      if (cost === 'passive') {
+        passive.push(pseudoGroup);
+      } else if (cost === 'reaction') {
+        reaction.push(pseudoGroup);
+      } else if (cost === 'special') {
+        special.push(pseudoGroup);
+      } else if (cost === 'free') {
+        freeAction.push(pseudoGroup);
+      } else if (typeof cost === 'number' && cost === 1) {
+        oneAction.push(pseudoGroup);
+      } else if (typeof cost === 'number' && cost > 1) {
+        multiAction.push(pseudoGroup);
+      }
+    }
+
+    // Add weapon-only attacks to 1-action or multi-action
+    for (const attack of weaponAttacks) {
+      const pseudoGroup = this.attackToGroupedPower(attack);
+      if (attack.actionCost === 1) {
+        oneAction.push(pseudoGroup);
+      } else {
+        multiAction.push(pseudoGroup);
+      }
+    }
+
+    const sections: ActionEconomySection[] = [];
+
+    if (oneAction.length > 0) {
+      sections.push({ key: 'one-action', title: '1 Action', icon: '⚡', accentClass: 'accent-action', groups: oneAction });
+    }
+    if (multiAction.length > 0) {
+      sections.push({ key: 'multi-action', title: 'Multi-Action', icon: '⚡⚡', accentClass: 'accent-multi', groups: multiAction });
+    }
+    if (freeAction.length > 0) {
+      sections.push({ key: 'free-action', title: 'Free Actions', icon: '💨', accentClass: 'accent-free', groups: freeAction });
+    }
+    if (reaction.length > 0) {
+      sections.push({ key: 'reaction', title: 'Reactions', icon: '🛡️', accentClass: 'accent-reaction', groups: reaction });
+    }
+    if (special.length > 0) {
+      sections.push({ key: 'special', title: 'Special Activations', icon: '🔮', accentClass: 'accent-special', groups: special });
+    }
+    if (passive.length > 0) {
+      sections.push({ key: 'passive', title: 'Passives', icon: '🔒', accentClass: 'accent-passive', groups: passive });
+    }
+
+    return sections;
+  }
+
+  /**
+   * Wrap a UniversalAbility as a pseudo-GroupedPower for unified rendering.
+   */
+  private universalAbilityToGroupedPower(ability: UniversalAbility): GroupedPower | null {
+    const pseudo: TalentNode = {
+      id: ability.id,
+      name: ability.name,
+      description: ability.description,
+      actionCost: typeof ability.actionCost === 'number' ? ability.actionCost
+        : ability.actionCost === 'free' ? ActionCostCode.Free
+        : ability.actionCost === 'reaction' ? ActionCostCode.Reaction
+        : ability.actionCost === 'special' ? ActionCostCode.Special
+        : ActionCostCode.Passive,
+      specialActivation: ability.specialActivation,
+      prerequisites: [],
+      tier: 0,
+      bonuses: [],
+      otherEffects: ability.effects,
+      _source: ability.source,
+      _resourceCost: ability.resourceCost,
+      _canUseWhileUnconscious: ability.canUseWhileUnconscious,
+      _limitations: ability.limitations,
+      _isUniversalAbility: true,
+    } as any;
+    return { base: pseudo, modifiers: [] };
+  }
+
+  /**
+   * Wrap a weapon Attack as a pseudo-GroupedPower for unified rendering.
+   */
+  private attackToGroupedPower(attack: Attack): GroupedPower {
+    const pseudo: TalentNode = {
+      id: attack.id,
+      name: attack.name,
+      description: attack.description,
+      actionCost: attack.actionCost,
+      prerequisites: [],
+      tier: 0,
+      bonuses: [],
+      _isWeaponAttack: true,
+    } as any;
+    return { base: pseudo, modifiers: [], attack };
   }
 
   getGroupedPowers(): GroupedPower[] {
@@ -244,6 +409,76 @@ export class CharacterPowersTab {
     }
     
     return effects;
+  }
+
+  /** Whether a GroupedPower has rich attack stats to display */
+  hasAttackStats(group: GroupedPower): boolean {
+    return !!group.attack;
+  }
+
+  /** Format attack bonus with + sign */
+  formatBonus(bonus: number): string {
+    return bonus >= 0 ? `+${bonus}` : `${bonus}`;
+  }
+
+  /** Get icon for attack source */
+  getSourceIcon(source: string): string {
+    switch (source) {
+      case 'weapon': return '⚔️';
+      case 'talent': return '✨';
+      case 'combined': return '💥';
+      default: return '⚔️';
+    }
+  }
+
+  /** Get defense color class */
+  getDefenseClass(defense: string): string {
+    switch (defense.toLowerCase()) {
+      case 'physical': return 'defense-physical';
+      case 'cognitive': return 'defense-cognitive';
+      case 'spiritual': return 'defense-spiritual';
+      default: return '';
+    }
+  }
+
+  /** Get damage type color class */
+  getDamageTypeClass(damageType: string): string {
+    switch (damageType.toLowerCase()) {
+      case 'keen': return 'damage-keen';
+      case 'impact': return 'damage-impact';
+      case 'energy': return 'damage-energy';
+      case 'vital': return 'damage-vital';
+      case 'spirit': return 'damage-spirit';
+      default: return '';
+    }
+  }
+
+  /** Check if this is a universal ability pseudo-node */
+  isUniversalAbility(node: TalentNode): boolean {
+    return !!(node as any)._isUniversalAbility;
+  }
+
+  /** Get source label for universal abilities */
+  getAbilitySource(node: TalentNode): string {
+    return (node as any)._source || '';
+  }
+
+  /** Get resource cost for universal abilities */
+  getNodeResourceCost(node: TalentNode): string {
+    const rc = (node as any)._resourceCost;
+    if (!rc) return '';
+    const displayType = rc.resourceType.charAt(0).toUpperCase() + rc.resourceType.slice(1);
+    return `${rc.amount} ${displayType}`;
+  }
+
+  /** Get limitations for universal abilities */
+  getNodeLimitations(node: TalentNode): string[] {
+    return (node as any)._limitations || [];
+  }
+
+  /** Check if usable while unconscious */
+  canUseWhileUnconscious(node: TalentNode): boolean {
+    return !!(node as any)._canUseWhileUnconscious;
   }
 
   /**

@@ -1,144 +1,183 @@
 <div class="sheet-content powers-notes-tab">
-  <!-- Attacks Section - Top of Tab -->
-  <app-character-attacks [character]="character"></app-character-attacks>
-
   <!-- Stance Selector Section -->
   <app-stance-selector [character]="character" (stanceChanged)="onStanceChanged($event)"></app-stance-selector>
 
-  <!-- Universal Abilities Card (for Radiant and other special abilities) -->
-  <div class="abilities-card" *ngIf="getUniversalAbilities().length > 0">
-    <div class="card-header">
-      <span class="section-icon">🌟</span>
-      <h3 class="card-title">Universal Abilities</h3>
-    </div>
-    <div class="card-content">
-      <div class="abilities-list">
-        <div class="abilities-accordion">
-          <details *ngFor="let ability of getUniversalAbilities()" class="ability-panel">
-            <summary class="ability-header">
-              <div class="ability-title">
-                <span class="ability-icon">💫</span>
-                <span class="ability-name">{{ ability.name }}</span>
-                <span class="ability-category-badge">{{ ability.category }}</span>
-              </div>
-              <span class="ability-cost">
-                {{ formatAbilityActionCost(ability.actionCost) }}
-              </span>
-            </summary>
-            <div class="ability-details">
-              <div class="ability-description">
-                <p>{{ ability.description }}</p>
-                <p *ngIf="ability.specialActivation" class="special-activation">
-                  <strong>Special Activation:</strong> {{ ability.specialActivation }}
-                </p>
-              </div>
-              <div class="ability-resource-cost" *ngIf="ability.resourceCost">
-                <h4><span class="resource-icon">💎</span> Cost</h4>
-                <p>{{ getAbilityResourceCost(ability) }}</p>
-              </div>
-              <div class="ability-effects" *ngIf="ability.effects && ability.effects.length > 0">
-                <h4><span class="effect-icon">✨</span> Effects</h4>
-                <ul>
-                  <li *ngFor="let effect of ability.effects">{{ effect }}</li>
-                </ul>
-              </div>
-              <div class="ability-limitations" *ngIf="ability.limitations && ability.limitations.length > 0">
-                <h4><span class="limit-icon">⚠️</span> Limitations</h4>
-                <ul>
-                  <li *ngFor="let limitation of ability.limitations">{{ limitation }}</li>
-                </ul>
-              </div>
-              <div class="ability-meta">
-                <span class="ability-source">
-                  <span class="source-icon">📜</span> Source: {{ ability.source }}
-                </span>
-                <span class="ability-unconscious" *ngIf="ability.canUseWhileUnconscious">
-                  <span class="unconscious-icon">😵</span> Usable while unconscious
-                </span>
-              </div>
-            </div>
-          </details>
-        </div>
+  <!-- Action Economy Sections (1 Action, Multi-Action, Free Actions, Reactions, Special, Passives) -->
+  <ng-container *ngFor="let section of getActionEconomySections()">
+    <div class="action-section" [class]="section.accentClass">
+      <div class="section-header">
+        <span class="section-icon">{{ section.icon }}</span>
+        <h3 class="section-title">{{ section.title }}</h3>
+        <span class="section-count">{{ section.groups.length }}</span>
       </div>
-    </div>
-  </div>
-
-  <!-- Powers Card -->
-  <div class="powers-card">
-    <div class="card-header">
-      <span class="section-icon">✨</span>
-      <h3 class="card-title">Powers</h3>
-    </div>
-    <div class="card-content">
-      <div class="powers-list">
-        <div class="powers-accordion" *ngIf="getGroupedPowers().length > 0">
-          <details *ngFor="let group of getGroupedPowers()" class="power-panel">
-            <summary class="power-header">
-              <div class="power-title">
-                <span class="power-icon">⚡</span>
-                <span class="power-name">{{ group.base.name }}</span>
-                <span class="modifier-count" *ngIf="group.modifiers.length > 0">+{{ group.modifiers.length }}</span>
-              </div>
-              <span class="power-cost">
+      <div class="section-content">
+        <details *ngFor="let group of section.groups" class="power-panel">
+          <summary class="power-header">
+            <div class="power-title">
+              <!-- Show source icon for weapon attacks -->
+              <span class="power-icon" *ngIf="hasAttackStats(group)">{{ getSourceIcon(group.attack!.source) }}</span>
+              <span class="power-icon" *ngIf="!hasAttackStats(group)">⚡</span>
+              <span class="power-name">{{ group.base.name }}</span>
+              <span class="modifier-count" *ngIf="group.modifiers.length > 0">+{{ group.modifiers.length }}</span>
+              <!-- Inline attack quick stats -->
+              <span class="attack-quick-stats" *ngIf="hasAttackStats(group)">
+                <span class="attack-bonus">{{ formatBonus(group.attack!.attackBonus) }}</span>
+                <span class="stat-separator">|</span>
+                <span class="attack-damage">{{ group.attack!.damage }}</span>
+                <span class="damage-type-badge" [class]="getDamageTypeClass(group.attack!.damageType)">
+                  {{ group.attack!.damageType }}
+                </span>
+              </span>
+            </div>
+            <div class="power-meta-header">
+              <span class="action-cost-badge" *ngIf="hasAttackStats(group)">
+                {{ group.attack!.actionCost }} ⚡
+              </span>
+              <span class="defense-badge" *ngIf="hasAttackStats(group)" [class]="getDefenseClass(group.attack!.targetDefense)">
+                vs {{ group.attack!.targetDefense }}
+              </span>
+              <span class="power-cost" *ngIf="!hasAttackStats(group)">
                 {{ getActionCostDisplay(group.base.actionCost) }}
               </span>
-            </summary>
-            <div class="power-details">
-              <div class="power-description">
-                <p>{{ group.base.description }}</p>
-                <p *ngIf="group.base.specialActivation" class="special-activation">
-                  <strong>Special Activation:</strong> {{ group.base.specialActivation }}
-                </p>
-              </div>
-              <div class="power-bonuses" *ngIf="getBonusDisplay(group.base).length > 0">
-                <h4><span class="bonus-icon">📈</span> Bonuses</h4>
-                <ul>
-                  <li *ngFor="let bonus of getBonusDisplay(group.base)">{{ bonus }}</li>
-                </ul>
-              </div>
-              <div class="power-effects" *ngIf="getOtherEffects(group.base).length > 0">
-                <h4><span class="effect-icon">✨</span> Additional Effects</h4>
-                <ul>
-                  <li *ngFor="let effect of getOtherEffects(group.base)">{{ effect }}</li>
-                </ul>
-              </div>
-              <div class="power-meta">
-                <span class="power-tier">Tier {{ group.base.tier }}</span>
-                <span class="power-path" *ngIf="group.base.pathRequirement">
-                  <span class="path-icon">🛤️</span> {{ group.base.pathRequirement }}
-                </span>
-              </div>
+            </div>
+          </summary>
+          <div class="power-details">
+            <!-- Description -->
+            <div class="power-description">
+              <p>{{ group.base.description }}</p>
+              <p *ngIf="group.base.specialActivation" class="special-activation">
+                <strong>Special Activation:</strong> {{ group.base.specialActivation }}
+              </p>
+            </div>
 
-              <!-- Modifier talents grouped under this base -->
-              <div class="modifier-section" *ngIf="group.modifiers.length > 0">
-                <h4 class="modifier-header"><span class="modifier-header-icon">🔧</span> Talent Modifications</h4>
-                <div class="modifier-item" *ngFor="let mod of group.modifiers">
-                  <div class="modifier-item-header">
-                    <span class="modifier-name">{{ mod.name }}</span>
-                    <span class="modifier-cost">{{ getActionCostDisplay(mod.actionCost) }}</span>
-                  </div>
-                  <p class="modifier-description">{{ mod.description }}</p>
-                  <ul class="modifier-effects" *ngIf="getOtherEffects(mod).length > 0">
-                    <li *ngFor="let effect of getOtherEffects(mod)">{{ effect }}</li>
-                  </ul>
-                  <ul class="modifier-bonuses" *ngIf="getBonusDisplay(mod).length > 0">
-                    <li *ngFor="let bonus of getBonusDisplay(mod)">{{ bonus }}</li>
-                  </ul>
-                  <span class="modifier-tier">Tier {{ mod.tier }}</span>
-                </div>
+            <!-- Rich attack stats grid (for talents with attackDefinition or weapon attacks) -->
+            <div class="attack-stats-grid" *ngIf="hasAttackStats(group)">
+              <div class="stat-item">
+                <span class="stat-label">Attack Bonus</span>
+                <span class="stat-value attack-bonus">{{ formatBonus(group.attack!.attackBonus) }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Damage</span>
+                <span class="stat-value attack-damage">{{ group.attack!.damage }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Damage Type</span>
+                <span class="stat-value" [class]="getDamageTypeClass(group.attack!.damageType)">{{ group.attack!.damageType }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Range</span>
+                <span class="stat-value">{{ group.attack!.range }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Target Defense</span>
+                <span class="stat-value" [class]="getDefenseClass(group.attack!.targetDefense)">{{ group.attack!.targetDefense }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Action Cost</span>
+                <span class="stat-value">{{ group.attack!.actionCost }} action{{ group.attack!.actionCost > 1 ? 's' : '' }}</span>
               </div>
             </div>
-          </details>
-        </div>
-        <p class="empty-text" *ngIf="getGroupedPowers().length === 0">
-          No powers unlocked yet
-        </p>
+
+            <!-- Attack traits -->
+            <div class="attack-traits" *ngIf="hasAttackStats(group) && group.attack!.traits.length > 0">
+              <h4><span class="traits-icon">🏷️</span> Traits</h4>
+              <div class="traits-list">
+                <span class="trait-badge" *ngFor="let trait of group.attack!.traits">{{ trait }}</span>
+              </div>
+            </div>
+
+            <!-- Attack resource cost -->
+            <div class="resource-cost-display" *ngIf="hasAttackStats(group) && group.attack!.resourceCost">
+              <h4><span class="resource-icon">💎</span> Cost</h4>
+              <p>{{ group.attack!.resourceCost!.amount }} {{ group.attack!.resourceCost!.type }}</p>
+            </div>
+
+            <!-- Universal ability resource cost -->
+            <div class="resource-cost-display" *ngIf="isUniversalAbility(group.base) && getNodeResourceCost(group.base)">
+              <h4><span class="resource-icon">💎</span> Cost</h4>
+              <p>{{ getNodeResourceCost(group.base) }}</p>
+            </div>
+
+            <!-- Bonuses -->
+            <div class="power-bonuses" *ngIf="getBonusDisplay(group.base).length > 0">
+              <h4><span class="bonus-icon">📈</span> Bonuses</h4>
+              <ul>
+                <li *ngFor="let bonus of getBonusDisplay(group.base)">{{ bonus }}</li>
+              </ul>
+            </div>
+
+            <!-- Effects -->
+            <div class="power-effects" *ngIf="getOtherEffects(group.base).length > 0">
+              <h4><span class="effect-icon">✨</span> Effects</h4>
+              <ul>
+                <li *ngFor="let effect of getOtherEffects(group.base)">{{ effect }}</li>
+              </ul>
+            </div>
+
+            <!-- Universal ability limitations -->
+            <div class="power-limitations" *ngIf="getNodeLimitations(group.base).length > 0">
+              <h4><span class="limit-icon">⚠️</span> Limitations</h4>
+              <ul>
+                <li *ngFor="let limitation of getNodeLimitations(group.base)">{{ limitation }}</li>
+              </ul>
+            </div>
+
+            <!-- Attack custom modifiers -->
+            <div class="power-bonuses" *ngIf="hasAttackStats(group) && group.attack!.customModifiers && group.attack!.customModifiers!.length > 0">
+              <h4><span class="bonus-icon">📈</span> Modifiers</h4>
+              <ul>
+                <li *ngFor="let modifier of group.attack!.customModifiers">
+                  {{ modifier.description }}
+                  <span class="modifier-condition" *ngIf="modifier.condition">({{ modifier.condition }})</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Meta info -->
+            <div class="power-meta">
+              <span class="power-tier" *ngIf="group.base.tier > 0">Tier {{ group.base.tier }}</span>
+              <span class="power-path" *ngIf="group.base.pathRequirement">
+                <span class="path-icon">🛤️</span> {{ group.base.pathRequirement }}
+              </span>
+              <span class="ability-source" *ngIf="isUniversalAbility(group.base)">
+                <span class="source-icon">📜</span> {{ getAbilitySource(group.base) }}
+              </span>
+              <span class="ability-unconscious" *ngIf="canUseWhileUnconscious(group.base)">
+                😵 Usable while unconscious
+              </span>
+            </div>
+
+            <!-- Modifier talents grouped under this base -->
+            <div class="modifier-section" *ngIf="group.modifiers.length > 0">
+              <h4 class="modifier-header"><span class="modifier-header-icon">🔧</span> Talent Modifications</h4>
+              <div class="modifier-item" *ngFor="let mod of group.modifiers">
+                <div class="modifier-item-header">
+                  <span class="modifier-name">{{ mod.name }}</span>
+                  <span class="modifier-cost">{{ getActionCostDisplay(mod.actionCost) }}</span>
+                </div>
+                <p class="modifier-description">{{ mod.description }}</p>
+                <ul class="modifier-effects" *ngIf="getOtherEffects(mod).length > 0">
+                  <li *ngFor="let effect of getOtherEffects(mod)">{{ effect }}</li>
+                </ul>
+                <ul class="modifier-bonuses" *ngIf="getBonusDisplay(mod).length > 0">
+                  <li *ngFor="let bonus of getBonusDisplay(mod)">{{ bonus }}</li>
+                </ul>
+                <span class="modifier-tier">Tier {{ mod.tier }}</span>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     </div>
+  </ng-container>
+
+  <!-- Empty state when no sections at all -->
+  <div class="empty-state" *ngIf="getActionEconomySections().length === 0">
+    <p class="empty-text">No powers or abilities unlocked yet</p>
   </div>
-  
+
   <!-- Expertises Card -->
-  <div class="stats-card">
+  <div class="stats-card" *ngIf="getSelectedExpertises().length > 0">
     <div class="card-header">
       <span class="section-icon">📚</span>
       <h3 class="card-title">Expertises</h3>
@@ -152,9 +191,6 @@
             {{ getExpertiseSourceBadge(expertise) }}
           </span>
         </div>
-        <p class="empty-text" *ngIf="getSelectedExpertises().length === 0">
-          No expertises selected
-        </p>
       </div>
     </div>
   </div>
