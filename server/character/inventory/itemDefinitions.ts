@@ -824,16 +824,40 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     stackable: true
   },
   {
-    id: 'vial-empty',
-    name: 'Empty Vial',
+    id: 'paperStack',
+    name: 'Paper Stack (10 sheets) and a bottle of Ink',
+    type: 'equipment',
+    quantity: 1,
+    weight: 1,
+    price: 5,
+    rarity: 'common',
+    description: 'A stack of 10 sheets of paper and a bottle of ink.',
+    equipable: false,
+    stackable: true
+  },
+  {
+    id: 'bottle',
+    name: 'Bottle',
     type: 'equipment',
     quantity: 1,
     weight: 0.2,
     price: 4,
     rarity: 'common',
-    description: 'A small glass vial.',
+    description: 'A small glass bottle.',
     equipable: false,
     stackable: true
+  },
+  {
+    id: 'glyphward',
+    name: 'Glyphward',
+    type: 'equipment',
+    quantity: 1,
+    weight: 0.1,
+    price: 1,
+    rarity: 'common',
+    description: 'A small paper glyph. Serves no purpose other than to offer a prayer',
+    equipable: false,
+    stackable: true,
   },
   {
     id: 'wax-block',
@@ -947,6 +971,18 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     stackable: true
   },
   {
+    id: 'wax-candle',
+    name: 'Wax and 5 candles',
+    type: 'equipment',
+    quantity: 1,
+    weight: 1,
+    price: 5,
+    rarity: 'common',
+    description: 'A block of wax and 5 candles.',
+    equipable: false,
+    stackable: true
+  },
+  {
     id: 'oil-lantern',
     name: 'Oil Lantern',
     type: 'equipment',
@@ -955,6 +991,18 @@ export const EQUIPMENT_ITEMS: InventoryItem[] = [
     price: 20,
     rarity: 'common',
     description: 'Sheds light in 30-foot radius for 6 hours per pint of oil.',
+    equipable: false,
+    stackable: false
+  },
+  {
+    id: 'surgical-kit',
+    name: 'Surgical Kit',
+    type: 'equipment',
+    quantity: 1,
+    weight: 5,
+    price: 50,
+    rarity: 'common',
+    description: 'A kit of surgical tools. Grants advantage on Medicine tests to stabilize or treat wounds.',
     equipable: false,
     stackable: false
   },
@@ -1236,7 +1284,7 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'ink-pen', quantity: 1 },
       { itemId: 'ink-bottle', quantity: 1 },
       { itemId: 'paper', quantity: 10 },
-      { itemId: 'vial-empty', quantity: 3 },
+      { itemId: 'bottle', quantity: 3 },
       { itemId: 'wax-block', quantity: 1 },
       { itemId: 'reference-book', quantity: 1 },
       { itemId: 'poison-weak', quantity: 1 }
@@ -1263,7 +1311,7 @@ export const STARTING_KITS: StartingKit[] = [
       { itemId: 'paper', quantity: 5 },
       { itemId: 'candle', quantity: 5 },
       { itemId: 'flint-steel', quantity: 1 },
-      { itemId: 'vial-empty', quantity: 3 },
+      { itemId: 'bottle', quantity: 3 },
       { itemId: 'tuning-fork', quantity: 1 },
       { itemId: 'musical-instrument', quantity: 1 },
       { itemId: 'scale', quantity: 1 }
