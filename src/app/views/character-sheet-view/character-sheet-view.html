@@ -81,7 +81,8 @@
       <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">Talents &amp; Expertises</button>
       <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">Equipment</button>
       <button class="tab-label" *ngIf="character.ancestry === 'singer'" [class.active]="activeTab === 4" [class.highstorm-active]="isHighstormActive" (click)="activeTab = 4">Singer Forms</button>
-      <button class="tab-label" [class.active]="activeTab === 5" (click)="activeTab = 5">Notes</button>
+      <button class="tab-label" [class.active]="activeTab === 5" (click)="activeTab = 5">Derived Stats</button>
+      <button class="tab-label" [class.active]="activeTab === 6" (click)="activeTab = 6">Notes</button>
     </div>
     <div class="tab-content" *ngIf="activeTab === 0">
       <div class="sheet-content overview-tab">
@@ -191,6 +192,12 @@
     </div>
 
     <div class="tab-content" *ngIf="activeTab === 5">
+      <div class="sheet-content">
+        <app-character-derived-stats-card [character]="character"></app-character-derived-stats-card>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 6">
       <div class="sheet-content powers-notes-tab">
         <mat-card class="notes-card">
           <mat-card-header>

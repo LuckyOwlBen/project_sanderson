@@ -28,6 +28,7 @@ import { CharacterPortraitCard } from '../../components/shared/character-portrai
 import { CharacterDefensesCard } from '../../components/shared/character-defenses-card/character-defenses-card';
 import { CharacterPowersTab } from '../../components/shared/character-powers-tab/character-powers-tab';
 import { CharacterResourcesBar } from '../../components/shared/character-resources-bar/character-resources-bar';
+import { CharacterDerivedStatsCard } from '../../components/shared/character-derived-stats-card/character-derived-stats-card';
 import { CharacterSkillsCard } from '../../components/shared/character-skills-card/character-skills-card';
 import { CraftingView } from '../../components/crafting-view/crafting-view';
 import { FormSelectorComponent } from '../../components/shared/form-selector/form-selector';
@@ -61,6 +62,7 @@ import { CombatService } from "../../services/combat.service";
     CharacterDefensesCard,
     CharacterPowersTab,
     CharacterResourcesBar,
+    CharacterDerivedStatsCard,
     CharacterSkillsCard,
     CraftingView,
     FormSelectorComponent,
