@@ -85,6 +85,8 @@ export interface CharacterData {
     focus: { current: number; max: number };
     investiture: { current: number; max: number; isActive: boolean };
   };
+  unlockedSingerForms?: string[];
+  activeForm?: string;
   radiantPath?: {
     boundOrder: string | null;
     currentIdeal: number;
@@ -344,6 +346,15 @@ async function runMigrations(): Promise<void> {
       await db.run('ALTER TABLE PathSelection ADD COLUMN finalized INTEGER DEFAULT 0');
       console.log('[Database] Migration completed: PathSelection.finalized column added');
     }
+
+    // Migration: Add activeForm column to Character table if it doesn't exist
+    const characterColumns = await db.all("PRAGMA table_info(Character)");
+    const hasActiveForm = characterColumns.some((col: any) => col.name === 'activeForm');
+    if (!hasActiveForm) {
+      console.log('[Database] Running migration: Adding activeForm column to Character table');
+      await db.run('ALTER TABLE Character ADD COLUMN activeForm TEXT DEFAULT NULL');
+      console.log('[Database] Migration completed: Character.activeForm column added');
+    }
   } catch (error) {
     console.error('[Database] Migration failed:', (error as Error).message);
     throw error;
@@ -381,6 +392,8 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
     const paths = await db.all('SELECT pathName, tier0TalentId FROM PathSelection WHERE characterId = ?', characterId);
     const cultures = await db.all('SELECT name FROM CultureSelection WHERE characterId = ?', characterId);
     const radiantPath = await db.get('SELECT boundOrder, currentIdeal, idealSpoken, surgePair, sprenType, radiantTier0TalentId FROM RadiantPath WHERE characterId = ?', characterId);
+    const singerForms = await db.all('SELECT formId FROM UnlockedSingerForm WHERE characterId = ?', characterId);
+    const singerFormActive = await db.get('SELECT activeForm FROM Character WHERE id = ?', characterId);
 
     // Serialize to character format
     return {
@@ -445,7 +458,9 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
         sprenType: radiantPath.sprenType,
         radiantTier0TalentId: radiantPath.radiantTier0TalentId || null
       } : undefined,
-      radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null
+      radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null,
+      unlockedSingerForms: singerForms.map((f: any) => f.formId),
+      activeForm: singerFormActive?.activeForm ?? undefined
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -1195,6 +1210,32 @@ export async function saveCharacter(
         Array.isArray(character.radiantPath.surgePair) ? character.radiantPath.surgePair.join('/') : null,
         character.radiantPath.sprenType || null,
         character.radiantTier0TalentId || null
+      );
+    }
+
+    // Save singer forms
+    if (Array.isArray(character.unlockedSingerForms) && character.unlockedSingerForms.length > 0) {
+      await db.run('DELETE FROM UnlockedSingerForm WHERE characterId = ?', character.id);
+      const now = new Date().toISOString();
+      for (const formId of character.unlockedSingerForms) {
+        await db.run(
+          `INSERT INTO UnlockedSingerForm (id, characterId, formId, unlockedAt)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(characterId, formId) DO NOTHING`,
+          `singerform-${character.id}-${formId}`,
+          character.id,
+          formId,
+          now
+        );
+      }
+    }
+
+    // Save active singer form on Character row
+    if (character.activeForm !== undefined) {
+      await db.run(
+        'UPDATE Character SET activeForm = ? WHERE id = ?',
+        character.activeForm,
+        character.id
       );
     }
 

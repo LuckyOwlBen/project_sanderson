@@ -247,7 +247,7 @@ export class CharacterStorageService {
       character.baselineUnlockedTalents = new Set(data.baselineUnlockedTalents);
     }
     
-    if (data.unlockedSingerForms) {
+    if (data.unlockedSingerForms?.length > 0) {
       data.unlockedSingerForms.forEach((formId: string) => {
         character.unlockSingerForm(formId);
       });

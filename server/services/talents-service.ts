@@ -2,8 +2,11 @@ import {
   createTalentsStateRecord,
   getTalentsStateRecord,
   updateTalentsStateRecord,
-  loadCharacter
+  loadCharacter,
+  saveCharacter
 } from '../database';
+import { applyTalentEffects } from 'shared/data/talents/talentEffects';
+import { Character } from '../character/character';
 import { getTalentPath, getTalentTree } from 'shared/data/talents/talentTrees';
 import { AvailableTreeDTO, AvailableNodeDTO } from 'shared/types/talents';
 import canUnlockTalentForCharacter from 'shared/data/talents/prereqChecker';
@@ -334,6 +337,13 @@ export async function setTalentsByCharacterId(
 
     const pendingSet = new Set(pendingTalents);
     const unlockedSet = new Set(totalTalents);
+
+    // Singer tier-0 talents are free/virtual and may not be in totalTalents in the DB,
+    // but they are always considered unlocked for a singer character.
+    if (character?.ancestry?.toLowerCase() === 'singer') {
+      unlockedSet.add('singer_ancestry');
+      unlockedSet.add('singer_change_form');
+    }
 
     // Allow pending tier-1 talents even if prereqs are not yet satisfied so the
     // user can pre-select them while reallocating other resources. For tiers >1
@@ -889,11 +899,28 @@ export async function finalizeTalentsByCharacterId(characterId: string): Promise
   }
 
   // Merge pending into total and finalize
+  const finalizedTalents = Array.from(new Set([...state.totalTalents, ...state.pendingTalents]));
   const result = await setTalentsByCharacterId(characterId, {
-    totalTalents: Array.from(new Set([...state.totalTalents, ...state.pendingTalents])),
+    totalTalents: finalizedTalents,
     pendingTalents: [],
     finalized: true
   });
+
+  // Derive and persist singer forms from finalized talents
+  if (character?.ancestry === 'singer') {
+    const serverChar = new Character();
+    serverChar.id = characterId;
+    serverChar.unlockedSingerForms = character.unlockedSingerForms || [];
+    for (const talentId of finalizedTalents) {
+      applyTalentEffects(serverChar, talentId);
+    }
+    if (serverChar.unlockedSingerForms.length > 0) {
+      await saveCharacter({
+        ...character,
+        unlockedSingerForms: serverChar.unlockedSingerForms
+      });
+    }
+  }
 
   return result;
 }
