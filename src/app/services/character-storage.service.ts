@@ -214,6 +214,8 @@ export class CharacterStorageService {
       character.attributes.willpower = data.attributes.willpower || 0;
       character.attributes.awareness = data.attributes.awareness || 0;
       character.attributes.presence = data.attributes.presence || 0;
+      // Recalculate resource maximums now that attributes are set
+      character.recalculateResources();
     }
     
     if (data.skills) {
