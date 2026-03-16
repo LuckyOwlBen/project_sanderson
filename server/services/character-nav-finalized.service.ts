@@ -1,9 +1,14 @@
 /**
  * Character Navigation Finalized Service
  * 
- * Provides finalized status for character creation/level-up steps.
- * This service is the single source of truth for what steps are locked down
+ * Provides tri-state status for character creation/level-up steps.
+ * This service is the single source of truth for what steps need action
  * in a character's progression. Used by frontend to display nav button colors.
+ * 
+ * States:
+ *   'pending'   – Has unspent points or selection not yet made (Gold)
+ *   'spent'     – All points spent / selection made, still editable (Green)
+ *   'finalized' – Locked via Review page finalize, read-only (Blue)
  */
 
 import {
@@ -15,58 +20,95 @@ import {
   loadCharacter
 } from '../database';
 
+export type StepState = 'pending' | 'spent' | 'finalized';
+
 export interface NavigationFinalizedStatus {
-  ancestry: boolean;
-  culture: boolean;
-  name: boolean;
-  attributes: boolean;
-  expertises: boolean;
-  skills: boolean;
-  paths: boolean;
-  talents: boolean;
-  equipment: boolean;
+  ancestry: StepState;
+  culture: StepState;
+  name: StepState;
+  attributes: StepState;
+  expertises: StepState;
+  skills: StepState;
+  paths: StepState;
+  talents: StepState;
+  equipment: StepState;
 }
 
 export class CharacterNavFinalizedService {
   /**
-   * Get navigation finalized status for a character
-   * Queries each step's finalized property from the database
+   * Derive tri-state for a point-based step from its DB record.
+   */
+  private pointStepState(record: { finalized: boolean; pointsRemaining: number } | null): StepState {
+    if (!record) return 'pending';
+    if (record.finalized) return 'finalized';
+    return record.pointsRemaining > 0 ? 'pending' : 'spent';
+  }
+
+  /**
+   * Get navigation status for a character.
+   * Returns a tri-state for each creation/level-up step.
    * 
    * @param characterId - Character to query
-   * @returns Navigation finalized status object
+   * @returns Navigation status object with tri-state per step
    */
   async getNavigationFinalized(characterId: string): Promise<NavigationFinalizedStatus> {
     try {
-      // Load basic character data for early-step info
       const character = await loadCharacter(characterId);
       if (!character) {
         throw new Error(`Character ${characterId} not found`);
       }
 
-      // Load state records for each step
+      // Load state records for point-based steps
       const attrs = await getAttributesRecord(characterId);
       const skills = await getSkillsStateRecord(characterId);
       const talents = await getTalentsStateRecord(characterId);
       const expertise = await getExpertiseStateRecord(characterId);
 
-      // Early steps are finalized if they have been chosen and lock happens on creation finalize
-      // For now, we'll check if they have values (true) as a proxy until we add explicit finalized columns
-      // At finalization, we'll update all these flags together
+      // Point-based steps use the helper
+      const attributesState = this.pointStepState(attrs);
+      const skillsState = this.pointStepState(skills);
+      const talentsState = this.pointStepState(talents);
+      const expertisesState = this.pointStepState(expertise);
+
+      // Selection-based steps: pending if empty, finalized if all point-steps are finalized, otherwise spent
+      const allPointStepsFinalized =
+        attributesState === 'finalized' &&
+        skillsState === 'finalized' &&
+        talentsState === 'finalized' &&
+        expertisesState === 'finalized';
+
       const hasAncestry = !!character.ancestry;
       const hasCulture = (character.cultures?.length ?? 0) > 0;
       const hasName = !!(character.name && character.name.length > 0) && character.name !== 'Unnamed';
+
+      const selectionState = (hasValue: boolean): StepState => {
+        if (!hasValue) return 'pending';
+        return allPointStepsFinalized ? 'finalized' : 'spent';
+      };
+
+      // Paths: selected = spent, finalized column = finalized, no selection = pending
       const pathsFinalized = await getPathsFinalized(characterId);
+      const hasPath = (character.paths?.length ?? 0) > 0;
+      let pathsState: StepState = 'pending';
+      if (pathsFinalized) {
+        pathsState = 'finalized';
+      } else if (hasPath) {
+        pathsState = 'spent';
+      }
+
+      // Equipment: no point system — spent pre-finalize, finalized post
+      const equipmentState: StepState = allPointStepsFinalized ? 'finalized' : 'spent';
 
       return {
-        ancestry: hasAncestry,
-        culture: hasCulture,
-        name: hasName,
-        attributes: attrs?.finalized ?? false,
-        expertises: expertise?.finalized ?? false,
-        skills: skills?.finalized ?? false,
-        paths: pathsFinalized,
-        talents: talents?.finalized ?? false,
-        equipment: true // Equipment is always available/finalizable
+        ancestry: selectionState(hasAncestry),
+        culture: selectionState(hasCulture),
+        name: selectionState(hasName),
+        attributes: attributesState,
+        expertises: expertisesState,
+        skills: skillsState,
+        paths: pathsState,
+        talents: talentsState,
+        equipment: equipmentState
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -76,15 +118,11 @@ export class CharacterNavFinalizedService {
   }
 
   /**
-   * Get finalized status for a specific step
-   * 
-   * @param characterId - Character to query
-   * @param step - Step name: ancestry, culture, name, attributes, skills, talents, expertises, paths, equipment
-   * @returns Boolean indicating if step is finalized
+   * Get status for a specific step
    */
-  async getStepFinalized(characterId: string, step: string): Promise<boolean> {
+  async getStepStatus(characterId: string, step: string): Promise<StepState> {
     const status = await this.getNavigationFinalized(characterId);
-    return (status as any)[step] ?? false;
+    return (status as any)[step] ?? 'pending';
   }
 }
 

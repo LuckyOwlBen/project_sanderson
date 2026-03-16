@@ -6,7 +6,7 @@
         <div class="points-remaining">Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}</div>
       </div>
       <div class="points-display">
-        <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
+        <button class="reset-btn" (click)="resetAllocations()" [disabled]="isFinalized">Reset All</button>
       </div>
     </div>
 
@@ -18,6 +18,7 @@
         [minValue]="getMinValue(attr)"
         [maxValue]="maxValue"
         [pointsRemaining]="remainingPoints"
+        [disabled]="isFinalized"
         (valueChanged)="onValueChanged($event)">
       </app-value-stepper>
     </div>

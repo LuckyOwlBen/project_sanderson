@@ -5,14 +5,15 @@ import { CharacterCreationFlowService, CreationStep } from '../../services/chara
 import { StepValidationService } from '../../services/step-validation.service';
 import { LevelUpStatusService } from '../../services/level-up-status.service';
 import { NavFinalizedService } from '../../services/nav-finalized.service';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { ALL_TALENT_PATHS, getTalentTree } from '../../../../shared/data/talents/talentTrees';
 import { TalentTree } from '../../../../shared/types/talents';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { filter, takeUntil } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
+import { filter, take, takeUntil } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-character-creator-view',
@@ -42,7 +43,8 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
     public flowService: CharacterCreationFlowService,
     private validationService: StepValidationService,
     private levelUpStatusService: LevelUpStatusService,
-    private navFinalized: NavFinalizedService
+    private navFinalized: NavFinalizedService,
+    private identityService: CharacterIdentityService
   ) {
     this.steps = this.flowService.getSteps();
   }
@@ -97,8 +99,9 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       this.validationService.validateAllSteps(character);
       
       // Load finalized status from backend
-      if (character && character.id) {
-        this.navFinalized.loadNavFinalized(character.id).subscribe();
+      const charId = character?.id || this.identityService.getCurrentCharacterId();
+      if (charId) {
+        this.navFinalized.loadNavFinalized(charId).subscribe();
       }
     });
   }
@@ -123,6 +126,9 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
   async nextStep(): Promise<void> {
     // Persist the current step before navigating to the next
     await this.persistCurrentStep();
+
+    // Reload nav status so the step we just completed turns green (spent)
+    await this.refreshNavStatus();
 
     if (this.isLevelUpMode) {
       // In level-up mode, skip to the next relevant step
@@ -161,6 +167,17 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       }
     } catch (err) {
       console.warn('[Character Creator] Persist hook failed or not available for current step', err);
+    }
+  }
+
+  /**
+   * Reload navigation status from backend after a step persist.
+   * This updates the nav cards so completed steps turn green (spent).
+   */
+  private async refreshNavStatus(): Promise<void> {
+    const characterId = this.characterState.getCharacter()?.id || this.identityService.getCurrentCharacterId();
+    if (characterId) {
+      await firstValueFrom(this.navFinalized.loadNavFinalized(characterId));
     }
   }
 

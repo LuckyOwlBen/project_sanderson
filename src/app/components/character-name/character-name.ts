@@ -9,11 +9,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil, filter } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
 import { NameApiService } from '../../services/name-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { CulturesService } from '../../services/cultures.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 
 @Component({
   selector: 'app-character-name',
@@ -42,6 +43,7 @@ export class CharacterName implements OnInit, OnDestroy {
   suggestedNames: string[] = [];
   isLoading: boolean = false;
   isWaitingForIdentity: boolean = false;
+  isFinalized: boolean = false;
   availableLevels: number[] = [];
   private characterId: string | null = null;
 
@@ -51,6 +53,7 @@ export class CharacterName implements OnInit, OnDestroy {
     private nameApiService: NameApiService,
     private identityService: CharacterIdentityService,
     private culturesService: CulturesService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {
     // Generate available levels 1-21
@@ -58,6 +61,14 @@ export class CharacterName implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.name === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Scroll to top when component loads
     setTimeout(() => {
       const mainContent = document.querySelector('.app-sidenav-content');
@@ -192,7 +203,7 @@ export class CharacterName implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
+  public async persistStep(): Promise<void> {
     console.log('[CharacterName] persistStep called');
     
     if (!this.characterId) {
@@ -209,19 +220,17 @@ export class CharacterName implements OnInit, OnDestroy {
     console.log('[CharacterName] Saving name:', nameToSave, 'level:', this.characterLevel);
     
     this.isLoading = true;
-    this.nameApiService.saveName(this.characterId, nameToSave, this.characterLevel)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('[CharacterName] Name saved to server:', response);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('[CharacterName] Failed to save name:', error);
-          this.isLoading = false;
-          this.router.navigate(['/']);
-        }
-      });
+    try {
+      const response = await firstValueFrom(
+        this.nameApiService.saveName(this.characterId, nameToSave, this.characterLevel)
+      );
+      console.log('[CharacterName] Name saved to server:', response);
+    } catch (error) {
+      console.error('[CharacterName] Failed to save name:', error);
+      this.router.navigate(['/']);
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
 

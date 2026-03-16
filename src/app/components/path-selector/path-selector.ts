@@ -168,12 +168,10 @@ export class PathSelector implements OnInit, OnDestroy {
   }
 
   private loadFinalizedStatus(characterId: string): void {
-    this.navFinalizedService.loadNavFinalized(characterId)
+    this.navFinalizedService.getNavigationFinalized()
       .pipe(takeUntil(this.destroy$))
       .subscribe((status) => {
-        if (status.paths) {
-          this.isFinalized = true;
-        }
+        this.isFinalized = status.paths === 'finalized';
         this.cdr.detectChanges();
       });
   }

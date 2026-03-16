@@ -10,7 +10,8 @@ import { StepValidationService } from '../../services/step-validation.service';
 import { CultureApiService } from '../../services/culture-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { CulturesService } from '../../services/cultures.service';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
+import { Subject, firstValueFrom, takeUntil, filter, take } from 'rxjs';
 
 interface CultureInfo {
   culture: CulturalInterface;
@@ -47,6 +48,7 @@ export class CultureSelector implements OnInit, OnDestroy {
   showValidation = false;
   isLoading = false;
   isWaitingForIdentity = false;
+  isFinalized = false;
   
   constructor(
     private router: Router,
@@ -54,6 +56,7 @@ export class CultureSelector implements OnInit, OnDestroy {
     private cultureApiService: CultureApiService,
     private identityService: CharacterIdentityService,
     private culturesService: CulturesService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {
     this.initializeCultureInfos();
@@ -94,6 +97,14 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.culture === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Monitor the waiting flag from identity service
     this.identityService.waitingForIdentity$
       .pipe(takeUntil(this.destroy$))
@@ -212,34 +223,34 @@ export class CultureSelector implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
+  public async persistStep(): Promise<void> {
     console.log('[CultureSelector] persistStep called');
-    this.identityService.currentCharacterId$.pipe(takeUntil(this.destroy$)).subscribe(characterId => {
-      if (!characterId) {
-        console.warn('[CultureSelector] No character ID available for saving');
-        return;
-      }
-      
-      if (this.selectedCultureNames.length === 0) {
-        console.warn('[CultureSelector] No cultures selected for saving');
-        return;
-      }
+    const characterId = await firstValueFrom(
+      this.identityService.currentCharacterId$.pipe(take(1))
+    );
 
-      console.log('[CultureSelector] Saving cultures:', this.selectedCultureNames, 'for character:', characterId);
-      this.isLoading = true;
-      this.cultureApiService.saveCultures(characterId, this.selectedCultureNames)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            console.log('[CultureSelector] Cultures saved to server:', response);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('[CultureSelector] Failed to save cultures:', error);
-            this.isLoading = false;
-            this.router.navigate(['/']);
-          }
-        });
-    });
+    if (!characterId) {
+      console.warn('[CultureSelector] No character ID available for saving');
+      return;
+    }
+
+    if (this.selectedCultureNames.length === 0) {
+      console.warn('[CultureSelector] No cultures selected for saving');
+      return;
+    }
+
+    console.log('[CultureSelector] Saving cultures:', this.selectedCultureNames, 'for character:', characterId);
+    this.isLoading = true;
+    try {
+      const response = await firstValueFrom(
+        this.cultureApiService.saveCultures(characterId, this.selectedCultureNames)
+      );
+      console.log('[CultureSelector] Cultures saved to server:', response);
+    } catch (error) {
+      console.error('[CultureSelector] Failed to save cultures:', error);
+      this.router.navigate(['/']);
+    } finally {
+      this.isLoading = false;
+    }
   }
 }

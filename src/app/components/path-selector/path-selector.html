@@ -10,7 +10,8 @@
       <mat-card 
         *ngFor="let path of availablePaths"
         class="path-card"
-        (click)="selectMainPath(path.id)">
+        [class.finalized]="isFinalized"
+        (click)="!isFinalized && selectMainPath(path.id)">
         
         <mat-card-header>
           <mat-icon class="path-icon">{{ getPathIcon(path) }}</mat-icon>
@@ -44,7 +45,8 @@
       <mat-card 
         *ngFor="let spec of availableSpecializations"
         class="path-card"
-        (click)="selectSpecialization(spec)">
+        [class.finalized]="isFinalized"
+        (click)="!isFinalized && selectSpecialization(spec)">
         
         <mat-card-header>
           <mat-card-title>{{ spec.pathName }}</mat-card-title>

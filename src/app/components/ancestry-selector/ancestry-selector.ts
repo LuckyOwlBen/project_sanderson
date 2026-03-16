@@ -6,6 +6,7 @@ import { Ancestry } from '../../character/ancestry/ancestry';
 import { StepValidationService } from '../../services/step-validation.service';
 import { AncestryApiService } from '../../services/ancestry-api.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -36,6 +37,7 @@ export class AncestrySelector implements OnInit, OnDestroy {
   Ancestry = Ancestry; // Expose enum to template
   isLoading: boolean = false;
   isWaitingForIdentity: boolean = false;
+  isFinalized: boolean = false;
 
   ancestries: AncestryInfo[] = [
     {
@@ -72,10 +74,19 @@ export class AncestrySelector implements OnInit, OnDestroy {
     private validationService: StepValidationService,
     private ancestryApiService: AncestryApiService,
     private identityService: CharacterIdentityService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.ancestry === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Monitor the waiting flag from identity service
     this.identityService.waitingForIdentity$
       .pipe(takeUntil(this.destroy$))

@@ -9,7 +9,8 @@
       *ngFor="let ancestry of ancestries"
       class="ancestry-card"
       [class.selected]="selectedAncestry === ancestry.type"
-      (click)="selectAncestry(ancestry.type)">
+      [class.finalized]="isFinalized"
+      (click)="!isFinalized && selectAncestry(ancestry.type)">
       
       <div class="card-image-placeholder">
         <mat-icon class="ancestry-icon">{{ ancestry.imagePlaceholder }}</mat-icon>

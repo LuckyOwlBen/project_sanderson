@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetection
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { NavFinalizedService, NavigationFinalized } from '../../services/nav-finalized.service';
+import { NavFinalizedService, NavigationFinalized, StepState } from '../../services/nav-finalized.service';
 
 export interface CreationStepStatus {
   label: string;
@@ -10,8 +10,7 @@ export interface CreationStepStatus {
   route: string;
   stepNumber: number;
   stepKey: keyof NavigationFinalized;
-  finalized: boolean;
-  hasPending: boolean;
+  state: StepState;
 }
 
 @Component({
@@ -42,7 +41,7 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
     this.navFinalized.getNavigationFinalized()
       .pipe(takeUntil(this.destroy$))
       .subscribe(navStatus => {
-        this.updateStepFinalizedStatus(navStatus);
+        this.updateStepStatus(navStatus);
         this.cdr.markForCheck();
       });
   }
@@ -54,25 +53,22 @@ export class CreationProgressComponent implements OnInit, OnDestroy {
 
   private initializeSteps(): void {
     this.steps = [
-      { label: 'Ancestry', icon: 'groups', route: 'ancestry', stepNumber: 0, stepKey: 'ancestry', finalized: false, hasPending: true },
-      { label: 'Culture', icon: 'public', route: 'culture', stepNumber: 1, stepKey: 'culture', finalized: false, hasPending: true },
-      { label: 'Name', icon: 'badge', route: 'name', stepNumber: 2, stepKey: 'name', finalized: false, hasPending: true },
-      { label: 'Attributes', icon: 'fitness_center', route: 'attributes', stepNumber: 3, stepKey: 'attributes', finalized: false, hasPending: true },
-      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 4, stepKey: 'expertises', finalized: false, hasPending: true },
-      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 5, stepKey: 'skills', finalized: false, hasPending: true },
-      { label: 'Path', icon: 'explore', route: 'paths', stepNumber: 6, stepKey: 'paths', finalized: false, hasPending: true },
-      { label: 'Talents', icon: 'stars', route: 'talents', stepNumber: 7, stepKey: 'talents', finalized: false, hasPending: true },
-      { label: 'Equipment', icon: 'inventory_2', route: 'equipment', stepNumber: 8, stepKey: 'equipment', finalized: false, hasPending: true },
-      { label: 'Review', icon: 'check_circle', route: 'review', stepNumber: 9, stepKey: 'equipment', finalized: false, hasPending: true },
+      { label: 'Ancestry', icon: 'groups', route: 'ancestry', stepNumber: 0, stepKey: 'ancestry', state: 'pending' },
+      { label: 'Culture', icon: 'public', route: 'culture', stepNumber: 1, stepKey: 'culture', state: 'pending' },
+      { label: 'Name', icon: 'badge', route: 'name', stepNumber: 2, stepKey: 'name', state: 'pending' },
+      { label: 'Attributes', icon: 'fitness_center', route: 'attributes', stepNumber: 3, stepKey: 'attributes', state: 'pending' },
+      { label: 'Expertises', icon: 'auto_stories', route: 'expertises', stepNumber: 4, stepKey: 'expertises', state: 'pending' },
+      { label: 'Skills', icon: 'school', route: 'skills', stepNumber: 5, stepKey: 'skills', state: 'pending' },
+      { label: 'Path', icon: 'explore', route: 'paths', stepNumber: 6, stepKey: 'paths', state: 'pending' },
+      { label: 'Talents', icon: 'stars', route: 'talents', stepNumber: 7, stepKey: 'talents', state: 'pending' },
+      { label: 'Equipment', icon: 'inventory_2', route: 'equipment', stepNumber: 8, stepKey: 'equipment', state: 'pending' },
+      { label: 'Review', icon: 'check_circle', route: 'review', stepNumber: 9, stepKey: 'equipment', state: 'pending' },
     ];
   }
 
-  private updateStepFinalizedStatus(navStatus: NavigationFinalized): void {
-    // Update finalized status from the backend service
+  private updateStepStatus(navStatus: NavigationFinalized): void {
     this.steps.forEach(step => {
-      step.finalized = navStatus[step.stepKey];
-      // Gold boxes show for any step that isn't finalized yet
-      step.hasPending = !step.finalized;
+      step.state = navStatus[step.stepKey];
     });
   }
 

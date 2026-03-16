@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterIdentityService } from '../../services/character-identity.service';
@@ -15,6 +15,7 @@ import { ALL_EXPERTISES, CULTURAL_EXPERTISES, ExpertiseDefinition } from '../../
 import { ExpertiseSource, ExpertiseSourceHelper } from '../../character/expertises/expertiseSource';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { CharacterStorageService } from '../../services/character-storage.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 
 @Component({
   selector: 'app-expertise-selector',
@@ -43,6 +44,7 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   totalPoints: number = 0;
   validationMessage: string = '';
   isLevelUpMode: boolean = false;
+  isFinalized: boolean = false;
   private characterId: string | null = null;
 
   constructor(
@@ -53,10 +55,19 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
     private expertiseApiService: ExpertiseApiService,
     private levelUpManager: LevelUpManager,
     private storageService: CharacterStorageService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.expertises === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Listen to points changed events from LevelUpManager
     this.levelUpManager.pointsChanged$
       .pipe(takeUntil(this.destroy$))
@@ -319,40 +330,35 @@ export class ExpertiseSelector implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
-    if (this.character && this.characterId) {
-      // First, sync local selectedExpertises to character state
-      // This ensures character.selectedExpertises matches what was selected in the UI
-      this.character.selectedExpertises = [...this.selectedExpertises];
-      
-      // Convert ExpertiseSource objects to ExpertiseSelection for API
-      const expertiseForApi = this.selectedExpertises.map(exp => ({
-        name: exp.name,
-        source: exp.source || 'manual',
-        sourceId: exp.sourceId
-      }));
-      
-      // Save expertises via API
-      this.expertiseApiService.updateExpertise(this.characterId, expertiseForApi)
-        .subscribe({
-          next: (result) => {
-            console.log(`[ExpertiseSelector] Expertises saved via API for ${this.characterId}`, result);
-            
-            // Add expertise skills to character's skill ranks
-            // These should be loaded from the backend, but if not available, add them locally
-            if (this.character) {
-              this.selectedExpertises.forEach(exp => {
-                // Set initial rank to 0 for newly selected expertise skills
-                this.character!.skills.setSkillRank(exp.name, 0);
-              });
-              console.log(`[ExpertiseSelector] Added ${this.selectedExpertises.length} expertise skill(s) to character`);
-            }
-          },
-          error: (err) => {
-            console.warn(`[ExpertiseSelector] API error, falling back to storage:`, err);
-            this.storageService.saveCharacter(this.character!).subscribe({ next: () => {}, error: () => {} });
-          }
+  public async persistStep(): Promise<void> {
+    if (!this.character || !this.characterId) return;
+
+    // Sync local selectedExpertises to character state
+    this.character.selectedExpertises = [...this.selectedExpertises];
+
+    // Convert ExpertiseSource objects to ExpertiseSelection for API
+    const expertiseForApi = this.selectedExpertises.map(exp => ({
+      name: exp.name,
+      source: exp.source || 'manual',
+      sourceId: exp.sourceId
+    }));
+
+    try {
+      const result = await firstValueFrom(
+        this.expertiseApiService.updateExpertise(this.characterId, expertiseForApi)
+      );
+      console.log(`[ExpertiseSelector] Expertises saved via API for ${this.characterId}`, result);
+
+      // Add expertise skills to character's skill ranks
+      if (this.character) {
+        this.selectedExpertises.forEach(exp => {
+          this.character!.skills.setSkillRank(exp.name, 0);
         });
+        console.log(`[ExpertiseSelector] Added ${this.selectedExpertises.length} expertise skill(s) to character`);
+      }
+    } catch (err) {
+      console.warn(`[ExpertiseSelector] API error, falling back to storage:`, err);
+      this.storageService.saveCharacter(this.character!).subscribe({ next: () => {}, error: () => {} });
     }
   }
 }

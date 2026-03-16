@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter, take } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil, filter, take } from 'rxjs';
 import { StepValidationService } from '../../services/step-validation.service';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { AttributesApiService, AttributesState } from '../../services/attributes-api.service';
@@ -9,6 +9,7 @@ import { BaseAllocator } from '../shared/base-allocator';
 import { DerivedAttributesManager } from '../../../../shared/character/attributes/derivedAttributes/derivedAttributesManager';
 import { ResourceManager } from '../../character/resources/resourceManager';
 import { Attributes } from '../../../../shared/character/attributes/attributes';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 
 type AttributeKey = 'strength' | 'speed' | 'awareness' | 'intellect' | 'willpower' | 'presence';
 
@@ -39,6 +40,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
   derivedHealth: number = 0;
   derivedFocus: number = 0;
   finalized: boolean = false;
+  isFinalized: boolean = false;
   isLoading: boolean = false;
   private characterId: string | null = null;
 
@@ -46,12 +48,21 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     private identityService: CharacterIdentityService,
     private attributesApi: AttributesApiService,
     private validationService: StepValidationService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {
     super();
   }
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.attributes === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Load attributes whenever character is set or changes
     this.identityService.currentCharacterId$
       .pipe(
@@ -196,7 +207,7 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
     return attrs;
   }
 
-  public persistStep(): void {
+  public async persistStep(): Promise<void> {
     if (!this.characterId) return;
 
     const attributesObj = this.items.reduce((acc, item) => {
@@ -204,20 +215,18 @@ export class AttributeAllocator extends BaseAllocator<AttributeConfig> implement
       return acc;
     }, {} as Record<AttributeKey, number>);
 
-    this.attributesApi.updateAttributes(this.characterId, attributesObj)
-      .subscribe({
-        next: (state) => {
-          console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);
-          // Update derived attributes from server response for authoritative values
-          this.derivedHealth = state.derived.health;
-          this.derivedFocus = state.derived.focus;
-          this.movementSpeed = state.derived.movement;
-          this.recoveryDie = state.derived.recovery;
-        },
-        error: (err: any) => {
-          console.error(`[AttributeAllocator] Failed to save attributes:`, err);
-        }
-      });
+    try {
+      const state = await firstValueFrom(
+        this.attributesApi.updateAttributes(this.characterId, attributesObj)
+      );
+      console.log(`[AttributeAllocator] Attributes saved for ${this.characterId}`);
+      this.derivedHealth = state.derived.health;
+      this.derivedFocus = state.derived.focus;
+      this.movementSpeed = state.derived.movement;
+      this.recoveryDie = state.derived.recovery;
+    } catch (err) {
+      console.error(`[AttributeAllocator] Failed to save attributes:`, err);
+    }
   }
 
   // TrackBy function for ngFor to prevent unnecessary re-renders

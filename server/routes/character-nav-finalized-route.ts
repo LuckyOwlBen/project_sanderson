@@ -14,21 +14,23 @@ import { characterNavFinalizedService } from '../services/character-nav-finalize
 export default function createCharacterNavFinalizedRoute(app: Express): void {
   /**
    * GET /api/character/:id/isNavFinalized
-   * Get navigation finalization status for a character
+   * Get navigation status for a character
    * 
-   * Returns which creation steps are finalized for the character.
-   * Green buttons = finalized, Gold buttons = not finalized.
+   * Returns tri-state for each creation step:
+   *   'pending'   – Has unspent points or selection not made (Gold)
+   *   'spent'     – All points spent / selection made, still editable (Green)
+   *   'finalized' – Locked via Review page finalize, read-only (Blue)
    * 
    * @returns {
-   *   ancestry: boolean,
-   *   culture: boolean,
-   *   name: boolean,
-   *   attributes: boolean,
-   *   expertises: boolean,
-   *   skills: boolean,
-   *   paths: boolean,
-   *   talents: boolean,
-   *   equipment: boolean
+   *   ancestry: 'pending' | 'spent' | 'finalized',
+   *   culture: 'pending' | 'spent' | 'finalized',
+   *   name: 'pending' | 'spent' | 'finalized',
+   *   attributes: 'pending' | 'spent' | 'finalized',
+   *   expertises: 'pending' | 'spent' | 'finalized',
+   *   skills: 'pending' | 'spent' | 'finalized',
+   *   paths: 'pending' | 'spent' | 'finalized',
+   *   talents: 'pending' | 'spent' | 'finalized',
+   *   equipment: 'pending' | 'spent' | 'finalized'
    * }
    */
   app.get('/api/character/:id/isNavFinalized', async (req: Request, res: Response) => {

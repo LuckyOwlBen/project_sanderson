@@ -43,8 +43,9 @@
           [class.cultural-auto]="isCulturalExpertise(expertise)"
           [class.available]="canSelectExpertise(expertise)"
           [class.locked]="!canSelectExpertise(expertise) && !isExpertiseSelected(expertise)"
+          [class.finalized]="isFinalized"
           [attr.data-category]="category"
-          (click)="toggleExpertise(expertise)">
+          (click)="!isFinalized && toggleExpertise(expertise)">
           
           <mat-card-header>
             <mat-card-title>
@@ -66,6 +67,7 @@
               mat-button 
               *ngIf="isExpertiseSelected(expertise)"
               (click)="toggleExpertise(expertise); $event.stopPropagation()"
+              [disabled]="isFinalized"
               color="warn">
               <mat-icon>remove_circle</mat-icon>
               Remove
@@ -74,6 +76,7 @@
               mat-button 
               *ngIf="!isExpertiseSelected(expertise) && canSelectExpertise(expertise)"
               (click)="toggleExpertise(expertise); $event.stopPropagation()"
+              [disabled]="isFinalized"
               color="primary">
               <mat-icon>add_circle</mat-icon>
               Select
@@ -89,7 +92,7 @@
     <mat-chip-set>
       <mat-chip 
         *ngFor="let expertise of selectedExpertises"
-        [removable]="canRemoveExpertise(expertise.name)"
+        [removable]="!isFinalized && canRemoveExpertise(expertise.name)"
         (removed)="removeExpertiseByName(expertise.name)">
         {{ expertise.name }}
         <span class="expertise-source-badge" [class]="'badge-' + expertise.source">

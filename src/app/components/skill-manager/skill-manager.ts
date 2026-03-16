@@ -6,7 +6,7 @@
 
 import { Component, OnInit, OnDestroy, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, filter, take } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil, filter, take } from 'rxjs';
 import { Character } from '../../character/character';
 import { CharacterStateService } from '../../character/characterStateService';
 import { CharacterIdentityService } from '../../services/character-identity.service';
@@ -16,6 +16,7 @@ import { ValueStepper } from '../value-stepper/value-stepper';
 import { BaseAllocator } from '../shared/base-allocator';
 import { SkillType } from '../../../../shared/data/skills/skillTypes';
 import { SkillAssociationTable } from '../../../../shared/data/skills/skillAssociationTable';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 
 interface SkillConfig {
   name: string;
@@ -46,6 +47,7 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
   private serverSkillPoints?: number;
   private isInitialized: boolean = false;
   private isFetchingSlice: boolean = false;
+  isFinalized: boolean = false;
 
   // Group skills by category for better UI organization
   physicalSkills: SkillConfig[] = [];
@@ -59,12 +61,21 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     private identityService: CharacterIdentityService,
     private skillsApi: SkillsApiService,
     private validationService: StepValidationService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {
     super();
   }
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.skills === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     this.identityService.currentCharacterId$
       .pipe(
         takeUntil(this.destroy$),
@@ -116,29 +127,28 @@ export class SkillManager extends BaseAllocator<SkillConfig> implements OnInit, 
     });
   }
 
-  private persistSkills(): void {
+  private persistSkills(): Promise<void> {
     if (!this.character || !this.characterId) {
-      return;
+      return Promise.resolve();
     }
 
     const payload = this.character.skills.getAllSkillRanks();
     console.log('[SkillManager] Persisting skills for character', this.characterId, payload);
-    this.skillsApi.updateSkills(this.characterId, payload)
-      .subscribe({
-        next: (response) => {
-          console.log('[SkillManager] Skills persisted successfully:', response);
-        },
-        error: (err) => {
-          console.error('[SkillManager] Failed to persist skills:', err);
-        }
-      });
+    return firstValueFrom(
+      this.skillsApi.updateSkills(this.characterId, payload)
+    ).then(response => {
+      console.log('[SkillManager] Skills persisted successfully:', response);
+    }).catch(err => {
+      console.error('[SkillManager] Failed to persist skills:', err);
+    });
   }
 
   // Persist hook called by CharacterCreatorView before navigating to next step
-  public persistStep(): void {
+  public persistStep(): Promise<void> {
     if (this.characterId) {
-      this.persistSkills();
+      return this.persistSkills();
     }
+    return Promise.resolve();
   }
 
   private initializeSkills(): void {

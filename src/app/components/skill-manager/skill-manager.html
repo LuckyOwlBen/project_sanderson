@@ -5,7 +5,7 @@
       <span class="points-remaining" [class.warning]="remainingPoints === 0">
         Points Remaining: <strong>{{ remainingPoints }}</strong> / {{ totalPoints }}
       </span>
-      <button class="reset-btn" (click)="resetAllocations()">Reset All</button>
+      <button class="reset-btn" (click)="resetAllocations()" [disabled]="isFinalized">Reset All</button>
     </div>
   </div>
 
@@ -21,6 +21,7 @@
             [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
+            [disabled]="isFinalized"
             (valueChanged)="onValueChanged($event)">
           </app-value-stepper>
           <div class="skill-info">
@@ -42,6 +43,7 @@
             [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
+            [disabled]="isFinalized"
             (valueChanged)="onValueChanged($event)">
           </app-value-stepper>
           <div class="skill-info">
@@ -63,6 +65,7 @@
             [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
+            [disabled]="isFinalized"
             (valueChanged)="onValueChanged($event)">
           </app-value-stepper>
           <div class="skill-info">
@@ -84,6 +87,7 @@
             [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
+            [disabled]="isFinalized"
             (valueChanged)="onValueChanged($event)">
           </app-value-stepper>
           <div class="skill-info">
@@ -105,6 +109,7 @@
             [minValue]="getMinValue(skill)"
             [maxValue]="maxValue"
             [pointsRemaining]="remainingPoints"
+            [disabled]="isFinalized"
             (valueChanged)="onValueChanged($event)">
           </app-value-stepper>
           <div class="skill-info">

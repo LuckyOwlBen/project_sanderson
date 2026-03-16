@@ -13,7 +13,7 @@
       <!-- Character Level Selection -->
       <mat-form-field appearance="outline" class="level-input">
         <mat-label>Character Level</mat-label>
-        <mat-select [(ngModel)]="characterLevel" (ngModelChange)="onLevelChange()">
+        <mat-select [(ngModel)]="characterLevel" (ngModelChange)="onLevelChange()" [disabled]="isFinalized">
           <mat-select-trigger>{{ characterLevel }}</mat-select-trigger>
           <mat-option *ngFor="let lvl of availableLevels" [value]="lvl">
             Level {{ lvl }}
@@ -30,6 +30,7 @@
           placeholder="Enter your character's name"
           autocomplete="off"
           maxlength="50"
+          [readonly]="isFinalized"
           #nameInput="ngModel">
         <mat-hint *ngIf="characterName.length > 0">
           {{ characterName.length }}/50 characters
@@ -70,7 +71,8 @@
         <mat-chip-set>
           <mat-chip 
             *ngFor="let name of suggestedNames"
-            (click)="selectSuggestedName(name)"
+            (click)="!isFinalized && selectSuggestedName(name)"
+            [disabled]="isFinalized"
             class="name-chip">
             {{ name }}
           </mat-chip>

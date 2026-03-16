@@ -12,6 +12,7 @@ export class ValueStepper implements OnInit, OnChanges {
   @Input() minValue: number = 0;
   @Input() maxValue: number = 10;
   @Input() pointsRemaining: number = 0;
+  @Input() disabled: boolean = false;
   
   @Output() valueChanged = new EventEmitter<{label: string, value: number}>();
 
@@ -43,11 +44,11 @@ export class ValueStepper implements OnInit, OnChanges {
   }
 
   get canIncrement(): boolean {
-    return this.displayValue < this.maxValue && this.pointsRemaining > 0;
+    return !this.disabled && this.displayValue < this.maxValue && this.pointsRemaining > 0;
   }
 
   get canDecrement(): boolean {
-    return this.displayValue > this.minValue;
+    return !this.disabled && this.displayValue > this.minValue;
   }
 
   get display(): number {

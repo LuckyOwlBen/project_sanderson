@@ -3,13 +3,14 @@
   <div
     *ngFor="let step of steps"
     class="nav-card"
-    [class.finalized]="step.finalized"
-    [class.has-pending]="step.hasPending"
+    [class.finalized]="step.state === 'finalized'"
+    [class.is-spent]="step.state === 'spent'"
+    [class.has-pending]="step.state === 'pending'"
     (click)="navigateToStep(step)">
     
     <div class="card-icon-wrapper">
       <span class="card-icon material-icons">{{ step.icon }}</span>
-      <span *ngIf="step.hasPending" class="pending-dot"></span>
+      <span *ngIf="step.state === 'pending'" class="pending-dot"></span>
     </div>
     
     <span class="card-label">{{ step.label }}</span>
@@ -22,12 +23,13 @@
     <div
       *ngFor="let step of steps; let i = index"
       class="progress-step"
-      [class.finalized]="step.finalized"
-      [class.has-pending]="step.hasPending">
+      [class.finalized]="step.state === 'finalized'"
+      [class.is-spent]="step.state === 'spent'"
+      [class.has-pending]="step.state === 'pending'">
       
       <div class="step-indicator">
         <span class="step-icon material-icons">{{ step.icon }}</span>
-        <span *ngIf="step.hasPending" class="pending-dot"></span>
+        <span *ngIf="step.state === 'pending'" class="pending-dot"></span>
       </div>
       
       <span class="step-label">{{ step.label }}</span>

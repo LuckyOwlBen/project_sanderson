@@ -77,7 +77,7 @@
                 <button 
                   mat-raised-button 
                   color="primary"
-                  [disabled]="!canAfford(item)"
+                  [disabled]="!canAfford(item) || isFinalized"
                   (click)="purchaseItem(item)">
                   <mat-icon>shopping_cart</mat-icon>
                   Buy
@@ -112,6 +112,7 @@
             <mat-select 
               [(ngModel)]="selectedKitId"
               (ngModelChange)="applyKit($event)"
+              [disabled]="isFinalized"
               [compareWith]="compareKits">
               <mat-optgroup label="Available Kits">
                 <mat-option *ngFor="let kit of availableKits" [value]="kit.id">
@@ -151,6 +152,7 @@
                 <button 
                   mat-icon-button
                   (click)="sellItem(kitItem.item.id)"
+                  [disabled]="isFinalized"
                   matTooltip="Sell item (50% value)">
                   <mat-icon>sell</mat-icon>
                 </button>
@@ -168,7 +170,7 @@
               <button 
                 mat-raised-button 
                 color="warn"
-                [disabled]="hasRefundedKit"
+                [disabled]="hasRefundedKit || isFinalized"
                 (click)="refundStartingKit()">
                 <mat-icon>currency_exchange</mat-icon>
                 Sell All Starting Items
@@ -200,7 +202,7 @@
               <span class="item-price">{{ inv.item.price || 0 }}mk</span>
               <span class="item-weight">{{ inv.item.weight || 0 }} lbs</span>
               <span class="item-value">Value: {{ (inv.item.price || 0) * inv.quantity || 0 }}mk</span>
-              <button mat-raised-button color="warn" (click)="sellItem(inv.item.id)">
+              <button mat-raised-button color="warn" [disabled]="isFinalized" (click)="sellItem(inv.item.id)">
                 <mat-icon>sell</mat-icon> Sell
               </button>
             </div>

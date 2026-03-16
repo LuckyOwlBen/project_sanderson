@@ -19,6 +19,7 @@ import { TalentNode, TalentUIResponse } from '../../../../shared/types/talents';
 import talentTreeManager from '../../../../shared/data/talents/talentManager';
 import { StepValidationService } from '../../services/step-validation.service';
 import { TalentsApiService } from '../../services/talents-api.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { TalentEffectParser } from 'shared/data/talents/talentEffectParser';
 import { ExpertiseChoiceDialog, ExpertiseChoiceData } from '../shared/expertise-choice-dialog/expertise-choice-dialog';
 
@@ -46,6 +47,7 @@ export class TalentView implements OnInit, OnDestroy {
   isLoading: boolean = false;
   validationMessage: string = '';
   isLevelUpMode: boolean = false;
+  isFinalized: boolean = false;
 
   private characterId: string | null = null;
   private pendingExpertiseChoices: Array<{ talentId: string; choices: string[] }> = [];
@@ -67,12 +69,21 @@ export class TalentView implements OnInit, OnDestroy {
     private validationService: StepValidationService,
     private dialog: MatDialog,
     private talentsApi: TalentsApiService,
+    private navFinalizedService: NavFinalizedService,
     private identityService: CharacterIdentityService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     console.log('[TalentView] ngOnInit called');
+
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.talents === 'finalized';
+        this.cdr.markForCheck();
+      });
 
     // Subscribe to route params to detect level-up mode
     this.activatedRoute.queryParams
@@ -151,11 +162,12 @@ export class TalentView implements OnInit, OnDestroy {
   /**
    * Persist step before navigation - calls finalize endpoint
    */
-  public persistStep(): void {
+  public persistStep(): Promise<void> {
     if (!this.characterId) {
       console.log('[TalentView] persistStep - no characterId');
-      return;
     }
+    // Talents are saved on unlock, not on step navigation
+    return Promise.resolve();
   }
 
   /**

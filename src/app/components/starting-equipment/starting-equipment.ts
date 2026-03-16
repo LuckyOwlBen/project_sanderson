@@ -12,9 +12,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { Subject, takeUntil, filter, take, switchMap } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil, filter, take, switchMap } from 'rxjs';
 import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { EquipmentApiService, EquipmentResponse } from '../../services/equipment-api.service';
 import { ItemType, StartingKitDTO, InventoryDTO, InventoryItem, InventoryViewItem } from '../../../../shared/types/inventory';
 
@@ -64,16 +65,26 @@ export class StartingEquipment implements OnInit, OnDestroy {
   pageSize = 12;
   pageIndex = 0;
   isWaitingForIdentity = false;
+  isFinalized = false;
 
   constructor(
     private router: Router,
     private equipmentApi: EquipmentApiService,
     private identityService: CharacterIdentityService,
     private validationService: StepValidationService,
+    private navFinalizedService: NavFinalizedService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to nav finalized status for lock state
+    this.navFinalizedService.getNavigationFinalized()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        this.isFinalized = status.equipment === 'finalized';
+        this.cdr.markForCheck();
+      });
+
     // Monitor identity service waiting state
     this.identityService.waitingForIdentity$
       .pipe(takeUntil(this.destroy$))
@@ -441,18 +452,19 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   // Persist hook for CharacterCreatorView
-  public persistStep(): void {
-    this.identityService.currentCharacterId$
-      .pipe(take(1))
-      .subscribe(characterId => {
-        if (!characterId || !this.currentInventory) return;
-        
+  public async persistStep(): Promise<void> {
+    const characterId = await firstValueFrom(
+      this.identityService.currentCharacterId$.pipe(take(1))
+    );
+    if (!characterId || !this.currentInventory) return;
+
+    try {
+      const response = await firstValueFrom(
         this.equipmentApi.saveEquipment(characterId, this.currentInventory)
-          .pipe(take(1))
-          .subscribe({
-            next: (response) => console.log('Equipment saved successfully:', response),
-            error: (error) => console.error('Failed to save equipment:', error)
-          });
-      });
+      );
+      console.log('Equipment saved successfully:', response);
+    } catch (error) {
+      console.error('Failed to save equipment:', error);
+    }
   }
 }
