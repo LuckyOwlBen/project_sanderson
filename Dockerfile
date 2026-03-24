@@ -5,8 +5,9 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy root package files and install (includes Angular CLI)
+# --legacy-peer-deps: @analogjs test packages lag behind Angular 21 peer deps
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy Angular/TS config and source
 COPY tsconfig*.json angular.json ./
