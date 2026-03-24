@@ -30,7 +30,7 @@ RUN apk add --no-cache curl
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY package*.json ./
-RUN npm ci --omit=dev && npx prisma generate
+RUN npm ci --omit=dev --legacy-peer-deps && npx prisma generate
 
 # Install server dependencies (tsx needed at runtime for TypeScript execution)
 COPY server/package*.json ./server/
