@@ -337,7 +337,7 @@ export class CharacterSheetView implements OnInit, OnDestroy {
           });
           this.character = character;
           this.characterIdentity.setCurrentCharacterId(id); // Set identity in service for API calls
-          this.portraitUrl = (character as any).portraitUrl || null;
+          this.portraitUrl = character.portraitUrl || null;
           this.characterState.updateCharacter(character);
           this.sessionNotes = (character as any).sessionNotes || '';
           
@@ -520,10 +520,10 @@ export class CharacterSheetView implements OnInit, OnDestroy {
     if (!this.character) return;
 
     if (imageUrl) {
-      (this.character as any).portraitUrl = imageUrl;
+      this.character.portraitUrl = imageUrl;
       this.portraitUrl = imageUrl;
     } else {
-      delete (this.character as any).portraitUrl;
+      this.character.portraitUrl = null;
       this.portraitUrl = null;
     }
     this.characterState.updateCharacter(this.character);

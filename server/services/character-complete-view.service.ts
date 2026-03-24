@@ -13,6 +13,7 @@ export interface CompleteCharacterView {
   level: number;
   ancestry: string | null;
   cultures: string[];
+  portraitUrl?: string | null;
   paths: {
     main: string | null;
     specialization: string | null;
@@ -104,6 +105,7 @@ export async function getCompleteCharacterView(characterId: string): Promise<Com
     level: character.level,
     ancestry,
     cultures,
+    portraitUrl: character.portraitUrl || null,
     paths,
     attributes,
     skills,

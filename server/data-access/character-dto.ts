@@ -113,6 +113,7 @@ export interface CharacterDTO {
   // ============================================================================
   id: string;
   name: string;
+  portraitUrl?: string | null;
 
   // ============================================================================
   // MODULE 2: PROGRESSION - Experience and level tracking
@@ -207,6 +208,7 @@ export function createEmptyCharacterDTO(id: string, name: string = ''): Characte
     // MODULE 1: IDENTITY
     id,
     name,
+    portraitUrl: null,
 
     // MODULE 2: PROGRESSION
     level: 1,

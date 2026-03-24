@@ -40,7 +40,7 @@ export class CharacterPortraitCard {
     const dialogRef = this.dialog.open(CharacterPortraitUpload, {
       width: '600px',
       data: {
-        currentImageUrl: (this.character as any).portraitUrl || null,
+        currentImageUrl: this.character.portraitUrl || null,
         characterId: this.characterId || (this.character as any).id,
         characterName: this.character.name || 'Character'
       }
@@ -64,6 +64,6 @@ export class CharacterPortraitCard {
   }
 
   getPortraitUrl(): string | null {
-    return (this.character as any)?.portraitUrl || null;
+    return this.character?.portraitUrl || null;
   }
 }

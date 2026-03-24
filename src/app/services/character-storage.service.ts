@@ -169,6 +169,7 @@ export class CharacterStorageService {
       radiantPath: character.radiantPath.toJSON(),
       inventory: character.inventory.serialize(),
       sessionNotes: (character as any).sessionNotes || '',
+      portraitUrl: character.portraitUrl || null,
       // spentPoints is server-side tracking only, don't serialize from client
       lastModified: new Date().toISOString()
     };
@@ -324,6 +325,9 @@ export class CharacterStorageService {
     }
     
     (character as any).sessionNotes = data.sessionNotes || '';
+    
+    // Restore portrait URL
+    character.portraitUrl = data.portraitUrl || null;
     
     // Restore spent points tracking
     if (data.spentPoints) {

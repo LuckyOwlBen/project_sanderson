@@ -8,6 +8,7 @@ export interface CompleteCharacterView {
   level: number;
   ancestry: string | null;
   cultures: string[];
+  portraitUrl?: string | null;
   paths: {
     main: string | null;
     specialization: string | null;

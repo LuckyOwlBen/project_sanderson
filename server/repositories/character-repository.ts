@@ -127,6 +127,7 @@ export class CharacterRepository {
     // MODULE 1: IDENTITY
     character.id = dto.id;
     character.name = dto.name;
+    (character as any).portraitUrl = dto.portraitUrl ?? null;
 
     // MODULE 2: PROGRESSION
     character.level = dto.level;
@@ -211,6 +212,7 @@ export class CharacterRepository {
       // MODULE 1: IDENTITY
       id: character.id,
       name: character.name,
+      portraitUrl: (character as any).portraitUrl ?? null,
 
       // MODULE 2: PROGRESSION
       level: character.level,

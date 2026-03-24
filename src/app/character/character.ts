@@ -41,6 +41,9 @@ export class Character {
   // Combat stance tracking - stores the ID of the currently active stance
   activeStanceId: string | null = null;
 
+  // Portrait image URL - path to the uploaded portrait stored on the server
+  portraitUrl: string | null = null;
+
   private skillManager = new SkillManager();
   private derivedAttributesManager = new DerivedAttributesManager();
   private defenseManager = new DefenseManager();

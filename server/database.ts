@@ -85,6 +85,7 @@ export interface CharacterData {
     focus: { current: number; max: number };
     investiture: { current: number; max: number; isActive: boolean };
   };
+  portraitUrl?: string | null;
   unlockedSingerForms?: string[];
   activeForm?: string;
   companions?: { companions: any[]; activePetId: string | undefined };
@@ -470,7 +471,8 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null,
       unlockedSingerForms: singerForms.map((f: any) => f.formId),
       activeForm: singerFormActive?.activeForm ?? undefined,
-      companions: char.companions ? JSON.parse(char.companions) : undefined
+      companions: char.companions ? JSON.parse(char.companions) : undefined,
+      portraitUrl: char.portraitUrl || null
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -951,8 +953,8 @@ export async function saveCharacter(
     }
     // Upsert character
     await db.run(`
-      INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, companions, lastModified)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, companions, portraitUrl, lastModified)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         level = excluded.level,
@@ -962,6 +964,7 @@ export async function saveCharacter(
         sessionNotes = excluded.sessionNotes,
         currencyInChips = excluded.currencyInChips,
         companions = excluded.companions,
+        portraitUrl = excluded.portraitUrl,
         lastModified = excluded.lastModified
     `,
       character.id,
@@ -973,6 +976,7 @@ export async function saveCharacter(
       character.sessionNotes ?? '',
       getCurrencyFromInventory(character.inventory) ?? 0,
       character.companions ? JSON.stringify(character.companions) : null,
+      character.portraitUrl ?? null,
       character.lastModified ?? new Date().toISOString()
     );
 

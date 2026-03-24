@@ -102,6 +102,7 @@ export class CharacterReview implements OnInit, OnDestroy {
             return;
           }
           this.completeCharacter = complete;
+          this.portraitUrl = complete.portraitUrl || null;
           console.log('[CharacterReview] Complete character loaded from API:', complete.name);
           this.cdr.detectChanges();
         },
