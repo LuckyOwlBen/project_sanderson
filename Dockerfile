@@ -1,50 +1,57 @@
 # Multi-stage build for Sanderson RPG
 # Stage 1: Build Angular app
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy root package files and install (includes Angular CLI)
 COPY package*.json ./
-COPY tsconfig*.json ./
-COPY angular.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
+# Copy Angular/TS config and source
+COPY tsconfig*.json angular.json ./
 COPY src ./src
 COPY public ./public
+COPY shared ./shared
 
 # Build Angular app
-RUN npm run build --configuration production
+RUN npx ng build --configuration production
 
 # Stage 2: Production server
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy backend package files
-COPY server/package*.json ./
+# Install curl for health checks
+RUN apk add --no-cache curl
 
-# Install production dependencies only
-RUN npm ci --production
+# Copy Prisma schema, config, and root package (for prisma generate)
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+COPY package*.json ./
+RUN npm ci --omit=dev && npx prisma generate
 
-# Copy backend code
-COPY server/server.js ./
+# Install server dependencies (tsx needed at runtime for TypeScript execution)
+COPY server/package*.json ./server/
+RUN cd server && npm ci
 
-# Copy built Angular app from builder stage
-COPY --from=builder /app/dist/project-sanderson/browser ./dist
+# Copy server source and shared modules
+COPY server ./server
+COPY shared ./shared
 
-# Create characters directory
-RUN mkdir -p /app/characters
+# Copy built Angular app from builder stage into where server expects it
+COPY --from=builder /app/dist/project-sanderson/browser ./server/dist
 
-# Expose port
+# Copy entrypoint script
+COPY deploy/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Create persistent data directories
+RUN mkdir -p /app/prisma /app/server/characters /app/server/images
+
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start server
-CMD ["node", "server.js"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

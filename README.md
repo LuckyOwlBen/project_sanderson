@@ -2,143 +2,147 @@ This repo is unfortunately AI slop. I tried so hard to remediate it but the data
 
 # Sanderson RPG - Character Management System
 
-Web-based character creator and session manager for tabletop RPG sessions. Built with Angular 18 and Node.js.
+Web-based character creator and session manager for tabletop RPG sessions. Built with Angular 21, Express, Socket.io, and SQLite.
 
-## 🚀 Quick Start
+## Quick Start (Development)
 
-**First Time Installation:**
 ```bash
-# Install frontend dependencies
+# Install dependencies
 npm install
+cd server && npm install && cd ..
 
-# Install backend dependencies (includes image processing)
-cd server
-npm install
-cd ..
+# Start both frontend and backend with hot reload
+npm start
 ```
 
-**Production (Recommended):**
+Frontend: `http://localhost:4200` | Backend API: `http://localhost:3000/api`
+
+## Production Deployment (Podman + Quadlet)
+
+The recommended production deployment uses **Podman** with **Quadlet** for systemd-managed container lifecycle. No docker-compose, no manual PID tracking — just systemd.
+
+### Prerequisites
+
+- [Podman](https://podman.io/docs/installation) installed on the host
+- Git (to clone the repo)
+
+### First-Time Setup
+
 ```bash
-./start.sh
+# Clone and enter the repo
+git clone <repo-url> && cd project_sanderson
+
+# Install the Quadlet service (creates data dirs, copies systemd unit)
+chmod +x deploy/*.sh
+./deploy/install.sh
+
+# Build the container image
+./deploy/build.sh
+
+# Start the service
+systemctl --user start sanderson-rpg
 ```
 
-Access at `http://sanderson-rpg.local:3000` or `http://<mini-pc-ip>:3000`
+The app is now running on port 80. Access it at `http://<host-ip>` or `http://sanderson-rpg.local`.
 
-**See [QUICKSTART.md](QUICKSTART.md) for full reference**
+### Manage the Service
 
-## 📚 Documentation
+```bash
+# Start / stop / restart
+systemctl --user start sanderson-rpg
+systemctl --user stop sanderson-rpg
+systemctl --user restart sanderson-rpg
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Commands and common tasks
-- **[STARTUP.md](STARTUP.md)** - Detailed startup options and systemd setup
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment, Docker, network config
-- **[IMAGE_UPLOAD.md](IMAGE_UPLOAD.md)** - Image upload system and WebP compression
+# Check status
+systemctl --user status sanderson-rpg
 
-## ✨ Features
+# Follow logs
+journalctl --user -u sanderson-rpg -f
+
+# The service auto-starts on boot (lingering is enabled during install)
+```
+
+### Update After Code Changes
+
+```bash
+git pull
+./deploy/update.sh    # Rebuilds image and restarts service
+```
+
+### Persistent Data
+
+All persistent data lives at `/opt/sanderson-rpg/data/`:
+
+| Path | Contents |
+|------|----------|
+| `data/db/dev.db` | SQLite database (characters, progression, resources) |
+| `data/characters/` | Character JSON snapshots |
+| `data/images/` | Uploaded character portraits |
+
+Back up this directory to preserve all game data.
+
+### Port Configuration
+
+By default the container serves on **host port 80**. To change this, edit `deploy/sanderson-rpg.container`:
+
+```ini
+PublishPort=8080:3000    # Change 80 to your preferred port
+```
+
+Then reload: `systemctl --user daemon-reload && systemctl --user restart sanderson-rpg`
+
+### Host Port 80 (Rootless Podman)
+
+If running rootless and port 80 is rejected, either:
+
+```bash
+# Option A: Allow unprivileged ports down to 80
+sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80
+echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee /etc/sysctl.d/99-unprivileged-ports.conf
+
+# Option B: Use a higher port (e.g., 3000 or 8080) in the .container file — no sysctl needed
+```
+
+## Features
 
 - **Character Creation Wizard**: Ancestry → Culture → Attributes → Skills → Paths → Talents
 - **Character Sheet**: Live gameplay view with resource tracking
-- **Image Upload System**: Custom character portraits with automatic WebP compression
+- **Image Upload**: Custom character portraits with automatic WebP compression
 - **Session Management**: Notes, resource tracking, auto-save
-- **Multi-User**: Multiple devices connect to single host
-- **Persistent Storage**: JSON file-based character database + server-side image storage
-- **Network Discovery**: Access by hostname (mDNS/Avahi)
+- **Multi-User**: Multiple devices connect via Socket.io
+- **Persistent Storage**: SQLite database + JSON file snapshots
 
-## 🏗️ Architecture
+## Architecture
 
-- **Frontend**: Angular 18 (standalone components, Material Design)
-- **Backend**: Express.js (~200 lines, minimal API)
-- **Storage**: JSON files (no database required)
-- **Deployment**: Single-process production mode or Docker
+- **Frontend**: Angular 21 (standalone components, Material Design)
+- **Backend**: Express.js + Socket.io (TypeScript, runs via tsx)
+- **Database**: SQLite via Prisma ORM
+- **Deployment**: Podman container managed by systemd via Quadlet
 
 ## Development
 
-To start development servers with hot reload:
-
 ```bash
-./start.sh dev
-```
+# Start both frontend (4200) and backend (3000) with hot reload
+npm start
 
-Frontend: `http://localhost:4200`  
-Backend: `http://localhost:3000`
+# Run all tests
+npm test
 
-## 🐳 Docker
+# Run UI tests in watch mode
+npm run test:watch
 
-Optional containerized deployment:
+# Run server tests
+npm run test:server
 
-```bash
-docker-compose up -d
-```
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for details.
-
-## 🌐 Network Setup
-
-**Enable hostname access (`sanderson-rpg.local`):**
-```bash
-sudo apt-get install avahi-daemon
-sudo hostnamectl set-hostname sanderson-rpg
-sudo systemctl enable avahi-daemon
-```
-
-## 🔧 Tech Stack
-
-- **Angular 18** - Standalone components, signals
-- **Angular Material** - UI components
-- **Node.js 18+** - Backend runtime
-- **Express.js** - REST API
-- **Sharp** - Image processing and WebP compression
-- **Multer** - File upload handling
-- **TypeScript** - Type safety
-- **RxJS** - Reactive programming
-
-## 📱 Supported Devices
-
-- Desktop browsers (Chrome, Firefox, Safari, Edge)
-- Tablets (iPad, Android tablets)
-- Mobile phones (iOS, Android)
-
-## 🧪 Testing
-
-```bash
-ng test
-```
-
-## 📦 Building for Production
-
-```bash
+# Production build (output: dist/project-sanderson/browser/)
 npm run build:prod
 ```
 
-Output: `dist/project-sanderson/browser/` (~600KB)
+## Tech Stack
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Angular 21 + Angular Material
+- Node.js 22+ / TypeScript / tsx
+- Express.js + Socket.io
+- SQLite + Prisma ORM
+- Vitest (testing)
+- Podman + Quadlet (deployment)

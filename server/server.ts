@@ -81,7 +81,7 @@ const sprenGrantService = new SprenGrantService(io);
 const itemGrantRepository = new ItemGrantRepository();
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const PORT = process.env.PORT || (IS_PRODUCTION ? 80 : 3000);
+const PORT = process.env.PORT || 3000;
 const CHARACTERS_DIR = path.join(__dirname, 'characters');
 const IMAGES_DIR = path.join(__dirname, 'images');
 
@@ -2292,8 +2292,8 @@ async function startServer() {
     process.exit(1);
   });
   
-  // Bind to localhost and 0.0.0.0 to ensure both work
-  httpServer.listen(PORT, '127.0.0.1', () => {
+  // Bind to all interfaces so the server is reachable from containers and the Angular dev proxy
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log('========================================');
     console.log('  Sanderson RPG Character Server');
     console.log('========================================');
