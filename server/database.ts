@@ -365,6 +365,22 @@ async function runMigrations(): Promise<void> {
       await db.run('ALTER TABLE Character ADD COLUMN companions TEXT DEFAULT NULL');
       console.log('[Database] Migration completed: companions column added');
     }
+
+    // Migration: Add pendingLevel column to Character table if it doesn't exist
+    const hasPendingLevel = characterColumns.some((col: any) => col.name === 'pendingLevel');
+    if (!hasPendingLevel) {
+      console.log('[Database] Running migration: Adding pendingLevel column to Character table');
+      await db.run('ALTER TABLE Character ADD COLUMN pendingLevel INTEGER DEFAULT 0');
+      console.log('[Database] Migration completed: pendingLevel column added');
+    }
+
+    // Migration: Add portraitUrl column to Character table if it doesn't exist
+    const hasPortraitUrl = characterColumns.some((col: any) => col.name === 'portraitUrl');
+    if (!hasPortraitUrl) {
+      console.log('[Database] Running migration: Adding portraitUrl column to Character table');
+      await db.run('ALTER TABLE Character ADD COLUMN portraitUrl TEXT DEFAULT NULL');
+      console.log('[Database] Migration completed: portraitUrl column added');
+    }
   } catch (error) {
     console.error('[Database] Migration failed:', (error as Error).message);
     throw error;
