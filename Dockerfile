@@ -26,9 +26,8 @@ WORKDIR /app
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Copy Prisma schema, config, and root package (for prisma generate)
+# Copy Prisma schema and root package (for prisma generate)
 COPY prisma ./prisma
-COPY prisma.config.ts ./
 COPY package*.json ./
 RUN npm ci --omit=dev --legacy-peer-deps && npx prisma generate
 
