@@ -193,6 +193,11 @@ export class CharacterRepository {
     character.sessionNotes = dto.sessionNotes;
     character.lastModified = dto.lastModified;
 
+    // MODULE 16: COMPANIONS
+    if (dto.companions) {
+      character.loadCompanions(dto.companions);
+    }
+
     return character;
   }
 
@@ -281,7 +286,13 @@ export class CharacterRepository {
 
       // MODULE 15: METADATA
       sessionNotes: character.sessionNotes,
-      lastModified: character.lastModified
+      lastModified: character.lastModified,
+
+      // MODULE 16: COMPANIONS
+      companions: {
+        companions: character.getAllCompanions().map(c => c.toJSON()),
+        activePetId: character.getActivePetId()
+      }
     };
   }
 }

@@ -2,11 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PetCompanion, PetStatBlock } from '../../../character/companions/petCompanion';
 import { PetAbility, ActionCost, DamageRoll } from '../../../character/companions/petAbility';
+import { ResourceTracker, Resource } from '../../resource-tracker/resource-tracker';
 
 @Component({
   selector: 'app-companion-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ResourceTracker],
   templateUrl: './companion-detail.component.html',
   styleUrls: ['./companion-detail.component.scss']
 })
@@ -15,8 +16,8 @@ export class CompanionDetailComponent implements OnInit {
   @Input() isActive: boolean = false;
 
   displayName: string = '';
-  healthPercent: number = 0;
-  focusPercent: number = 0;
+  healthResource: Resource = { name: 'Health', current: 0, max: 0, color: '#e53935' };
+  focusResource: Resource = { name: 'Focus', current: 0, max: 0, color: '#1e88e5' };
 
   ngOnInit(): void {
     this.updateDisplay();
@@ -30,12 +31,24 @@ export class CompanionDetailComponent implements OnInit {
     if (!this.companion) return;
 
     this.displayName = this.companion.statBlock.name;
-    
-    const maxHealth = this.companion.statBlock.health.max;
-    const maxFocus = this.companion.statBlock.focus.max;
-    
-    this.healthPercent = maxHealth > 0 ? (this.companion.currentHealth / maxHealth) * 100 : 0;
-    this.focusPercent = maxFocus > 0 ? (this.companion.currentFocus / maxFocus) * 100 : 0;
+
+    this.healthResource.current = this.companion.currentHealth;
+    this.healthResource.max = this.companion.statBlock.health.max;
+
+    this.focusResource.current = this.companion.currentFocus;
+    this.focusResource.max = this.companion.statBlock.focus.max;
+  }
+
+  onHealthChanged(value: number): void {
+    if (this.companion) {
+      this.companion.currentHealth = value;
+    }
+  }
+
+  onFocusChanged(value: number): void {
+    if (this.companion) {
+      this.companion.currentFocus = value;
+    }
   }
 
   get statBlock(): PetStatBlock | undefined {

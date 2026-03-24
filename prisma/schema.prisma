@@ -38,6 +38,7 @@ model Character {
   singerForms      UnlockedSingerForm[]
   spentPoints      SpentPoints?
   pendingGrants    PendingGrantQueue[]
+  companions       String?   // JSON: { companions: PetCompanion[], activePetId: string | undefined }
 
   @@index([name])
   @@index([lastModified])

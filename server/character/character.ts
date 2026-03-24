@@ -531,5 +531,17 @@ export class Character {
     this.companions.delete(petId);
   }
 
+  /**
+   * Hydrate companions from persisted state (used during load)
+   */
+  loadCompanions(data: { companions: any[]; activePetId: string | undefined }): void {
+    this.companions.clear();
+    for (const cData of data.companions) {
+      const companion = PetCompanion.fromJSON(cData);
+      this.companions.set(companion.id, companion);
+    }
+    this.activePetId = data.activePetId;
+  }
+
 }
 

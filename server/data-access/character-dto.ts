@@ -91,6 +91,18 @@ export interface CraftingStateDTO {
   };
 }
 
+export interface CompanionStateDTO {
+  id: string;
+  statBlock: any;
+  currentHealth: number;
+  currentFocus: number;
+}
+
+export interface CompanionsDTO {
+  companions: CompanionStateDTO[];
+  activePetId: string | undefined;
+}
+
 // ============================================================================
 // MAIN CHARACTER DTO
 // ============================================================================
@@ -180,6 +192,11 @@ export interface CharacterDTO {
   // ============================================================================
   sessionNotes: string;
   lastModified: string;
+
+  // ============================================================================
+  // MODULE 16: COMPANIONS - Pet and companion management
+  // ============================================================================
+  companions?: CompanionsDTO;
 }
 
 /**

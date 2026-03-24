@@ -87,6 +87,7 @@ export interface CharacterData {
   };
   unlockedSingerForms?: string[];
   activeForm?: string;
+  companions?: { companions: any[]; activePetId: string | undefined };
   radiantPath?: {
     boundOrder: string | null;
     currentIdeal: number;
@@ -353,7 +354,15 @@ async function runMigrations(): Promise<void> {
     if (!hasActiveForm) {
       console.log('[Database] Running migration: Adding activeForm column to Character table');
       await db.run('ALTER TABLE Character ADD COLUMN activeForm TEXT DEFAULT NULL');
-      console.log('[Database] Migration completed: Character.activeForm column added');
+      console.log('[Database] Migration completed: Character.activeForm column added.');
+    }
+
+    // Migration: Add companions column to Character table if it doesn't exist
+    const hasCompanions = characterColumns.some((col: any) => col.name === 'companions');
+    if (!hasCompanions) {
+      console.log('[Database] Running migration: Adding companions column to Character table');
+      await db.run('ALTER TABLE Character ADD COLUMN companions TEXT DEFAULT NULL');
+      console.log('[Database] Migration completed: companions column added');
     }
   } catch (error) {
     console.error('[Database] Migration failed:', (error as Error).message);
@@ -460,7 +469,8 @@ export async function loadCharacter(characterId: string): Promise<CharacterData 
       } : undefined,
       radiantTier0TalentId: radiantPath?.radiantTier0TalentId || null,
       unlockedSingerForms: singerForms.map((f: any) => f.formId),
-      activeForm: singerFormActive?.activeForm ?? undefined
+      activeForm: singerFormActive?.activeForm ?? undefined,
+      companions: char.companions ? JSON.parse(char.companions) : undefined
     };
   } catch (error) {
     console.error(`[Database] Error loading character ${characterId}:`, error);
@@ -941,8 +951,8 @@ export async function saveCharacter(
     }
     // Upsert character
     await db.run(`
-      INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, lastModified)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Character (id, name, level, pendingLevelPoints, pendingLevel, ancestry, sessionNotes, currencyInChips, companions, lastModified)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         name = excluded.name,
         level = excluded.level,
@@ -951,6 +961,7 @@ export async function saveCharacter(
         ancestry = excluded.ancestry,
         sessionNotes = excluded.sessionNotes,
         currencyInChips = excluded.currencyInChips,
+        companions = excluded.companions,
         lastModified = excluded.lastModified
     `,
       character.id,
@@ -961,6 +972,7 @@ export async function saveCharacter(
       character.ancestry ?? null,
       character.sessionNotes ?? '',
       getCurrencyFromInventory(character.inventory) ?? 0,
+      character.companions ? JSON.stringify(character.companions) : null,
       character.lastModified ?? new Date().toISOString()
     );
 

@@ -31,25 +31,8 @@
 
   <!-- Resources: Health and Focus -->
   <div class="resources-section">
-    <div class="resource-container">
-      <div class="resource-header">
-        <span class="resource-label">Health</span>
-        <span class="resource-value">{{ companion.currentHealth }} / {{ companion.statBlock.health.max }}</span>
-      </div>
-      <div class="resource-bar">
-        <div class="resource-fill health-fill" [style.width.%]="healthPercent"></div>
-      </div>
-    </div>
-
-    <div class="resource-container">
-      <div class="resource-header">
-        <span class="resource-label">Focus</span>
-        <span class="resource-value">{{ companion.currentFocus }} / {{ companion.statBlock.focus.max }}</span>
-      </div>
-      <div class="resource-bar">
-        <div class="resource-fill focus-fill" [style.width.%]="focusPercent"></div>
-      </div>
-    </div>
+    <app-resource-tracker [resource]="healthResource" (valueChanged)="onHealthChanged($event)"></app-resource-tracker>
+    <app-resource-tracker [resource]="focusResource" (valueChanged)="onFocusChanged($event)"></app-resource-tracker>
   </div>
 
   <!-- Defense and Movement -->
