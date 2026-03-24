@@ -17,9 +17,9 @@ npm start
 
 Frontend: `http://localhost:4200` | Backend API: `http://localhost:3000/api`
 
-## Production Deployment (Podman + Quadlet)
+## Production Deployment (Podman + systemd)
 
-The recommended production deployment uses **Podman** with **Quadlet** for systemd-managed container lifecycle. No docker-compose, no manual PID tracking — just systemd.
+The recommended production deployment uses **Podman** with a **systemd user service** for container lifecycle management. No docker-compose, no manual PID tracking — just systemd.
 
 ### Prerequisites
 
@@ -32,7 +32,7 @@ The recommended production deployment uses **Podman** with **Quadlet** for syste
 # Clone and enter the repo
 git clone <repo-url> && cd project_sanderson
 
-# Install the Quadlet service (creates data dirs, copies systemd unit)
+# Install the systemd service (creates data dirs, copies unit file)
 chmod +x deploy/*.sh
 ./deploy/install.sh
 
@@ -83,10 +83,10 @@ Back up this directory to preserve all game data.
 
 ### Port Configuration
 
-By default the container serves on **host port 80**. To change this, edit `deploy/sanderson-rpg.container`:
+By default the container serves on **host port 80**. To change this, edit `deploy/sanderson-rpg.service` and change the `-p 80:3000` flag:
 
-```ini
-PublishPort=8080:3000    # Change 80 to your preferred port
+```
+-p 8080:3000    # Change 80 to your preferred port
 ```
 
 Then reload: `systemctl --user daemon-reload && systemctl --user restart sanderson-rpg`
@@ -117,7 +117,7 @@ echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee /etc/sysctl.d/99-unpriv
 - **Frontend**: Angular 21 (standalone components, Material Design)
 - **Backend**: Express.js + Socket.io (TypeScript, runs via tsx)
 - **Database**: SQLite via Prisma ORM
-- **Deployment**: Podman container managed by systemd via Quadlet
+- **Deployment**: Podman container managed by systemd
 
 ## Development
 

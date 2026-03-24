@@ -1,0 +1,30 @@
+[Unit]
+Description=Sanderson RPG Character Management System
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+# Remove any existing container on start (in case of unclean shutdown)
+ExecStartPre=-/usr/bin/podman rm -f sanderson-rpg
+
+ExecStart=/usr/bin/podman run \
+  --name sanderson-rpg \
+  --rm \
+  -p 80:3000 \
+  -v /opt/sanderson-rpg/data/db:/app/prisma:Z \
+  -v /opt/sanderson-rpg/data/characters:/app/server/characters:Z \
+  -v /opt/sanderson-rpg/data/images:/app/server/images:Z \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e DATABASE_URL=file:./prisma/dev.db \
+  localhost/sanderson-rpg:latest
+
+ExecStop=/usr/bin/podman stop -t 30 sanderson-rpg
+
+[Install]
+WantedBy=default.target
