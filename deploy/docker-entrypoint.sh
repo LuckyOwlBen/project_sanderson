@@ -3,7 +3,11 @@ set -e
 
 echo "[Entrypoint] Running Prisma migrations..."
 cd /app
-npx prisma migrate deploy 2>/dev/null || echo "[Entrypoint] No pending migrations (or first run)"
+if npx prisma migrate deploy; then
+  echo "[Entrypoint] Migrations complete"
+else
+  echo "[Entrypoint] WARNING: Prisma migration failed - check logs above"
+fi
 
 echo "[Entrypoint] Starting server..."
 cd /app/server
