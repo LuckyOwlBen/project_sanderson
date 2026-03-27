@@ -2,15 +2,15 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-DATA_DIR="/opt/sanderson-rpg/data"
 SYSTEMD_DIR="${HOME}/.config/systemd/user"
 
 echo "=== Sanderson RPG - Podman Service Installation ==="
 
-# Create persistent data directories
-echo "Creating data directories at ${DATA_DIR}..."
-sudo mkdir -p "${DATA_DIR}/db" "${DATA_DIR}/characters" "${DATA_DIR}/images"
-sudo chown -R "$(id -u):$(id -g)" "${DATA_DIR}"
+# Create named volumes for persistence
+echo "Creating Podman volumes..."
+podman volume create sanderson-rpg-db 2>/dev/null || echo "  sanderson-rpg-db already exists"
+podman volume create sanderson-rpg-characters 2>/dev/null || echo "  sanderson-rpg-characters already exists"
+podman volume create sanderson-rpg-images 2>/dev/null || echo "  sanderson-rpg-images already exists"
 
 # Create user systemd directory
 mkdir -p "${SYSTEMD_DIR}"
@@ -41,4 +41,8 @@ echo "  3. Check status:      systemctl --user status sanderson-rpg"
 echo "  4. View logs:         journalctl --user -u sanderson-rpg -f"
 echo ""
 echo "The service will auto-start on boot (lingering enabled)."
-echo "Data is stored at: ${DATA_DIR}"
+echo "Data is stored in Podman volumes: sanderson-rpg-db, sanderson-rpg-characters, sanderson-rpg-images"
+echo ""
+echo "To inspect or back up volume data:"
+echo "  podman volume inspect sanderson-rpg-db"
+echo "  podman volume export sanderson-rpg-db > db-backup.tar"

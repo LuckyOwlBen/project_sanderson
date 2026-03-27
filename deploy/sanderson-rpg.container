@@ -5,9 +5,9 @@ After=network-online.target
 [Container]
 Image=localhost/sanderson-rpg:latest
 PublishPort=80:3000
-Volume=/opt/sanderson-rpg/data/db:/app/prisma
-Volume=/opt/sanderson-rpg/data/characters:/app/server/characters
-Volume=/opt/sanderson-rpg/data/images:/app/server/images
+Volume=sanderson-rpg-db:/app/prisma
+Volume=sanderson-rpg-characters:/app/server/characters
+Volume=sanderson-rpg-images:/app/server/images
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=DATABASE_URL=file:./prisma/dev.db

@@ -16,9 +16,9 @@ ExecStart=/usr/bin/podman run \
   --name sanderson-rpg \
   --rm \
   -p 80:3000 \
-  -v /opt/sanderson-rpg/data/db:/app/prisma:Z \
-  -v /opt/sanderson-rpg/data/characters:/app/server/characters:Z \
-  -v /opt/sanderson-rpg/data/images:/app/server/images:Z \
+  -v sanderson-rpg-db:/app/prisma \
+  -v sanderson-rpg-characters:/app/server/characters \
+  -v sanderson-rpg-images:/app/server/images \
   -e NODE_ENV=production \
   -e PORT=3000 \
   -e DATABASE_URL=file:./prisma/dev.db \
