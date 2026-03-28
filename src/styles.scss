@@ -58,4 +58,10 @@ app-root { display: flex; flex-direction: column; height: 100vh; }
       color: var(--gpSystemLightestGrey) !important;
     }
   }
+
+  @media (max-width: 600px) {
+    .mat-mdc-dialog-surface {
+      overflow-y: auto !important;
+    }
+  }
 }
