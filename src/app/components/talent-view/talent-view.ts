@@ -230,6 +230,7 @@ export class TalentView implements OnInit, OnDestroy {
       // Show dialog for choice
       const dialogRef = this.dialog.open(ExpertiseChoiceDialog, {
         width: '600px',
+        maxHeight: '90vh',
         panelClass: 'dark-dialog',
         data: {
           talentName: talent.name,

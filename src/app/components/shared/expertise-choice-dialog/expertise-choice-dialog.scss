@@ -110,5 +110,10 @@
   .expertise-choice-dialog {
     min-width: unset;
     width: 100%;
+
+    .expertise-options {
+      max-height: none;
+      overflow-y: visible;
+    }
   }
 }
