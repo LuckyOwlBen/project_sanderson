@@ -181,6 +181,28 @@
       mat-icon {
         color: gold;
       }
+
+      .currency-legend {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.55);
+        cursor: default;
+        margin-left: 0.25rem;
+
+        .legend-icon {
+          font-size: 0.9rem;
+          width: 0.9rem;
+          height: 0.9rem;
+          color: rgba(255, 255, 255, 0.45);
+        }
+
+        .legend-text {
+          white-space: nowrap;
+        }
+      }
     }
   }
 

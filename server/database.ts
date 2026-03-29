@@ -1533,4 +1533,34 @@ export async function clearDatabase(): Promise<void> {
   }
 }
 
+// ============================================================================
+// GAME SETTINGS
+// ============================================================================
+
+export interface GameSettingsRecord {
+  sellPercent: number;
+}
+
+const DEFAULT_GAME_SETTINGS: GameSettingsRecord = {
+  sellPercent: 50
+};
+
+export async function getGameSettings(): Promise<GameSettingsRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const row = await db.get(`SELECT sellPercent FROM GameSettings WHERE id = 'global'`);
+  if (!row) return { ...DEFAULT_GAME_SETTINGS };
+  return { sellPercent: row.sellPercent ?? DEFAULT_GAME_SETTINGS.sellPercent };
+}
+
+export async function saveGameSettings(settings: Partial<GameSettingsRecord>): Promise<GameSettingsRecord> {
+  if (!db) throw new Error('Database not initialized');
+  const current = await getGameSettings();
+  const updated = { ...current, ...settings };
+  await db.run(
+    `INSERT INTO GameSettings (id, sellPercent) VALUES ('global', ?)
+     ON CONFLICT(id) DO UPDATE SET sellPercent = excluded.sellPercent, updatedAt = CURRENT_TIMESTAMP`,
+    updated.sellPercent
+  );
+  return updated;
+}
 

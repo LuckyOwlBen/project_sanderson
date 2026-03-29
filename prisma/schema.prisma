@@ -274,3 +274,11 @@ model PendingGrantQueue {
   @@index([characterId])
   @@index([createdAt])
 }
+
+// ===== GAME SETTINGS =====
+// Singleton row (id = 'global') for server-wide GM-controlled settings
+model GameSettings {
+  id          String @id @default("global")
+  sellPercent Int    @default(50)   // Percentage of item price returned on sell (0-100)
+  updatedAt   DateTime @default(now()) @updatedAt
+}

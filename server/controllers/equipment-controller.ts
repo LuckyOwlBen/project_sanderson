@@ -130,7 +130,7 @@ export async function purchaseItem(req: Request, res: Response, broadcaster: Soc
 export async function sellItem(req: Request, res: Response, broadcaster: SocketBroadcaster): Promise<void> {
   try {
     const { id } = req.params;
-    const { itemId, quantity } = req.body ?? {};
+    const { itemId, quantity, fullPrice } = req.body ?? {};
 
     if (!itemId) {
       res.status(400).json({
@@ -140,7 +140,7 @@ export async function sellItem(req: Request, res: Response, broadcaster: SocketB
       return;
     }
 
-    const result = await sellItemForCharacter(id, itemId, quantity ?? 1);
+    const result = await sellItemForCharacter(id, itemId, quantity ?? 1, !!fullPrice);
 
     if (!result.success) {
       res.status(400).json({

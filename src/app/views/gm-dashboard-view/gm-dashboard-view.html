@@ -16,6 +16,32 @@
     </div>
   </div>
 
+  <!-- Economy Settings -->
+  <div class="world-events-section">
+    <mat-card class="world-event-card economy-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="event-icon">sell</mat-icon>
+        <mat-card-title>Economy Settings</mat-card-title>
+        <mat-card-subtitle>Item sell rate (% of item value players receive)</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="sell-percent-control">
+          <mat-form-field appearance="outline" class="sell-percent-field">
+            <mat-label>Sell Rate (%)</mat-label>
+            <input matInput type="number" [(ngModel)]="sellPercent" min="0" max="100" step="5">
+          </mat-form-field>
+          <span class="sell-percent-hint">Players receive {{ sellPercent }}% of an item's value when selling</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="saveSellPercent()" [disabled]="isSavingSellPercent">
+          <mat-icon>save</mat-icon>
+          {{ isSavingSellPercent ? 'Saving...' : 'Save' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
   <!-- World Events Control -->
   <div class="world-events-section">
     <mat-card class="world-event-card highstorm-card" [class.active]="isHighstormActive">

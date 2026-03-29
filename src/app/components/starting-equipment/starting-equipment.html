@@ -17,6 +17,10 @@
           <div class="currency-display">
             <mat-icon>paid</mat-icon>
             <span>{{ getCurrencyDisplay() }}</span>
+            <span class="currency-legend" matTooltip="5 chips (c) = 1 mark (mk) · 4 marks = 1 broam (b)">
+              <mat-icon class="legend-icon">info</mat-icon>
+              <span class="legend-text">5c = 1mk · 4mk = 1b</span>
+            </span>
           </div>
         </mat-card-header>
 
@@ -64,7 +68,7 @@
                   <span class="item-name">{{ item.name }}</span>
                   <span class="item-type">{{ item.type }}</span>
                 </div>
-                <span class="item-price">{{ item.price }}mk</span>
+                <span class="item-price" [matTooltip]="item.price + ' marks'">{{ formatPrice(item.price) }}</span>
               </div>
 
               <p class="item-description">{{ item.description }}</p>
@@ -151,14 +155,14 @@
                   mat-icon-button
                   (click)="sellItem(kitItem.item.id)"
                   [disabled]="isFinalized"
-                  matTooltip="Sell item (50% value)">
+                  matTooltip="Sell item (full value)">
                   <mat-icon>sell</mat-icon>
                 </button>
               </div>
 
               <div class="kit-currency" *ngIf="startingKit">
                 <mat-icon>paid</mat-icon>
-                <span>Starting Currency: {{ startingKit.currency }} marks</span>
+                <span>Starting Currency: {{ formatPrice(startingKit.currency) }}</span>
               </div>
             </div>
 
@@ -174,7 +178,7 @@
                 Sell All Starting Items
               </button>
               <p class="refund-hint">
-                Sell all starting items for 50% of their value
+                Trade in your starting items at full value
               </p>
             </div>
           </ng-container>
@@ -194,9 +198,9 @@
               <span class="inv-item-name">{{ inv.item.name || 'Unknown Item' }}</span>
               <span class="inv-item-qty" *ngIf="inv.quantity > 1">&times;{{ inv.quantity }}</span>
               <span class="item-type">{{ inv.item.type || 'equipment' }}</span>
-              <span class="item-price">{{ inv.item.price || 0 }}mk</span>
+              <span class="item-price">{{ formatPrice(inv.item.price || 0) }}</span>
               <span class="item-weight">{{ inv.item.weight || 0 }} lbs</span>
-              <span class="item-value">Value: {{ (inv.item.price || 0) * inv.quantity || 0 }}mk</span>
+              <span class="item-value" [matTooltip]="((inv.item.price || 0) * inv.quantity) + ' marks'">Value: {{ formatPrice((inv.item.price || 0) * inv.quantity) }}</span>
               <button mat-raised-button color="warn" [disabled]="isFinalized" (click)="sellItem(inv.item.id)">
                 <mat-icon>sell</mat-icon> Sell
               </button>

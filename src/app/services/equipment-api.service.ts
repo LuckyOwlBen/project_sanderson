@@ -76,9 +76,9 @@ export class EquipmentApiService {
       .post<PurchaseResponse>(`${this.charactersUrl}/${characterId}/equipment/purchase`, { itemId, quantity });
   }
 
-  sellItem(characterId: string, itemId: string, quantity?: number): Observable<PurchaseResponse> {
+  sellItem(characterId: string, itemId: string, quantity?: number, fullPrice?: boolean): Observable<PurchaseResponse> {
     return this.http
-      .post<PurchaseResponse>(`${this.charactersUrl}/${characterId}/equipment/sell`, { itemId, quantity });
+      .post<PurchaseResponse>(`${this.charactersUrl}/${characterId}/equipment/sell`, { itemId, quantity, fullPrice });
   }
 
   applyStartingKit(characterId: string, kitId: string): Observable<KitResponse> {

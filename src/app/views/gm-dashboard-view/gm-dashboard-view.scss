@@ -85,6 +85,45 @@
       margin: 0;
       line-height: 1.5;
     }
+
+    &.economy-card {
+      mat-card-title { color: #e8e8e8; }
+      mat-card-subtitle { color: rgba(255,255,255,0.6) !important; }
+
+      .sell-percent-control {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding-top: 8px;
+      }
+
+      .sell-percent-field {
+        width: 140px;
+
+        // Label
+        .mat-mdc-floating-label { color: rgba(255,255,255,0.7) !important; }
+        // Input text
+        input { color: #fff !important; }
+        // Outline border
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: rgba(255,255,255,0.4) !important;
+        }
+        &:hover .mdc-notched-outline__leading,
+        &:hover .mdc-notched-outline__notch,
+        &:hover .mdc-notched-outline__trailing {
+          border-color: rgba(255,255,255,0.8) !important;
+        }
+      }
+
+      .sell-percent-hint {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.875rem;
+        font-style: italic;
+      }
+    }
   }
 }
 

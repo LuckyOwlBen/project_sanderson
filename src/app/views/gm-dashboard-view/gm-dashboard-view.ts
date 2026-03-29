@@ -9,8 +9,13 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { WebsocketService, PlayerJoinedEvent } from '../../services/websocket.service';
+import { GameSettingsApiService } from '../../services/game-settings-api.service';
 import { RADIANT_ORDERS } from '../../character/radiantPath/radiantPathManager';
 import { SprenGrantDialogComponent } from './spren-grant-dialog.component';
 import { ItemGrantDialogComponent } from './item-grant-dialog.component';
@@ -32,6 +37,10 @@ import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
     MatDialogModule,
     MatListModule,
     MatSnackBarModule,
+    MatSliderModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
     CombatPanelComponent
 ],
   templateUrl: './gm-dashboard-view.html',
@@ -43,7 +52,9 @@ export class GmDashboardView implements OnInit, OnDestroy {
   activePlayers = new Map<string, PlayerJoinedEvent>();
   isConnected = false;
   isHighstormActive = false;
-  criticalPlayers = new Set<string>(); // Characters at 0 health
+  criticalPlayers = new Set<string>();
+  sellPercent = 50;
+  isSavingSellPercent = false;
   storeEnabled = new Map<string, boolean>([
     ['main-store', true],
     ['weapons-shop', true],
@@ -59,7 +70,8 @@ export class GmDashboardView implements OnInit, OnDestroy {
     private websocketService: WebsocketService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private gameSettingsApi: GameSettingsApiService
   ) {}
 
   ngOnInit(): void {
@@ -80,6 +92,14 @@ export class GmDashboardView implements OnInit, OnDestroy {
 
     // Connect to WebSocket after subscriptions are set up
     this.websocketService.connect();
+
+    // Load current game settings
+    this.gameSettingsApi.getSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(settings => {
+        this.sellPercent = settings.sellPercent;
+        this.cdr.detectChanges();
+      });
 
     // Subscribe to player joined events
     this.websocketService.playerJoined$
@@ -339,5 +359,25 @@ export class GmDashboardView implements OnInit, OnDestroy {
 
   isStoreEnabled(storeId: string): boolean {
     return this.storeEnabled.get(storeId) ?? true;
+  }
+
+  saveSellPercent(): void {
+    const clamped = Math.min(100, Math.max(0, Math.round(this.sellPercent)));
+    this.sellPercent = clamped;
+    this.isSavingSellPercent = true;
+    this.gameSettingsApi.updateSettings({ sellPercent: clamped })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (settings) => {
+          this.sellPercent = settings.sellPercent;
+          this.isSavingSellPercent = false;
+          this.snackBar.open(`Sell rate updated to ${settings.sellPercent}%`, 'Close', { duration: 3000 });
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isSavingSellPercent = false;
+          this.snackBar.open('Failed to update sell rate', 'Close', { duration: 3000 });
+        }
+      });
   }
 }

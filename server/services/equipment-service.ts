@@ -1,6 +1,6 @@
 import { InventoryModuleRepository, InventoryDTO, InventoryItemDTO } from '../repositories/modules/inventory-repository';
 import { getItemById, STARTING_KITS, ALL_ITEMS } from 'shared/data/items/item-definitions';
-import { loadCharacter, saveCharacter } from '../database';
+import { loadCharacter, saveCharacter, getGameSettings } from '../database';
 
 export interface InventoryViewItem {
   id: string;
@@ -173,12 +173,13 @@ export async function purchaseItemForCharacter(
 }
 
 /**
- * Sell an item for a character (remove from inventory, gain currency at 50% value)
+ * Sell an item for a character (remove from inventory, gain currency at 50% value or full value)
  */
 export async function sellItemForCharacter(
   characterId: string,
   itemId: string,
-  quantity: number = 1
+  quantity: number = 1,
+  fullPrice: boolean = false
 ): Promise<{
   success: boolean;
   inventory?: InventoryDTO;
@@ -225,8 +226,14 @@ export async function sellItemForCharacter(
       };
     }
 
-    // Calculate sale price (50% of purchase price)
-    const salePrice = Math.floor((item.price ?? 0) * 0.5);
+    // Calculate sale price (full price during character creation, or DB-configured % otherwise)
+    let salePrice: number;
+    if (fullPrice) {
+      salePrice = item.price ?? 0;
+    } else {
+      const gameSettings = await getGameSettings();
+      salePrice = Math.floor((item.price ?? 0) * (gameSettings.sellPercent / 100));
+    }
     const totalSalePrice = salePrice * quantity;
 
     // Remove or reduce quantity
@@ -248,7 +255,7 @@ export async function sellItemForCharacter(
       currencyInChips: newCurrency
     };
 
-    console.log(`[Equipment] Sell: Character ${characterId} sold ${quantity}x ${item.name} for ${totalSalePrice} (${salePrice} each)`);
+    console.log(`[Equipment] Sell: Character ${characterId} sold ${quantity}x ${item.name} for ${totalSalePrice} (${salePrice} each)${fullPrice ? ' [full price]' : ' [50%]'}`);
 
     // Save
     await saveCharacter(char);

@@ -38,6 +38,7 @@ import createPathsRoute from './routes/paths';
 import createEquipmentRoute from './routes/equipment-route';
 import createCharacterFinalizationRoute from './routes/character-finalization-route';
 import createCharacterNavFinalizedRoute from './routes/character-nav-finalized-route';
+import createGameSettingsRoute from './routes/game-settings-route';
 import { attributesService } from './services/attributes-service';
 import { AttributesFinalizationService } from './services/attributes-finalization';
 import { SprenGrantService } from './services/spren-grant-service';
@@ -267,6 +268,9 @@ createCharacterFinalizationRoute(app, socketBroadcaster);
 
 // Register character navigation finalized route (get finalized status for sidenav)
 createCharacterNavFinalizedRoute(app);
+
+// Register game settings route (GM-controlled settings like sell percentage)
+createGameSettingsRoute(app);
 
 // Lightweight operational logs endpoint (newest first)
 app.get('/api/logs', (req, res) => {

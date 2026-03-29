@@ -383,6 +383,16 @@ export class StartingEquipment implements OnInit, OnDestroy {
     return parts.length > 0 ? parts.join(' ') : '0 broams';
   }
 
+  formatPrice(marks: number): string {
+    if (marks <= 0) return '0mk';
+    const converted = this.convertToMixedDenominations(marks);
+    const parts: string[] = [];
+    if (converted.broams > 0) parts.push(`${converted.broams}b`);
+    if (converted.marks > 0) parts.push(`${converted.marks}mk`);
+    if (converted.chips > 0) parts.push(`${converted.chips}c`);
+    return parts.join(' ');
+  }
+
   private convertToMixedDenominations(marks: number): { chips: number; marks: number; broams: number } {
     const totalChips = Math.round(marks * 5);
     const broams = Math.floor(totalChips / 20);
@@ -403,7 +413,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
       .subscribe(characterId => {
         if (!characterId) return;
 
-        this.equipmentApi.sellItem(characterId, itemId)
+        this.equipmentApi.sellItem(characterId, itemId, 1, true)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (response) => {
