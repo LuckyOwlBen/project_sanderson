@@ -461,43 +461,48 @@
 .kit-selector {
   margin-bottom: 1.5rem;
   width: 100%;
-
-  ::ng-deep {
-    // Style the form field outline
-    .mat-mdc-form-field {
-      width: 100%;
-    }
-
-    // Style the select trigger
-    .mat-mdc-select-trigger {
-      color: #fff;
-      font-weight: 500;
-    }
-
-    // Style the label
-    .mat-mdc-form-field-label {
-      color: #bbb;
-    }
-
-    // Style focused state
-    .mat-focused .mat-mdc-form-field-label {
-      color: #5dade2;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
-// Kit option styling in dropdown
-.kit-option-name {
-  font-weight: 600;
-  display: inline-block;
-  min-width: 150px;
-  color: #fff;
-}
-
-.kit-option-currency {
+.kit-selector-label {
+  font-size: 0.85rem;
   color: #bbb;
-  font-size: 0.9rem;
-  margin-left: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.kit-selector-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--gpSystemDarkGrey);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: auto;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--gpColor-ChalkyBlue);
+    box-shadow: 0 0 0 2px rgba(102, 192, 244, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  option {
+    background: var(--gpSystemDarkGrey);
+    color: #fff;
+  }
 }
 
 // No Kit Selected Message

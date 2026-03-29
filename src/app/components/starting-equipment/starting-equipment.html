@@ -107,21 +107,19 @@
 
         <mat-card-content>
           <!-- Kit Selection Dropdown -->
-          <mat-form-field appearance="outline" class="kit-selector">
-            <mat-label>Select Starting Kit</mat-label>
-            <mat-select 
+          <div class="kit-selector">
+            <label class="kit-selector-label">Select Starting Kit</label>
+            <select
+              class="kit-selector-select"
               [(ngModel)]="selectedKitId"
               (ngModelChange)="applyKit($event)"
-              [disabled]="isFinalized"
-              [compareWith]="compareKits">
-              <mat-optgroup label="Available Kits">
-                <mat-option *ngFor="let kit of availableKits" [value]="kit.id">
-                  <span class="kit-option-name">{{ kit.name }}</span>
-                  <span class="kit-option-currency">{{ kit.currency }} marks</span>
-                </mat-option>
-              </mat-optgroup>
-            </mat-select>
-          </mat-form-field>
+              [disabled]="isFinalized">
+              <option [value]="null" disabled>-- Select a kit --</option>
+              <option *ngFor="let kit of availableKits" [value]="kit.id">
+                {{ kit.name }} — {{ kit.currency }} marks
+              </option>
+            </select>
+          </div>
 
           <!-- No Kit Selected Message -->
           <div class="no-kit-selected" *ngIf="!startingKit">
