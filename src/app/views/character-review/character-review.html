@@ -182,7 +182,7 @@
       </mat-card-header>
       <mat-card-content>
         <div class="talents-display" *ngIf="completeCharacter.talents.total > 0">
-          <div class="talent-item-simple" *ngFor="let talentId of completeCharacter.talents.selected">
+          <div class="talent-item" *ngFor="let talentId of completeCharacter.talents.selected">
             <mat-icon class="talent-icon">stars</mat-icon>
             <span class="talent-name">{{ talentId }}</span>
           </div>
