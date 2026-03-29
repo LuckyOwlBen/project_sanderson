@@ -35,7 +35,7 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
   // Convert database inventory format to view format
   const inventoryItems: InventoryViewItem[] = (char.inventory?.items ?? [])
     .map((item: any) => {
-      const baseId = item.id.split('-')[0];
+      const baseId = item.id;
       const itemDef = getItemById(baseId);
       
       // Only include items with valid definitions

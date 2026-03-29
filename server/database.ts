@@ -1202,6 +1202,9 @@ export async function saveCharacter(
           }
         }
 
+        // Delete existing items first so removed items (e.g. sold) are not retained
+        await db.run('DELETE FROM InventoryItem WHERE characterId = ?', character.id);
+
         for (const item of character.inventory.items) {
           const itemId = item.itemId || item.id;
           if (!itemId) continue;
