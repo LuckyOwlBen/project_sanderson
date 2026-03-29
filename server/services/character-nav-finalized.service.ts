@@ -96,8 +96,10 @@ export class CharacterNavFinalizedService {
         pathsState = 'spent';
       }
 
-      // Equipment: no point system — spent pre-finalize, finalized post
-      const equipmentState: StepState = allPointStepsFinalized ? 'finalized' : 'spent';
+      // Equipment: pending until a kit is selected; spent until all point steps finalized; then finalized
+      const equipmentState: StepState = !character.selectedKitId
+        ? 'pending'
+        : allPointStepsFinalized ? 'finalized' : 'spent';
 
       return {
         ancestry: selectionState(hasAncestry),

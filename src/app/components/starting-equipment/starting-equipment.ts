@@ -53,7 +53,6 @@ export class StartingEquipment implements OnInit, OnDestroy {
   availableKits: StartingKitDTO[] = [];
   selectedKitId: string | null = null;
   startingKit: StartingKitDTO | null = null;
-  hasRefundedKit = false;
   private defaultKitId: string | null = null;
   
   availableItems: InventoryItem[] = [];
@@ -121,10 +120,11 @@ export class StartingEquipment implements OnInit, OnDestroy {
             this.currentInventory = response.inventory ?? null;
             this.inventoryItems = response.inventoryItems ?? [];
             this.currentCurrency = response.currency ?? 0;
+            this.selectedKitId = response.selectedKitId ?? null;
+            this.resolveStartingKit();
           }
           this.updateValidation();
           this.isWaitingForIdentity = false;
-          // No auto-apply - user must choose a kit
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -142,9 +142,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
           this.availableKits = kits;
           const militaryKit = kits.find((kit) => kit.id === 'military-kit');
           this.defaultKitId = militaryKit?.id ?? kits[0]?.id ?? null;
-          // Do NOT auto-select a kit - let user choose
-          this.selectedKitId = null;
-          this.startingKit = null;
+          this.resolveStartingKit();
           this.cdr.markForCheck();
         },
         error: (err) => {
@@ -169,8 +167,11 @@ export class StartingEquipment implements OnInit, OnDestroy {
   }
 
   private updateValidation(): void {
-    // Equipment step is optional - mark as complete
-    this.validationService.setStepValid(8, true);
+    this.validationService.setStepValid(8, !!this.selectedKitId);
+  }
+
+  private resolveStartingKit(): void {
+    this.startingKit = this.availableKits.find(k => k.id === this.selectedKitId) ?? null;
   }
 
   ngOnDestroy(): void {
@@ -191,7 +192,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
             this.currentCurrency = response.currency ?? 0;
             this.selectedKitId = kitId;
             this.startingKit = kit;
-            this.hasRefundedKit = false;
+              this.updateValidation();
             console.log('Kit applied successfully');
             this.cdr.markForCheck();
           } else {
@@ -226,7 +227,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
               this.currentCurrency = response.currency ?? 0;
               this.selectedKitId = kitId;
               this.startingKit = kit;
-              this.hasRefundedKit = false;
+                this.updateValidation();
               console.log('Kit switched successfully (refunded old kit, applied new kit)');
               this.cdr.markForCheck();
             } else {
@@ -259,7 +260,7 @@ export class StartingEquipment implements OnInit, OnDestroy {
                 this.currentCurrency = response.currency ?? 0;
                 this.selectedKitId = null;
                 this.startingKit = null;
-                this.hasRefundedKit = true;
+              this.updateValidation();
                 console.log('Kit refunded successfully');
                 this.cdr.markForCheck();
               } else {

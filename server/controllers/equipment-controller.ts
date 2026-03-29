@@ -24,7 +24,8 @@ export async function getEquipment(req: Request, res: Response): Promise<void> {
       success: true,
       inventory: result.inventory ?? null,
       inventoryItems: result.inventoryItems,
-      currency: result.currency
+      currency: result.currency,
+      selectedKitId: result.selectedKitId ?? null
     });
   } catch (error) {
     console.error('Error loading equipment:', error);

@@ -17,6 +17,7 @@ export interface EquipmentResponse {
   inventory?: InventoryDTO;
   inventoryItems?: InventoryViewItem[];
   currency?: number;
+  selectedKitId?: string | null;
   error?: string;
 }
 
@@ -35,6 +36,7 @@ export interface KitResponse {
   inventoryItems?: InventoryViewItem[];
   appliedKit?: string;
   currency?: number;
+  selectedKitId?: string | null;
   message?: string;
   error?: string;
 }

@@ -22,6 +22,7 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
   inventory: InventoryDTO | null;
   inventoryItems: InventoryViewItem[];
   currency: number;
+  selectedKitId: string | null;
 }> {
   const char = await loadCharacter(characterId);
   if (!char) {
@@ -61,7 +62,8 @@ export async function getEquipmentByCharacterId(characterId: string): Promise<{
   return {
     inventory: char.inventory || null,
     inventoryItems,
-    currency: char.inventory?.currencyInChips ?? 0
+    currency: char.inventory?.currencyInChips ?? 0,
+    selectedKitId: char.selectedKitId ?? null
   };
 }
 
@@ -335,6 +337,7 @@ export async function applyStartingKitForCharacter(
       items: newItems,
       currencyInChips: kitCurrencyInChips
     };
+    char.selectedKitId = kitId;
 
     console.log(`[Equipment] Applied kit '${kit.name}' to character ${characterId}`);
 
@@ -347,6 +350,7 @@ export async function applyStartingKitForCharacter(
       inventory: char.inventory,
       inventoryItems: result.inventoryItems,
       currency: char.inventory.currencyInChips,
+      selectedKitId: char.selectedKitId ?? null,
       message: `Applied ${kit.name}`
     };
   } catch (error) {
@@ -387,6 +391,7 @@ export async function refundStartingKitForCharacter(
       equippedItems: [],
       currencyInChips: 0
     };
+    char.selectedKitId = null;
 
     console.log(`[Equipment] Refunded starting kit for character ${characterId}`);
 

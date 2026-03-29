@@ -168,16 +168,13 @@
               <button 
                 mat-raised-button 
                 color="warn"
-                [disabled]="hasRefundedKit || isFinalized"
+                [disabled]="isFinalized"
                 (click)="refundStartingKit()">
                 <mat-icon>currency_exchange</mat-icon>
                 Sell All Starting Items
               </button>
-              <p class="refund-hint" *ngIf="!hasRefundedKit">
+              <p class="refund-hint">
                 Sell all starting items for 50% of their value
-              </p>
-              <p class="refund-hint" *ngIf="hasRefundedKit">
-                ✓ Starting kit refunded
               </p>
             </div>
           </ng-container>

@@ -21,6 +21,7 @@ model Character {
   sessionNotes     String    @default("")
   currencyInChips  Float     @default(0)
   portraitUrl      String?
+  selectedKitId    String?
   lastModified     DateTime  @default(now()) @updatedAt
 
   // Relations
