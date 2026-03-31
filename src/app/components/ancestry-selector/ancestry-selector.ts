@@ -68,7 +68,7 @@ export class AncestrySelector implements OnInit, OnDestroy {
         'Ancient heritage predating humans'
       ],
       imagePlaceholder: 'psychology',
-      image: 'assets/images/ancestries/singer.jpg'
+      image: '/images/ancestries/singer.jpg'
 
     }
   ];
