@@ -17,6 +17,7 @@ interface AncestryInfo {
   fullDesc: string;
   features: string[];
   imagePlaceholder: string;
+  image: string;
 }
 
 @Component({
@@ -51,7 +52,8 @@ export class AncestrySelector implements OnInit, OnDestroy {
         'Most common ancestry across Roshar',
         'Wide variety of cultures and traditions'
       ],
-      imagePlaceholder: 'account_circle'
+      imagePlaceholder: 'account_circle',
+      image: '/images/ancestries/human.jpg'
     },
     {
       type: Ancestry.SINGER,
@@ -65,7 +67,9 @@ export class AncestrySelector implements OnInit, OnDestroy {
         'Access to specialized form abilities',
         'Ancient heritage predating humans'
       ],
-      imagePlaceholder: 'psychology'
+      imagePlaceholder: 'psychology',
+      image: 'assets/images/ancestries/singer.jpg'
+
     }
   ];
 
