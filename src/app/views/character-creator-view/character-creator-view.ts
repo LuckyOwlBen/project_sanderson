@@ -89,6 +89,11 @@ export class CharacterCreatorView implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(() => {
       this.flowService.setCurrentStepByRoute(this.router.url);
+      // Scroll to top of the page on every step change
+      const mainContent = document.querySelector('.app-sidenav-content');
+      if (mainContent) {
+        mainContent.scrollTo({ top: 0 });
+      }
     });
 
     // Subscribe to character changes to validate all steps and trigger change detection
