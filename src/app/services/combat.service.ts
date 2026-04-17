@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { WebsocketService } from './websocket.service';
+import { CombatPhase, CombatParticipant, CombatStateEvent } from '../../../shared/types/websocket-events';
 
 export interface NPCCard {
   id: string;
@@ -41,6 +42,25 @@ export class CombatService {
   // Track registered players (those who have joined combat but not chosen speed)
   private registeredPlayers = new Set<string>();
 
+  // Turn tracker state (synced from server)
+  private roundsStartedSubject = new BehaviorSubject<boolean>(false);
+  public roundsStarted$ = this.roundsStartedSubject.asObservable();
+
+  private currentRoundSubject = new BehaviorSubject<number>(1);
+  public currentRound$ = this.currentRoundSubject.asObservable();
+
+  private currentPhaseSubject = new BehaviorSubject<CombatPhase>('fastPC');
+  public currentPhase$ = this.currentPhaseSubject.asObservable();
+
+  private activeParticipantIdSubject = new BehaviorSubject<string | null>(null);
+  public activeParticipantId$ = this.activeParticipantIdSubject.asObservable();
+
+  private completedInPhaseSubject = new BehaviorSubject<Set<string>>(new Set());
+  public completedInPhase$ = this.completedInPhaseSubject.asObservable();
+
+  private participantsSubject = new BehaviorSubject<CombatStateEvent['participants'] | null>(null);
+  public participants$ = this.participantsSubject.asObservable();
+
   // Event streams
   private turnSpeedChangedSubject = new Subject<TurnSpeedChangeEvent>();
   public turnSpeedChanged$ = this.turnSpeedChangedSubject.asObservable();
@@ -57,6 +77,31 @@ export class CombatService {
     if (turnSpeedStream && typeof turnSpeedStream.subscribe === 'function') {
       turnSpeedStream.subscribe((event: any) => {
         this.setTurnSpeed(event.characterId, event.turnSpeed);
+      });
+    }
+
+    // Sync turn tracker state from server
+    const combatStateStream = (this.websocketService as any)?.combatState$;
+    if (combatStateStream && typeof combatStateStream.subscribe === 'function') {
+      combatStateStream.subscribe((state: CombatStateEvent) => {
+        this.roundsStartedSubject.next(state.roundsStarted);
+        this.currentRoundSubject.next(state.round);
+        this.currentPhaseSubject.next(state.phase);
+        this.activeParticipantIdSubject.next(state.activeParticipantId);
+        this.completedInPhaseSubject.next(new Set(state.completedInPhase));
+        this.participantsSubject.next(state.participants);
+        // Keep combat active in sync
+        if (state.active && !this.combatActiveSubject.value) {
+          this.combatActiveSubject.next(true);
+        }
+      });
+    }
+
+    // Handle combat end from server
+    const combatEndStream = (this.websocketService as any)?.combatEnd$;
+    if (combatEndStream && typeof combatEndStream.subscribe === 'function') {
+      combatEndStream.subscribe(() => {
+        this.clearCombatState();
       });
     }
   }
@@ -179,6 +224,12 @@ export class CombatService {
     this.npcTurnSpeeds.clear();
     this.npcCards.clear();
     this.registeredPlayers.clear();
+    this.roundsStartedSubject.next(false);
+    this.currentRoundSubject.next(1);
+    this.currentPhaseSubject.next('fastPC');
+    this.activeParticipantIdSubject.next(null);
+    this.completedInPhaseSubject.next(new Set());
+    this.participantsSubject.next(null);
   }
 
   // Register player for combat (for tracking uninitialized players)
@@ -190,4 +241,53 @@ export class CombatService {
     return allPlayerIds.filter(id => !this.playerTurnSpeeds.has(id));
   }
 
+  // Turn tracker accessors
+  get roundsStarted(): boolean {
+    return this.roundsStartedSubject.value;
+  }
+
+  get currentRound(): number {
+    return this.currentRoundSubject.value;
+  }
+
+  get currentPhase(): CombatPhase {
+    return this.currentPhaseSubject.value;
+  }
+
+  get activeParticipantId(): string | null {
+    return this.activeParticipantIdSubject.value;
+  }
+
+  get completedInPhase(): Set<string> {
+    return this.completedInPhaseSubject.value;
+  }
+
+  get participants(): CombatStateEvent['participants'] | null {
+    return this.participantsSubject.value;
+  }
+
+  isParticipantActive(id: string): boolean {
+    return this.activeParticipantIdSubject.value === id;
+  }
+
+  isParticipantComplete(id: string): boolean {
+    return this.completedInPhaseSubject.value.has(id);
+  }
+
+  // Turn tracker actions (delegate to websocket)
+  beginRounds(participants: CombatStateEvent['participants']): void {
+    this.websocketService.beginRounds(participants);
+  }
+
+  setActiveTurn(participantId: string): void {
+    this.websocketService.setActiveTurn(participantId);
+  }
+
+  completeTurn(participantId: string): void {
+    this.websocketService.completeTurn(participantId);
+  }
+
+  endCombat(): void {
+    this.websocketService.endCombat();
+  }
 }

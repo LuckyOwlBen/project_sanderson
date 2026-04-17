@@ -163,3 +163,55 @@ export interface CharacterUpdatedEvent {
   characterId: string;
   timestamp: string;
 }
+
+/**
+ * Combat turn phases following the Cosmere RPG rules:
+ * 1. Fast PCs → 2. Fast NPCs → 3. Slow PCs → 4. Slow NPCs → Next Round
+ */
+export type CombatPhase = 'fastPC' | 'fastNPC' | 'slowPC' | 'slowNPC';
+
+/**
+ * A participant in combat (PC or NPC group)
+ */
+export interface CombatParticipant {
+  id: string;
+  name: string;
+  type: 'pc' | 'npc';
+}
+
+/**
+ * Full combat state broadcast from the server to all clients
+ */
+export interface CombatStateEvent {
+  active: boolean;
+  roundsStarted: boolean;
+  round: number;
+  phase: CombatPhase;
+  activeParticipantId: string | null;
+  completedInPhase: string[];
+  participants: {
+    fastPC: CombatParticipant[];
+    fastNPC: CombatParticipant[];
+    slowPC: CombatParticipant[];
+    slowNPC: CombatParticipant[];
+  };
+  timestamp: string;
+}
+
+/**
+ * Fired when it's a specific player's turn
+ */
+export interface YourTurnEvent {
+  characterId: string;
+  round: number;
+  phase: CombatPhase;
+  actionsAvailable: number;
+  timestamp: string;
+}
+
+/**
+ * Fired when combat ends
+ */
+export interface CombatEndEvent {
+  timestamp: string;
+}

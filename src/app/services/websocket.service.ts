@@ -18,7 +18,11 @@ import {
   CombatStartEvent,
   TurnSpeedSelectionEvent,
   TurnGroupsUpdateEvent,
-  CharacterUpdatedEvent
+  CharacterUpdatedEvent,
+  CombatStateEvent,
+  YourTurnEvent,
+  CombatEndEvent,
+  CombatParticipant
 } from '../../../shared/types/websocket-events';
 
 // Extend shared PlayerJoinedEvent to use local Ancestry type
@@ -32,6 +36,7 @@ export type { ItemTransaction, StoreTransactionEvent, ItemGrantEvent };
 export type { StoreToggleEvent, ExpertiseGrantEvent, LevelUpEvent };
 export type { HighstormEvent, CombatStartEvent, TurnSpeedSelectionEvent };
 export type { TurnGroupsUpdateEvent, CharacterUpdatedEvent };
+export type { CombatStateEvent, YourTurnEvent, CombatEndEvent, CombatParticipant };
 
 @Injectable({
   providedIn: 'root'
@@ -92,6 +97,15 @@ export class WebsocketService implements OnDestroy {
 
   private characterUpdatedSubject = new Subject<CharacterUpdatedEvent>();
   public characterUpdated$ = this.characterUpdatedSubject.asObservable();
+
+  private combatStateSubject = new Subject<CombatStateEvent>();
+  public combatState$ = this.combatStateSubject.asObservable();
+
+  private yourTurnSubject = new Subject<YourTurnEvent>();
+  public yourTurn$ = this.yourTurnSubject.asObservable();
+
+  private combatEndSubject = new Subject<CombatEndEvent>();
+  public combatEnd$ = this.combatEndSubject.asObservable();
 
   constructor() {
     // Determine server URL based on current location
@@ -235,6 +249,22 @@ export class WebsocketService implements OnDestroy {
     this.socket.on('character-updated', (data: CharacterUpdatedEvent) => {
       console.log('[WebSocket] 🔄 Character updated:', data);
       this.characterUpdatedSubject.next(data);
+    });
+
+    // Listen for combat turn tracker events
+    this.socket.on('combat-state', (data: CombatStateEvent) => {
+      console.log('[WebSocket] 🎯 Combat state update:', data);
+      this.combatStateSubject.next(data);
+    });
+
+    this.socket.on('your-turn', (data: YourTurnEvent) => {
+      console.log('[WebSocket] 🚨 YOUR TURN:', data);
+      this.yourTurnSubject.next(data);
+    });
+
+    this.socket.on('combat-end', (data: CombatEndEvent) => {
+      console.log('[WebSocket] 🛑 Combat ended:', data);
+      this.combatEndSubject.next(data);
     });
     
     console.log('[WebSocket] ✅ All event listeners registered');
@@ -499,6 +529,52 @@ export class WebsocketService implements OnDestroy {
       turnSpeed,
       timestamp: new Date().toISOString()
     });
+  }
+
+  // Combat turn tracker emissions
+  beginRounds(participants: {
+    fastPC: CombatParticipant[];
+    fastNPC: CombatParticipant[];
+    slowPC: CombatParticipant[];
+    slowNPC: CombatParticipant[];
+  }): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot begin rounds: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 🎯 Beginning rounds');
+    this.socket.emit('gm-begin-rounds', { participants });
+  }
+
+  setActiveTurn(participantId: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot set active turn: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] ▶️ Setting active turn:', participantId);
+    this.socket.emit('gm-set-active-turn', { participantId });
+  }
+
+  completeTurn(participantId: string): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot complete turn: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] ✅ Completing turn:', participantId);
+    this.socket.emit('gm-complete-turn', { participantId });
+  }
+
+  endCombat(): void {
+    if (!this.socket?.connected) {
+      console.warn('[WebSocket] Cannot end combat: not connected');
+      return;
+    }
+
+    console.log('[WebSocket] 🛑 Ending combat');
+    this.socket.emit('gm-end-combat');
   }
 
   isConnected(): boolean {

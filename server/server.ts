@@ -44,6 +44,7 @@ import { AttributesFinalizationService } from './services/attributes-finalizatio
 import { SprenGrantService } from './services/spren-grant-service';
 import { ItemGrantRepository } from './repositories/item-grant-repository';
 import { levelUpManager } from './services/levelup-manager';
+import { registerCombatHandlers } from './socket-handlers/combat-handlers';
 
 import {
   initDatabase,
@@ -2266,6 +2267,9 @@ io.on('connection', (socket) => {
     io.emit('turn-speed-selection', payload);
     console.log(`[Combat] 🔄 Turn speed selection broadcasted`);
   });
+
+  // Register combat turn tracker handlers
+  registerCombatHandlers(socket, io, findSocketIdByCharacterId, activePlayers);
 
   // Handle disconnect
   socket.on('disconnect', () => {
