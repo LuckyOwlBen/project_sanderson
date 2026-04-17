@@ -49,6 +49,7 @@ import { CombatPanelComponent } from "../combat-panel/combat-panel.component";
 export class GmDashboardView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
+  activeTab = 0;
   activePlayers = new Map<string, PlayerJoinedEvent>();
   isConnected = false;
   isHighstormActive = false;

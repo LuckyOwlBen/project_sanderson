@@ -16,269 +16,301 @@
     </div>
   </div>
 
-  <!-- Economy Settings -->
-  <div class="world-events-section">
-    <mat-card class="world-event-card economy-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="event-icon">sell</mat-icon>
-        <mat-card-title>Economy Settings</mat-card-title>
-        <mat-card-subtitle>Item sell rate (% of item value players receive)</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="sell-percent-control">
-          <mat-form-field appearance="outline" class="sell-percent-field">
-            <mat-label>Sell Rate (%)</mat-label>
-            <input matInput type="number" [(ngModel)]="sellPercent" min="0" max="100" step="5">
-          </mat-form-field>
-          <span class="sell-percent-hint">Players receive {{ sellPercent }}% of an item's value when selling</span>
-        </div>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-raised-button color="primary" (click)="saveSellPercent()" [disabled]="isSavingSellPercent">
-          <mat-icon>save</mat-icon>
-          {{ isSavingSellPercent ? 'Saving...' : 'Save' }}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+  <!-- Tab Navigation -->
+  <div class="sheet-tabs custom-tabs" *ngIf="isConnected">
+    <div class="tab-labels">
+      <button class="tab-label" [class.active]="activeTab === 0" (click)="activeTab = 0">
+        <mat-icon>people</mat-icon> Players
+      </button>
+      <button class="tab-label" [class.active]="activeTab === 1" (click)="activeTab = 1">
+        <mat-icon>swords</mat-icon> Combat
+      </button>
+      <button class="tab-label" [class.active]="activeTab === 2" (click)="activeTab = 2">
+        <mat-icon>public</mat-icon> World
+      </button>
+      <button class="tab-label" [class.active]="activeTab === 3" (click)="activeTab = 3">
+        <mat-icon>store</mat-icon> Stores
+      </button>
+    </div>
 
-  <!-- World Events Control -->
-  <div class="world-events-section">
-    <mat-card class="world-event-card highstorm-card" [class.active]="isHighstormActive">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="event-icon">flash_on</mat-icon>
-        <mat-card-title>Highstorm</mat-card-title>
-        <mat-card-subtitle>Allow Singers to change forms</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p class="event-description">
-          {{ isHighstormActive ? 'Singers can currently change forms during this highstorm.' : 'Trigger a highstorm to allow Singers to change forms.' }}
-        </p>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button 
-          mat-raised-button 
-          [color]="isHighstormActive ? 'warn' : 'accent'"
-          (click)="toggleHighstorm()">
-          <mat-icon>{{ isHighstormActive ? 'flash_off' : 'flash_on' }}</mat-icon>
-          {{ isHighstormActive ? 'End Highstorm' : 'Trigger Highstorm' }}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+    <!-- Tab 0: Players -->
+    <div class="tab-content" *ngIf="activeTab === 0">
+      <div class="players-grid" *ngIf="activePlayers.size > 0">
+        <mat-card *ngFor="let player of getActivePlayersArray()" 
+                  class="player-card"
+                  [class.critical]="isCritical(player.characterId)">
+          
+          <!-- Critical Alert Badge -->
+          <div class="critical-badge" *ngIf="isCritical(player.characterId)">
+            <mat-icon>warning</mat-icon>
+            <span>CRITICAL</span>
+          </div>
 
-  <!-- Active Players Grid -->
-  <div class="players-grid" *ngIf="activePlayers.size > 0">
-    <mat-card *ngFor="let player of getActivePlayersArray()" 
-              class="player-card"
-              [class.critical]="isCritical(player.characterId)">
-      
-      <!-- Critical Alert Badge -->
-      <div class="critical-badge" *ngIf="isCritical(player.characterId)">
-        <mat-icon>warning</mat-icon>
-        <span>CRITICAL</span>
+          <mat-card-header>
+            <mat-card-title>
+              {{ player.name }}
+              <mat-icon class="level-icon" [matBadge]="player.level" matBadgeSize="small">star</mat-icon>
+            </mat-card-title>
+            <mat-card-subtitle>{{ player.ancestry }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Health -->
+            <div class="resource-section">
+              <div class="resource-header">
+                <mat-icon class="resource-icon health">favorite</mat-icon>
+                <span class="resource-label">Health</span>
+                <span class="resource-values">{{ player.health.current }} / {{ player.health.max }}</span>
+              </div>
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getHealthPercentage(player)"
+                [color]="getHealthColor(player)"
+                class="resource-bar health-bar">
+              </mat-progress-bar>
+            </div>
+
+            <!-- Focus -->
+            <div class="resource-section">
+              <div class="resource-header">
+                <mat-icon class="resource-icon focus">psychology</mat-icon>
+                <span class="resource-label">Focus</span>
+                <span class="resource-values">{{ player.focus.current }} / {{ player.focus.max }}</span>
+              </div>
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getFocusPercentage(player)"
+                color="accent"
+                class="resource-bar focus-bar">
+              </mat-progress-bar>
+            </div>
+
+            <!-- Investiture -->
+            <div class="resource-section">
+              <div class="resource-header">
+                <mat-icon class="resource-icon investiture">auto_awesome</mat-icon>
+                <span class="resource-label">Investiture</span>
+                <span class="resource-values">{{ player.investiture.current }} / {{ player.investiture.max }}</span>
+              </div>
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getInvestiturePercentage(player)"
+                color="primary"
+                class="resource-bar investiture-bar">
+              </mat-progress-bar>
+            </div>
+
+            <!-- Joined timestamp -->
+            <div class="player-meta">
+              <mat-icon>schedule</mat-icon>
+              <span>Joined: {{ player.joinedAt | date:'short' }}</span>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-raised-button color="primary" (click)="openSprenGrantDialog(player)">
+              <mat-icon>auto_awesome</mat-icon>
+              Grant Spren
+            </button>
+            <button mat-raised-button color="accent" (click)="openItemGrantDialog(player)">
+              <mat-icon>redeem</mat-icon>
+              Grant Item
+            </button>
+            <button mat-raised-button (click)="openMoneyGrantDialog(player)">
+              <mat-icon>monetization_on</mat-icon>
+              Grant Money
+            </button>
+            <button mat-raised-button (click)="openExpertiseGrantDialog(player)">
+              <mat-icon>school</mat-icon>
+              Grant Expertise
+            </button>
+            <button mat-raised-button color="warn" (click)="grantLevelUp(player)">
+              <mat-icon>trending_up</mat-icon>
+              Level Up
+            </button>
+          </mat-card-actions>
+        </mat-card>
       </div>
 
-      <mat-card-header>
-        <mat-card-title>
-          {{ player.name }}
-          <mat-icon class="level-icon" [matBadge]="player.level" matBadgeSize="small">star</mat-icon>
-        </mat-card-title>
-        <mat-card-subtitle>{{ player.ancestry }}</mat-card-subtitle>
-      </mat-card-header>
+      <!-- Empty Players State -->
+      <div class="empty-state" *ngIf="activePlayers.size === 0">
+        <mat-icon>people_outline</mat-icon>
+        <h2>No Active Players</h2>
+        <p>Waiting for players to join the session...</p>
+        <p class="hint">Players will appear here when they load their character sheets</p>
+      </div>
+    </div>
 
-      <mat-card-content>
-        <!-- Health -->
-        <div class="resource-section">
-          <div class="resource-header">
-            <mat-icon class="resource-icon health">favorite</mat-icon>
-            <span class="resource-label">Health</span>
-            <span class="resource-values">{{ player.health.current }} / {{ player.health.max }}</span>
+    <!-- Tab 1: Combat -->
+    <div class="tab-content" *ngIf="activeTab === 1">
+      <app-combat-panel [activePlayers]="activePlayers"></app-combat-panel>
+    </div>
+
+    <!-- Tab 2: World -->
+    <div class="tab-content" *ngIf="activeTab === 2">
+      <!-- Economy Settings -->
+      <div class="world-events-section">
+        <mat-card class="world-event-card economy-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="event-icon">sell</mat-icon>
+            <mat-card-title>Economy Settings</mat-card-title>
+            <mat-card-subtitle>Item sell rate (% of item value players receive)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="sell-percent-control">
+              <mat-form-field appearance="outline" class="sell-percent-field">
+                <mat-label>Sell Rate (%)</mat-label>
+                <input matInput type="number" [(ngModel)]="sellPercent" min="0" max="100" step="5">
+              </mat-form-field>
+              <span class="sell-percent-hint">Players receive {{ sellPercent }}% of an item's value when selling</span>
+            </div>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-raised-button color="primary" (click)="saveSellPercent()" [disabled]="isSavingSellPercent">
+              <mat-icon>save</mat-icon>
+              {{ isSavingSellPercent ? 'Saving...' : 'Save' }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+      <!-- Highstorm -->
+      <div class="world-events-section">
+        <mat-card class="world-event-card highstorm-card" [class.active]="isHighstormActive">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="event-icon">flash_on</mat-icon>
+            <mat-card-title>Highstorm</mat-card-title>
+            <mat-card-subtitle>Allow Singers to change forms</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="event-description">
+              {{ isHighstormActive ? 'Singers can currently change forms during this highstorm.' : 'Trigger a highstorm to allow Singers to change forms.' }}
+            </p>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button 
+              mat-raised-button 
+              [color]="isHighstormActive ? 'warn' : 'accent'"
+              (click)="toggleHighstorm()">
+              <mat-icon>{{ isHighstormActive ? 'flash_off' : 'flash_on' }}</mat-icon>
+              {{ isHighstormActive ? 'End Highstorm' : 'Trigger Highstorm' }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Tab 3: Stores -->
+    <div class="tab-content" *ngIf="activeTab === 3">
+      <mat-card class="store-controls-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>store</mat-icon>
+          <mat-card-title>Store Controls</mat-card-title>
+          <mat-card-subtitle>Enable or disable stores for players</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="store-toggles">
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>store</mat-icon>
+                <span class="store-name">General Store</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('main-store') ? 'primary' : 'warn'"
+                (click)="toggleStore('main-store')">
+                <mat-icon>{{ isStoreEnabled('main-store') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('main-store') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('weapons-shop') ? 'swords' : 'lock'}}</mat-icon>
+                <span class="store-name">Weapons Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('weapons-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('weapons-shop')">
+                <mat-icon>{{ isStoreEnabled('weapons-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('weapons-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('armor-shop') ? 'shield' : 'lock'}}</mat-icon>
+                <span class="store-name">Armor Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('armor-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('armor-shop')">
+                <mat-icon>{{ isStoreEnabled('armor-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('armor-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('equipment-shop') ? 'backpack' : 'lock'}}</mat-icon>
+                <span class="store-name">Equipment Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('equipment-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('equipment-shop')">
+                <mat-icon>{{ isStoreEnabled('equipment-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('equipment-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('consumables-shop') ? 'science' : 'lock'}}</mat-icon>
+                <span class="store-name">Consumables Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('consumables-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('consumables-shop')">
+                <mat-icon>{{ isStoreEnabled('consumables-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('consumables-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('fabrials-shop') ? 'auto_awesome' : 'lock'}}</mat-icon>
+                <span class="store-name">Fabrials Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('fabrials-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('fabrials-shop')">
+                <mat-icon>{{ isStoreEnabled('fabrials-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('fabrials-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
+
+            <div class="store-toggle">
+              <div class="store-info">
+                <mat-icon>{{isStoreEnabled('mounts-shop') ? 'pets' : 'lock'}}</mat-icon>
+                <span class="store-name">Mounts Shop</span>
+              </div>
+              <button 
+                mat-raised-button 
+                [color]="isStoreEnabled('mounts-shop') ? 'primary' : 'warn'"
+                (click)="toggleStore('mounts-shop')">
+                <mat-icon>{{ isStoreEnabled('mounts-shop') ? 'lock_open' : 'lock' }}</mat-icon>
+                {{ isStoreEnabled('mounts-shop') ? 'Open' : 'Closed' }}
+              </button>
+            </div>
           </div>
-          <mat-progress-bar 
-            mode="determinate" 
-            [value]="getHealthPercentage(player)"
-            [color]="getHealthColor(player)"
-            class="resource-bar health-bar">
-          </mat-progress-bar>
-        </div>
-
-        <!-- Focus -->
-        <div class="resource-section">
-          <div class="resource-header">
-            <mat-icon class="resource-icon focus">psychology</mat-icon>
-            <span class="resource-label">Focus</span>
-            <span class="resource-values">{{ player.focus.current }} / {{ player.focus.max }}</span>
-          </div>
-          <mat-progress-bar 
-            mode="determinate" 
-            [value]="getFocusPercentage(player)"
-            color="accent"
-            class="resource-bar focus-bar">
-          </mat-progress-bar>
-        </div>
-
-        <!-- Investiture -->
-        <div class="resource-section">
-          <div class="resource-header">
-            <mat-icon class="resource-icon investiture">auto_awesome</mat-icon>
-            <span class="resource-label">Investiture</span>
-            <span class="resource-values">{{ player.investiture.current }} / {{ player.investiture.max }}</span>
-          </div>
-          <mat-progress-bar 
-            mode="determinate" 
-            [value]="getInvestiturePercentage(player)"
-            color="primary"
-            class="resource-bar investiture-bar">
-          </mat-progress-bar>
-        </div>
-
-        <!-- Joined timestamp -->
-        <div class="player-meta">
-          <mat-icon>schedule</mat-icon>
-          <span>Joined: {{ player.joinedAt | date:'short' }}</span>
-        </div>
-      </mat-card-content>
-
-      <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="openSprenGrantDialog(player)">
-          <mat-icon>auto_awesome</mat-icon>
-          Grant Spren
-        </button>
-        <button mat-raised-button color="accent" (click)="openItemGrantDialog(player)">
-          <mat-icon>redeem</mat-icon>
-          Grant Item
-        </button>
-        <button mat-raised-button (click)="openMoneyGrantDialog(player)">
-          <mat-icon>monetization_on</mat-icon>
-          Grant Money
-        </button>
-        <button mat-raised-button (click)="openExpertiseGrantDialog(player)">
-          <mat-icon>school</mat-icon>
-          Grant Expertise
-        </button>
-        <button mat-raised-button color="warn" (click)="grantLevelUp(player)">
-          <mat-icon>trending_up</mat-icon>
-          Level Up
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
-  <app-combat-panel [activePlayers]="activePlayers"></app-combat-panel>
-  <!-- Store Controls Section -->
-  <mat-card class="store-controls-card" *ngIf="isConnected">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>store</mat-icon>
-      <mat-card-title>Store Controls</mat-card-title>
-      <mat-card-subtitle>Enable or disable stores for players</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="store-toggles">
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>store</mat-icon>
-            <span class="store-name">General Store</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('main-store') ? 'primary' : 'warn'"
-            (click)="toggleStore('main-store')">
-            <mat-icon>{{ isStoreEnabled('main-store') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('main-store') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{'{{'}}isStoreEnabled('weapons-shop') ? 'swords' : 'lock'{{'}}'}}</mat-icon>
-            <span class="store-name">Weapons Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('weapons-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('weapons-shop')">
-            <mat-icon>{{ isStoreEnabled('weapons-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('weapons-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{'{{'}}isStoreEnabled('armor-shop') ? 'shield' : 'lock'{{'}}'}}</mat-icon>
-            <span class="store-name">Armor Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('armor-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('armor-shop')">
-            <mat-icon>{{ isStoreEnabled('armor-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('armor-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{isStoreEnabled('equipment-shop') ? 'backpack' : 'lock'}}</mat-icon>
-            <span class="store-name">Equipment Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('equipment-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('equipment-shop')">
-            <mat-icon>{{ isStoreEnabled('equipment-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('equipment-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{isStoreEnabled('consumables-shop') ? 'science' : 'lock'}}</mat-icon>
-            <span class="store-name">Consumables Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('consumables-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('consumables-shop')">
-            <mat-icon>{{ isStoreEnabled('consumables-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('consumables-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{isStoreEnabled('fabrials-shop') ? 'auto_awesome' : 'lock'}}</mat-icon>
-            <span class="store-name">Fabrials Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('fabrials-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('fabrials-shop')">
-            <mat-icon>{{ isStoreEnabled('fabrials-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('fabrials-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>
-
-        <div class="store-toggle">
-          <div class="store-info">
-            <mat-icon>{{isStoreEnabled('mounts-shop') ? 'pets' : 'lock'}}</mat-icon>
-            <span class="store-name">Mounts Shop</span>
-          </div>
-          <button 
-            mat-raised-button 
-            [color]="isStoreEnabled('mounts-shop') ? 'primary' : 'warn'"
-            (click)="toggleStore('mounts-shop')">
-            <mat-icon>{{ isStoreEnabled('mounts-shop') ? 'lock_open' : 'lock' }}</mat-icon>
-            {{ isStoreEnabled('mounts-shop') ? 'Open' : 'Closed' }}
-          </button>
-        </div>      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="activePlayers.size === 0 && isConnected">
-    <mat-icon>people_outline</mat-icon>
-    <h2>No Active Players</h2>
-    <p>Waiting for players to join the session...</p>
-    <p class="hint">Players will appear here when they load their character sheets</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 
   <!-- Disconnected State -->
