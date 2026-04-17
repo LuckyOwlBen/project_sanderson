@@ -35,6 +35,7 @@ describe('AncestrySelector', () => {
   let storageService: any;
   let ancestryApiService: any;
   let identityService: any;
+  let identityId$: BehaviorSubject<string | null>;
   let navigateSpy: any;
 
   beforeEach(async () => {
@@ -47,10 +48,11 @@ describe('AncestrySelector', () => {
       saveAncestry: vi.fn().mockReturnValue(of(Ancestry.HUMAN))
     };
 
-    const identityId$ = new BehaviorSubject<string | null>('char-123');
+    const identityId$Local = new BehaviorSubject<string | null>('char-123');
+    identityId$ = identityId$Local;
     const waiting$ = new BehaviorSubject<boolean>(false);
     identityService = {
-      currentCharacterId$: identityId$.asObservable(),
+      currentCharacterId$: identityId$Local.asObservable(),
       waitingForIdentity$: waiting$.asObservable(),
       getCurrentCharacterId: vi.fn().mockReturnValue('char-123'),
       setCurrentCharacterId: vi.fn(),
@@ -118,6 +120,7 @@ describe('AncestrySelector', () => {
   it('should not persist when character has no id', () => {
     const char = new Character();
     characterState.updateCharacter(char);
+    identityId$.next(null);
     component.selectedAncestry = Ancestry.HUMAN;
 
     component.persistStep();

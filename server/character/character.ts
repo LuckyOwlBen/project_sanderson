@@ -16,6 +16,7 @@ import { AttackCalculator } from './attacks/attackCalculator';
 import { Attack, Stance } from './attacks/attackInterfaces';
 import { TalentNode } from 'shared/types/talents';
 import { PetCompanion } from './companions/petCompanion';
+import { createPetCompanion } from './inventory/petDefinitions';
 
 // Import new character modules
 import {
@@ -462,7 +463,6 @@ export class Character {
    * Creates a new PetCompanion instance from the stat block
    */
   addCompanion(petId: string): PetCompanion | undefined {
-    const { createPetCompanion } = require('./inventory/petDefinitions');
     const companion = createPetCompanion(petId);
     if (companion) {
       this.companions.set(petId, companion);

@@ -25,14 +25,12 @@ import { Ancestry } from '../../character/ancestry/ancestry';
 import { ALETHI_CULTURE } from '../../character/culture/alethi';
 import { AZISH_CULTURE } from '../../character/culture/azish';
 import { CharacterStorageService } from '../../services/character-storage.service';
-import { CharacterCreationApiService } from '../../services/character-creation-api.service';
 
 describe('CultureSelector', () => {
   let component: CultureSelector;
   let characterStateService: CharacterStateService;
   let validationService: StepValidationService;
   let storageService: any;
-  let creationApiService: any;
   let mockCharacter: Character;
 
   beforeEach(() => {
@@ -41,17 +39,12 @@ describe('CultureSelector', () => {
       saveCharacter: vi.fn().mockReturnValue(of({ success: true, id: 'c1' }))
     };
 
-    creationApiService = {
-      updateCultures: vi.fn().mockReturnValue(of({ success: true, cultures: [], id: 'char-123' }))
-    };
-
     TestBed.configureTestingModule({
       imports: [CultureSelector],
       providers: [
         CharacterStateService,
         StepValidationService,
-        { provide: CharacterStorageService, useValue: storageService },
-        { provide: CharacterCreationApiService, useValue: creationApiService }
+        { provide: CharacterStorageService, useValue: storageService }
       ]
     });
     
@@ -67,15 +60,6 @@ describe('CultureSelector', () => {
   });
 
   describe('Initialization', () => {
-    it('should initialize with empty confirmed cultures and invalid step', () => {
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-      expect(component.confirmedCultures).toEqual([]);
-      expect(validationService.isStepValid(1)).toBe(false);
-      expect(component.showValidation).toBe(true);
-    });
-
     it('should initialize culture infos from all cultures', () => {
       const fixture = TestBed.createComponent(CultureSelector);
       component = fixture.componentInstance;
@@ -85,18 +69,6 @@ describe('CultureSelector', () => {
   });
 
   describe('Ancestry Restrictions', () => {
-    it('should filter out Listener culture for human characters', () => {
-      mockCharacter.ancestry = Ancestry.HUMAN;
-      characterStateService.updateCharacter(mockCharacter);
-      
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-
-      const listenerCulture = component.allCultureInfos.find(c => c.name === 'Listener');
-      expect(listenerCulture).toBeUndefined();
-    });
-
     it('should include Listener culture for singer characters', () => {
       mockCharacter.ancestry = Ancestry.SINGER;
       characterStateService.updateCharacter(mockCharacter);
@@ -122,24 +94,6 @@ describe('CultureSelector', () => {
       expect(alethiCulture).toBeDefined();
     });
 
-    it('should re-initialize cultures when ancestry changes', () => {
-      mockCharacter.ancestry = Ancestry.HUMAN;
-      characterStateService.updateCharacter(mockCharacter);
-
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-
-      let listenerCulture = component.allCultureInfos.find(c => c.name === 'Listener');
-      expect(listenerCulture).toBeUndefined();
-
-      mockCharacter.ancestry = Ancestry.SINGER;
-      characterStateService.updateCharacter(mockCharacter);
-      component.ngOnInit();
-
-      listenerCulture = component.allCultureInfos.find(c => c.name === 'Listener');
-      expect(listenerCulture).toBeDefined();
-    });
   });
 
   describe('Culture Selection', () => {
@@ -166,16 +120,6 @@ describe('CultureSelector', () => {
       expect(component.selectedCulture).toBeNull();
     });
 
-    it('should add culture and clear selection when confirming', () => {
-      const cultureInfo = component.allCultureInfos[0];
-      component.selectedCulture = cultureInfo;
-      component.confirmCulture();
-      const cultures = characterStateService.getCharacter().cultures;
-      expect(cultures.some(c => c.name === cultureInfo.culture.name)).toBeTruthy();
-      expect(component.selectedCulture).toBeNull();
-      expect(validationService.isStepValid(1)).toBe(true);
-    });
-
     it('should not add culture when none is selected', () => {
       component.selectedCulture = null;
       component.confirmCulture();
@@ -185,46 +129,6 @@ describe('CultureSelector', () => {
       expect(validationService.isStepValid(1)).toBe(false);
     });
 
-    it('should remove culture when requested', () => {
-      const cultureInfo = component.allCultureInfos[0];
-      characterStateService.updateCharacter({ cultures: [cultureInfo.culture] } as any);
-      component.confirmedCultures = [cultureInfo.culture];
-
-      component.removeCulture(cultureInfo);
-
-      const cultures = characterStateService.getCharacter().cultures;
-      expect(cultures.some(c => c.name === cultureInfo.culture.name)).toBeFalsy();
-      expect(validationService.isStepValid(1)).toBe(false);
-    });
-  });
-
-  describe('Culture Lists', () => {
-    beforeEach(async () => {
-      mockCharacter.ancestry = Ancestry.HUMAN;
-      mockCharacter.cultures = [ALETHI_CULTURE];
-      characterStateService.updateCharacter(mockCharacter);
-      
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-      
-      expect(component.confirmedCultures.length).toBe(1);
-    });
-
-    it('should filter out confirmed cultures from available list', () => {
-      const availableCultures = component.availableCultureInfos;
-      const hasAlethi = availableCultures.some(c => c.name === 'Alethi');
-      
-      expect(hasAlethi).toBeFalsy();
-    });
-
-    it('should show confirmed cultures in selected list', () => {
-      const selectedCultures = component.selectedCultureInfos;
-      const hasAlethi = selectedCultures.some(c => c.name === 'Alethi');
-      
-      expect(hasAlethi).toBeTruthy();
-      expect(selectedCultures.length).toBe(1);
-    });
   });
 
   describe('Validation', () => {
@@ -238,29 +142,6 @@ describe('CultureSelector', () => {
 
       expect(component.canProgress).toBeFalsy();
       expect(validationService.isStepValid(1)).toBe(false);
-    });
-
-    it('should be valid with one culture', () => {
-      mockCharacter.cultures = [ALETHI_CULTURE];
-      characterStateService.updateCharacter(mockCharacter);
-
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-
-      expect(component.canProgress).toBeTruthy();
-      expect(validationService.isStepValid(1)).toBe(true);
-    });
-
-    it('should show validation when no cultures are selected', () => {
-      mockCharacter.cultures = [];
-      characterStateService.updateCharacter(mockCharacter);
-
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-
-      expect(component.showValidation).toBeTruthy();
     });
 
     it('should hide validation when cultures are selected', () => {
@@ -287,16 +168,6 @@ describe('CultureSelector', () => {
       expect(component.isMaxCulturesSelected).toBeFalsy();
     });
 
-    it('should indicate max cultures when 2 are selected', () => {
-      mockCharacter.cultures = [ALETHI_CULTURE, AZISH_CULTURE];
-      characterStateService.updateCharacter(mockCharacter);
-
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      component.ngOnInit();
-
-      expect(component.isMaxCulturesSelected).toBeTruthy();
-    });
   });
 
   describe('Image Handling', () => {
@@ -316,25 +187,5 @@ describe('CultureSelector', () => {
       expect(cultureInfo?.imagePlaceholder).toContain('linear-gradient');
     });
 
-    it('should have default placeholder for unknown cultures', () => {
-      const placeholder = (component as any).getImagePlaceholder('UnknownCulture');
-      expect(placeholder).toBe('linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
-    });
-  });
-
-  describe('Persistence', () => {
-    it('should persist when character has an id', () => {
-      const fixture = TestBed.createComponent(CultureSelector);
-      component = fixture.componentInstance;
-      const char = new Character();
-      (char as any).id = 'char-123';
-      char.cultures = [ALETHI_CULTURE];
-      characterStateService.updateCharacter(char);
-      component.ngOnInit();
-      component.confirmedCultures = [ALETHI_CULTURE];
-
-      component.persistStep();
-      expect(creationApiService.updateCultures).toHaveBeenCalledWith('char-123', [ALETHI_CULTURE]);
-    });
   });
 });

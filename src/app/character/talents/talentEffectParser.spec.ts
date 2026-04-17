@@ -254,10 +254,10 @@ describe('TalentEffectParser', () => {
       
       expect(grants).toHaveLength(3);
       expect(grants[0].type).toBe('choice');
-      expect(grants[0].expertises).toContain('Light Weaponry');
-      expect(grants[0].expertises).toContain('Heavy Weaponry');
+      expect(grants[0].expertises).toContain('Knives');
+      expect(grants[0].expertises).toContain('Sidesword');
       expect(grants[1].type).toBe('choice');
-      expect(grants[1].expertises).toContain('Armor Proficiency');
+      expect(grants[1].expertises).toContain('Breastplate');
       expect(grants[2].type).toBe('single');
       expect(grants[2].expertises).toEqual(['Military Life']);
     });

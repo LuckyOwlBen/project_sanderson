@@ -89,9 +89,8 @@ describe('CharacterPowersTab', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      const emptyText = fixture.debugElement.query(By.css('.expertises-list .empty-text'));
-      expect(emptyText).toBeTruthy();
-      expect(emptyText.nativeElement.textContent).toContain('No expertises selected');
+      const statsCard = fixture.debugElement.query(By.css('.stats-card'));
+      expect(statsCard).toBeFalsy();
     });
   });
 
@@ -112,9 +111,9 @@ describe('CharacterPowersTab', () => {
       component.character = mockCharacter;
       fixture.detectChanges();
 
-      const emptyText = fixture.debugElement.query(By.css('.powers-list .empty-text'));
+      const emptyText = fixture.debugElement.query(By.css('.empty-state .empty-text'));
       expect(emptyText).toBeTruthy();
-      expect(emptyText.nativeElement.textContent).toContain('No powers unlocked yet');
+      expect(emptyText.nativeElement.textContent).toContain('No powers or abilities unlocked yet');
     });
   });
 
@@ -260,9 +259,9 @@ describe('CharacterPowersTab', () => {
       fixture.detectChanges();
     });
 
-    it('should have powers card', () => {
-      const powersCard = fixture.debugElement.query(By.css('.powers-card'));
-      expect(powersCard).toBeTruthy();
+    it('should have powers section', () => {
+      const powersSection = fixture.debugElement.query(By.css('.sheet-content'));
+      expect(powersSection).toBeTruthy();
     });
 
     it('should have expertises card', () => {
@@ -296,7 +295,7 @@ describe('CharacterPowersTab', () => {
       // STEP 2: Verify Ironstance grants advantage
       expect(ironstance?.grantsAdvantage).toBeDefined();
       expect(ironstance?.grantsAdvantage?.length).toBeGreaterThan(0);
-      expect(ironstance?.grantsAdvantage).toContain('insight_in_ironstance');
+      expect(ironstance?.grantsAdvantage).toContain('On Insight tests while in Ironstance.');
 
       // STEP 3: Set Ironstance as active stance
       const setSuccess = character.setActiveStance('ironstance');
@@ -308,7 +307,7 @@ describe('CharacterPowersTab', () => {
       expect(activeStance).toBeDefined();
       expect(activeStance?.id).toBe('ironstance');
       expect(activeStance?.name).toBe('Ironstance');
-      expect(activeStance?.grantsAdvantage).toContain('insight_in_ironstance');
+      expect(activeStance?.grantsAdvantage).toContain('On Insight tests while in Ironstance.');
 
       // STEP 5: Verify bonuses are applied (if any exist)
       if (activeStance?.bonuses && activeStance.bonuses.length > 0) {
@@ -348,7 +347,7 @@ describe('CharacterPowersTab', () => {
           // Verify at least one ribbon contains the advantage ID
           const ribbonTexts = ribbons.map(r => r.nativeElement.textContent);
           expect(ribbonTexts.some(text => 
-            text.includes('insight_in_ironstance') || 
+            text.includes('On Insight tests while in Ironstance.') || 
             text.toLowerCase().includes('insight')
           )).toBe(true);
         }
@@ -424,7 +423,7 @@ describe('CharacterPowersTab', () => {
       
       expect(stance1?.id).toBe(stance2?.id);
       expect(stance1?.grantsAdvantage).toEqual(stance2?.grantsAdvantage);
-      expect(stance1?.grantsAdvantage).toContain('insight_in_ironstance');
+      expect(stance1?.grantsAdvantage).toContain('On Insight tests while in Ironstance.');
     });
   });
 });

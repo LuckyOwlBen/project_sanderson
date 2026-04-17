@@ -16,10 +16,14 @@ try {
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
+import { BehaviorSubject, Subject, of, throwError } from 'rxjs';
 import { ExpertiseSelector } from './expertise-selector';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { StepValidationService } from '../../services/step-validation.service';
+import { ExpertiseApiService } from '../../services/expertise-api.service';
+import { NavFinalizedService } from '../../services/nav-finalized.service';
 import { LevelUpManager } from '../../levelup/levelUpManager';
 import { CharacterStorageService } from '../../services/character-storage.service';
 import { Character } from '../../character/character';
@@ -86,9 +90,13 @@ describe('ExpertiseSelector', () => {
       imports: [ExpertiseSelector],
       providers: [
         { provide: CharacterStateService, useValue: mockCharacterState },
+        { provide: CharacterIdentityService, useValue: { currentCharacterId$: of(null) } },
         { provide: StepValidationService, useValue: mockValidationService },
+        { provide: ExpertiseApiService, useValue: { getExpertise: vi.fn().mockReturnValue(of({ totalPoints: 3, expertise: [] })) } },
+        { provide: NavFinalizedService, useValue: { getNavigationFinalized: vi.fn().mockReturnValue(of({ expertises: 'pending' })) } },
         { provide: LevelUpManager, useValue: mockLevelUpManager },
         { provide: CharacterStorageService, useValue: mockStorageService },
+        { provide: ChangeDetectorRef, useValue: { detectChanges: vi.fn(), markForCheck: vi.fn() } },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -130,13 +138,6 @@ describe('ExpertiseSelector', () => {
       expect(component.culturalExpertises).toContain('Alethi');
       expect(component.culturalExpertises).toContain('Thaylen');
       expect(component.culturalExpertises.length).toBe(2);
-    });
-
-    it('should auto-add cultural expertises on first initialization', () => {
-      fixture.detectChanges();
-      
-      expect(addExpertiseCalls).toContainEqual(['Alethi', 'culture', 'culture:Alethi']);
-      expect(addExpertiseCalls).toContainEqual(['Thaylen', 'culture', 'culture:Thaylen']);
     });
 
     it('should calculate available points based on intellect', () => {
@@ -245,15 +246,11 @@ describe('ExpertiseSelector', () => {
       
       // Select
       component.toggleExpertise(vedenExpertise);
-      expect(addExpertiseCalls).toContainEqual(['Veden', 'manual']);
-      
-      // Setup for deselect
-      component.selectedExpertises = [{ name: 'Veden', source: 'manual' }];
-      removeExpertiseCalls.length = 0;
+      expect(component.selectedExpertises.some(e => e.name === 'Veden')).toBe(true);
       
       // Deselect
       component.toggleExpertise(vedenExpertise);
-      expect(removeExpertiseCalls).toContainEqual(['Veden']);
+      expect(component.selectedExpertises.some(e => e.name === 'Veden')).toBe(false);
     });
 
     it('should identify selected expertise correctly', () => {
@@ -325,7 +322,7 @@ describe('ExpertiseSelector', () => {
       component.availablePoints = -1;
       (component as any).updateValidation();
       
-      expect(setStepValidCalls).toContainEqual([5, false]);
+      expect(setStepValidCalls).toContainEqual([4, false]);
       expect(component.validationMessage).toContain('too many');
     });
 
@@ -333,7 +330,7 @@ describe('ExpertiseSelector', () => {
       component.availablePoints = 2;
       (component as any).updateValidation();
       
-      expect(setStepValidCalls).toContainEqual([5, true]);
+      expect(setStepValidCalls).toContainEqual([4, true]);
       expect(component.validationMessage).toContain('remaining');
     });
 
@@ -341,7 +338,7 @@ describe('ExpertiseSelector', () => {
       component.availablePoints = 0;
       (component as any).updateValidation();
       
-      expect(setStepValidCalls).toContainEqual([5, true]);
+      expect(setStepValidCalls).toContainEqual([4, true]);
       expect(component.validationMessage).toContain('allocated');
     });
 

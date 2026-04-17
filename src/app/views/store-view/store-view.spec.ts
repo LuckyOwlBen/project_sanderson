@@ -16,11 +16,13 @@ try {
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { Subject, of } from 'rxjs';
 import { StoreView } from './store-view';
 import { CharacterStateService } from '../../character/characterStateService';
+import { CharacterIdentityService } from '../../services/character-identity.service';
 import { WebsocketService, StoreToggleEvent } from '../../services/websocket.service';
 import { Character } from '../../character/character';
 
@@ -47,6 +49,7 @@ describe('StoreView - Category Filtering', () => {
       storeToggle$: storeToggleSubject.asObservable(),
       emitStoreTransaction: vi.fn(),
       requestStoreState: vi.fn(),
+      characterUpdated$: new Subject<any>(),
     };
 
     mockActivatedRoute = {
@@ -62,6 +65,8 @@ describe('StoreView - Category Filtering', () => {
       providers: [
         StoreView,
         { provide: CharacterStateService, useValue: mockCharacterState },
+        { provide: HttpClient, useValue: { get: vi.fn().mockReturnValue(of({ items: [] })) } },
+        { provide: CharacterIdentityService, useValue: { getCurrentCharacterId: vi.fn().mockReturnValue(null), currentCharacterId$: of(null) } },
         { provide: WebsocketService, useValue: mockWebsocketService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef },
@@ -262,6 +267,7 @@ describe('StoreView - Store Info', () => {
       storeToggle$: of(),
       emitStoreTransaction: vi.fn(),
       requestStoreState: vi.fn(),
+      characterUpdated$: new Subject<any>(),
     };
 
     mockActivatedRoute = {
@@ -277,6 +283,8 @@ describe('StoreView - Store Info', () => {
       providers: [
         StoreView,
         { provide: CharacterStateService, useValue: mockCharacterState },
+        { provide: HttpClient, useValue: { get: vi.fn().mockReturnValue(of({ items: [] })) } },
+        { provide: CharacterIdentityService, useValue: { getCurrentCharacterId: vi.fn().mockReturnValue(null), currentCharacterId$: of(null) } },
         { provide: WebsocketService, useValue: mockWebsocketService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: ChangeDetectorRef, useValue: mockChangeDetectorRef },

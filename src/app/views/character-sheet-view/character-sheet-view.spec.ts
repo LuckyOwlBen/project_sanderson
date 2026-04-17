@@ -58,7 +58,8 @@ describe('CharacterSheetView - No character$ Subscription', () => {
       sprenGrant$: of(null),
       levelUp$: of(null),
       highstorm$: of({ active: false }),
-      combatStart$: new Subject<any>()
+      combatStart$: new Subject<any>(),
+      characterUpdated$: new Subject<any>()
     };
 
     paramsSubject = new BehaviorSubject({ id: 'char-123' });
