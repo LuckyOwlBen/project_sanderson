@@ -207,6 +207,9 @@ import { takeUntil } from 'rxjs/operators';
     .combat-panel {
       margin: 20px;
       max-width: 600px;
+      background: linear-gradient(135deg, rgba(30, 30, 50, 0.8) 0%, rgba(20, 20, 40, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e8e8e8;
     }
 
     mat-card-header {
@@ -219,6 +222,7 @@ import { takeUntil } from 'rxjs/operators';
       justify-content: space-between;
       font-size: 20px;
       margin: 0;
+      color: #e8e8e8;
     }
 
     .combat-toggle {
@@ -229,6 +233,7 @@ import { takeUntil } from 'rxjs/operators';
       margin-top: 20px;
       margin-bottom: 12px;
       font-size: 18px;
+      color: #e8e8e8;
     }
 
     .npc-form {
@@ -251,11 +256,11 @@ import { takeUntil } from 'rxjs/operators';
     }
 
     .npc-card {
-      border: 1px solid #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 4px;
       padding: 12px;
       margin-bottom: 12px;
-      background-color: #f5f5f5;
+      background-color: rgba(255, 255, 255, 0.06);
     }
 
     .npc-header {
@@ -268,10 +273,12 @@ import { takeUntil } from 'rxjs/operators';
     .npc-name {
       font-weight: bold;
       font-size: 16px;
+      color: #e8e8e8;
     }
 
     .npc-count {
       font-size: 14px;
+      color: #c0c0c0;
     }
 
     .npc-controls {
@@ -292,19 +299,20 @@ import { takeUntil } from 'rxjs/operators';
     .turn-order-section h3 {
       margin: 20px 0 12px 0;
       font-size: 18px;
+      color: #e8e8e8;
     }
 
     .turn-group {
       margin: 16px 0;
       padding: 12px;
-      border-left: 4px solid #3f51b5;
-      background-color: rgba(63, 81, 181, 0.05);
+      border-left: 4px solid #5c6bc0;
+      background-color: rgba(63, 81, 181, 0.15);
       border-radius: 4px;
     }
 
     .turn-group.uninitialized {
       border-left-color: #ff9800;
-      background-color: rgba(255, 152, 0, 0.05);
+      background-color: rgba(255, 152, 0, 0.12);
     }
 
     .group-header {
@@ -312,6 +320,7 @@ import { takeUntil } from 'rxjs/operators';
       font-size: 14px;
       font-weight: 600;
       text-transform: uppercase;
+      color: #c0c0c0;
     }
 
     .group-content {
@@ -345,6 +354,26 @@ import { takeUntil } from 'rxjs/operators';
     .end-combat-button {
       width: 100%;
       margin-top: 20px;
+    }
+
+    ::ng-deep .combat-panel .mat-mdc-text-field-wrapper {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ::ng-deep .combat-panel .mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    ::ng-deep .combat-panel .mat-mdc-input-element {
+      color: #e8e8e8 !important;
+    }
+
+    ::ng-deep .combat-panel .mat-mdc-form-field .mat-mdc-floating-label {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    ::ng-deep .combat-panel mat-divider {
+      border-top-color: rgba(255, 255, 255, 0.12);
     }
   `]
 })
